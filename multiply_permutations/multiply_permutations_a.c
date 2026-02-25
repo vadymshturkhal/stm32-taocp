@@ -85,9 +85,9 @@ uint32_t search_untagged(uint8_t *tagged, uint32_t permutation_length) {
 }
 
 uint32_t find_cycle(char *parsed_permutation, uint32_t permutation_length, char *tagged, char* multiplication_result, uint32_t start_index, uint32_t multiplication_result_length) {
-	volatile char start = parsed_permutation[start_index];
-	volatile char current = parsed_permutation[start_index];
-	volatile char current_char;
+	char start = parsed_permutation[start_index];
+	char current = parsed_permutation[start_index];
+	char current_char;
 
 	while (1) {
 		// A4
@@ -125,14 +125,14 @@ void multiply_permutations_a(char *permutation, uint32_t permutation_length, cha
 	// volatile size_t len = strlen(permutation);
 
 	// Init
-	volatile uint32_t multiplication_result_length = 0;
-	volatile char start;
+	uint32_t multiplication_result_length = 0;
+	char start;
 
 	// Reserve space on the heap
-	volatile uint8_t *tagged = calloc(permutation_length, sizeof(uint8_t));
+	uint8_t *tagged = calloc(permutation_length, sizeof(uint8_t));
 
 	// A1
-	volatile char *parsed_permutation = first_pass(permutation, tagged, permutation_length);
+	char *parsed_permutation = first_pass(permutation, tagged, permutation_length);
 
 
 	// A2
@@ -145,7 +145,7 @@ void multiply_permutations_a(char *permutation, uint32_t permutation_length, cha
 	while (1) {
 		// Searching from left to right, find the first untagged element of the input.
 		// Set START equal to it;
-		volatile uint32_t start_index = search_untagged(tagged, permutation_length);
+		uint32_t start_index = search_untagged(tagged, permutation_length);
 
 		// If all chars are tagged: return output string;
 		if (start_index == 0) {
@@ -173,25 +173,4 @@ void multiply_permutations_a(char *permutation, uint32_t permutation_length, cha
 	free(tagged);
 	free(parsed_permutation);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
