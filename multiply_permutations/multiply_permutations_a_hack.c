@@ -117,7 +117,7 @@ uint32_t find_cycle_hack(char *parsed_permutation, uint32_t permutation_length, 
 				parsed_permutation[i] = parsed_permutation[i] | 0x80;
 
 				// A3
-				// should be untagged
+				// clear current
 				current = parsed_permutation[i + 1] & 0x7F;
 
 				i++;
