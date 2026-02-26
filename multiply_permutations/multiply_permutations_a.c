@@ -174,3 +174,24 @@ void multiply_permutations_a(char *permutation, uint32_t permutation_length, cha
 	free(parsed_permutation);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

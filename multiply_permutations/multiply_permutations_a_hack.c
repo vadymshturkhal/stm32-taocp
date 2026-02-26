@@ -51,6 +51,8 @@
 	// CURRENT;
 
 // A1
+// GCC is using Function Inlining for that function
+// We can use __attribute__((noinline)) to force GCC to compile it as a standalone function
 char *first_pass_hack(char *permutation, char *parsed_permutation, uint32_t permutation_length) {
 	// A1
 	// Tag all left parentheses,
@@ -130,6 +132,15 @@ uint32_t find_cycle_hack(char *parsed_permutation, uint32_t permutation_length, 
 		if (current == start) {
 			multiplication_result[multiplication_result_length] = ')';
 			multiplication_result_length++;
+
+			// very slow singleton elimination
+//			if (multiplication_result[multiplication_result_length - 3] == '(') {
+//				multiplication_result_length -= 3;
+//			}
+
+			// Knuth style singleton elimination
+			multiplication_result_length -= 3 * (multiplication_result[multiplication_result_length - 3] == '(');
+
 			return multiplication_result_length;
 		}
 
@@ -151,8 +162,14 @@ void multiply_permutations_a_hack(char *permutation, uint32_t permutation_length
 	// A1
 	// Declare parsed_permutation as an array, so the compiler copies it into SRAM (RAM)
 	// for granting read/write access to the bits;
+
+	// Because I declared char parsed_permutation[permutation_length];
+	// with a variable length, GCC dynamically allocated it directly on the stack!
 	char parsed_permutation[permutation_length];
 	first_pass_hack(permutation, parsed_permutation, permutation_length);
+//	first_pass_hack_asm(permutation, parsed_permutation, permutation_length);
+//	first_pass_hack_asm1(permutation, parsed_permutation, permutation_length);
+//	first_pass_hack_asm2(permutation, parsed_permutation, permutation_length);
 
 	while (1) {
 		// A2
@@ -185,25 +202,3 @@ void multiply_permutations_a_hack(char *permutation, uint32_t permutation_length
 	// free
 	free(parsed_permutation);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
