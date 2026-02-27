@@ -51,7 +51,7 @@ void comparing_multiply_permutations() {
 	end = DWT->CYCCNT;
 	volatile uint32_t c_hack_multiply_permutations_cycles = (end - start) - overhead;
 
-	// cycles = 3167
+	// cycles = 3167, with asm_hack1 = 3083 , with .balign 4 = 3083
 	volatile char *multiplication_result_hack_asm = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
 	multiply_permutations_a_hack_asm(permutation, permutation_length, multiplication_result_hack_asm);
@@ -60,8 +60,10 @@ void comparing_multiply_permutations() {
 
 
 
+
 	// free
 	free(multiplication_result);
 	free(multiplication_result_hack);
 	free(multiplication_result_hack_asm);
 }
+

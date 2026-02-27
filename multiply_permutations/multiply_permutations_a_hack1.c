@@ -96,9 +96,15 @@ void multiply_permutations_a_hack_asm(char *permutation, uint32_t permutation_le
 		parsed_permutation[start_index] |= 0x80;
 
 		// A3, A4, A5, A6
-		multiplication_result_length = asm_find_cycle_hack(parsed_permutation, permutation_length, multiplication_result, start_index, multiplication_result_length);
+		// cycles = 3167
+		// multiplication_result_length = asm_find_cycle_hack(parsed_permutation, permutation_length, multiplication_result, start_index, multiplication_result_length);
+		// cycles = 3083
+		// multiplication_result_length = asm_find_cycle_hack1(parsed_permutation, permutation_length, multiplication_result, start_index, multiplication_result_length);
+		// cycles = 3083
+		multiplication_result_length = asm_find_cycle_hack2(parsed_permutation, permutation_length, multiplication_result, start_index, multiplication_result_length);
 	}
 
 	// free
 	free(parsed_permutation);
 }
+
