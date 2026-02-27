@@ -33,7 +33,7 @@ asm_find_cycle_hack1:
 	PUSH {R4-R9, LR}
 
 	@ Retrieve fifth argument from the Stack
-	@ We pushed 7 registers * 4 bytes = 24 bytes,
+	@ We pushed 7 registers * 4 bytes = 28 bytes,
 	@ and multiplication_result_length now at SP + 28
 	LDR R4, [SP, #28]
 
