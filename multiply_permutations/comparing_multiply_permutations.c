@@ -90,5 +90,5 @@ void comparing_multiply_permutations() {
 //	free(multiplication_result);
 	free(multiplication_result_hack);
 //	free(multiplication_result_asm);
-//	free(multiplication_result_asm1);
+	free(multiplication_result_asm1);
 }
