@@ -1,24 +1,25 @@
 .syntax unified
 	.thumb
 	.cpu cortex-m4
-	.global asm_find_cycle_hack2
+	.global asm_find_cycle_hack3
 
 
 @ Using optimal-sequential write (auto-incrementing)
+@ Use multiplication_result in place
 
 @ Signature
 @ uint32_t find_cycle_hack(char *parsed_permutation,
 @							uint32_t permutation_length,
 @							char* multiplication_result,
 @							uint32_t start_index,
-@							uint32_t multiplication_result_length)
+@ x							uint32_t multiplication_result_length)
 
 @ Registers:
 @ R0 parsed_permutation addres and i;
 @ R1 permutation_length;
 @ R2 multiplication_result;
 @ R3 start_index, then parsed_permutation addres + start_index;
-@ R4 multiplication_result_length;
+@ x R4 multiplication_result_length;
 @ R5 start;
 @ R6 current;
 @ R7 current_char;
@@ -28,7 +29,7 @@
 @ R4;
 
 @ char *permutation = "(acf)(bd)(abd)(ef)";
-asm_find_cycle_hack2:
+asm_find_cycle_hack3:
 	PUSH {R4-R8, LR}
 
 	@ Retrieve fifth argument from the Stack
@@ -98,7 +99,8 @@ compare_current_and_start:
 
 @ A5
 place_char_to_result:
-	STRB R6, [R2, R4]
+	@ x STRB R6, [R2, R4]
+	STRB R6, [R2], #1
 	ADD R4, R4, #1
 	B init_i
 
@@ -107,17 +109,22 @@ found_cycle:
 	MOV R7, #0x29	@ASCII ')'
 
 	@ multiplication_result[multiplication_result_length] = ')';
-	STRB R7, [R2, R4]
+	@ x STRB R7, [R2, R4]
+	STRB R7, [R2], #1
 	ADD R4, R4, #1
 
 	@ Knuth singleton elimination
 	@ multiplication_result_length -= 3 * (multiplication_result[multiplication_result_length - 3] == '(');
-	SUB R12, R4, #3
-	LDRB R7, [R2, R12]
+	@ x SUB R12, R4, #3
+	SUB R12, R2, #3
+	@ LDRB R7, [R2, R12]
+	LDRB R7, [R12]
 	CMP	R7, #0x28	@ ASCII '('
 	IT EQ
-	SUBEQ R4, R4, #3
+	@ x SUBEQ R4, R4, #3
+	SUBEQ R2, R2, #3
 
 done:
-	MOV R0, R4
+	@ MOV R0, R4
+	MOV R0, R2
 	POP {R4-R8, PC}

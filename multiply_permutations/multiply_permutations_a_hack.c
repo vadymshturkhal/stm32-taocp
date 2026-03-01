@@ -86,7 +86,6 @@ uint32_t search_untagged_hack(uint8_t *parsed_permutation, uint32_t permutation_
 	// else return 0
 
 	for (uint32_t i = 0; i < permutation_length; ++i) {
-
 		if ((parsed_permutation[i] & 0x80) == 0) {
 			return i;
 		}
@@ -95,7 +94,60 @@ uint32_t search_untagged_hack(uint8_t *parsed_permutation, uint32_t permutation_
 	return 0;
 }
 
-uint32_t find_cycle_hack(char *parsed_permutation, uint32_t permutation_length, char* multiplication_result, uint32_t start_index, uint32_t multiplication_result_length) {
+//uint32_t find_cycle_hack(char *parsed_permutation, uint32_t permutation_length, char* multiplication_result, uint32_t start_index, uint32_t multiplication_result_length) {
+//	// clear start and current
+//	char start = parsed_permutation[start_index] & 0x7F;
+//	char current = parsed_permutation[start_index] & 0x7F;
+//	char current_char;
+//
+//	while (1) {
+//		// A4
+//		uint32_t i = start_index;
+//		while (i < permutation_length-1) {
+//			// clear current_char
+//			current_char = parsed_permutation[i] & 0x7F;
+//
+//			// uncomment for getting + 500 cycles for permutation = "(acfg)(bcd)(aed)(fade)(bgfae)"
+////			current_char = parsed_permutation[i];
+////			if ((current_char & 0x80) != 0) {
+////				current_char = current_char & 0x7F;
+////			}
+//
+//			if (current_char == current) {
+//				// tag
+//				parsed_permutation[i] = parsed_permutation[i] | 0x80;
+//
+//				// A3
+//				// clear current
+//				current = parsed_permutation[i + 1] & 0x7F;
+//
+//				i++;
+//			}
+//
+//			i++;
+//		}
+//
+//		// A6
+//		if (current == start) {
+//			multiplication_result[multiplication_result_length++] = ')';
+//
+//			// very slow singleton elimination
+////			if (multiplication_result[multiplication_result_length - 3] == '(') {
+////				multiplication_result_length -= 3;
+////			}
+//
+//			// Knuth style singleton elimination
+//			multiplication_result_length -= 3 * (multiplication_result[multiplication_result_length - 3] == '(');
+//
+//			return multiplication_result_length;
+//		}
+//
+//		// A5
+//		multiplication_result[multiplication_result_length++] = current;
+//	}
+//}
+
+char* find_cycle_hack1(char *parsed_permutation, uint32_t permutation_length, char* multiplication_result, uint32_t start_index) {
 	// clear start and current
 	char start = parsed_permutation[start_index] & 0x7F;
 	char current = parsed_permutation[start_index] & 0x7F;
@@ -120,9 +172,10 @@ uint32_t find_cycle_hack(char *parsed_permutation, uint32_t permutation_length, 
 
 				// A3
 				// clear current
-				current = parsed_permutation[i + 1] & 0x7F;
-
-				i++;
+				current = parsed_permutation[++i] & 0x7F;
+//				or
+//				current = parsed_permutation[i + 1] & 0x7F;
+//				i++;
 			}
 
 			i++;
@@ -130,8 +183,7 @@ uint32_t find_cycle_hack(char *parsed_permutation, uint32_t permutation_length, 
 
 		// A6
 		if (current == start) {
-			multiplication_result[multiplication_result_length] = ')';
-			multiplication_result_length++;
+			*multiplication_result++ = ')';
 
 			// very slow singleton elimination
 //			if (multiplication_result[multiplication_result_length - 3] == '(') {
@@ -139,37 +191,31 @@ uint32_t find_cycle_hack(char *parsed_permutation, uint32_t permutation_length, 
 //			}
 
 			// Knuth style singleton elimination
-			multiplication_result_length -= 3 * (multiplication_result[multiplication_result_length - 3] == '(');
+			multiplication_result -= 3 * (*(multiplication_result - 3) == '(');
 
-			return multiplication_result_length;
+			return multiplication_result;
 		}
 
 		// A5
-		multiplication_result[multiplication_result_length] = current;
-		multiplication_result_length++;
+		*multiplication_result++ = current;
 	}
 }
 
 void multiply_permutations_a_hack(char *permutation, uint32_t permutation_length, char *multiplication_result) {
 	// permutation = "(acf)(bd)(abd)(ef)";
 	// output = "(acefb)(d)"
-	// volatile size_t len = strlen(permutation);
 
 	// Init
-	uint32_t multiplication_result_length = 0;
 	char start;
 
 	// A1
 	// Declare parsed_permutation as an array, so the compiler copies it into SRAM (RAM)
 	// for granting read/write access to the bits;
 
-	// Because I declared char parsed_permutation[permutation_length];
+	// Because I declared char parsed_permutation[permutation_length]
 	// with a variable length, GCC dynamically allocated it directly on the stack!
 	char parsed_permutation[permutation_length];
 	first_pass_hack(permutation, parsed_permutation, permutation_length);
-//	first_pass_hack_asm(permutation, parsed_permutation, permutation_length);
-//	first_pass_hack_asm1(permutation, parsed_permutation, permutation_length);
-//	first_pass_hack_asm2(permutation, parsed_permutation, permutation_length);
 
 	while (1) {
 		// A2
@@ -178,27 +224,31 @@ void multiply_permutations_a_hack(char *permutation, uint32_t permutation_length
 		// If all chars are tagged: return output string;
 		if (start_index == 0) {
 			// Add '\0' to make a string
-			multiplication_result[multiplication_result_length] = '\0';
+//			multiplication_result[multiplication_result_length] = '\0';
+			*multiplication_result = '\0';
 			return;
 		}
 
 		// Add a left parenthesis to the output;
-		multiplication_result[multiplication_result_length] = '(';
-		multiplication_result_length++;
+		*multiplication_result = '(';
+		*multiplication_result++;
+
+//		slower
+//		*multiplication_result++ = '(';
 
 		// Add the element to the output and tag it;
 		start = parsed_permutation[start_index];
-		multiplication_result[multiplication_result_length] = start;
-		multiplication_result_length++;
+		*multiplication_result = start;
+		*multiplication_result++;
+
+//		slower
+//		*multiplication_result++ = '(';
 
 		// tag
 		// parsed_permutation[start_index] = parsed_permutation[start_index] | 0x80;
 		parsed_permutation[start_index] |= 0x80;
 
 		// A3, A4, A5, A6
-		multiplication_result_length = find_cycle_hack(parsed_permutation, permutation_length, multiplication_result, start_index, multiplication_result_length);
+		multiplication_result = find_cycle_hack1(parsed_permutation, permutation_length, multiplication_result, start_index);
 	}
-
-	// free
-	free(parsed_permutation);
 }

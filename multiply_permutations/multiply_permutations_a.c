@@ -134,7 +134,6 @@ void multiply_permutations_a(char *permutation, uint32_t permutation_length, cha
 	// A1
 	char *parsed_permutation = first_pass(permutation, tagged, permutation_length);
 
-
 	// A2
 	// If all chars are tagged: return output string;
 	// Searching from left to right, find the first untagged element of the input.
