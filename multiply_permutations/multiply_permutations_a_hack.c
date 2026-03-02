@@ -186,8 +186,8 @@ char* find_cycle_hack1(char *parsed_permutation, uint32_t permutation_length, ch
 			*multiplication_result++ = ')';
 
 			// very slow singleton elimination
-//			if (multiplication_result[multiplication_result_length - 3] == '(') {
-//				multiplication_result_length -= 3;
+//			if (*(multiplication_result - 3) == '(') {
+//				multiplication_result -= 3;
 //			}
 
 			// Knuth style singleton elimination
