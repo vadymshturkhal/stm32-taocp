@@ -94,59 +94,6 @@ uint32_t search_untagged_hack(uint8_t *parsed_permutation, uint32_t permutation_
 	return 0;
 }
 
-//uint32_t find_cycle_hack(char *parsed_permutation, uint32_t permutation_length, char* multiplication_result, uint32_t start_index, uint32_t multiplication_result_length) {
-//	// clear start and current
-//	char start = parsed_permutation[start_index] & 0x7F;
-//	char current = parsed_permutation[start_index] & 0x7F;
-//	char current_char;
-//
-//	while (1) {
-//		// A4
-//		uint32_t i = start_index;
-//		while (i < permutation_length-1) {
-//			// clear current_char
-//			current_char = parsed_permutation[i] & 0x7F;
-//
-//			// uncomment for getting + 500 cycles for permutation = "(acfg)(bcd)(aed)(fade)(bgfae)"
-////			current_char = parsed_permutation[i];
-////			if ((current_char & 0x80) != 0) {
-////				current_char = current_char & 0x7F;
-////			}
-//
-//			if (current_char == current) {
-//				// tag
-//				parsed_permutation[i] = parsed_permutation[i] | 0x80;
-//
-//				// A3
-//				// clear current
-//				current = parsed_permutation[i + 1] & 0x7F;
-//
-//				i++;
-//			}
-//
-//			i++;
-//		}
-//
-//		// A6
-//		if (current == start) {
-//			multiplication_result[multiplication_result_length++] = ')';
-//
-//			// very slow singleton elimination
-////			if (multiplication_result[multiplication_result_length - 3] == '(') {
-////				multiplication_result_length -= 3;
-////			}
-//
-//			// Knuth style singleton elimination
-//			multiplication_result_length -= 3 * (multiplication_result[multiplication_result_length - 3] == '(');
-//
-//			return multiplication_result_length;
-//		}
-//
-//		// A5
-//		multiplication_result[multiplication_result_length++] = current;
-//	}
-//}
-
 char* find_cycle_hack1(char *parsed_permutation, uint32_t permutation_length, char* multiplication_result, uint32_t start_index) {
 	// clear start and current
 	char start = parsed_permutation[start_index] & 0x7F;
@@ -186,8 +133,8 @@ char* find_cycle_hack1(char *parsed_permutation, uint32_t permutation_length, ch
 			*multiplication_result++ = ')';
 
 			// very slow singleton elimination
-//			if (*(multiplication_result - 3) == '(') {
-//				multiplication_result -= 3;
+//			if (multiplication_result[multiplication_result_length - 3] == '(') {
+//				multiplication_result_length -= 3;
 //			}
 
 			// Knuth style singleton elimination
