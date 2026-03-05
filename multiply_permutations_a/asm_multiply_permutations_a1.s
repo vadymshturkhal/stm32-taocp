@@ -63,7 +63,6 @@ search_untagged:
 	@ if R0 == 0 we are done
 	CBZ R0, done
 
-@ --- WE ARE RIGHT AFTER: CBZ R0, done ---
     @ R0 holds our valid start_index.
     MOV R9, R0              @ start_index = R0
 
