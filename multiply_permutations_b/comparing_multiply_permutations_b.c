@@ -3,7 +3,9 @@
 
 
 // Prototypes
-
+multiply_permutations_b(char *permutation, uint32_t permutation_length, char *multiplication_result);
+asm_c_multiply_permutations_b(char *permutation, uint32_t permutation_length, char *multiplication_result);
+asm_multiply_permutations_b(char *permutation, uint32_t permutation_length, char *multiplication_result);
 
 // Example of multiplication:
 	// (acf)(bd)(abd)(ef) = (acefb);
@@ -32,6 +34,7 @@ void comparing_multiply_permutations_b() {
 //	char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)(dgeac)";
 	size_t permutation_length = strlen(permutation);
 
+	// GCC -O3
 	// cycles_cold = [1984-1996], cycles_warm = 1913
 	volatile char *multiplication_result = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
@@ -39,8 +42,15 @@ void comparing_multiply_permutations_b() {
 	end = DWT->CYCCNT;
 	volatile uint32_t c_cycles_cold_multiply_permutations_b = (end - start) - overhead;
 
+	// ARM Assembly
+	// cycles_cold = [1875-1877], cycles_warm = 1790
+	volatile char *asm_multiplication_result = (char *)malloc(permutation_length * sizeof(char));
+	start = DWT->CYCCNT;
+	asm_multiply_permutations_b(permutation, permutation_length, asm_multiplication_result);
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_cycles_cold_multiply_permutations_b = (end - start) - overhead;
 
 	// free
 	free(multiplication_result);
-
+	free(asm_multiplication_result);
 }

@@ -49,6 +49,7 @@ uint32_t get_auxiliary_table(char *permutation, uint32_t permutation_length, cha
 		element = permutation[index];
 
 		// If the element is a ')': set Z = 1 and repeat step B2;
+		// Z = 1 for avoiding visual string interruption in the middle with placing Z = 0
 		if (element == ')') {
 			Z = 1;
 			continue;
@@ -92,11 +93,9 @@ uint32_t get_auxiliary_table(char *permutation, uint32_t permutation_length, cha
 	return i;
 }
 
-
 uint32_t get_first_untagged(char *original_order, uint32_t original_order_length) {
 	// Searching from left to right,
 	// find the first untagged element of the original_order
-	// tag it
 	// and return its index
 	// else return -1
 
@@ -115,6 +114,7 @@ void get_multiplication_result(char *original_order, char *auxiliary_table, uint
 
 	while (1) {
 		int32_t untagged_index = get_first_untagged(original_order, i);
+
 		if (untagged_index == -1) {
 			// add '\0'
 			*multiplication_result++ = '\0';
@@ -146,7 +146,6 @@ void get_multiplication_result(char *original_order, char *auxiliary_table, uint
 					break;
 				}
 			}
-
 		}
 
 		// add ')'
@@ -168,21 +167,3 @@ void multiply_permutations_b(char *permutation, uint32_t permutation_length, cha
 
 	get_multiplication_result(original_order, auxiliary_table, i, multiplication_result);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
