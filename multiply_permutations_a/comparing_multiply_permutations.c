@@ -48,7 +48,8 @@ void comparing_multiply_permutations() {
 	// cycles without if = 3115;
 	// cycles without if and without singleton = 3309;
 	// cycles without if and without singleton using Knuth style = 3157;
-	// GCC Optimization -O3:
+	// GCC -O3
+	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
 	// cycles cold = [2978-2983], cycles warm = 2917
 	volatile char *multiplication_result_hack = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
@@ -62,8 +63,8 @@ void comparing_multiply_permutations() {
 	volatile uint32_t cycles_c_hack_multiply_permutations_warm = (end - start) - overhead;
 
 
-//	ARM Assembly
-
+	// ARM Assembly
+	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
 	// cycles cold = [2999-3004], cycles warm = [2916-2917]
 //	volatile char *multiplication_result_asm = (char *)malloc(permutation_length * sizeof(char));
 //	start = DWT->CYCCNT;
