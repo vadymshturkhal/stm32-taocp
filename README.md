@@ -6,12 +6,12 @@
 - Algorithm B (Multiply permutations in cycle form);
 
 ## How to run:
-Go to the algorithm's folder and run C script which is starting with 'comparing' word;
-Keep in mind that latest ARM Assembly version has greater number in its naming, for example:
-asm_get_auxiliary_table4.s is the latest version;
+- Navigate to the specific algorithm's folder;
+- Run the C script starting with the word ***comparing***;
+- Note: The latest ARM Assembly versions have the highest trailing number in their filename (e.g., ***asm_get_auxiliary_table4.s*** is the fully optimized version).
 
 ## Performance summary GCC -O3 and ARM Assembly:
-### (All cycle counts measured using the internal DWT cycle counter on the Cortex-M4)
+### All cycle counts measured using the internal DWT cycle counter on the Cortex-M4
 - Algorithm P for 500 primes:
     - GCC -O3: cycles_cold = [167241-167611], cycles_warm = 167254
     - ARM Assembly: cycles_cold = [158090-158300], cycles_warm = 158034;
