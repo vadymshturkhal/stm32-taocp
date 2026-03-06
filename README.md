@@ -1,6 +1,6 @@
 # Implementation of The Art of Computer Programming Vol.1 in C and ARM Assembly
 
-# Implemented algorithms
+# Implemented algorithms:
 - Algorithm P (Print table of 500 primes);
 - Algorithm A (Multiply permutations in cycle form);
 - Algorithm B (Multiply permutations in cycle form);
