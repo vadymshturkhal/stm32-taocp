@@ -35,6 +35,7 @@ void comparing_multiply_permutations_b() {
 	size_t permutation_length = strlen(permutation);
 
 	// GCC -O3
+	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
 	// cycles_cold = [1984-1996], cycles_warm = 1913
 	volatile char *multiplication_result = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
@@ -43,6 +44,7 @@ void comparing_multiply_permutations_b() {
 	volatile uint32_t c_cycles_cold_multiply_permutations_b = (end - start) - overhead;
 
 	// ARM Assembly
+	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
 	// cycles_cold = [1875-1877], cycles_warm = 1790
 	volatile char *asm_multiplication_result = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
