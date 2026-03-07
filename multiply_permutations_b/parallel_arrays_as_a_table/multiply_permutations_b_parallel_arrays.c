@@ -156,7 +156,7 @@ void get_multiplication_result(char *original_order, char *auxiliary_table, uint
 	}
 }
 
-void multiply_permutations_b(char *permutation, uint32_t permutation_length, char *multiplication_result) {
+void multiply_permutations_b_parallel_arrays(char *permutation, uint32_t permutation_length, char *multiplication_result) {
 	// B1
 	// Reserve space on the stack
 	char original_order[permutation_length];
