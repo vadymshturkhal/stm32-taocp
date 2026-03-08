@@ -46,7 +46,7 @@ void comparing_multiply_permutations_b_one_array() {
 	start = DWT->CYCCNT;
 	multiply_permutations_b_one_array(permutation, permutation_length, multiplication_result);
 	end = DWT->CYCCNT;
-	volatile uint32_t c_cycles_cold_multiply_permutations_b_one_array1  = (end - start) - overhead;
+	volatile uint32_t c_cycles_warm_multiply_permutations_b_one_array  = (end - start) - overhead;
 
 
 	// ARM Assembly
@@ -61,7 +61,7 @@ void comparing_multiply_permutations_b_one_array() {
 	start = DWT->CYCCNT;
 	asm_multiply_permutations_b_one_array(permutation, permutation_length, asm_multiplication_result);
 	end = DWT->CYCCNT;
-	volatile uint32_t asm_cycles_cold_multiply_permutations_b_parallel_arrays1 = (end - start) - overhead;
+	volatile uint32_t asm_cycles_warm_multiply_permutations_b_parallel_arrays = (end - start) - overhead;
 
 	// free
 	free(multiplication_result);
