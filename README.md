@@ -28,3 +28,7 @@
         - ARM Assembly: cycles_cold = [1875-1877], cycles_warm = 1790;
         - Summary: Hand-tuned ASM won by ~109 cycles in the cold version and by ~123 in the warm one;
 
+    - Using one array as a table:
+        - GCC -O3: cycles_cold = [947-959], cycles_warm = [887-890];
+        - ARM Assembly: cycles_cold = [778-784], cycles_warm = 736;
+        - Summary: Hand-tuned ASM won by ~169 cycles in the cold version and by ~151 in the warm one;
