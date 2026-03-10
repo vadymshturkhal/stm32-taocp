@@ -6,10 +6,7 @@ def inverse_in_place(permutation):
     m = len(permutation) - 1
     j = -1
 
-    # for k in range(1):
-    while m > 0:
-        # print(permutation)
-       
+    while m > 0:       
         # I2 (Next element)
         i = permutation[m]
 
