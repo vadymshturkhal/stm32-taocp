@@ -26,7 +26,7 @@
 <details>
 <summary><b>Algorithm B (Multiply permutations in cycle form) - Up to 17.8% Time Reduction</b></summary>
 
-Here is the raw DWT cycle count proof mapping the architectural differences between data structures and compiler optimizations.
+Here is the raw DWT cycle count proof against GCC `-O3`:
 
 * **Base case = `"(acfg)(bcd)(aed)(fade)(bgfae)"`:**
     * **Using parallel arrays as a table:**
@@ -44,7 +44,7 @@ Here is the raw DWT cycle count proof mapping the architectural differences betw
 <details>
 <summary><b>Algorithm I (Inverse in place) - 16.8% Time Reduction</b></summary>
 
-Here is the raw DWT cycle count proof against GCC `-O3`.
+Here is the raw DWT cycle count proof against GCC `-O3`:
 
 * **Base case = `{0, 6, 2, 1, 5, 4, 3}`:**
     * GCC -O3: cycles_cold = [181-189], cycles_warm = 167;
