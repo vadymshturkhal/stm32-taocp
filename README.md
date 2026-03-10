@@ -34,7 +34,14 @@
         - ARM Assembly: cycles_cold = [778-784], cycles_warm = 736;
         - Summary: Hand-tuned ASM won by ~169 cycles (**~17.8% time reduction**) in the cold version and by ~151 (**~17.0% time reduction**) in the warm one;
 
-- Algorithm I with base case = {0, 6, 2, 1, 5, 4, 3}:
-    - GCC -O3: cycles cold = [181-189], cycles warm = 167;
-    - ARM Assembly: cycles cold = 151, cycles warm = 139;
-    - Summary: Hand-tuned ASM won by ~30 cycles (**~16.6% time reduction**) in the cold version and by ~28 (**~16.7% time reduction**) in the warm one;
+<details>
+<summary><b>Algorithm I (Inverse in Place) - 16.8% Time Reduction</b></summary>
+
+Here is the raw DWT cycle count proof against GCC `-O3`.
+
+* **Base case = `{0, 6, 2, 1, 5, 4, 3}`:**
+    * GCC -O3: cycles cold = [181-189], cycles warm = 167;
+    * ARM Assembly: cycles cold = 151, cycles warm = 139;
+    * **Summary:** Hand-tuned ASM won by ~30 cycles (**~16.6% time reduction**) in the cold version and by ~28 (**~16.7% time reduction**) in the warm one;
+
+</details>
