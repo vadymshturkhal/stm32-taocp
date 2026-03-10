@@ -27,14 +27,14 @@
     - Using parallel arrays as a table:
         - GCC -O3: cycles_cold = [1984-1996], cycles_warm = 1913;
         - ARM Assembly: cycles_cold = [1875-1877], cycles_warm = 1790;
-        - Summary: Hand-tuned ASM won by ~109 cycles in the cold version and by ~123 in the warm one;
+        - Summary: Hand-tuned ASM won by ~109 cycles (**~0.05% time reduction**) in the cold version and by ~123 (**~0.06% time reduction**) in the warm one;
 
     - Using one array as a table:
         - GCC -O3: cycles_cold = [947-959], cycles_warm = [887-890];
         - ARM Assembly: cycles_cold = [778-784], cycles_warm = 736;
-        - Summary: Hand-tuned ASM won by ~169 cycles in the cold version and by ~151 in the warm one;
+        - Summary: Hand-tuned ASM won by ~169 cycles (**~17.8% time reduction**) in the cold version and by ~151 (**~17.0% time reduction**) in the warm one;
 
 - Algorithm I with base case = {0, 6, 2, 1, 5, 4, 3}:
     - GCC -O3: cycles cold = [181-189], cycles warm = 167;
     - ARM Assembly: cycles cold = 151, cycles warm = 139;
-    - Summary: Hand-tuned ASM won by ~30 cycles (**~16.6% time reduction**) in the cold version and by ~28 (**~16.7% time reduction**)in the warm one;
+    - Summary: Hand-tuned ASM won by ~30 cycles (**~16.6% time reduction**) in the cold version and by ~28 (**~16.7% time reduction**) in the warm one;
