@@ -36,8 +36,6 @@ def inverse_in_place(permutation):
             # I4 (End of cycle?) 
             # If i > 0, go back to I3 (the cycle has not ended);
             # otherwise i = j (In the latter case, the original permutation had X[-j] = m and m is the largest in its cycle)
-            # if i <= -1:
-                # break
 
         i = j
 
