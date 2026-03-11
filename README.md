@@ -42,7 +42,7 @@ Here is the raw DWT cycle count proof against GCC `-O3`:
 </details>
 
 <details>
-<summary><b>Algorithm I (Inverse in place) - 16.8% Time Reduction</b></summary>
+<summary><b>Algorithm I (Inverse in place) - Up to 16.7% Time Reduction</b></summary>
 
 Here is the raw DWT cycle count proof against GCC `-O3`:
 
