@@ -4,13 +4,22 @@
     .global asm_search_untagged
 
 
+@ Input:
 @ R0 uint8_t *parsed_permutation;
 @ R1 uint32_t permutation_length;
-@ return index or 0;
+
+@ Runtime:
+@ R0 uint8_t *parsed_permutation;
+@ R1 uint32_t permutation_length;
+@ R2 parsed_permutation[i];
+@ R3 parsed_permutation + 1;
+
+@ Return:
+@ index or 0;
 
 asm_search_untagged:
 	@ save the start of the parsed_permutation
-	MOV R3, R0
+	ADDS R3, R0, #1		@ pointer trick names Pointer Biasing
 
 .balign 4
 search_loop:
@@ -32,14 +41,9 @@ search_loop:
 	BNE search_loop
 
 not_found:
-	MOV R0, #0
+	MOVS R0, #0
 	BX LR
 
 return_i:
-	SUB R0, R0, R3
-
-	@ subtract auto-increment
-	SUBS R0, R0, #1
-
-	@ Branch and Exchange to Link Register
-	BX LR
+	SUBS R0, R0, R3
+	BX LR	@ Branch and Exchange to Link Register

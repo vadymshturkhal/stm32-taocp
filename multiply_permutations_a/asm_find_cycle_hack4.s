@@ -96,4 +96,3 @@ found_cycle:
 done:
 	MOV R0, R2
 	POP {R4-R7, PC}
-

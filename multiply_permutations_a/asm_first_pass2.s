@@ -9,8 +9,10 @@
 @ R0 permutation;
 @ R1 parsed_permutation;
 @ R2 permutation_length;
+@ R3 current_char;
 first_pass_hack_asm2:
     PUSH {R4, LR}
+
     @ If length is 0, jump immediately to done
     CBZ R2, done
 
