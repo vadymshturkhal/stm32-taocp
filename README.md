@@ -38,9 +38,9 @@
         * **Summary:** Hand-tuned ASM won by ~109 cycles (**~5.5% time reduction**) in the cold version and by ~123 cycles (**~6.4% time reduction**) in the warm one;
 
     * **Using one array as a table:**
-        * GCC -O3: cycles_cold = [947-959], cycles_warm = [887-890];
-        * ARM Assembly: cycles_cold = [778-784], cycles_warm = 736;
-        * **Summary:** Hand-tuned ASM won by ~169 cycles (**~17.8% time reduction**) in the cold version and by ~151 cycles (**~17.0% time reduction**) in the warm one;
+        * GCC -O3: cycles_cold = [947-959], cycles_warm = [887-890], size = 260 bytes;
+        * ARM Assembly: cycles_cold = [778-784], cycles_warm = 736, size = 224 bytes;
+        * **Summary:** Hand-tuned ASM won by ~169 cycles (**~17.8% time reduction**) in the cold version and by ~151 cycles (**~17.0% time reduction**) in the warm one, with ARM Assembly consuming **13.8%** less Flash memory;
 </details>
 
 <details>
