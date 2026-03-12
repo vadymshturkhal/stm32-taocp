@@ -3,9 +3,8 @@
 
 
 // Prototypes
-void multiply_permutations_a(char *permutation, uint32_t permutation_length, char *multiplication_result);
 void multiply_permutations_a_hack(char *permutation, uint32_t permutation_length, char *multiplication_result);
-void multiply_permutations_a_hack_asm(char *permutation, uint32_t permutation_length, char *multiplication_result);
+void asm_multiply_permutations_a1(char *permutation, uint32_t permutation_length, char *multiplication_result);
 
 // Example of multiplication:
 	// (acf)(bd)(abd)(ef) = (acefb);
@@ -34,62 +33,43 @@ void comparing_multiply_permutations() {
 //	char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)(dgeac)";
 	size_t permutation_length = strlen(permutation);
 
-//	C
-
-//	// cycles = 3350, volatile removed
-//	volatile char *multiplication_result = (char *)malloc(permutation_length * sizeof(char));
-//	start = DWT->CYCCNT;
-//	multiply_permutations_a(permutation, permutation_length, multiplication_result);
-//	end = DWT->CYCCNT;
-//	volatile uint32_t c_multiply_permutations_cycles = (end - start) - overhead;
-
 	// GCC Optimization -O2:
 	// cycles with if = 3616;
 	// cycles without if = 3115;
 	// cycles without if and without singleton = 3309;
 	// cycles without if and without singleton using Knuth style = 3157;
+
 	// GCC -O3
 	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
-	// cycles cold = [2977-2983], cycles warm = 2917
+	// cycles cold = [2977-2983], cycles warm = 2917, size = 0xec;
 	volatile char *multiplication_result_hack = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
 	multiply_permutations_a_hack(permutation, permutation_length, multiplication_result_hack);
 	end = DWT->CYCCNT;
-	volatile uint32_t cycles_c_hack_multiply_permutations_cold = (end - start) - overhead;
-//
-//	start = DWT->CYCCNT;
-//	multiply_permutations_a_hack(permutation, permutation_length, multiplication_result_hack);
-//	end = DWT->CYCCNT;
-//	volatile uint32_t cycles_c_hack_multiply_permutations_warm = (end - start) - overhead;
+	volatile uint32_t c_cycles_cold_hack_multiply_permutations = (end - start) - overhead;
+
+	start = DWT->CYCCNT;
+	multiply_permutations_a_hack(permutation, permutation_length, multiplication_result_hack);
+	end = DWT->CYCCNT;
+	volatile uint32_t c_cycles_warm_hack_multiply_permutations = (end - start) - overhead;
 
 
 	// ARM Assembly
 	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
-	// cycles cold = [2999-3004], cycles warm = [2916-2917]
-//	volatile char *multiplication_result_asm = (char *)malloc(permutation_length * sizeof(char));
-//	start = DWT->CYCCNT;
-//	asm_multiply_permutations_a(permutation, permutation_length, multiplication_result_asm);
-//	end = DWT->CYCCNT;
-//	volatile uint32_t cycles_asm_multiply_permutations_a = (end - start) - overhead;
-
-	// cycles cold = [2613-2618], cycles warm = ?
+	// cycles cold = [2613-2618], cycles warm = 2547, size = 0x58;
 	volatile char *multiplication_result_asm1 = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
 	asm_multiply_permutations_a1(permutation, permutation_length, multiplication_result_asm1);
 	end = DWT->CYCCNT;
-	volatile uint32_t cycles_asm_multiply_permutations_a_cold = (end - start) - overhead;
+	volatile uint32_t asm_cycles_cold_multiply_permutations_a_cold = (end - start) - overhead;
 
-//	start = DWT->CYCCNT;
-//	asm_multiply_permutations_a1(permutation, permutation_length, multiplication_result_asm1);
-//	end = DWT->CYCCNT;
-//	volatile uint32_t cycles_asm_multiply_permutations_a_warm = (end - start) - overhead;
+	start = DWT->CYCCNT;
+	asm_multiply_permutations_a1(permutation, permutation_length, multiplication_result_asm1);
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_cycles_warm_multiply_permutations_a_cold = (end - start) - overhead;
 
-	// GCC is winning in cases like char *permutation = "(acf)(bd)";
-	// ASM in other cases;
 
 	// free
-//	free(multiplication_result);
 	free(multiplication_result_hack);
-//	free(multiplication_result_asm);
 	free(multiplication_result_asm1);
 }

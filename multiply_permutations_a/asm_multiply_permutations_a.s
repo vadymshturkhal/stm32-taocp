@@ -88,10 +88,6 @@ search_untagged:
     ORR R3, R4, #0x80       @ Tag the character
     STRB R3, [R10]          @ Write it back to the array
 
-    @ ==============================================================
-    @ --- CALLING asm_find_cycle_hack2 (THE 5-ARGUMENT MANEUVER) ---
-    @ ==============================================================
-
     @ Arg 5: multiplication_result_length (Must go on the stack!)
     PUSH {R8}               @ SP just moved down by 4 bytes!
 
