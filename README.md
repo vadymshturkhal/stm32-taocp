@@ -18,22 +18,19 @@
     - ARM Assembly: cycles_cold = [158090-158300], cycles_warm = 158034;
     - Summary: Hand-tuned ASM won by ~9,151 cycles in the cold version and by ~9,220 cycles in the warm one;
 
-- Algorithm A with base case = "(acfg)(bcd)(aed)(fade)(bgfae)":
-    - GCC -O3: cycles cold = [2977-2983], cycles warm = 2917, size = 236 bytes;
-    - ARM Assembly: cycles cold = [2613-2618], cycles warm = 2547, size = 88 bytes;
-    - Summary: Hand-tuned ASM won by ~364 cycles (**~12.2% time reduction**) in the cold version and by ~370 cycles (**~12.6% time reduction**) in the warm one;
-
 <details>
 <summary><b>Algorithm A (Multiply permutations in cycle form)</b></summary>
+
 * **Base case = `"(acfg)(bcd)(aed)(fade)(bgfae)"`:**
     * GCC -O3: cycles_cold = [2977-2983], cycles warm = 2917, size = 236 bytes;
     * ARM Assembly: cycles_cold = [2613-2618], cycles warm = 2547, size = 88 bytes;
-    * **Summary:** Hand-tuned ASM won by ~364 cycles (**~12.2% time reduction**) in the cold version and by ~370 cycles (**~12.6% time reduction**) in the warm one, while consuming 62.7% less Flash memory;
+    * **Summary:** Hand-tuned ASM won by ~364 cycles (**~12.2% time reduction**) in the cold version and by ~370 cycles (**~12.6% time reduction**) in the warm one, * while consuming 62.7% less Flash memory;
 </details>
 
 
 <details>
 <summary><b>Algorithm B (Multiply permutations in cycle form)</b></summary>
+
 * **Base case = `"(acfg)(bcd)(aed)(fade)(bgfae)"`:**
     * **Using parallel arrays as a table:**
         * GCC -O3: cycles_cold = [1984-1996], cycles_warm = 1913;
@@ -48,6 +45,7 @@
 
 <details>
 <summary><b>Algorithm I (Inverse in place)</b></summary>
+
 * **Base case = `{0, 6, 2, 1, 5, 4, 3}`:**
     * GCC -O3: cycles_cold = [181-189], cycles_warm = 167, size = 100 bytes;
     * ARM Assembly: cycles_cold = 151, cycles_warm = 139, size = 50 bytes;
