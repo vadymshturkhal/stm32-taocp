@@ -23,8 +23,8 @@
 
 * **Base case = `"(acfg)(bcd)(aed)(fade)(bgfae)"`:**
     * GCC -O3: cycles_cold = [2977-2983], cycles warm = 2917, size = 236 bytes;
-    * ARM Assembly: cycles_cold = [2613-2618], cycles warm = 2547, size = 88 bytes;
-    * **Summary:** Hand-tuned ASM won by ~364 cycles (**~12.2% time reduction**) in the cold version and by ~370 cycles (**~12.6% time reduction**) in the warm one, while consuming **62.7%** less Flash memory;
+    * ARM Assembly: cycles_cold = [2613-2618], cycles warm = 2547, size = 268 bytes;
+    * **Summary:** Hand-tuned ASM won by ~364 cycles (**~12.2% time reduction**) in the cold version and by ~370 cycles (**~12.6% time reduction**) in the warm one, with GCC consuming **11.9%** less Flash memory due to aggressive compiler inlining;
 </details>
 
 
