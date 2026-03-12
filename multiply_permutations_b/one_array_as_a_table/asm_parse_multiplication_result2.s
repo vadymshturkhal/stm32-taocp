@@ -18,11 +18,10 @@
 @ R7 char next_char;
 @ R12 as tmp;
 
-
 asm_parse_multiplication_result2:
 	PUSH {R4-R7, LR}
 
-	@ SP Offset = (Number of Registers Pushed) × 4 = 6*4=24
+	@ SP Offset = (Number of Registers Pushed) × 4 = 5*4=20
 	LDR R4, [SP, #20]	@ get R4 from the stack
 	ADDS R1, R0, R1
 	MOVS R5, #0
