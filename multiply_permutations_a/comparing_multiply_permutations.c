@@ -56,7 +56,7 @@ void comparing_multiply_permutations() {
 
 	// ARM Assembly
 	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
-	// cycles cold = [2613-2618], cycles warm = 2547, size = 88 bytes;
+	// cycles cold = [2613-2618], cycles warm = 2547, size = 268 bytes;
 	volatile char *multiplication_result_asm1 = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
 	asm_multiply_permutations_a1(permutation, permutation_length, multiplication_result_asm1);
