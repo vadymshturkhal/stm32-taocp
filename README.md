@@ -49,5 +49,5 @@
 * **Base case = `{0, 6, 2, 1, 5, 4, 3}`:**
     * GCC -O3: cycles_cold = [181-189], cycles_warm = 167, size = 100 bytes;
     * ARM Assembly: cycles_cold = 151, cycles_warm = 139, size = 50 bytes;
-    * **Summary:** Hand-tuned ASM won by ~30 cycles (**~16.6% time reduction**) in the cold version and by ~28 (**~16.7% time reduction**) in the warm one, while consuming **50%** less Flash memory;
+    * **Summary:** Hand-tuned ASM won by ~30 cycles (**~16.6% time reduction**) in the cold version and by ~28 (**~16.7% time reduction**) in the warm one, with ARM Assembly consuming **50%** less Flash memory;
 </details>
