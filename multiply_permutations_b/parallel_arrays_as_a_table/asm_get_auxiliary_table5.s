@@ -46,7 +46,7 @@ asm_get_auxiliary_table5:
     MOV R10, R0         @ Base pointer for loop termination
 
 	@ 3xMOVS + 2 bytes
-    NOP
+    NOP					@ comment and measure performance
 
     @ Pre-calculate (Base Pointer + 1)
     ADD R12, R5, #1
