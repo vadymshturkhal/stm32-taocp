@@ -33,9 +33,9 @@
 
 * **Base case = `"(acfg)(bcd)(aed)(fade)(bgfae)"`:**
     * **Using parallel arrays as a table:**
-        * GCC -O3: cycles_cold = [1984-1996], cycles_warm = 1913;
-        * ARM Assembly: cycles_cold = [1875-1877], cycles_warm = 1790;
-        * **Summary:** Hand-tuned ASM won by ~109 cycles (**~5.5% time reduction**) in the cold version and by ~123 cycles (**~6.4% time reduction**) in the warm one;
+        * GCC -O3: cycles_cold = [1984-1996], cycles_warm = 1913, size = 292 bytes;
+        * ARM Assembly: cycles_cold = [1775-1784], cycles_warm = 1689, size = 342 bytes;
+        * **Summary:** Hand-tuned ASM won by ~209 cycles (**~10.5% time reduction**) in the cold version and by ~224 cycles (**~11.7% time reduction**) in the warm one, with GCC consuming **14.6%** less Flash memory;
 
     * **Using one array as a table:**
         * GCC -O3: cycles_cold = [947-959], cycles_warm = [887-890], size = 260 bytes;
