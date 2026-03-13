@@ -44,6 +44,7 @@
         * GCC -O3: cycles_cold = [947-959], cycles_warm = [887-890], size = 260 bytes;
         * ARM Assembly: cycles_cold = [778-784], cycles_warm = 736, size = 224 bytes;
         * **Summary:** Hand-tuned ASM won by ~169 cycles (**~17.8% time reduction**) in the cold version and by ~151 cycles (**~17.0% time reduction**) in the warm one, with ARM Assembly consuming **13.8%** less Flash memory;
+        * **Some tricks and insights:** Pointer Shifting, Hot Path Isolation & Register Recycling, Free Bounds Checking, 16-bit Thumb-2 instructions instead of standard 32-bit instructions, Branchless Conditional Logic;
 </details>
 
 <details>
