@@ -1,7 +1,7 @@
 .syntax unified
     .thumb
     .cpu cortex-m4
-    .global asm_find_the_original_index2
+    .global asm_find_the_original_index3
 
 @ Input:
 @ R0 char *original_order
@@ -16,7 +16,7 @@
 @ R12 original_order
 
 @ 2257 cycles
-asm_find_the_original_index2:
+asm_find_the_original_index3:
 	@ early return
 	CBZ R1, not_found
 

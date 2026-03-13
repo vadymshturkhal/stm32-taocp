@@ -37,24 +37,34 @@ void comparing_multiply_permutations_b_parallel_arrays() {
 
 	// GCC -O3
 	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
-	// cycles_cold = [1984-1996], cycles_warm = 1913
-	volatile char *multiplication_result = (char *)malloc(permutation_length * sizeof(char));
+	// cycles_cold = [1984-1996], cycles_warm = 1913, size = 292 bytes;
+	volatile char *c_multiplication_result = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
-	multiply_permutations_b_parallel_arrays(permutation, permutation_length, multiplication_result);
+	multiply_permutations_b_parallel_arrays(permutation, permutation_length, c_multiplication_result);
 	end = DWT->CYCCNT;
-	volatile uint32_t c_cycles_cold_multiply_permutations_b_parallel_arrays  = (end - start) - overhead;
+	volatile uint32_t c_cycles_cold_multiply_permutations_b_parallel_arrays = (end - start) - overhead;
+
+	start = DWT->CYCCNT;
+	multiply_permutations_b_parallel_arrays(permutation, permutation_length, c_multiplication_result);
+	end = DWT->CYCCNT;
+	volatile uint32_t c_cycles_warm_multiply_permutations_b_parallel_arrays = (end - start) - overhead;
 
 	// ARM Assembly
 	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
-	// cycles_cold = [1875-1877], cycles_warm = 1790
+	// cycles_cold = [1775-1784], cycles_warm = 1689, size = 342 bytes;
 	volatile char *asm_multiplication_result = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
 	asm_multiply_permutations_b_parallel_arrays(permutation, permutation_length, asm_multiplication_result);
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_cycles_cold_multiply_permutations_b_parallel_arrays = (end - start) - overhead;
 
+	start = DWT->CYCCNT;
+	asm_multiply_permutations_b_parallel_arrays(permutation, permutation_length, asm_multiplication_result);
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_cycles_warm_multiply_permutations_b_parallel_arrays = (end - start) - overhead;
+
 
 	// free
-	free(multiplication_result);
+	free(c_multiplication_result);
 	free(asm_multiplication_result);
 }

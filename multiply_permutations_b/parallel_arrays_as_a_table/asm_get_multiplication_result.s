@@ -33,11 +33,14 @@ main_loop:
 
 	@ R1 contains untagged_index
 
+	@ CMP R0, #-1			@ if (untagged_index == -1)
+	@ ITTT EQ
+	@ MOVEQ R1, #0		@ store '\0'
+	@ STRBEQ R1, [R7], #1 @ *multiplication_result++ = '\0';
+	@ BEQ done
+
 	CMP R0, #-1			@ if (untagged_index == -1)
-	ITTT EQ
-	MOVEQ R1, #0		@ store '\0'
-	STRBEQ R1, [R7], #1 @ *multiplication_result++ = '\0';
-	BEQ done
+	BEQ pre_done
 
 add_left_parenthesis:
 	MOV R1, '('
@@ -60,7 +63,7 @@ add_inner_cycle:
 
 find_the_current_char_index_loop:
 	LDRB R2, [R3], #1
-	CMP R1, R2		@ if (current_char == original_order[k])
+	CMP R1, R2			@ if (current_char == original_order[k])
 	BEQ found_match
 
 	CMP R3, R12
@@ -77,13 +80,16 @@ singleton_elimination:
 	CMP R1, '('
 	IT EQ
 	SUBEQ R7, #3
-
 	B main_loop
 
 found_match:
 	SUB R0, R3, R4
 	SUB R0, R0, #1
 	B add_inner_cycle
+
+pre_done:
+	MOV R1, #0		@ store '\0'
+	STRB R1, [R7], #1 @ *multiplication_result++ = '\0';
 
 done:
 	POP {R4-R7, PC}
