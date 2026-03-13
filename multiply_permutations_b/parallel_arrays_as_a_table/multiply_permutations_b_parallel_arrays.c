@@ -49,10 +49,9 @@ uint32_t get_auxiliary_table(char *permutation, uint32_t permutation_length, cha
 		element = permutation[index];
 
 		// If the element is a ')': set Z = 1 and repeat step B2;
-		// Z = 1 for avoiding visual string interruption in the middle with placing Z = 0;
-		// Replacing Z = 1 with Z = 0 slightly increase the speed (~15 cycles with the base case);
+		// Replace Z = 0 with Z = 1 for avoiding visual string interruption in debugger;
 		if (element == ')') {
-			Z = 1;
+			Z = 0;
 			continue;
 		}
 
@@ -85,8 +84,8 @@ uint32_t get_auxiliary_table(char *permutation, uint32_t permutation_length, cha
 		auxiliary_table[original_index] = Z;
 		Z = current_element;
 
-		// If T[i] == 1: j = i;
-		if (auxiliary_table[original_index] == 1) {
+		// If T[i] == 0: j = i;
+		if (auxiliary_table[original_index] == 0) {
 			j = original_index;
 		}
 	}

@@ -11,6 +11,7 @@
 @ Branchless Conditional Execution;
 @ Extreme Tail Duplication;
 @ Surgical Mod 16 Cache Alignment;
+@ Architectural Abuse;
 
 
 @ Input:
@@ -30,7 +31,6 @@
 @ R2 char Z;
 @ R10 char *permutation;
 
-
 asm_get_auxiliary_table5:
     PUSH {R4-R10, LR}
 
@@ -46,11 +46,13 @@ asm_get_auxiliary_table5:
     MOV R10, R0         @ Base pointer for loop termination
 
 	@ 3xMOVS + 2 bytes
+	@ same behaviour as .balign 4 before examine_the_next_element
     NOP					@ comment and measure performance
 
     @ Pre-calculate (Base Pointer + 1)
     ADD R12, R5, #1
 
+@.balign 4
 examine_the_next_element:
     LDRB R7, [R4], #-1
 

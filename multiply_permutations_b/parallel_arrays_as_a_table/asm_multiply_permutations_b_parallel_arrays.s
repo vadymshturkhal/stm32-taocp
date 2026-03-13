@@ -12,21 +12,21 @@ asm_multiply_permutations_b_parallel_arrays:
 
 	@ save stack pointer and parameters
 	MOV R4, SP
-	MOV R5, R1
-	MOV R6, R2
+	MOVS R5, R1
+	MOVS R6, R2
 
 	@ B1
 	@ reserve space on the stack
 	@ for two arrays space = permutation_length * 2
-	LSL R2, R1, #1
+	LSLS R2, R1, #1
 
 	@ round space bytes
-	ADD R2, R2, #7
+	ADDS R2, R2, #7
 	@ Bit Clear
 	BIC R2, R2, #7
 
 	@ allocate the memory on the stack
-	SUB SP, SP, R2
+	SUBS SP, SP, R2
 
 	@ B2, B3, B4
 	@ uint32_t i =  asm_get_auxiliary_table4(permutation, permutation_length, original_order, auxiliary_table);
@@ -34,7 +34,7 @@ asm_multiply_permutations_b_parallel_arrays:
 	@ R0 already = permutation
 	@ R1 already = permutation_length
 	MOV R2, SP
-	ADD R3, SP, R5
+	ADDS R3, SP, R5
 	BL asm_get_auxiliary_table5
 
 	@ R0 contains i now
@@ -42,22 +42,13 @@ asm_multiply_permutations_b_parallel_arrays:
 	@ Parsing result
 	@ asm_get_multiplication_result(original_order, auxiliary_table, i, multiplication_result);
 
-	MOV R2, R0
+	MOVS R2, R0
 	MOV R0, SP
-	ADD R1, SP, R5
-	MOV R3, R6
+	ADDS R1, SP, R5
+	MOVS R3, R6
 
-	BL asm_get_multiplication_result
+	BL asm_get_multiplication_result1
 
 done:
 	MOV SP, R4
 	POP {R4-R6, PC}
-
-
-
-
-
-
-
-
-

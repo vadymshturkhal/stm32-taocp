@@ -34,10 +34,9 @@ void comparing_multiply_permutations_b_parallel_arrays() {
 //	char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)(dgeac)";
 	size_t permutation_length = strlen(permutation);
 
-
 	// GCC -O3
 	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
-	// cycles_cold = [1984-1996], cycles_warm = 1913, size = 292 bytes;
+	// cycles_cold = [1968-1970], cycles_warm = 1893, size = 292 bytes;
 	volatile char *c_multiplication_result = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
 	multiply_permutations_b_parallel_arrays(permutation, permutation_length, c_multiplication_result);
@@ -51,7 +50,7 @@ void comparing_multiply_permutations_b_parallel_arrays() {
 
 	// ARM Assembly
 	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
-	// cycles_cold = [1775-1784], cycles_warm = 1689, size = 342 bytes;
+	// cycles_cold = [1741-1747], cycles_warm = 1662, size = 322;
 	volatile char *asm_multiplication_result = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
 	asm_multiply_permutations_b_parallel_arrays(permutation, permutation_length, asm_multiplication_result);

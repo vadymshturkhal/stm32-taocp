@@ -16,11 +16,7 @@
 @ R2 original_order + 1
 @ R3 current_char
 asm_get_first_untagged:
-	@ MOV R2, R0
-
-	@ 2141
-	@ Trick for avoiding SUBS R0, R0, #1 in return_i
-	ADD R2, R0, #1
+	ADD R2, R0, #1		@ Trick for avoiding SUBS R0, R0, #1 in return_i
 
 .balign 4
 search_first_untagged:
@@ -30,7 +26,6 @@ search_first_untagged:
 	@ TST does a bitwise AND and sets flags, without modifying R3!
     @ If the top bit is 0 (untagged), the Zero (Z) flag is set.
     @ parsed_permutation[i] & 0x80 == 0
-    @ 2146
 	TST R3, 0x80
 	BEQ return_i
 
@@ -47,10 +42,8 @@ search_first_untagged:
 
 not_found:
 	MOV R0, #-1
-	BX LR
+	BX LR			@ Branch and Exchange to Link Register
 
 return_i:
 	SUB R0, R0, R2
-
-	@ Branch and Exchange to Link Register
 	BX LR
