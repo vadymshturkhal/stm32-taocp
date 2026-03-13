@@ -36,6 +36,9 @@
         * GCC -O3: cycles_cold = [1968-1970], cycles_warm = 1893, size = 296 bytes;
         * ARM Assembly: cycles_cold = [1741-1747], cycles_warm = 1662, size = 322;
         * **Summary:** Hand-tuned ASM won by ~227 cycles (**~11.5% time reduction**) in the cold version and by ~231 cycles (**~12.2% time reduction**) in the warm one, with GCC consuming **8%** less Flash memory;
+        * **Some tricks and insights:** The "Silicon Butterfly Effect" & Cache-Line Shields (NOP, .balign), The ABI bypass (Removed C-Returns), Instructions sizing
+            as Physical Tetris (16-bit vs 32-bit), The Bare-Metal VLA (Variable Length Array) Hack (stack with BIC instead of malloc), 
+            Write-Back Hazard Avoidance (TST instead of AND+CBZ), Pre-increment Pointer Hack (for avoiding late SUB);
 
     * **Using one array as a table:**
         * GCC -O3: cycles_cold = [947-959], cycles_warm = [887-890], size = 260 bytes;
