@@ -36,7 +36,7 @@ void comparing_multiply_permutations_b_parallel_arrays() {
 
 	// GCC -O3
 	// with char *permutation = "(acfg)(bcd)(aed)(fade)(bgfae)";
-	// cycles_cold = [1968-1970], cycles_warm = 1893, size = 292 bytes;
+	// cycles_cold = [1968-1970], cycles_warm = 1893, size = 296 bytes;
 	volatile char *c_multiplication_result = (char *)malloc(permutation_length * sizeof(char));
 	start = DWT->CYCCNT;
 	multiply_permutations_b_parallel_arrays(permutation, permutation_length, c_multiplication_result);
