@@ -65,8 +65,8 @@ bool is_prime(uint32_t candidate, uint32_t* primes_array) {
 uint32_t* c_knuth_primes(uint32_t* primes_array, uint32_t primes_to_find) {
 	// P1
 	primes_array[0] = 2;
-	volatile uint32_t primes_found = 1;
-	volatile uint32_t candidate = 3;
+	uint32_t primes_found = 1;
+	uint32_t candidate = 3;
 
 	// P2
 	primes_array[primes_found] = candidate;
