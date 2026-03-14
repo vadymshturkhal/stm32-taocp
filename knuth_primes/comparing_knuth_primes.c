@@ -15,32 +15,33 @@ void comparing_primes() {
 	volatile uint32_t PRIMES_TO_PRINT = 500;
 
 	// GCC -O3
-	// for 500 primes
-	// cycles_cold = [167241-167611], cycles_warm = 167254
+	// with 500 primes;
+	// cycles_cold = [167241-167611], cycles_warm = [167253-167254], size = 100 bytes;
 	volatile uint32_t* c_primes_array = malloc(PRIMES_TO_PRINT * sizeof(uint32_t));
 	start = DWT->CYCCNT;
 	c_knuth_primes(c_primes_array, PRIMES_TO_PRINT);
 	end = DWT->CYCCNT;
-	volatile uint32_t c_primes_cycles = (end - start) - overhead;
+	volatile uint32_t c_cycles_cold_knuth_primes = (end - start) - overhead;
 
 	start = DWT->CYCCNT;
 	c_knuth_primes(c_primes_array, PRIMES_TO_PRINT);
 	end = DWT->CYCCNT;
-	volatile uint32_t c_primes_cycles1 = (end - start) - overhead;
+	volatile uint32_t c_cycles_warm_knuth_primes = (end - start) - overhead;
+
 
 	// ARM Assembly
-	// for 500 primes
-	// cycles_cold = [158090-158300], cycles_warm = 158034 for 500 primes
+	// with 500 primes;
+	// cycles_cold = [141548-141561], cycles_warm = 141561, size = 56 bytes;
 	volatile uint32_t* asm_primes_array = malloc(PRIMES_TO_PRINT * sizeof(uint32_t));
 	start = DWT->CYCCNT;
-	asm_knuth_primes(asm_primes_array, PRIMES_TO_PRINT);
+	asm_knuth_primes2(asm_primes_array, PRIMES_TO_PRINT);
 	end = DWT->CYCCNT;
-	volatile uint32_t asm_primes_cycles = (end - start) - overhead;
+	volatile uint32_t asm_cycles_cold_knuth_primes = (end - start) - overhead;
 
 	start = DWT->CYCCNT;
-	asm_knuth_primes(asm_primes_array, PRIMES_TO_PRINT);
+	asm_knuth_primes2(asm_primes_array, PRIMES_TO_PRINT);
 	end = DWT->CYCCNT;
-	volatile uint32_t asm_primes_cycles1 = (end - start) - overhead;
+	volatile uint32_t asm_cycles_warm_knuth_primes = (end - start) - overhead;
 
 	free(c_primes_array);
 	free(asm_primes_array);
