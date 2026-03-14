@@ -13,10 +13,14 @@
 
 ## Performance summary GCC -O3 and ARM Assembly:
 ### All cycle counts measured using the internal DWT cycle counter on the Cortex-M4
-- Algorithm P with 500 primes:
-    - GCC -O3: cycles_cold = [167241-167611], cycles_warm = 167254;
-    - ARM Assembly: cycles_cold = [158090-158300], cycles_warm = 158034;
-    - Summary: Hand-tuned ASM won by ~9,151 cycles in the cold version and by ~9,220 cycles in the warm one;
+
+<details>
+<summary><b>Algorithm P (Print table of 500 primes)</b></summary>
+
+* **Base case = `500 primes`:**
+    * GCC -O3: cycles_cold = [167241-167611], cycles_warm = [167253-167254], size = 100 bytes;
+    * ARM Assembly: cycles_cold = [141548-141561], cycles_warm = 141561, size = 56 bytes;
+</details>
 
 <details>
 <summary><b>Algorithm A (Multiply permutations in cycle form)</b></summary>
