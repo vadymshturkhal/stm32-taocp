@@ -15,7 +15,7 @@ void comparing_primes() {
 	const uint32_t PRIMES_TO_PRINT = 500;
 
 
-	// GCC -O3 c_knuth_primes_mod_3_hack_xor:
+	// GCC -O3
 	// with 500 primes;
 	// cycles_cold = [120736-120741], cycles_warm = [120712-120713], size = 76 bytes;
 	volatile uint32_t* c_primes_array = malloc(PRIMES_TO_PRINT * sizeof(uint32_t));
