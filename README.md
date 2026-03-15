@@ -18,8 +18,9 @@
 <summary><b>Algorithm P (Print table of 500 primes)</b></summary>
 
 * **Base case = `500 primes`:**
-    * GCC -O3: cycles_cold = [167241-167611], cycles_warm = [167253-167254], size = 100 bytes;
-    * ARM Assembly: cycles_cold = [141548-141561], cycles_warm = 141561, size = 56 bytes;
+    * GCC -O3: cycles_cold = 147911, cycles_warm = 147909, size = 76 bytes;
+    * ARM Assembly: cycles_cold = [141548-141561], cycles_warm = [141561-141563], size = 50 bytes;
+    * **Summary:** Hand-tuned ASM won by ~364 cycles (**~4.3% time reduction**) in the cold version and by ~370 cycles (**~4.2% time reduction**) in the warm one,    with ARM Assembly consuming **~34.2%** less Flash memory;
 </details>
 
 <details>
@@ -28,7 +29,7 @@
 * **Base case = `"(acfg)(bcd)(aed)(fade)(bgfae)"`:**
     * GCC -O3: cycles_cold = [2977-2983], cycles warm = 2917, size = 236 bytes;
     * ARM Assembly: cycles_cold = [2613-2618], cycles warm = 2547, size = 268 bytes;
-    * **Summary:** Hand-tuned ASM won by ~364 cycles (**~12.2% time reduction**) in the cold version and by ~370 cycles (**~12.6% time reduction**) in the warm one, with GCC consuming **11.9%** less Flash memory due to aggressive compiler inlining;
+    * **Summary:** Hand-tuned ASM won by ~364 cycles (**~12.2% time reduction**) in the cold version and by ~370 cycles (**~12.6% time reduction**) in the warm one, with GCC consuming **~11.9%** less Flash memory due to aggressive compiler inlining;
 </details>
 
 
@@ -38,8 +39,8 @@
 * **Base case = `"(acfg)(bcd)(aed)(fade)(bgfae)"`:**
     * **Using parallel arrays as a table:**
         * GCC -O3: cycles_cold = [1968-1970], cycles_warm = 1893, size = 296 bytes;
-        * ARM Assembly: cycles_cold = [1741-1747], cycles_warm = 1662, size = 322;
-        * **Summary:** Hand-tuned ASM won by ~227 cycles (**~11.5% time reduction**) in the cold version and by ~231 cycles (**~12.2% time reduction**) in the warm one, with GCC consuming **8%** less Flash memory;
+        * ARM Assembly: cycles_cold = [1741-1747], cycles_warm = 1662, size = 322 bytes;
+        * **Summary:** Hand-tuned ASM won by ~227 cycles (**~11.5% time reduction**) in the cold version and by ~231 cycles (**~12.2% time reduction**) in the warm one, with GCC consuming **~8%** less Flash memory;
         * **Some tricks and insights:** The "Silicon Butterfly Effect" & Cache-Line Shields (NOP, .balign), The ABI bypass (Removed C-Returns), Instructions sizing
             as Physical Tetris (16-bit vs 32-bit), The Bare-Metal VLA (Variable Length Array) Hack (stack with BIC instead of malloc), 
             Write-Back Hazard Avoidance (TST instead of AND+CBZ), Pre-increment Pointer Hack (for avoiding late SUB);
@@ -47,7 +48,7 @@
     * **Using one array as a table:**
         * GCC -O3: cycles_cold = [947-959], cycles_warm = [887-890], size = 260 bytes;
         * ARM Assembly: cycles_cold = [778-784], cycles_warm = 736, size = 224 bytes;
-        * **Summary:** Hand-tuned ASM won by ~169 cycles (**~17.8% time reduction**) in the cold version and by ~151 cycles (**~17.0% time reduction**) in the warm one, with ARM Assembly consuming **13.8%** less Flash memory;
+        * **Summary:** Hand-tuned ASM won by ~169 cycles (**~17.8% time reduction**) in the cold version and by ~151 cycles (**~17.0% time reduction**) in the warm one, with ARM Assembly consuming **~13.8%** less Flash memory;
         * **Some tricks and insights:** Pointer Shifting, Hot Path Isolation & Register Recycling, Free Bounds Checking, 16-bit Thumb-2 instructions instead of standard 32-bit instructions, Branchless Conditional Logic;
 </details>
 
