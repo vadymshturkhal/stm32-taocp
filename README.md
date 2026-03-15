@@ -19,8 +19,8 @@
 
 * **Base case = `500 primes`:**
     * GCC -O3: cycles_cold = [126198-126699], cycles_warm = [126163-126696], size = 92 bytes;
-    * ARM Assembly: cycles_cold = [121038-121047], cycles_warm = [121009-121046], size = 84 bytes;
-    * **Summary:** Hand-tuned ASM won by ~5160 cycles (**~4% time reduction**) in the cold version and by ~5154 cycles (**~4% time reduction**) in the warm one,    with ARM Assembly consuming **~8.6%** less Flash memory;
+    * ARM Assembly: cycles_cold = [118065-118080], cycles_warm = [118046-118069], size = 84 bytes;
+    * **Summary:** Hand-tuned ASM won by ~8133 cycles (**~6.4% time reduction**) in the cold version and by ~8117 cycles (**~6.4% time reduction**) in the warm one,    with ARM Assembly consuming **~8.6%** less Flash memory;
 </details>
 
 <details>
