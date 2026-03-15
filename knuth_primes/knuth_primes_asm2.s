@@ -68,7 +68,6 @@ asm_knuth_primes2:
 	B candidate_is_prime	@ add 3 to primes array
 
 @ P4
-.balign 4
 advance_candidate:
 	ADDS R3, R3, #2
 
@@ -77,7 +76,6 @@ init_primes_counter:
 	ADDS R4, R0, #4
 
 @ P6
-.balign 8
 is_divided:
 	@ P8 in place
 	LDR R5, [R4], #4	@ primes_array[primes_counter]
@@ -91,7 +89,6 @@ is_divided:
 @ P7
 is_q_large:
 	CMP R6, R5
-	@ BLS candidate_is_prime
 	BHI is_divided
 
 @ P2

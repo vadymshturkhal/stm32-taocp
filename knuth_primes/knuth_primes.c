@@ -61,6 +61,37 @@ bool is_prime(uint32_t candidate, uint32_t* primes_array) {
 	return true;
 }
 
+// 3k cycles slower than original is_prime
+//bool is_prime(uint32_t candidate, uint32_t* primes_array) {
+//	uint32_t Q;
+//	uint32_t temp_product;
+//	uint32_t divisor;
+//
+//	// P5
+//	uint32_t primes_counter = 0;  // start from 3 as a divisor
+//
+//	// P7
+//	do {
+//		primes_counter += 1;
+//		divisor = primes_array[primes_counter];
+//
+//		// P6
+//		Q = candidate / divisor;
+//
+//		// THE MUL STEAL: Replace modulo (%) with Multiply (*)
+//		// This forces GCC to use a 1-cycle MUL instead of a 2-cycle MLS
+//		temp_product = Q * divisor;
+//
+//		// If Q * divisor perfectly reconstructs the candidate, remainder is 0.
+//		if (temp_product == candidate) {
+//			// to P4
+//			return false;
+//		}
+//	} while (Q > divisor);
+//
+//	return true;
+//}
+
 
 uint32_t* c_knuth_primes(uint32_t* primes_array, uint32_t primes_to_find) {
 	// P1

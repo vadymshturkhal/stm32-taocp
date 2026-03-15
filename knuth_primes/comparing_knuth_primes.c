@@ -31,7 +31,7 @@ void comparing_primes() {
 
 	// ARM Assembly
 	// with 500 primes;
-	// cycles_cold = [141548-141561], cycles_warm = [141561-141563], size = 56 bytes;
+	// cycles_cold = [141548-141561], cycles_warm = [141561-141563], size = 50 bytes;
 	volatile uint32_t* asm_primes_array = malloc(PRIMES_TO_PRINT * sizeof(uint32_t));
 	start = DWT->CYCCNT;
 	asm_knuth_primes2(asm_primes_array, PRIMES_TO_PRINT);
