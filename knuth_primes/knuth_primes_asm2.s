@@ -4,6 +4,9 @@
 	.global asm_knuth_primes2
 
 
+@ using 16 bit instructions
+
+
 @ Algorithm
 @ P1
 @ init primes_array[0] = 2;
@@ -44,7 +47,7 @@
 
 @ Runtime:
 @ R1 end pointer
-@ R2 currebt_prime pointer
+@ R2 current_prime pointer
 @ R3 candidate
 @ R4 traversal_primes pointer
 @ R5 divisor

@@ -1,10 +1,10 @@
 .syntax unified
 	.thumb
 	.cpu cortex-m4
-	.global asm_knuth_primes1
+	.global asm_knuth_primes_mod_3_hack
 
 
-@ using post incrementing
+@ using mod 3 hack filter
 
 
 @ Algorithm
@@ -53,34 +53,45 @@
 @ R5 divisor
 @ R6 Q
 @ R7 temp (divisor * Q)
+@ R8 0xAAAAAAAB (modular inverse of 3)
+@ R9 0x55555555 (max valid limit for mod 3)
 
 
-asm_knuth_primes1:
+asm_knuth_primes_mod_3_hack:
 	@ P1
-	PUSH {R4-R7, LR}
+	PUSH {R4-R9, LR}
 
-	@ store 2 to primes_array
-	MOV R3, #2
-	STR R3, [R0]
+	@ pre-load mod 3 filter constand
+	LDR R8, =0xAAAAAAAB
+	LDR R9, =0x55555555
 
-	ADD R2, R0, #4			@ primes_array pointer += 4
-	ADD R1, R0, R1, LSL #2	@ end_pointer = primes_array + (primes_to_find * 4)
+	@ store 2 and 3 to primes_array
+	MOVS R3, #2
+	STR R3, [R0, #0]
+    MOVS R3, #3
+    STR R3, [R0, #4]
 
-	MOV R3, #3				@ candidate = 3
+	ADDS R2, R0, #8			@ R2 points to primes_array[2]
+	ADDS R1, R0, R1, LSL #2	@ end_pointer = primes_array + (primes_to_find * 4)
 
-	B candidate_is_prime	@ add 3 to primes array
+	MOVS R3, #5				@ start candidate = 5
+	B candidate_is_prime	@ add 5 to primes array
 
 @ P4
-.balign 4
 advance_candidate:
-	ADD R3, R3, #2
+	ADDS R3, R3, #2
+
+    @ mod 3 filter hack
+    MUL R6, R3, R8
+    CMP R6, R9
+    BLS advance_candidate   @ skip if multiple of 3
 
 @ P5
 init_primes_counter:
-	ADD R4, R0, #4
+	ADDS R4, R0, #8         @ skip 2 and 3 from primes_array[0] and primes_array[1]
 
 @ P6
-.balign 16
+.balign 4
 is_divided:
 	@ P8 in place
 	LDR R5, [R4], #4	@ primes_array[primes_counter]
@@ -94,7 +105,6 @@ is_divided:
 @ P7
 is_q_large:
 	CMP R6, R5
-	@ BLS candidate_is_prime
 	BHI is_divided
 
 @ P2
@@ -106,4 +116,4 @@ candidate_is_prime:
 	BNE advance_candidate
 
 done:
-	POP {R4-R7, PC}
+	POP {R4-R9, PC}
