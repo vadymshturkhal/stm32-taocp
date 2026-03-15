@@ -18,9 +18,9 @@
 <summary><b>Algorithm P (Print table of 500 primes)</b></summary>
 
 * **Base case = `500 primes`:**
-    * GCC -O3: cycles_cold = 147911, cycles_warm = 147909, size = 76 bytes;
-    * ARM Assembly: cycles_cold = [141548-141561], cycles_warm = [141561-141563], size = 50 bytes;
-    * **Summary:** Hand-tuned ASM won by ~6363 cycles (**~4.3% time reduction**) in the cold version and by ~6348 cycles (**~4.2% time reduction**) in the warm one,    with ARM Assembly consuming **~34.2%** less Flash memory;
+    * GCC -O3: cycles_cold = [126198-126699], cycles_warm = [126163-126696], size = 92 bytes;
+    * ARM Assembly: cycles_cold = [121038-121047], cycles_warm = [121009-121046], size = 84 bytes;
+    * **Summary:** Hand-tuned ASM won by ~5160 cycles (**~4% time reduction**) in the cold version and by ~5154 cycles (**~4% time reduction**) in the warm one,    with ARM Assembly consuming **~8.6%** less Flash memory;
 </details>
 
 <details>
