@@ -63,8 +63,8 @@ bool is_prime_mod_3_hack(uint32_t candidate, uint32_t* primes_array) {
 
 void c_knuth_primes_mod_3_hack(uint32_t* primes_array, uint32_t primes_to_find) {
 	// P1
-	// @ R8 0xAAAAAAAB (modular inverse of 3)
-	// @ R9 0x55555555 (max valid limit for mod 3)
+	// 0xAAAAAAAB (modular inverse of 3)
+	// 0x55555555 (max valid limit for mod 3)
 
 	const uint32_t modular_inverse_of_3 = 0xAAAAAAAB;
 	const uint32_t max_valid_limit_for_mod_3 = 0x55555555;
