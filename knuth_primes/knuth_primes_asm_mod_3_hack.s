@@ -84,14 +84,14 @@ advance_candidate:
     @ mod 3 filter hack
     MUL R6, R3, R8
     CMP R6, R9
-    BLS advance_candidate   @ skip if multiple of 3
+    IT LS
+    ADDLS R3, R3, #2		@ Add 2 if it is a multiple of 3
 
 @ P5
 init_primes_counter:
 	ADDS R4, R0, #8         @ skip 2 and 3 from primes_array[0] and primes_array[1]
 
 @ P6
-.balign 4
 is_divided:
 	@ P8 in place
 	LDR R5, [R4], #4	@ primes_array[primes_counter]
