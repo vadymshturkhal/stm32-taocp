@@ -26,7 +26,7 @@ def j_inverse_in_place(permutation):
         permutation[-i] = m
 
         # J5 (Loop on m)
-        # Decrease m by 1; if m > 0, go back to J2, terminate if else
+        # Decrease m by 1; if m > 0, go back to J2, terminate otherwise
         m -= 1
 
 
