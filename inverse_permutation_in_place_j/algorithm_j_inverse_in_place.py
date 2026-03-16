@@ -8,7 +8,6 @@ def j_inverse_in_place(permutation):
 
     m = len(permutation) - 1
 
-    # for _ in range(3):
     while m > 0:
        
         # J2 (Initialize)
@@ -20,7 +19,6 @@ def j_inverse_in_place(permutation):
         while i > 0:
             j = i
             i = permutation[j]
-
 
         # J4 (Invert)
         # Set permutation[j] = permutation[-i], permutation[-i] = m
