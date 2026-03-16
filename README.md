@@ -5,6 +5,7 @@
 - Algorithm A (Multiply permutations in cycle form);
 - Algorithm B (Multiply permutations in cycle form);
 - Algorithm I (Inverse permutation in place);
+- Algorithm J (Inverse permutation in place);
 
 ## How to run:
 - Navigate to the specific algorithm's folder;
@@ -59,4 +60,13 @@
     * GCC -O3: cycles_cold = [181-189], cycles_warm = 167, size = 100 bytes;
     * ARM Assembly: cycles_cold = 151, cycles_warm = 139, size = 50 bytes;
     * **Summary:** Hand-tuned ASM won by ~30 cycles (**~16.6% time reduction**) in the cold version and by ~28 (**~16.7% time reduction**) in the warm one, with ARM Assembly consuming **50%** less Flash memory;
+</details>
+
+<details>
+<summary><b>Algorithm J (Inverse in place)</b></summary>
+
+* **Base case = `{0, 6, 2, 1, 5, 4, 3}`:**
+    * GCC -O3: cycles_cold = [225-226], cycles_warm = 203, size = 84 bytes;
+    * ARM Assembly: cycles_cold = [201-202], cycles_warm = 186, size = 60 bytes;
+    * **Summary:** Hand-tuned ASM won by ~24 cycles (**~10.6% time reduction**) in the cold version and by ~17 (**~8.3% time reduction**) in the warm one, with ARM Assembly consuming **~28.5%** less Flash memory;
 </details>
