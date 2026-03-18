@@ -6,6 +6,7 @@
 - Algorithm B (Multiply permutations in cycle form);
 - Algorithm I (Inverse permutation in place);
 - Algorithm J (Inverse permutation in place);
+- Josephus Problem (Generalized);
 
 ## How to run:
 - Navigate to the specific algorithm's folder;
@@ -68,5 +69,14 @@
 * **Base case = `{0, 6, 2, 1, 5, 4, 3}`:**
     * GCC -O3: cycles_cold = [225-226], cycles_warm = 203, size = 84 bytes;
     * ARM Assembly: cycles_cold = [201-202], cycles_warm = 186, size = 60 bytes;
-    * **Summary:** Hand-tuned ASM won by ~24 cycles (**~10.6% time reduction**) in the cold version and by ~17 (**~8.3% time reduction**) in the warm one, with ARM Assembly consuming **~28.5%** less Flash memory;
+    * **Summary:** Hand-tuned ASM won by ~24 cycles (**~10.6% time reduction**) in the cold version and by ~17 cycles (**~8.3% time reduction**) in the warm one, with ARM Assembly consuming **~28.5%** less Flash memory;
+</details>
+
+<summary><b>Josephus Problem (Generalized)</b></summary>
+
+* **Base case = `mod 33 and participants 10111`:**
+    * GCC -O3: cycles_cold = 14006, cycles_warm = 13950, size = 92 bytes;
+    * ARM Assembly: cycles_cold = 4846, cycles_warm = 4816, size = 114 bytes;
+    * **Summary:** Hand-tuned ASM won by ~9160 cycles (**~65.4% time reduction**) in the cold version and by ~9134 cycles (**~65.4% time reduction**) in the warm one, with GCC consuming **~19.2%** less Flash memory;
+    * **Some tricks and insights:** ASM custom ceiling;
 </details>
