@@ -72,7 +72,7 @@
     * **Summary:** Hand-tuned ASM won by ~24 cycles (**~10.6% time reduction**) in the cold version and by ~17 cycles (**~8.3% time reduction**) in the warm one, with ARM Assembly consuming **~28.5%** less Flash memory;
 </details>
 
-</details>
+<details>
 <summary><b>Josephus Problem (Generalized)</b></summary>
 
 * **Base case = `mod 33 and participants 10111`:**
