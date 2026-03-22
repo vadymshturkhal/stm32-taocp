@@ -27,7 +27,6 @@ Node* init_storage_pool(Stack* stack, uint32_t size) {
 
 Stack* c_create_stack(void* memory, uint32_t size) {
 	Stack* stack = (Stack*)memory;
-	stack->size = size;
 	stack->top = NULL;
 
 	Node* avail = init_storage_pool(stack, size);

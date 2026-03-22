@@ -11,7 +11,6 @@ typedef struct Node {
 } Node;
 
 typedef struct {
-    uint32_t size;
     Node* top;
     Node* avail;
 } Stack;

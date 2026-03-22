@@ -28,28 +28,25 @@ void comparing_stack() {
 	if (stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t c_stack_cycles_cold = (end - start) - overhead;
-
-	start = DWT->CYCCNT;
-	stack_status = perform_c_stack_operations(MAX_NODES, operations_factor);
-	if (stack_status == 0) return;
-	end = DWT->CYCCNT;
-	volatile uint32_t c_stack_cycles_warm = (end - start) - overhead;
-
-
+//
+//	start = DWT->CYCCNT;
+//	stack_status = perform_c_stack_operations(MAX_NODES, operations_factor);
+//	if (stack_status == 0) return;
+//	end = DWT->CYCCNT;
+//	volatile uint32_t c_stack_cycles_warm = (end - start) - overhead;
 
 
 
 	// ARM Assembly
 	// with ?
 	// cycles_cold = ?, cycles_warm = ?, size = ? bytes;
-//	volatile uint32_t* asm_stack_memory = malloc(MAX_NODES * sizeof(uint32_t));
 //	start = DWT->CYCCNT;
-//	perform_asm_stack_operations(MAX_NODES);
+//	volatile uint8_t stack_status = perform_c_stack_operations(MAX_NODES, operations_factor);
+//	if (stack_status == 0) return;
 //	end = DWT->CYCCNT;
 //	volatile uint32_t asm_stack_cycles_cold = (end - start) - overhead;
 
 
 	end = DWT->CYCCNT;
 
-//	free(asm_stack_memory);
 }
