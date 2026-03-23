@@ -23,7 +23,7 @@
 * **Base case = `500 primes`:**
     * GCC -O3: cycles_cold = [120736-120741], cycles_warm = [120712-120713], size = 76 bytes;
     * ARM Assembly: cycles_cold = [115679-115712], cycles_warm = [115654-115692], size = 72 bytes;
-    * **Summary:** Hand-tuned ASM won by ~5057 cycles (**~4.1% time reduction**) in the cold version and by ~5058 cycles (**~4.1% time reduction**) in the warm one,    with ARM Assembly consuming **~5.2%** less Flash memory;
+    * **Summary:** Hand-tuned ASM won by ~5,057 cycles (**~4.1% time reduction**) in the cold version and by ~5,058 cycles (**~4.1% time reduction**) in the warm one,    with ARM Assembly consuming **~5.2%** less Flash memory;
 </details>
 
 <details>
@@ -79,7 +79,7 @@
 * **Base case = `mod 33 and participants 10111`:**
     * GCC -O3: cycles_cold = 14006, cycles_warm = 13950, size = 92 bytes;
     * ARM Assembly: cycles_cold = 4846, cycles_warm = 4816, size = 114 bytes;
-    * **Summary:** Hand-tuned ASM won by ~9160 cycles (**~65.4% time reduction**) in the cold version and by ~9134 cycles (**~65.4% time reduction**) in the warm one, with GCC consuming **~19.2%** less Flash memory;
+    * **Summary:** Hand-tuned ASM won by ~9,160 cycles (**~65.4% time reduction**) in the cold version and by ~9,134 cycles (**~65.4% time reduction**) in the warm one, with GCC consuming **~19.2%** less Flash memory;
     * **Some tricks and insights:** ASM custom ceiling;
 </details>
 
