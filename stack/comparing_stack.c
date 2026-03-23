@@ -1,7 +1,7 @@
 #include "main.h"
 #include "c_stack.h"
 
-#define MAX_NODES 128
+//#define MAX_NODES 128
 
 
 // Prototypes
@@ -17,18 +17,20 @@ void comparing_stack() {
 	end = DWT->CYCCNT;
 	overhead = end - start;
 
+	const uint16_t max_nodes = 128;
+
 	// GCC -O3
 	// Translation Unit Boundary Push/Pop case (not integrated)
-	// with 128 Push and 128 Pop using balloc (custom malloc) and
-	// cycles_cold = [9382], cycles_warm = [9309], size = 420 bytes
+	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
+	// cycles_cold = 9382, cycles_warm = 9309, size = 420 bytes
 	start = DWT->CYCCNT;
-	volatile uint8_t c_stack_status = perform_c_stack_operations(MAX_NODES);
+	volatile uint8_t c_stack_status = perform_c_stack_operations(max_nodes);
 	if (c_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t c_stack_cycles_cold = (end - start) - overhead;
 
 	start = DWT->CYCCNT;
-	c_stack_status = perform_c_stack_operations(MAX_NODES);
+	c_stack_status = perform_c_stack_operations(max_nodes);
 	if (c_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t c_stack_cycles_warm = (end - start) - overhead;
@@ -36,16 +38,16 @@ void comparing_stack() {
 
 	// ARM Assembly
 	// Translation Unit Boundary Push/Pop case (not integrated)
-	// with 128 Push and 128 Pop using balloc (custom malloc)
+	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
 	// cycles_cold = [6765-6804], cycles_warm = [6726-6745], size = 240 bytes;
 	start = DWT->CYCCNT;
-	volatile uint8_t asm_stack_status = asm_perform_stack_operations(MAX_NODES);
+	volatile uint8_t asm_stack_status = asm_perform_stack_operations(max_nodes);
 	if (asm_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_stack_cycles_cold = (end - start) - overhead;
 
 	start = DWT->CYCCNT;
-	asm_stack_status = asm_perform_stack_operations(MAX_NODES);
+	asm_stack_status = asm_perform_stack_operations(max_nodes);
 	if (asm_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_stack_cycles_warm = (end - start) - overhead;
