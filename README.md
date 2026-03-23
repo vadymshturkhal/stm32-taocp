@@ -86,11 +86,10 @@
 <details>
 <summary><b>Stack</b></summary>
 
-* **Base case = `128 nodes, 128 Push and 128 Pop using balloc (custom malloc)`:**
-    * **Translation Unit Boundary Push/Pop case (not integrated):**
+* **Base case = `128 nodes, 128 Push and 128 Pop using balloc (custom bare-metal memory allocator)`:**
+    * **Translation Unit Boundary Push/Pop case (not inline integrated):**
         * GCC -O3: cycles_cold = 9382, cycles_warm = 9309, size = 420 bytes
         * ARM Assembly: cycles_cold = [6765-6804], cycles_warm = [6726-6745], size = 240 bytes;
-        * **Summary:** Hand-tuned ASM won by ~2617 cycles (**~27.8% time reduction**) in the cold version and by ~2583 cycles (**~28.1% time reduction**) in the warm one, with ASM consuming **~42.8%** less Flash memory;
-        * **Some tricks and insights:** Aggressive using of Scratch Registers in subroutines, Custom malloc (balloc), Flag usage, AAPCS 8-byte Stack Alignment,
-        Instruction Pipeline Alignment (.balign 4), Cascade Return;
+        * **Summary:** Hand-tuned ASM won by ~2,617 cycles (**~27.8% time reduction**) in the cold version and by ~2,583 cycles (**~28.1% time reduction**) in the warm one, with ASM consuming **~42.8%** less Flash memory;
+        * **Some tricks and insights:** Aggressive use of Scratch Registers in subroutines, Custom bare-metal memory allocator (balloc), Register-level flag usage for error handling, Strict AAPCS 8-byte Stack Alignment, Instruction Pipeline Alignment (.balign 4), Cascade Return;
 </details>
