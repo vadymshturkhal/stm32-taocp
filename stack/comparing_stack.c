@@ -1,12 +1,12 @@
 #include "main.h"
-
+#include "c_stack.h"
 
 #define MAX_NODES 128
 
 
 // Prototypes
-uint8_t perform_c_stack_operations(uint16_t max_nodes, uint8_t operations_factor);
-
+uint8_t perform_c_stack_operations(uint16_t max_nodes);
+uint8_t asm_perform_stack_operations(uint16_t max_nodes);
 
 void comparing_stack() {
 	// notice that stack node must be 8 bytes long;
@@ -17,34 +17,38 @@ void comparing_stack() {
 	end = DWT->CYCCNT;
 	overhead = end - start;
 
-	// perform push/pop (MAX_NODES * operations_factor) times
-	uint8_t operations_factor = 1;
-
 	// GCC -O3
-	// with	nodes = 128, operations_factor = 1 (128 push and 128 pop)
-	// cycles_cold = [4984-5124], cycles_warm = [4586-4700], size = 296 bytes
+	// Translation Unit Boundary Push/Pop case (not integrated)
+	// with 128 Push and 128 Pop using balloc (custom malloc) and
+	// cycles_cold = [9382], cycles_warm = [9309], size = 420 bytes
 	start = DWT->CYCCNT;
-	volatile uint8_t stack_status = perform_c_stack_operations(MAX_NODES, operations_factor);
-	if (stack_status == 0) return;
+	volatile uint8_t c_stack_status = perform_c_stack_operations(MAX_NODES);
+	if (c_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t c_stack_cycles_cold = (end - start) - overhead;
-//
-//	start = DWT->CYCCNT;
-//	stack_status = perform_c_stack_operations(MAX_NODES, operations_factor);
-//	if (stack_status == 0) return;
-//	end = DWT->CYCCNT;
-//	volatile uint32_t c_stack_cycles_warm = (end - start) - overhead;
 
+	start = DWT->CYCCNT;
+	c_stack_status = perform_c_stack_operations(MAX_NODES);
+	if (c_stack_status == 0) return;
+	end = DWT->CYCCNT;
+	volatile uint32_t c_stack_cycles_warm = (end - start) - overhead;
 
 
 	// ARM Assembly
-	// with ?
-	// cycles_cold = ?, cycles_warm = ?, size = ? bytes;
-//	start = DWT->CYCCNT;
-//	volatile uint8_t stack_status = perform_c_stack_operations(MAX_NODES, operations_factor);
-//	if (stack_status == 0) return;
-//	end = DWT->CYCCNT;
-//	volatile uint32_t asm_stack_cycles_cold = (end - start) - overhead;
+	// Translation Unit Boundary Push/Pop case (not integrated)
+	// with 128 Push and 128 Pop using balloc (custom malloc)
+	// cycles_cold = [6765-6804], cycles_warm = [6726-6745], size = 240 bytes;
+	start = DWT->CYCCNT;
+	volatile uint8_t asm_stack_status = asm_perform_stack_operations(MAX_NODES);
+	if (asm_stack_status == 0) return;
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_stack_cycles_cold = (end - start) - overhead;
+
+	start = DWT->CYCCNT;
+	asm_stack_status = asm_perform_stack_operations(MAX_NODES);
+	if (asm_stack_status == 0) return;
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_stack_cycles_warm = (end - start) - overhead;
 
 
 	end = DWT->CYCCNT;
