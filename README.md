@@ -7,6 +7,7 @@
 - Algorithm I (Inverse permutation in place);
 - Algorithm J (Inverse permutation in place);
 - Josephus Problem (Generalized);
+- Stack;
 
 ## How to run:
 - Navigate to the specific algorithm's folder;
@@ -80,4 +81,16 @@
     * ARM Assembly: cycles_cold = 4846, cycles_warm = 4816, size = 114 bytes;
     * **Summary:** Hand-tuned ASM won by ~9160 cycles (**~65.4% time reduction**) in the cold version and by ~9134 cycles (**~65.4% time reduction**) in the warm one, with GCC consuming **~19.2%** less Flash memory;
     * **Some tricks and insights:** ASM custom ceiling;
+</details>
+
+<details>
+<summary><b>Stack</b></summary>
+
+* **Base case = `128 nodes, 128 Push and 128 Pop using balloc (custom malloc)`:**
+    * **Translation Unit Boundary Push/Pop case (not integrated):**
+        * GCC -O3: cycles_cold = 9382, cycles_warm = 9309, size = 420 bytes
+        * ARM Assembly: cycles_cold = [6765-6804], cycles_warm = [6726-6745], size = 240 bytes;
+        * **Summary:** Hand-tuned ASM won by ~2617 cycles (**~27.8% time reduction**) in the cold version and by ~2583 cycles (**~28.1% time reduction**) in the warm one, with ASM consuming **~42.8%** less Flash memory;
+        * **Some tricks and insights:** Aggressive using of Scratch Registers in subroutines, Custom malloc (balloc), Flag usage, AAPCS 8-byte Stack Alignment,
+        Instruction Pipeline Alignment (.balign 4), Cascade Return;
 </details>
