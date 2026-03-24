@@ -92,4 +92,10 @@
         * ARM Assembly: cycles_cold = [6765-6804], cycles_warm = [6726-6745], size = 240 bytes;
         * **Summary:** Hand-tuned ASM won by ~2,617 cycles (**~27.8% time reduction**) in the cold version and by ~2,583 cycles (**~28.1% time reduction**) in the warm one, with ASM consuming **~42.8%** less Flash memory;
         * **Some tricks and insights:** Aggressive use of Scratch Registers in subroutines, Custom bare-metal memory allocator (balloc), Register-level flag usage for error handling, Strict AAPCS 8-byte Stack Alignment, Instruction Pipeline Alignment (.balign 4), Cascade Return;
+
+    * **Inlined Push/Pop (integrated):**
+        * GCC -O3: cycles_cold = [4490-4494], cycles_warm = 4430, size = 216 bytes
+        * ARM Assembly: [4180-4204], cycles_warm = [4160-4163], size = 178 bytes
+        * **Summary:** Hand-tuned ASM won by ~310 cycles (**~6.9% time reduction**) in the cold run and by ~270 cycles (**~6.1% time reduction**) in the warm run, with ASM consuming **~17.6%** less Flash memory;
+        * **Some tricks and insights:** Aggressive use of Scratch Registers: Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations, 100% 16-bit Thumb-2 Density: Forcing all operations in low registers, Cascade Return Architecture: Fall-through error handling to minimize epilogue redundancy, Custom bare-metal memory allocator: balloc
 </details>
