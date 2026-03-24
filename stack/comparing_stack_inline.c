@@ -5,11 +5,11 @@
 
 
 // Prototypes
-uint8_t perform_c_stack_operations(uint16_t max_nodes);
-uint8_t asm_perform_stack_operations(uint16_t max_nodes);
+uint8_t perform_c_stack_operations_inline(uint16_t max_nodes);
+uint8_t asm_perform_stack_operations_inline(uint16_t max_nodes);
 
 
-void comparing_stack() {
+void comparing_stack_inline() {
 	// notice that stack node must be 8 bytes long;
 
     volatile uint32_t start, end, overhead;
@@ -23,15 +23,15 @@ void comparing_stack() {
 	// GCC -O3
 	// Translation Unit Boundary Push/Pop case (not integrated)
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
-	// cycles_cold = 9382, cycles_warm = 9309, size = 420 bytes
+	// cycles_cold = [4490-4494], cycles_warm = 4430, size = 216 bytes
 	start = DWT->CYCCNT;
-	volatile uint8_t c_stack_status = perform_c_stack_operations(max_nodes);
+	volatile uint8_t c_stack_status = perform_c_stack_operations_inline(max_nodes);
 	if (c_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t c_stack_cycles_cold = (end - start) - overhead;
 
 	start = DWT->CYCCNT;
-	c_stack_status = perform_c_stack_operations(max_nodes);
+	c_stack_status = perform_c_stack_operations_inline(max_nodes);
 	if (c_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t c_stack_cycles_warm = (end - start) - overhead;
@@ -40,15 +40,15 @@ void comparing_stack() {
 	// ARM Assembly
 	// Translation Unit Boundary Push/Pop case (not integrated)
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
-	// cycles_cold = [6765-6804], cycles_warm = [6726-6745], size = 240 bytes
+	// cycles_cold = [4180-4204], cycles_warm = [4160-4163], size = 178 bytes
 	start = DWT->CYCCNT;
-	volatile uint8_t asm_stack_status = asm_perform_stack_operations(max_nodes);
+	volatile uint8_t asm_stack_status = asm_perform_stack_operations_inline(max_nodes);
 	if (asm_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_stack_cycles_cold = (end - start) - overhead;
 
 	start = DWT->CYCCNT;
-	asm_stack_status = asm_perform_stack_operations(max_nodes);
+	asm_stack_status = asm_perform_stack_operations_inline(max_nodes);
 	if (asm_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_stack_cycles_warm = (end - start) - overhead;
