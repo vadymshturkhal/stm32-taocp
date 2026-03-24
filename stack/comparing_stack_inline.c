@@ -21,7 +21,7 @@ void comparing_stack_inline() {
 	const uint16_t max_nodes = 128;
 
 	// GCC -O3
-	// Translation Unit Boundary Push/Pop case (not integrated)
+	// Inlined Push/Pop case (integrated)
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
 	// cycles_cold = [4490-4494], cycles_warm = 4430, size = 216 bytes
 	start = DWT->CYCCNT;
@@ -38,7 +38,7 @@ void comparing_stack_inline() {
 
 
 	// ARM Assembly
-	// Translation Unit Boundary Push/Pop case (not integrated)
+	// Inlined Push/Pop case (integrated)
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
 	// cycles_cold = [4180-4204], cycles_warm = [4160-4163], size = 178 bytes
 	start = DWT->CYCCNT;
