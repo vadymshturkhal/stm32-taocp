@@ -17,7 +17,6 @@
 @ R0 Bump Address
 asm_balloc_free:
 	LDR R1, =heap_head
-	STR R2, [R1]
 	STR R0, [R1]
 
 done:
