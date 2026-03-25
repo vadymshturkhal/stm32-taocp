@@ -59,27 +59,22 @@ push_loop_init:
 
 .balign 4
 asm_stack_push_inline:
-	@ 1
 	CBZ R2, handle_overflow_underflow		@ if (stack->avail == NULL) return false
 
-	MOVS R3, R2					@ R3 = P = avail
-	LDR R2, [R3, #NODE_LINK]	@ avail = P->link;
+	@ R2 is P at the moment
+	LDR R3, [R2, #NODE_LINK]	@ R3 = next avail = P->link;
+	STR R6, [R2, #NODE_INFO]	@ P->info = info;
+	STR R1, [R2, #NODE_LINK]	@ P->link = stack->top;
 
-	@ 2
-	STR R6, [R3, #NODE_INFO]	@ P->info = info;
-
-	@ 3
-	STR R1, [R3, #NODE_LINK]	@ P->link = stack->top;
-
-	@ 4
-	MOVS R1, R3					@ R1 = stack->top = P
+	MOVS R1, R2					@ R1 = stack->top = P
+	MOVS R2, R3					@ stack->avail = next avail
 
 	SUBS R6, R6, #1
 	BNE asm_stack_push_inline
 
 push_inline_sync:
-	STR R2, [R0, #STACK_AVAIL]	@ stack->avail = stack->avail->link
 	STR R1, [R0, #STACK_TOP]
+	STR R2, [R0, #STACK_AVAIL]	@ stack->avail = stack->avail->link
 
 pop_loop_init:
 	MOVS R6, R4
@@ -88,17 +83,13 @@ pop_loop_init:
 	LDR R1, [R0, #STACK_TOP]	@ R1 = stack->top;
 	LDR R2, [R0, #STACK_AVAIL]	@ R2 = stack->avail
 
+.balign 4
 asm_stack_pop_inline:
 	@ 1
 	CBZ R1, handle_overflow_underflow	@ if (stack->top == NULL): underflow
 
-	@ 2
 	LDR R3, [R1, #NODE_LINK]	@ R3 = P->link
-
-	@ 3
 	LDR R5, [R1, #NODE_INFO]	@ info = P->info;
-
-	@ 4
 	STR R2, [R1, #NODE_LINK]	@ P->link = stack->avail;
 
 	MOVS R2, R1					@ R2 = stack->avail = P;
