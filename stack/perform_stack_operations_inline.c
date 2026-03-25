@@ -14,7 +14,6 @@ uint8_t perform_c_stack_operations_inline(uint16_t max_nodes){
 	bool pop_is_success = true;	// flag for Underflow checking
 	uint32_t info;
 
-
 	for (uint16_t i = max_nodes; i > 0; i--){
 		if (c_stack_push(stack, i) == false) {
 			asm_balloc_free(c_stack_memory);
