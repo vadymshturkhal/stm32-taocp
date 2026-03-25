@@ -105,7 +105,7 @@
         * ARM Assembly: cycles_cold = [3553-3573], cycles_warm = [3528-3529], size = 182 bytes
         * **Summary:** Hand-tuned ASM won by ~673 cycles (**~16% time reduction**) in the cold run and by ~644 cycles (**~15.4% time reduction**) in the warm run, with ASM consuming **9%** less Flash memory;
         * **Some tricks and insights:** 
-        Aggressive use of Scratch Registers: Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations, 
+        ABI Register Aliasing: Exploiting the C calling convention by preserving the base memory pointer in R0 across both loops, achieving zero-cost pointer setup for the balloc free cascade exit,
         16-bit Thumb-2 Density: Forcing all operations in low registers,
         Instruction Pipeline Alignment (.balign 4),
         Cascade Return Architecture: Fall-through error handling to minimize epilogue redundancy, 
