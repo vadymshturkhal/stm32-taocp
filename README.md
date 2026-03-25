@@ -102,8 +102,8 @@
 
     * **Inlined Push/Pop (integrated):**
         * GCC -O3: cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
-        * ARM Assembly: cycles_cold = [3553-3573], cycles_warm = [3528-3529], size = 182 bytes
-        * **Summary:** Hand-tuned ASM won by ~673 cycles (**~16% time reduction**) in the cold run and by ~644 cycles (**~15.4% time reduction**) in the warm run, with ASM consuming **9%** less Flash memory;
+        * ARM Assembly: cycles_cold = [3426-3444], cycles_warm = 3399, size = 182 bytes
+        * **Summary:** Hand-tuned ASM won by ~800 cycles (**~18.9% time reduction**) in the cold run and by ~773 cycles (**~18.5% time reduction**) in the warm run, with ASM consuming **9%** less Flash memory;
         * **Some tricks and insights:** 
         ABI Register Aliasing: Exploiting the C calling convention by preserving the base memory pointer in R0 across both loops, achieving zero-cost pointer setup for the balloc free cascade exit,
         16-bit Thumb-2 Density: Forcing all operations in low registers,
