@@ -7,7 +7,7 @@
 // Prototypes
 uint8_t perform_c_stack_operations_inline(uint16_t max_nodes);
 uint8_t asm_perform_stack_operations_inline(uint16_t max_nodes);
-uint8_t asm_perform_stack_operations_inline_registers(uint16_t max_nodes);
+uint8_t asm_perform_stack_operations_inline_hoisting(uint16_t max_nodes);
 
 
 void comparing_stack_inline() {
@@ -43,13 +43,13 @@ void comparing_stack_inline() {
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
 	// cycles_cold = [3553-3573], cycles_warm = [3528-3529], size = 182 bytes
 	start = DWT->CYCCNT;
-	volatile uint8_t asm_stack_status = asm_perform_stack_operations_inline1(max_nodes);
+	volatile uint8_t asm_stack_status = asm_perform_stack_operations_inline_hoisting(max_nodes);
 	if (asm_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_stack_cycles_cold = (end - start) - overhead;
 
 	start = DWT->CYCCNT;
-	asm_stack_status = asm_perform_stack_operations_inline1(max_nodes);
+	asm_stack_status = asm_perform_stack_operations_inline_hoisting(max_nodes);
 	if (asm_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_stack_cycles_warm = (end - start) - overhead;
