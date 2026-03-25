@@ -23,7 +23,7 @@ void comparing_stack_inline() {
 	// GCC -O3
 	// Inlined Push/Pop case (integrated)
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
-	// cycles_cold = [4490-4494], cycles_warm = 4430, size = 216 bytes
+	// cycles_cold = 4230, cycles_warm = 4173, size = 216 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t c_stack_status = perform_c_stack_operations_inline(max_nodes);
 	if (c_stack_status == 0) return;
