@@ -91,11 +91,24 @@
         * GCC -O3: cycles_cold = 9382, cycles_warm = 9309, size = 420 bytes
         * ARM Assembly: cycles_cold = [6765-6804], cycles_warm = [6726-6745], size = 240 bytes
         * **Summary:** Hand-tuned ASM won by ~2,617 cycles (**~27.8% time reduction**) in the cold version and by ~2,583 cycles (**~28.1% time reduction**) in the warm one, with ASM consuming **~42.8%** less Flash memory
-        * **Some tricks and insights:** Aggressive use of Scratch Registers in subroutines, Custom bare-metal memory allocator (balloc), Register-level flag usage for error handling, Strict AAPCS 8-byte Stack Alignment, Instruction Pipeline Alignment (.balign 4), Cascade Return
+        * **Some tricks and insights:** 
+        Aggressive use of Scratch Registers: Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations, 
+        Register-level flag usage for error handling, 
+        Strict AAPCS 8-byte Stack Alignment, 
+        16-bit Thumb-2 Density: Forcing all operations in low registers, 
+        Instruction Pipeline Alignment (.balign 4), 
+        Cascade Return Architecture: Fall-through error handling to minimize epilogue redundancy,
+        Custom bare-metal memory allocator (balloc),
 
     * **Inlined Push/Pop (integrated):**
         * GCC -O3: cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
         * ARM Assembly: cycles_cold = [3553-3573], cycles_warm = [3528-3529], size = 182 bytes
         * **Summary:** Hand-tuned ASM won by ~673 cycles (**~16% time reduction**) in the cold run and by ~644 cycles (**~15.4% time reduction**) in the warm run, with ASM consuming **9%** less Flash memory;
-        * **Some tricks and insights:** Aggressive use of Scratch Registers: Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations, 100% 16-bit Thumb-2 Density: Forcing all operations in low registers, Cascade Return Architecture: Fall-through error handling to minimize epilogue redundancy, Custom bare-metal memory allocator: balloc
+        * **Some tricks and insights:** 
+        Aggressive use of Scratch Registers: Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations, 
+        16-bit Thumb-2 Density: Forcing all operations in low registers,
+        Instruction Pipeline Alignment (.balign 4),
+        Cascade Return Architecture: Fall-through error handling to minimize epilogue redundancy, 
+        Custom bare-metal memory allocator: balloc, 
+        SRAM bus starvation (Register Hoisting): hoisted top and avail nodes pointers into scratch registers before Push/Pop loops
 </details>
