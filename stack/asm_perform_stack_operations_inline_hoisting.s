@@ -30,7 +30,7 @@
 @ R6 max_nodes loop counter
 
 asm_perform_stack_operations_inline_hoisting:
-	PUSH {R4-R6, LR}			@ add R7 for stack alignment
+	PUSH {R4-R6, LR}
 
 	CBZ R0, early_exit
 
