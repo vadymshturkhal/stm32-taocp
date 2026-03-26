@@ -6,6 +6,9 @@
 
 @ Performs max_nodes Push and Pop with integrated Push/Pop with Hoisting
 
+@ Stats:
+@ with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
+@ cycles_cold = [3426-3444], cycles_warm = 3399, size = 182 bytes
 
 @ Memory offsets
 .equ NODE_SIZE,		8	@ sizeof(Node) = 8 bytes
