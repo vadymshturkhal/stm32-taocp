@@ -8,8 +8,7 @@
 @ Loop unrolling mod 4
 @ Register Hoisting
 @ Modulo Variable Expansion (MVE mod 4) or Circular Register Allocation:
-@ MVE mod 4: registers becomes identity after 4 cyclic permutations
-@ Registers R3-R6: The Ping-Pong Matrix
+@ MVE mod 4: registers permutation becomes identity after 4 cyclic permutations
 
 
 @ Memory offsets

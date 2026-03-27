@@ -24,17 +24,17 @@ void comparing_stack_inline() {
 	// GCC -O3
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
 	// cycles_cold = [4225-4231], cycles_warm = [4172-4173], size = 200 bytes
-	start = DWT->CYCCNT;
-	volatile uint8_t c_stack_status = perform_c_stack_operations_inline(max_nodes);
-	if (c_stack_status == 0) return;
-	end = DWT->CYCCNT;
-	volatile uint32_t c_stack_cycles_cold = (end - start) - overhead;
-
-	start = DWT->CYCCNT;
-	c_stack_status = perform_c_stack_operations_inline(max_nodes);
-	if (c_stack_status == 0) return;
-	end = DWT->CYCCNT;
-	volatile uint32_t c_stack_cycles_warm = (end - start) - overhead;
+//	start = DWT->CYCCNT;
+//	volatile uint8_t c_stack_status = perform_c_stack_operations_inline(max_nodes);
+//	if (c_stack_status == 0) return;
+//	end = DWT->CYCCNT;
+//	volatile uint32_t c_stack_cycles_cold = (end - start) - overhead;
+//
+//	start = DWT->CYCCNT;
+//	c_stack_status = perform_c_stack_operations_inline(max_nodes);
+//	if (c_stack_status == 0) return;
+//	end = DWT->CYCCNT;
+//	volatile uint32_t c_stack_cycles_warm = (end - start) - overhead;
 
 
 	// ARM Assembly
