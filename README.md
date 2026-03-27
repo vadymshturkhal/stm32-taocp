@@ -102,13 +102,13 @@
 
     * **Inlined Push/Pop (integrated):**
         * GCC -O3: cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
-        * ARM Assembly: cycles_cold = [3426-3444], cycles_warm = 3399, size = 182 bytes
-        * **Summary:** Hand-tuned ASM won by ~800 cycles (**~18.9% time reduction**) in the cold run and by ~773 cycles (**~18.5% time reduction**) in the warm run, with ASM consuming **9%** less Flash memory;
+        * ARM Assembly: cycles_cold = [2615-2626], cycles_warm = [2554-2555], size = 390 bytes
+        * **Summary:** Hand-tuned ASM won by ~1611 cycles (**~38.1% time reduction**) in the cold run and by ~1618 cycles (**~38.7% time reduction**) in the warm run, with GCC consuming **48.7%** less Flash memory;
         * **Some tricks and insights:** 
-        ABI Register Aliasing: Exploiting the C calling convention by preserving the base memory pointer in R0 across both loops, achieving zero-cost pointer setup for the balloc free cascade exit,
         16-bit Thumb-2 Density: Forcing all operations in low registers,
         Instruction Pipeline Alignment (.balign 4),
         Cascade Return Architecture: Fall-through error handling to minimize epilogue redundancy, 
         Custom bare-metal memory allocator: balloc, 
-        SRAM bus starvation (Register Hoisting): hoisted top and avail nodes pointers into scratch registers before Push/Pop loops
+        SRAM bus starvation (Register Hoisting): hoisted top and avail nodes pointers into scratch registers before Push/Pop loops,
+        Modulo Variable Expansion (MVE mod 4) or Circular Register Allocation: registers permutation becomes identity after 4 cyclic permutations
 </details>
