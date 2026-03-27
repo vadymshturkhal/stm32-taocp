@@ -51,7 +51,7 @@ asm_perform_stack_operations_inline_pingpong:
 
 	@ R0 already contains asm_stack_memory
 	MOVS R1, R4					@ Move max_nodes to R1
-	BL asm_create_stack1			@ Stack* stack = asm_create_stack(asm_stack_memory, max_nodes);
+	BL asm_create_stack			@ Stack* stack = asm_create_stack(asm_stack_memory, max_nodes);
 
 	@ Stack in R0 now
 	MOVS R6, R0					@ save Stack
