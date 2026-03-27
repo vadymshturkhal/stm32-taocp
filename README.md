@@ -107,8 +107,7 @@
         * **Some tricks and insights:** 
         16-bit Thumb-2 Density: Forcing all operations in low registers,
         Instruction Pipeline Alignment (.balign 4),
-        Cascade Return Architecture: Fall-through error handling to minimize epilogue redundancy, 
-        Custom bare-metal memory allocator: balloc, 
-        SRAM bus starvation (Register Hoisting): hoisted top and avail nodes pointers into scratch registers before Push/Pop loops,
-        Modulo Variable Expansion (MVE mod 4) or Circular Register Allocation: registers permutation becomes identity after 4 cyclic permutations
+        Bump Allocator: balloc,
+        Reduced SRAM traffic by hoisting Top and Avail nodes,
+        Loop Unrolling & Modulo Variable Expansion (MVE mod 4): the register permutation returns to identity after 4 cycles
 </details>
