@@ -102,8 +102,8 @@
 
     * **Inlined Push/Pop (integrated):**
         * GCC -O3: cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
-        * ARM Assembly: cycles_cold = [2615-2626], cycles_warm = [2554-2555], size = 390 bytes
-        * **Summary:** Hand-tuned ASM won by ~1611 cycles (**~38.1% time reduction**) in the cold run and by ~1618 cycles (**~38.7% time reduction**) in the warm run, with GCC consuming **48.7%** less Flash memory;
+        * ARM Assembly: cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
+        * **Summary:** Hand-tuned ASM won by ~1617 cycles (**~38.2% time reduction**) in the cold run and by ~1618 cycles (**~38.7% time reduction**) in the warm run, with GCC consuming **46.5%** less Flash memory;
         * **Some tricks and insights:** 
         16-bit Thumb-2 Density: Forcing all operations in low registers,
         Instruction Pipeline Alignment (.balign 4),
