@@ -62,8 +62,8 @@ pop_loop_init:
 	MOVS R6, R4
 
 pop_loop:
-	MOVS R0, R7					@ Move Stack pointer to R0
-	MOV R1, SP					@ Move &pop_is_success to R1
+	MOV R0, SP					@ Move &pop_is_success to R0
+	MOVS R1, R7					@ Move Stack pointer to R1
 	BL asm_stack_pop
 
 	@ now R0 contains info

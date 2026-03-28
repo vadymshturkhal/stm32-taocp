@@ -18,29 +18,27 @@
 @ Runtime:
 @ R0 Stack* stack
 @ R1 uint32_t info
-@ R2 Node* P = stack->avail
-@ R3 Node* P->link
+@ R2 Avail
+@ R3 Top
 asm_stack_push:
 	@ 1
-	LDR R2, [R0, #STACK_AVAIL]
-	CBZ R2, overflow			@ if (stack->avail == NULL) return false
+	LDR R2, [R0, #STACK_AVAIL]	@ R2 = Avail
+	CBZ R2, overflow			@ if Avail == NULL: return false
 
-	@ At the moment R2 = Node* P = stack->avail;
-	LDR R3, [R2, #NODE_LINK]	@ R3 = stack->avail->link;
-	STR R3, [R0, #STACK_AVAIL]	@ stack->avail = stack->avail->link;
+	LDR R3, [R2, #NODE_LINK]	@ R3 = Avail->link
+	STR R3, [R0, #STACK_AVAIL]	@ stack->avail = Avail->link
 
 	@ 2
-	STR R1, [R2, #NODE_INFO]	@ P->info = info;
+	STR R1, [R2, #NODE_INFO]	@ Avail->info = info
 
 	@ 3
-	LDR R3, [R0, #STACK_TOP]	@ R2 = stack->top;
-	STR R3, [R2, #NODE_LINK]	@ P->link = stack->top;
+	LDR R3, [R0, #STACK_TOP]	@ R3 = Top
+	STR R3, [R2, #NODE_LINK]	@ Avail->link = Top
 
 	@ 4
-	STR R2, [R0, #STACK_TOP]	@ stack->top = P;
+	STR R2, [R0, #STACK_TOP]	@ stack->top = Avail
 
 done:
-	MOVS R0, #1
 	BX LR
 
 overflow:

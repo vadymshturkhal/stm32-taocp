@@ -11,12 +11,12 @@
 .equ STACK_AVAIL,	4
 
 @ Input:
-@ R0 Stack* stack
-@ R1 bool* pop_is_success
+@ R0 bool* pop_is_success
+@ R1 Stack* stack
 
 @ Runtime:
-@ R0 Stack* stack
-@ R1 bool* pop_is_success then info
+@ R0 bool* pop_is_success, info
+@ R1 Stack* stack
 @ R2 Node* P = stack->top
 @ R3 Node* P->link then stack->avail
 
@@ -24,28 +24,28 @@
 @ Top (node info) or (0 and update pop_is_success flag)
 asm_stack_pop:
 	@ 1
-	LDR R2, [R0, #STACK_TOP]	@ P = stack->top
-	CBZ R2, underflow			@ if (stack->top == NULL): underflow
+	LDR R2, [R1, #STACK_TOP]	@ R2 = Top
+	CBZ R2, underflow			@ if Top == NULL: underflow
 
 	@ 2
-	LDR R3, [R2, #NODE_LINK]	@ R3 = P->link
-	STR R3, [R0, #STACK_TOP]	@ stack->top = P->link
+	LDR R3, [R2, #NODE_LINK]	@ R3 = Next Top
+	STR R3, [R1, #STACK_TOP]	@ stack->top = Next Top
 
 	@ 3
-	LDR R1, [R2, #NODE_INFO]	@ info = P->info;
+	LDR R0, [R2, #NODE_INFO]	@ R0 = Top->info;
 
 	@ 4
-	LDR R3, [R0, #STACK_AVAIL]	@ stack->avail
-	STR R3, [R2, #NODE_LINK]	@ P->link = stack->avail;
-	STR R2, [R0, #STACK_AVAIL]	@ stack->avail = P;
+	LDR R3, [R1, #STACK_AVAIL]	@ R3 = Avail
+	STR R3, [R2, #NODE_LINK]	@ Top->link = Avail;
+	STR R2, [R1, #STACK_AVAIL]	@ Avail = Top;
 
 done:
-	MOVS R0, R1
-	BX LR						@ @ return info;
+	@ info is already at R0
+	BX LR						@ return info;
 
 underflow:
 	MOVS R3, #0
-	STRB R3, [R1]				@ *pop_is_success = false
+	STRB R3, [R0]				@ *pop_is_success = false
 
 	MOVS R0, #0
 	BX LR						@ Return 0

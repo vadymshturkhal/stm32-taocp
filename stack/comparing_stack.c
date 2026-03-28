@@ -23,7 +23,7 @@ void comparing_stack() {
 	// GCC -O3
 	// Translation Unit Boundary Push/Pop case (not integrated)
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
-	// cycles_cold = 9382, cycles_warm = 9309, size = 420 bytes
+	// cycles_cold = [9377-9382], cycles_warm = [9307-9309], size = 280 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t c_stack_status = perform_c_stack_operations(max_nodes);
 	if (c_stack_status == 0) return;
@@ -40,7 +40,7 @@ void comparing_stack() {
 	// ARM Assembly
 	// Translation Unit Boundary Push/Pop case (not integrated)
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
-	// cycles_cold = [6765-6804], cycles_warm = [6726-6745], size = 240 bytes
+	// cycles_cold = [6520-6530], cycles_warm = 6478, size = 234 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t asm_stack_status = asm_perform_stack_operations(max_nodes);
 	if (asm_stack_status == 0) return;
