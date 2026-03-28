@@ -7,7 +7,7 @@
 uint8_t perform_c_stack_operations_inline(uint16_t max_nodes);
 uint8_t asm_perform_stack_operations_inline(uint16_t max_nodes);
 uint8_t asm_perform_stack_operations_inline_hoisting(uint16_t max_nodes);
-uint8_t asm_perform_stack_operations_inline_pingpong(uint16_t max_nodes);
+uint8_t asm_perform_stack_operations_inline_mve(uint16_t max_nodes);
 
 void comparing_stack_inline() {
 	// notice that stack node must be 8 bytes long;
@@ -39,15 +39,15 @@ void comparing_stack_inline() {
 
 	// ARM Assembly
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
-	// cycles_cold = [2606-2626], cycles_warm = [2554-2555], size = 374 bytes
+	// cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
 	start = DWT->CYCCNT;
-	asm_stack_status = asm_perform_stack_operations_inline_pingpong(max_nodes);
+	asm_stack_status = asm_perform_stack_operations_inline_mve(max_nodes);
 	if (asm_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_stack_cycles_cold = (end - start) - overhead;
 
 	start = DWT->CYCCNT;
-	asm_stack_status = asm_perform_stack_operations_inline_pingpong(max_nodes);
+	asm_stack_status = asm_perform_stack_operations_inline_mve(max_nodes);
 	if (asm_stack_status == 0) return;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_stack_cycles_warm = (end - start) - overhead;

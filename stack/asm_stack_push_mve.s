@@ -1,7 +1,7 @@
 .syntax unified
     .thumb
     .cpu cortex-m4
-    .global asm_stack_push_pingpong
+    .global asm_stack_push_mve
 
 
 @ Using:
@@ -31,7 +31,7 @@
 
 @ Return 0 or 1
 
-asm_stack_push_pingpong:
+asm_stack_push_mve:
 	PUSH {R4-R6, LR}
 	CBZ R1, early_return
 
@@ -39,7 +39,7 @@ asm_stack_push_pingpong:
 	LDR R4, [R0, #STACK_AVAIL]	@ R4 = Avail
 
 	ANDS R6, R1, #3				@ Remainder of R1(number of iterations) mod 4
-	BEQ push_pingpong_loop
+	BEQ push_mve_loop
 
 handle_push_tail_loop:
 	@ R3 = Top, R4 = Avail
@@ -57,7 +57,7 @@ handle_push_tail_loop:
 	CBZ R1, done				@ return if there was only a tail
 
 .balign 4
-push_pingpong_loop:
+push_mve_loop:
 	@ R3 = Top, R4 = Avail, same case as in handle_tail_loop
 	CBZ R4, handle_overflow0		@ R4 = P
 	LDR R5, [R4, #NODE_LINK]	@ R5 = next avail node
@@ -87,7 +87,7 @@ push_pingpong_loop:
 	SUBS R1, R1, #1				@ decrement iterations
 
 	@ R3 = Top, R4 = Avail now
-	BNE push_pingpong_loop
+	BNE push_mve_loop
 
 done:
 	STR R3, [R0, #STACK_TOP]

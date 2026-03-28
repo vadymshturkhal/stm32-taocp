@@ -1,10 +1,10 @@
 .syntax unified
     .thumb
     .cpu cortex-m4
-    .global asm_perform_stack_operations_inline_pingpong
+    .global asm_perform_stack_operations_inline_mve
 
 
-@ Performs max_nodes Push and Pop with integrated Push/Pop with Hoisting
+@ Performs max_nodes Push and Pop with integrated Push/Pop with Hoisting and MVE 4
 
 @ Stats:
 @ with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
@@ -33,7 +33,7 @@
 @ R5 memory pointer
 @ R6 max_nodes loop counter
 
-asm_perform_stack_operations_inline_pingpong:
+asm_perform_stack_operations_inline_mve:
 	PUSH {R4-R6, LR}			@ add R7 for stack alignment
 
 	CBZ R0, early_exit
@@ -57,16 +57,16 @@ asm_perform_stack_operations_inline_pingpong:
 	MOVS R6, R0					@ save Stack
 
 .balign 4
-asm_stack_push_inline:
+stack_push_mve:
     MOVS R1, R4					@ iterations to R1
-  	BL asm_stack_push_pingpong
+  	BL asm_stack_push_mve
   	CBZ R0, handle_overflow_underflow
 
 .balign 4
-asm_stack_pop_inline:
+stack_pop_mve:
 	MOVS R0, R6					@ Stack to R0
 	MOVS R1, R4					@ iterations to R1
-	BL asm_stack_pop_pingpong
+	BL asm_stack_pop_mve
 	CBZ R0, handle_overflow_underflow
 
 done:
