@@ -88,9 +88,9 @@
 
 * **Base case = `128 nodes, 128 Push and 128 Pop using balloc (custom bare-metal memory allocator)`:**
     * **Translation Unit Boundary Push/Pop case (not inline integrated):**
-        * GCC -O3: cycles_cold = 9382, cycles_warm = 9309, size = 420 bytes
-        * ARM Assembly: cycles_cold = [6765-6804], cycles_warm = [6726-6745], size = 240 bytes
-        * **Summary:** Hand-tuned ASM won by ~2,617 cycles (**~27.8% time reduction**) in the cold version and by ~2,583 cycles (**~28.1% time reduction**) in the warm one, with ASM consuming **~42.8%** less Flash memory
+        * GCC -O3: cycles_cold = 9382, cycles_warm = 9309, size = 280 bytes
+        * ARM Assembly: cycles_cold = [6520-6530], cycles_warm = 6478, size = 234 bytes
+        * **Summary:** Hand-tuned ASM won by ~2,862 cycles (**~30.5% time reduction**) in the cold version and by ~2,831 cycles (**~30.4% time reduction**) in the warm one, with ASM consuming **~16.4%** less Flash memory
         * **Some tricks and insights:** 
         Aggressive use of Scratch Registers: Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations, 
         Register-level flag usage for error handling, 
