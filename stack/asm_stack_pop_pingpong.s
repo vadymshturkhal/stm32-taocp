@@ -96,7 +96,25 @@ early_return:
 	MOVS R0, #1
 	POP {R4-R6, PC}
 
-handle_underflow0: STR R4, [R0, #STACK_TOP]; STR R3, [R0, #STACK_AVAIL]; MOVS R0, #0; POP {R4-R6, PC}
-handle_underflow1: STR R5, [R0, #STACK_TOP]; STR R4, [R0, #STACK_AVAIL]; MOVS R0, #0; POP {R4-R6, PC}
-handle_underflow2: STR R6, [R0, #STACK_TOP]; STR R5, [R0, #STACK_AVAIL]; MOVS R0, #0; POP {R4-R6, PC}
-handle_underflow3: STR R3, [R0, #STACK_TOP]; STR R6, [R0, #STACK_AVAIL]; MOVS R0, #0; POP {R4-R6, PC}
+handle_underflow0:
+	STR R4, [R0, #STACK_TOP]
+	STR R3, [R0, #STACK_AVAIL]
+	B underflow
+
+handle_underflow1:
+	STR R5, [R0, #STACK_TOP]
+	STR R4, [R0, #STACK_AVAIL]
+	B underflow
+
+handle_underflow2:
+	STR R6, [R0, #STACK_TOP]
+	STR R5, [R0, #STACK_AVAIL]
+	B underflow
+
+handle_underflow3:
+	STR R3, [R0, #STACK_TOP]
+	STR R6, [R0, #STACK_AVAIL]
+
+underflow:
+	MOVS R0, #0
+	POP {R4-R6, PC}

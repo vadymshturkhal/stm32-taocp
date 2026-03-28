@@ -36,7 +36,7 @@
 asm_perform_stack_operations_inline_pingpong:
 	PUSH {R4-R6, LR}			@ add R7 for stack alignment
 
-	@ CBZ R0, early_exit
+	CBZ R0, early_exit
 
 	@ clean values
 	UXTH R4, R0
@@ -72,7 +72,7 @@ asm_stack_pop_inline:
 done:
 	MOVS R0, R6					@ Stack to R0
 	BL asm_balloc_free
-	MOVS R0, #1
+	MOVS R0, #1					@ return true
 	POP {R4-R6, PC}
 
 handle_overflow_underflow:
@@ -80,7 +80,7 @@ handle_overflow_underflow:
 	BL asm_balloc_free
 
 early_exit:
-	MOVS R0, #0
+	MOVS R0, #0					@ return false
 
 exit:
 	POP {R4-R6, PC}

@@ -39,7 +39,7 @@ void comparing_stack_inline() {
 
 	// ARM Assembly
 	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
-	// cycles_cold = [2606-2626], cycles_warm = [2554-2555], size = 390 bytes
+	// cycles_cold = [2606-2626], cycles_warm = [2554-2555], size = 374 bytes
 	start = DWT->CYCCNT;
 	asm_stack_status = asm_perform_stack_operations_inline_pingpong(max_nodes);
 	if (asm_stack_status == 0) return;

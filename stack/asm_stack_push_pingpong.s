@@ -97,7 +97,25 @@ early_return:
 	MOVS R0, #1					@ Return true
 	POP {R4-R6, PC}
 
-handle_overflow0: STR R3, [R0, #STACK_TOP]; STR R4, [R0, #STACK_AVAIL]; MOVS R0, #0; POP {R4-R6, PC}
-handle_overflow1: STR R4, [R0, #STACK_TOP]; STR R5, [R0, #STACK_AVAIL]; MOVS R0, #0; POP {R4-R6, PC}
-handle_overflow2: STR R5, [R0, #STACK_TOP]; STR R6, [R0, #STACK_AVAIL]; MOVS R0, #0; POP {R4-R6, PC}
-handle_overflow3: STR R6, [R0, #STACK_TOP]; STR R3, [R0, #STACK_AVAIL]; MOVS R0, #0; POP {R4-R6, PC}
+handle_overflow0:
+	STR R3, [R0, #STACK_TOP]
+	STR R4, [R0, #STACK_AVAIL]
+	B overflow
+
+handle_overflow1:
+	STR R4, [R0, #STACK_TOP];
+	STR R5, [R0, #STACK_AVAIL]
+	B overflow
+
+handle_overflow2:
+	STR R5, [R0, #STACK_TOP]
+	STR R6, [R0, #STACK_AVAIL]
+	B overflow
+
+handle_overflow3:
+	STR R6, [R0, #STACK_TOP]
+	STR R3, [R0, #STACK_AVAIL]
+
+overflow:
+	MOVS R0, #0
+	POP {R4-R6, PC}
