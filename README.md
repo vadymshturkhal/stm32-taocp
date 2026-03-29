@@ -98,7 +98,7 @@
         16-bit Thumb-2 Density: Forcing all operations in low registers, 
         Instruction Pipeline Alignment (.balign 4), 
         Cascade Return Architecture: Fall-through error handling to minimize epilogue redundancy,
-        Custom bare-metal memory allocator (balloc),
+        Bump Allocator (balloc),
         * **Note:** The C version of returning of Struct(flag,info) is slower than using current flag pointer;
 
 
