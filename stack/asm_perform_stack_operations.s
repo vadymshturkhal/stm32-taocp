@@ -21,15 +21,12 @@
 @ R7 Stack pointer
 
 asm_perform_stack_operations:
-	PUSH {R4-R7, LR}			@ add R7 for stack alignment
-	SUBS SP, SP, #4				@ for bool pop_is_success
+	PUSH {R4-R8, LR}			@ add R8 for 8-byte stack alignment
 
 	CBZ R0, early_exit
 
 	@ clean values
 	UXTH R4, R0
-	MOVS R6, #1
-	STRB R6, [SP]				@ bool pop_is_success = true
 
 	LSL R0, R4, #3				@ R0 = max_nodes * 8
 	ADDS R0, #STACK_SIZE		@ R0 = max_nodes * sizeof(Node) + sizeof(Stack)
@@ -61,14 +58,13 @@ push_loop:
 pop_loop_init:
 	MOVS R6, R4
 
+.balign 4
 pop_loop:
-	MOV R0, SP					@ Move &pop_is_success to R0
-	MOVS R1, R7					@ Move Stack pointer to R1
+	MOVS R0, R7					@ Move Stack pointer to R0
 	BL asm_stack_pop
 
-	@ now R0 contains info
-	LDRB R2, [SP]
-	CBZ R2, handle_overflow_underflow	@ check pop_is_success flag
+	@ now R0 contains flag and R1 contains info
+	CBZ R0, handle_overflow_underflow	@ check status
 
 	SUBS R6, R6, #1
 	BNE pop_loop
@@ -77,8 +73,7 @@ done:
 	MOV R0, R5
 	BL asm_balloc_free
 	MOVS R0, #1
-	ADDS SP, SP, #4
-	POP {R4-R7, PC}
+	POP {R4-R8, PC}
 
 handle_overflow_underflow:
 	MOVS R0, R5
@@ -88,5 +83,4 @@ early_exit:
 	MOVS R0, #0
 
 exit:
-	ADDS SP, SP, #4
-	POP {R4-R7, PC}
+	POP {R4-R8, PC}
