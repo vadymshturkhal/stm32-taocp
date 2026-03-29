@@ -86,7 +86,7 @@
 <details>
 <summary><b>Stack</b></summary>
 
-* **Base case = `128 nodes, 128 Push and 128 Pop using balloc (custom bare-metal memory allocator)`:**
+* **Base case = `128 nodes, 128 Push and 128 Pop using Bump Allocator (balloc)`:**
     * **Translation Unit Boundary Push/Pop case (not inline integrated):**
         * GCC -O3: cycles_cold = 9382, cycles_warm = 9309, size = 280 bytes
         * ARM Assembly: cycles_cold = [5988-6006], cycles_warm = 5955, size = 212 byte
