@@ -110,7 +110,7 @@
             * **Redundant Load Elimination:** Carried over register states between Push/Pop loops to bypass memory reads
             * **16-bit Thumb-2 Density:** Forced all operations into low registers to shrink the binary footprint
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
-            * **Deterministic Waterfall Exit:**: Zero-branch success path
+            * **Deterministic Waterfall Exit:** Zero-branch success path
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Insight:** Proved that `STRD` (Double-Word Store) is at least two times slower than two consecutive `STR` instructions in this case
 
