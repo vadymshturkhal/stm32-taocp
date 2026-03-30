@@ -119,10 +119,11 @@
         * GCC -O3: cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
         * ARM Assembly: cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
         * **Summary:** Hand-tuned ASM won by ~1617 cycles (**~38.2% time reduction**) in the cold run and by ~1618 cycles (**~38.7% time reduction**) in the warm run, with GCC consuming **46.5%** less Flash memory;
-        * **Some tricks and insights:** 
+        * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes out of memory
             * **16-bit Thumb-2 Density:** Forcing all operations in low registers
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
-            * **Loop Unrolling & Modulo Variable Expansion (MVE mod 4)**: the register permutation returns to identity after 4 cycles
+            * **Loop Unrolling & Modulo Variable Expansion (MVE mod 4)**
+            * **Insight:** the register permutation returns to identity after 4 cycles
 </details>
