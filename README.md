@@ -88,7 +88,7 @@
 
 * **Base case = `128 nodes, 128 Push and 128 Pop using Bump Allocator (balloc)`:**
     * **Translation Unit Boundary Push/Pop case (not inline integrated):**
-        * GCC -O3: cycles_cold = 9382, cycles_warm = 9309, size = 280 bytes
+        * GCC -O3 (Clean Code): cycles_cold = 9382, cycles_warm = 9309, size = 280 bytes
         * ARM Assembly: cycles_cold = [5988-6006], cycles_warm = 5955, size = 212 byte
         * **Summary:** Hand-tuned ASM won by ~3,394 cycles (**~36.1% time reduction**) in the cold version and by ~3,354 cycles (**~36% time reduction**) in the warm one, with ASM consuming **~24.2%** less Flash memory
         * **Tricks & Insights:** 
@@ -101,7 +101,7 @@
             * **Insight (Flag usage for error handling):** In Pop function C version used flag instead of Struct with two elements (which is ~100 cycles slower) while ASM simply used R0 and R1 for returning error and info
 
     * **Inlined Push/Pop (integrated) with ASM Hoisting:**
-        * GCC -O3: cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
+        * GCC -O3 (Clean Code): cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
         * ARM Assembly: cycles_cold = [3421-3444], cycles_warm = 3398, size = 174 bytes
         * **Summary:** Hand-tuned ASM won by ~805 cycles (**~19% time reduction**) in the cold run and by ~774 cycles (**~18.5% time reduction**) in the warm run, with ASM consuming **13%** less Flash memory;
         * **Tricks & Insights:** 
@@ -115,7 +115,7 @@
             * **Insight:** Proved that `STRD` (Double-Word Store) is actually slower than two consecutive `STR` instructions in this case
 
     * **Inlined Push/Pop (integrated) with ASM MVE 4:**
-        * GCC -O3: cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
+        * GCC -O3 (Clean Code): cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
         * ARM Assembly: cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
         * **Summary:** Hand-tuned ASM won by ~1617 cycles (**~38.2% time reduction**) in the cold run and by ~1618 cycles (**~38.7% time reduction**) in the warm run, with GCC consuming **46.5%** less Flash memory;
         * **Tricks & Insights:** 
