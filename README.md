@@ -84,7 +84,7 @@
 </details>
 
 <details>
-<summary><b>Stack</b></summary>
+<summary><b>Stack (linked allocation)</b></summary>
 
 * **Base case = `128 nodes, 128 Push and 128 Pop using Bump Allocator (balloc)`:**
     * **Translation Unit Boundary Push/Pop (not inline integrated):**
