@@ -22,7 +22,7 @@ void comparing_stack_inline() {
 	const uint16_t max_nodes = 128;
 
 	// GCC -O3
-	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
+	// Base case: 128 nodes, 128 Push/Pop using Bump Allocator (balloc)
 	// cycles_cold = [4225-4231], cycles_warm = [4172-4181], size = 200 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t c_stack_status = perform_c_stack_operations_inline(max_nodes);
@@ -38,7 +38,7 @@ void comparing_stack_inline() {
 
 
 	// ARM Assembly
-	// with 128 nodes, 128 Push and 128 Pop using balloc (custom malloc)
+	// Base case: 128 nodes, 128 Push/Pop using Bump Allocator (balloc)
 	// cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
 	start = DWT->CYCCNT;
 	asm_stack_status = asm_perform_stack_operations_inline_mve(max_nodes);

@@ -1,8 +1,6 @@
 #include "main.h"
 #include "c_stack.h"
 
-//#define MAX_NODES 128
-
 
 // Prototypes
 uint8_t perform_c_stack_operations(uint16_t max_nodes);
