@@ -112,7 +112,7 @@
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
             * **Deterministic Waterfall Exit:**: Zero-branch success path
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
-            * **Insight:** Proved that `STRD` (Double-Word Store) is actually slower than two consecutive `STR` instructions in this case
+            * **Insight:** Proved that `STRD` (Double-Word Store) is at least two times slower than two consecutive `STR` instructions in this case
 
     * **Inlined Push/Pop (integrated) with ASM MVE 4:**
         * GCC -O3 (Clean Code): cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
