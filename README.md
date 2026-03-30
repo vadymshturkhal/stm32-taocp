@@ -91,15 +91,14 @@
         * GCC -O3: cycles_cold = 9382, cycles_warm = 9309, size = 280 bytes
         * ARM Assembly: cycles_cold = [5988-6006], cycles_warm = 5955, size = 212 byte
         * **Summary:** Hand-tuned ASM won by ~3,394 cycles (**~36.1% time reduction**) in the cold version and by ~3,354 cycles (**~36% time reduction**) in the warm one, with ASM consuming **~24.2%** less Flash memory
-        * **Some tricks and insights:** 
-        Aggressive use of Scratch Registers: Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations, 
-        Register-level flag usage for error handling, 
-        Strict AAPCS 8-byte Stack Alignment, 
-        16-bit Thumb-2 Density: Forcing all operations in low registers, 
-        Instruction Pipeline Alignment (.balign 4), 
-        Cascade Return Architecture: Fall-through error handling to minimize epilogue redundancy,
-        Bump Allocator (balloc),
-        * **Note:** The C version of returning of Struct(flag,info) is slower than using current flag pointer;
+        * **Tricks & Insights:** 
+            * **Aggressive use of Scratch Registers:** Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations
+            * **Strict AAPCS 8-byte Stack Alignment**
+            * **16-bit Thumb-2 Density:** Forced all operations into low registers to shrink the binary footprint
+            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+            * **Cascade Return Architecture:** Fall-through error handling to minimize epilogue redundancy,
+            * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
+            * **Insight (Flag usage for error handling):** In Pop function C version used flag instead of Struct with two elements (which is ~100 cycles slower) while ASM simply used R0 and R1 for returning error and info
 
     * **Inlined Push/Pop (integrated) with ASM Hoisting:**
         * GCC -O3: cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
