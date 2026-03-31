@@ -39,6 +39,7 @@ asm_stack_push:
 	STR R2, [R0, #STACK_TOP]	@ stack->top = Avail
 
 done:
+	MOVS R0, #1
 	BX LR
 
 overflow:
