@@ -2,6 +2,7 @@
 
 
 // Prototypes
+uint8_t run_all_queue_tests(uint16_t max_nodes);
 uint8_t c_perform_queue_operations(uint16_t max_nodes);
 
 
