@@ -17,6 +17,7 @@ typedef struct {
 
 // Cold Path init
 Stack* c_create_stack(void* memory, uint32_t size);
+Node* init_storage_pool(Stack* stack, uint32_t size);
 
 // Hot Path inline execution
 static inline bool c_stack_push(Stack* stack, uint32_t info) {
