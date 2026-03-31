@@ -14,16 +14,15 @@ uint8_t perform_c_stack_operations(uint16_t max_nodes){
 	bool pop_is_success = true;	// flag for Underflow checking
 	uint32_t info;
 
-	for (uint16_t i = 0; i < max_nodes; i++){
+	for (int16_t i = max_nodes - 1; i > -1; i--){
 		if (c_stack_push_tub(stack, i) == false) {
 			asm_balloc_free(c_stack_memory);
 			return 0;
 		}
 	}
 
-	for (uint16_t i = 0; i < max_nodes; i++){
+	for (int16_t i = max_nodes - 1; i > -1; i--){
 		info = c_stack_pop_tub(stack, &pop_is_success);
-
 		if (pop_is_success == false) {
 			asm_balloc_free(c_stack_memory);
 			return 0;

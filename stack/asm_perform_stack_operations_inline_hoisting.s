@@ -12,7 +12,7 @@
 @ Tricks & Insights:
 @ Hoisting, Using Registers as Level 0 Cache, Redundant Load Elimination,
 @ Deterministic Waterfall Exit
-@ Notice that STRD is slower than two consecutive STR in that case
+@ Notice that STRD is at least two times slower than two consecutive STR in that case
 
 
 @ Memory offsets

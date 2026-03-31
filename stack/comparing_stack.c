@@ -21,7 +21,7 @@ void comparing_stack() {
 	// GCC -O3
 	// Translation Unit Boundary Push/Pop case (not integrated)
 	// with 128 nodes, 128 Push and 128 Pop using Bump Allocator (balloc)
-	// cycles_cold = [9377-9382], cycles_warm = [9307-9309], size = 280 bytes
+	// cycles_cold = 9248, cycles_warm = 9179, size = 280 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t c_stack_status = perform_c_stack_operations(max_nodes);
 	if (c_stack_status == 0) return;
