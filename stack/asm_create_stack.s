@@ -8,6 +8,7 @@
 .equ NODE_INFO,		0
 .equ NODE_LINK, 	4
 .equ NODE_SIZE,		8
+
 .equ STACK_TOP, 	0
 .equ STACK_AVAIL,	4
 .equ STACK_SIZE,	8
@@ -27,6 +28,7 @@
 asm_create_stack:
 	MOVS R2, #0
 	STR R2, [R0, #STACK_TOP]	@ stack->top = NULL
+	CBZ R1, early_exit			@ stack size == 0?
 
 init_storage_pool:
 	ADDS R3, R0, #STACK_SIZE	@ Node* avail = (Node*)(stack + 1), since Stack is 8 bytes
@@ -48,4 +50,8 @@ linking_loop:
 @ now R3 is Node* avail
 done:
 	STR R3, [R0, #STACK_AVAIL]	@ stack->avail = avail;
+	BX LR
+
+early_exit:
+	STR R2, [R0, #STACK_AVAIL]	@ stack->avail = avail;
 	BX LR
