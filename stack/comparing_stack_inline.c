@@ -23,7 +23,7 @@ void comparing_stack_inline() {
 
 	// GCC -O3
 	// Base case: 128 nodes, 128 Push/Pop using Bump Allocator (balloc)
-	// cycles_cold = [4225-4231], cycles_warm = [4172-4181], size = 200 bytes
+	// cycles_cold = [4096-4098], cycles_warm = 4045, size = 200 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t c_stack_status = perform_c_stack_operations_inline(max_nodes);
 	if (c_stack_status == 0) return;
@@ -39,7 +39,7 @@ void comparing_stack_inline() {
 
 	// ARM Assembly
 	// Base case: 128 nodes, 128 Push/Pop using Bump Allocator (balloc)
-	// cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
+	// cycles_cold = [2609-2626], cycles_warm = [2553-2555], size = 374 bytes
 	start = DWT->CYCCNT;
 	asm_stack_status = asm_perform_stack_operations_inline_mve(max_nodes);
 	if (asm_stack_status == 0) return;
