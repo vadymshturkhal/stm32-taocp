@@ -8,6 +8,7 @@
 - Algorithm J (Inverse permutation in place);
 - Josephus Problem (Generalized);
 - Stack;
+- Queue;
 
 ## How to run:
 - Navigate to the specific algorithm's folder;
@@ -126,3 +127,24 @@
             * **Loop Unrolling & Modulo Variable Expansion (MVE mod 4)**
             * **Insight:** the register permutation returns to identity after 4 cycles
 </details>
+
+<details>
+<summary><b>Queue (linked allocation)</b></summary>
+
+* **Base case = `128 nodes, 128 Push and 128 Pop using Bump Allocator (balloc)`:**
+    * **Translation Unit Boundary Push/Pop (not inline integrated):**
+        * GCC -O3 (Clean Code): cycles_cold = [9468-9507], cycles_warm = [9438-9442], size = 288 bytes
+        * ARM Assembly: cycles_cold = [6634-6641], cycles_warm = 6600, size = 236 bytes
+        * **Summary:** Hand-tuned ASM won by ~2,834 cycles (**~30% time reduction**) in the cold version and by ~2,838 cycles (**~30% time reduction**) in the warm one, with ASM consuming **~18%** less Flash memory
+        * **Tricks & Insights:** 
+            * **Branchless enqueue (Knuth/Torvalds Trick):** Redefined the `rear` pointer as a `Node**` double pointer for handle empty states
+            * **Load scheduling/latency hiding:** Issuing independent loads early to absorb the M4's 2-cycle load latency
+            * **Strict AAPCS 8-byte Stack Alignment**
+            * **16-bit Thumb-2 Density:** Forced all operations into low registers to shrink the binary footprint
+            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+            * **Cascade Return Architecture:** Fall-through error handling to minimize epilogue redundancy,
+            * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
+            * **Insight (Flag usage for error handling):** In Dequeue function C version used flag instead of Struct with two elements (which is ~100 cycles slower) while ASM simply used R0 and R1 for returning error and info
+            * **Insight (uint32_t for Push/Pop loops):** The fastest way to iterate over max_nodes is to create uint32_t i and iterating from end to start
+</details>
+    
