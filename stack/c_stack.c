@@ -50,7 +50,6 @@ uint32_t c_stack_pop_tub(Stack* stack, bool* pop_is_success) {
 	return info;
 }
 
-
 Node* init_storage_pool(Stack* stack, uint32_t size) {
 	Node* avail = (Node*)(stack + 1);
 	Node* tmp;
