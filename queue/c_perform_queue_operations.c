@@ -12,6 +12,8 @@ uint32_t c_dequeue_tub(Queue* queue, bool* pop_is_success);
 uint8_t c_perform_queue_operations(uint16_t max_nodes) {
 	// node info is uint32_t
 
+	if (max_nodes == 0) return 0;
+
 	void* c_queue_memory = asm_balloc(max_nodes * sizeof(Node) + sizeof(Queue));
 	if (c_queue_memory == NULL) return 0;
 
