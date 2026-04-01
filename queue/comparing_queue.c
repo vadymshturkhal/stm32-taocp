@@ -22,7 +22,7 @@ void comparing_queue() {
 	// GCC -O3
 	// Translation Unit Boundary Push/Pop case (not integrated)
 	// with 128 nodes, 128 Push and 128 Pop using Bump Allocator (balloc)
-	// cycles_cold = [9693-9769], cycles_warm = 9702, size = 300 bytes
+	// cycles_cold = [9468-9507], cycles_warm = 9438, size = 288 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t c_queue_status = c_perform_queue_operations(max_nodes);
 	if (c_queue_status == 0) return;
