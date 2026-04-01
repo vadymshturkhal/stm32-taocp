@@ -53,5 +53,5 @@ done:
 	BX LR
 
 early_exit:
-	STR R2, [R0, #STACK_AVAIL]	@ stack->avail = avail;
+	STR R2, [R0, #STACK_AVAIL]	@ stack->avail = NULL;
 	BX LR
