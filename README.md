@@ -101,9 +101,9 @@
             * **Insight (Flag usage for error handling):** In Pop function C version used flag instead of Struct with two elements (which is ~100 cycles slower) while ASM simply used R0 and R1 for returning error and info
 
     * **Inlined Push/Pop (integrated) with ASM Hoisting:**
-        * GCC -O3 (Clean Code): cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
+        * GCC -O3 (Clean Code): cycles_cold = [4096-4098], cycles_warm = 4045, size = 200 bytes
         * ARM Assembly: cycles_cold = [3421-3444], cycles_warm = 3398, size = 174 bytes
-        * **Summary:** Hand-tuned ASM won by ~805 cycles (**~19% time reduction**) in the cold run and by ~774 cycles (**~18.5% time reduction**) in the warm run, with ASM consuming **13%** less Flash memory;
+        * **Summary:** Hand-tuned ASM won by ~675 cycles (**~16.4% time reduction**) in the cold run and by ~647 cycles (**~16% time reduction**) in the warm run, with ASM consuming **13%** less Flash memory;
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes out of memory
             * **L0 Caching:** Used CPU Registers as Level 0 Cache across loops
@@ -115,9 +115,9 @@
             * **Insight:** Proved that `STRD` (Double-Word Store) is at least two times slower than two consecutive `STR` instructions in this case
 
     * **Inlined Push/Pop (integrated) with ASM MVE 4:**
-        * GCC -O3 (Clean Code): cycles_cold = [4226-4231], cycles_warm = [4172-4173], size = 200 bytes
+        * GCC -O3 (Clean Code): cycles_cold = [4096-4098], cycles_warm = 4045, size = 200 bytes
         * ARM Assembly: cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
-        * **Summary:** Hand-tuned ASM won by ~1617 cycles (**~38.2% time reduction**) in the cold run and by ~1618 cycles (**~38.7% time reduction**) in the warm run, with GCC consuming **46.5%** less Flash memory;
+        * **Summary:** Hand-tuned ASM won by ~1,487 cycles (**~36.3% time reduction**) in the cold run and by ~1,491 cycles (**~36.8% time reduction**) in the warm run, with GCC consuming **46.5%** less Flash memory;
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes out of memory
             * **16-bit Thumb-2 Density:** Forcing all operations in low registers
