@@ -125,7 +125,8 @@
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Loop Unrolling & Modulo Variable Expansion (MVE mod 4)**
-            * **Insight:** the register permutation returns to identity after 4 cycles
+            * **Insight:** The register permutation returns to identity after 4 cycles
+            * **Insight (Why GCC loses despite unrolling):** Mechanical unrolling replicates the loop body and cannot eliminate inter-iteration register moves. The permutation identity reduces those moves to zero - a structural property no pragma can express
 </details>
 
 <details>
