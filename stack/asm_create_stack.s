@@ -30,6 +30,7 @@ asm_create_stack:
 	STR R2, [R0, #STACK_TOP]	@ stack->top = NULL
 	CBZ R1, early_exit			@ stack size == 0?
 
+.balign 4
 init_storage_pool:
 	ADDS R3, R0, #STACK_SIZE	@ Node* avail = (Node*)(stack + 1), since Stack is 8 bytes
 	STR R1, [R3, #NODE_INFO]	@ avail->info = size
