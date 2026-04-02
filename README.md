@@ -106,11 +106,11 @@
         * ARM Assembly: cycles_cold = [3421-3444], cycles_warm = 3398, size = 174 bytes
         * **Summary:** Hand-tuned ASM won by ~675 cycles (**~16.4% time reduction**) in the cold run and by ~647 cycles (**~16% time reduction**) in the warm run, with ASM consuming **13%** less Flash memory;
         * **Tricks & Insights:** 
-            * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes out of memory
+            * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` entirely into registers, bypassing memory wait-states
             * **L0 Caching:** Used CPU Registers as Level 0 Cache across loops
             * **Redundant Load Elimination:** Carried over register states between Push/Pop loops to bypass memory reads
-            * **16-bit Thumb-2 Density:** Forced all operations into low registers to shrink the binary footprint
-            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+            * **16-bit Thumb-2 Density:** Forced all operations into low registers to maximize instruction density and shrink the binary footprint 
+            * **Pipeline Alignment:** Applied `.balign 4` to prevent fetch-stalls and eliminate the "Memory Butterfly Effect" (preventing pipeline stalls across hundreds of loop iterations)
             * **Deterministic Waterfall Exit:** Zero-branch success path
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Insight:** Proved that `STRD` (Double-Word Store) is at least two times slower than two consecutive `STR` instructions in this case
@@ -120,12 +120,12 @@
         * ARM Assembly: cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
         * **Summary:** Hand-tuned ASM won by ~1,053 cycles (**~28.7% time reduction**) in the cold run and by ~970 cycles (**~27.5% time reduction**) in the warm run, with ASM consuming **17.2%** less Flash memory;
         * **Tricks & Insights:** 
-            * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes out of memory
-            * **16-bit Thumb-2 Density:** Forcing all operations in low registers
-            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+            * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes entirely into registers, bypassing memory wait-states
+            * **16-bit Thumb-2 Density:** Forced all operations into low registers to maximize instruction density and shrink the binary footprint 
+            * **Pipeline Alignment:** Applie `.balign 4` to prevent fetch-stalls and eliminate the "Memory Butterfly Effect" (preventing pipeline stalls across hundreds of loop iterations)
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
-            * **Loop Unrolling & Modulo Variable Expansion (MVE mod 4)**
-            * **Insight:** The register permutation returns to identity after 4 cycles
+            * **Modulo Variable Expansion of factor 4 (MVE mod 4):** Achieved 0-Wait-State unrolling by mathematically weaving registers across iterations
+            * **Insight (The Permutation Identity):** The register permutation returns to identity after 4 cycles
             * **Insight (Why GCC loses despite unrolling):** Mechanical unrolling replicates the loop body and cannot eliminate inter-iteration register moves. The permutation identity reduces those moves to zero - a structural property no pragma can express
 </details>
 
