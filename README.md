@@ -115,10 +115,10 @@
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Insight:** Proved that `STRD` (Double-Word Store) is at least two times slower than two consecutive `STR` instructions in this case
 
-    * **Inlined Push/Pop (integrated) with ASM MVE 4:**
-        * GCC -O3 (Clean Code): cycles_cold = [4096-4098], cycles_warm = 4045, size = 200 bytes
+    * **Inlined Push/Pop (integrated) with GCC -O3 (#pragma unroll 4) vs ASM Modulo Variable Expansion (MVE mod 4):**
+        * GCC -O3 (Clean Code): cycles_cold = 3662, cycles_warm = 3524, size = 452 bytes
         * ARM Assembly: cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
-        * **Summary:** Hand-tuned ASM won by ~1,487 cycles (**~36.3% time reduction**) in the cold run and by ~1,491 cycles (**~36.8% time reduction**) in the warm run, with GCC consuming **46.5%** less Flash memory;
+        * **Summary:** Hand-tuned ASM won by ~1,053 cycles (**~28.7% time reduction**) in the cold run and by ~970 cycles (**~27.5% time reduction**) in the warm run, with ASM consuming **13.7%** less Flash memory;
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes out of memory
             * **16-bit Thumb-2 Density:** Forcing all operations in low registers
