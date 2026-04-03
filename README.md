@@ -132,8 +132,8 @@
 <details>
 <summary><b>Queue (linked allocation)</b></summary>
 
-* **Base case = `128 nodes, 128 Push and 128 Pop using Bump Allocator (balloc)`:**
-    * **Translation Unit Boundary Push/Pop (not inline integrated):**
+* **Base case = `128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc)`:**
+    * **Translation Unit Boundary Enqueue/Dequeue (not inline integrated):**
         * GCC -O3 (Clean Code): cycles_cold = [9468-9507], cycles_warm = [9438-9442], size = 288 bytes
         * ARM Assembly: cycles_cold = [6634-6641], cycles_warm = 6600, size = 236 bytes
         * **Summary:** Hand-tuned ASM won by ~2,834 cycles (**~30% time reduction**) in the cold version and by ~2,838 cycles (**~30% time reduction**) in the warm one, with ASM consuming **~18%** less Flash memory
