@@ -104,7 +104,7 @@
     * **Inlined Push/Pop (integrated) with ASM Hoisting:**
         * GCC -O3 (Clean Code): cycles_cold = [4096-4098], cycles_warm = 4045, size = 200 bytes
         * ARM Assembly: cycles_cold = [3421-3444], cycles_warm = 3398, size = 174 bytes
-        * **Summary:** Hand-tuned ASM won by ~675 cycles (**~16.4% time reduction**) in the cold run and by ~647 cycles (**~16% time reduction**) in the warm run, with ASM consuming **13%** less Flash memory;
+        * **Summary:** Hand-tuned ASM won by ~675 cycles (**~16.4% time reduction**) in the cold run and by ~647 cycles (**~16% time reduction**) in the warm run, with ASM consuming **13%** less Flash memory
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` entirely into registers, bypassing memory wait-states
             * **L0 Caching:** Used CPU Registers as Level 0 Cache across loops
@@ -118,7 +118,7 @@
     * **Inlined Push/Pop (integrated) with GCC -O3 (#pragma unroll 4) vs ASM Modulo Variable Expansion (MVE mod 4):**
         * GCC -O3 (Clean Code): cycles_cold = 3662, cycles_warm = 3524, size = 452 bytes
         * ARM Assembly: cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
-        * **Summary:** Hand-tuned ASM won by ~1,053 cycles (**~28.7% time reduction**) in the cold run and by ~970 cycles (**~27.5% time reduction**) in the warm run, with ASM consuming **17.2%** less Flash memory;
+        * **Summary:** Hand-tuned ASM won by ~1,053 cycles (**~28.7% time reduction**) in the cold run and by ~970 cycles (**~27.5% time reduction**) in the warm run, with ASM consuming **17.2%** less Flash memory
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes entirely into registers, bypassing memory wait-states
             * **16-bit Thumb-2 Density:** Forced all operations into low registers to maximize instruction density and shrink the binary footprint 
@@ -138,14 +138,30 @@
         * ARM Assembly: cycles_cold = [6634-6641], cycles_warm = 6600, size = 236 bytes
         * **Summary:** Hand-tuned ASM won by ~2,834 cycles (**~30% time reduction**) in the cold version and by ~2,838 cycles (**~30% time reduction**) in the warm one, with ASM consuming **~18%** less Flash memory
         * **Tricks & Insights:** 
-            * **Branchless enqueue (Knuth/Torvalds Trick):** Redefined the `rear` pointer as a `Node**` double pointer for handle empty states
+            * **Branchless enqueue (Knuth/Torvalds Trick):** Redefined the `rear` pointer as a `Node**` double pointer for handling empty states
             * **Load scheduling/latency hiding:** Issuing independent loads early to absorb the M4's 2-cycle load latency
             * **Strict AAPCS 8-byte Stack Alignment**
             * **16-bit Thumb-2 Density:** Forced all operations into low registers to shrink the binary footprint
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
-            * **Cascade Return Architecture:** Fall-through error handling to minimize epilogue redundancy,
+            * **Cascade Return Architecture:** Fall-through error handling to minimize epilogue redundancy
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Insight (Flag usage for error handling):** In Dequeue function C version used flag instead of Struct with two elements (which is ~100 cycles slower) while ASM simply used R0 and R1 for returning error and info
             * **Insight (uint32_t for Push/Pop loops):** The fastest way to iterate over max_nodes is to create uint32_t i and iterating from end to start
+
+    * **Inlined Enqueue/Dequeue (integrated) with ASM Hoisting:**
+        * GCC -O3 (Clean Code): cycles_cold = [4338-4369], cycles_warm = [4318-4327], size = 212 bytes
+        * ARM Assembly: cycles_cold = [3430-3452], cycles_warm = [3405-3414], size = 194 bytes
+        * **Summary:** Hand-tuned ASM won by ~908 cycles (**~20.9% time reduction**) in the cold run and by ~913 cycles (**~21.1% time reduction**) in the warm run, with ASM consuming **8.4%** less Flash memory
+        * **Tricks & Insights:** 
+            * **Reduced SRAM traffic:** Hoisted `Front`, `Rear` and `Avail` pointers entirely into registers, bypassing memory wait-states across all iterations
+            * **L0 Caching:** Used CPU Registers as Level 0 Cache across all iterations
+            * **Redundant Load Elimination:** Carried over `Avail` register state from Enqueue into Dequeue loop, bypassing `LDR R1, [R0, #QUEUE_AVAIL]` entirely
+            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrinking the binary footprint 
+            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+            * **Cascade Return Architecture:** Fall-through error handling with unified `free_queue_memory_store_avail` exit minimizing epilogue redundancy
+            * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
+            * **Insight (Flag Trick):** Register R5 pulls double duty — NULL sentinel during Enqueue loop and pessimistic false flag for unified exit. A single `MOVS R5, #1` is the entire success acknowledgement
+            * **Insight (Deferred NULL Linkage):** Removed `P->link = NULL` from Enqueue hot loop - only the final rear node requires explicit nulling, deferred to `enqueue_loop_sync`
+            * **Insight (Two-Pointer Tax Absorption):** The Queue's structural overhead over Stack collapses from ~645 cycles (TUB boundary case) to ~10 cycles (inline hoisted) — proving that the tax is a memory-boundary artifact, not an algorithmic property
 </details>
     
