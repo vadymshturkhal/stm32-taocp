@@ -138,12 +138,12 @@
         * ARM Assembly: cycles_cold = [6634-6641], cycles_warm = 6600, size = 236 bytes
         * **Summary:** Hand-tuned ASM won by ~2,834 cycles (**~30% time reduction**) in the cold version and by ~2,838 cycles (**~30% time reduction**) in the warm one, with ASM consuming **~18%** less Flash memory
         * **Tricks & Insights:** 
-            * **Branchless enqueue (Knuth/Torvalds Trick):** Redefined the `rear` pointer as a `Node**` double pointer for handling empty states
-            * **Load scheduling/latency hiding:** Issuing independent loads early to absorb the M4's 2-cycle load latency
+            * **Branchless enqueue (Knuth/Torvalds Trick):** Redefined `rear `as `Node**` — writing `P` into either `queue->front` or the old tail's link field through the same pointer, eliminating the empty-queue branch entirely
+            * **Load scheduling/latency hiding:** M4 has 2-cycle load latency. Independent loads are issued early and interleaved with stores so every load is exactly when consumed — zero stall cycles in the hot path
             * **Strict AAPCS 8-byte Stack Alignment**
             * **16-bit Thumb-2 Density:** Forced all operations into low registers to shrink the binary footprint
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
-            * **Cascade Return Architecture:** Fall-through error handling to minimize epilogue redundancy
+            * **Cascade Return Architecture:** Overflow and underflow fall directly into shared cleanup — one BL asm_balloc_free, one return sequence, zero duplicated epilogue code
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Insight (Flag usage for error handling):** In Dequeue function C version used flag instead of Struct with two elements (which is ~100 cycles slower) while ASM simply used R0 and R1 for returning error and info
             * **Insight (uint32_t for Push/Pop loops):** The fastest way to iterate over max_nodes is to create uint32_t i and iterating from end to start
