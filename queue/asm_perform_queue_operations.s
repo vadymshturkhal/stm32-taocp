@@ -20,6 +20,8 @@
 @ R6 max_nodes loop counter
 @ R7 Queue pointer
 
+@ Return 0 if false or 1 if success run
+
 asm_perform_queue_operations:
 	PUSH {R4-R8, LR}			@ add R8 for 8-byte stack alignment
 
@@ -41,11 +43,11 @@ asm_perform_queue_operations:
 	BL asm_create_queue			@ Queue* queue = asm_create_queue(asm_queue_memory, max_nodes);
 	MOVS R7, R0
 
-push_loop_init:
+enqueue_loop_init:
 	MOVS R6, R4
 
 .balign 4
-push_loop:
+enqueue_loop:
 	MOVS R0, R7					@ Move Queue pointer to R0
 	MOVS R1, R6					@ Move info to R1
 	BL asm_enqueue
@@ -53,13 +55,13 @@ push_loop:
 	CBZ R0, handle_overflow_underflow
 
 	SUBS R6, R6, #1
-	BNE push_loop
+	BNE enqueue_loop
 
-pop_loop_init:
+dequeue_loop_init:
 	MOVS R6, R4
 
 .balign 4
-pop_loop:
+dequeue_loop:
 	MOVS R0, R7					@ Move Queue pointer to R0
 	BL asm_dequeue
 
@@ -67,7 +69,7 @@ pop_loop:
 	CBZ R0, handle_overflow_underflow	@ check status
 
 	SUBS R6, R6, #1
-	BNE pop_loop
+	BNE dequeue_loop
 
 done:
 	MOVS R0, R5

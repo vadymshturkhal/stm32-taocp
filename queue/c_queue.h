@@ -20,7 +20,7 @@ typedef struct {
 Node* init_queue_storage_pool(Queue* queue, uint32_t size);
 Queue* c_create_queue(void* memory, uint32_t size);
 
-static inline bool c_queue_push(Queue* queue, uint32_t info) {
+static inline bool c_enqueue(Queue* queue, uint32_t info) {
 	// return false if Overflow, else true
 
 	// 1 (P <= Avail)
@@ -44,7 +44,7 @@ static inline bool c_queue_push(Queue* queue, uint32_t info) {
 	return true;
 }
 
-static inline uint32_t c_queue_pop(Queue* queue, bool* pop_is_success) {
+static inline uint32_t c_dequeue(Queue* queue, bool* pop_is_success) {
 	// return false if Underflow, else true
 	// input pop_is_success flag must always be true
 
