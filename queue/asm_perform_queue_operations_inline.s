@@ -3,8 +3,9 @@
     .cpu cortex-m4
     .global asm_perform_queue_operations_inline
 
-
 @ Performs max_nodes Enqueue and Dequeue
+@ Stats with 128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc):
+@ cycles_cold = [3430-3452], cycles_warm = [3405-3414], size = 194 bytes
 
 @ Memory offsets
 .equ NODE_INFO, 	0
@@ -21,7 +22,10 @@
 
 @ Runtime:
 @ R0 max_nodes, max_nodes * sizeof(Node) + sizeof(Queue)
-@ R4 max_nodes
+@ R1 Avail
+@ R2 Rear, Front, P
+@ R3 P->link
+@ R4 max_nodes, P->info
 @ R5 = 0 for NULL linkage and false flag
 @ R6 max_nodes loop counter
 
@@ -86,7 +90,7 @@ dequeue_loop_init:
 .balign 4
 dequeue_loop:
 	@ 1
-	CBZ R2, underflow			@ if Top == NULL: underflow
+	CBZ R2, underflow			@ if Front == NULL: underflow
 
 	LDR R3, [R2, #NODE_LINK]	@ 2. R3 = P->link;
 	LDR R4, [R2, #NODE_INFO]	@ 3. R4 = P->info
