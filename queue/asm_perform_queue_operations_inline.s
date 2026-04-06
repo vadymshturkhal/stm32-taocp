@@ -57,6 +57,7 @@ enqueue_loop_init:
 	MOVS R6, R4					@ R6 = max_nodes
 	LDR R1, [R0, #QUEUE_AVAIL]	@ R1 = P = Avail
 	LDR R2, [R0, #QUEUE_REAR]	@ R2 = address held in rear (e.g. &queue->front)
+	STR R1, [R2]				@ *queue->rear = Avail (link Rear to Avail List once)
 
 .balign 4
 enqueue_loop:
@@ -66,8 +67,7 @@ enqueue_loop:
 	LDR R3, [R1, #NODE_LINK]	@ R3 = P->link
 	STR R6, [R1, #NODE_INFO]	@ 2. P->info = info
 	@ STR R5, [R1, #NODE_LINK]	@ 3. P->link = NULL only for the last rear
-	STR R1, [R2]				@ 4. *queue->rear = P
-
+	@ STR R1, [R2]				@ 4. *queue->rear = P
 	ADDS R2, R1, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
 	MOVS R1, R3					@ P = P->link
 

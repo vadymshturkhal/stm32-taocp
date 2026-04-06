@@ -29,6 +29,8 @@
 
 asm_dequeue_mve4:
 	PUSH {R4-R6, LR}
+
+	MOVS R6, #0					@ set flag to 0
 	CBZ R1, early_return
 
 	ANDS R5, R1, #3
@@ -38,7 +40,7 @@ asm_dequeue_mve4:
 	LDR R1, [R0, #QUEUE_AVAIL]	@ R1 = Avail
 	LDR R2, [R0, #QUEUE_FRONT]	@ R2 = Front = P
 
-	CBZ R5, check_mve_loop_counter
+	CBZ R5, deque_mve_loop
 
 .balign 4
 handle_dequeue_tail_loop:
@@ -56,48 +58,50 @@ handle_dequeue_tail_loop:
 	SUBS R5, R5, #1				@ decrement tail counter
 	BNE handle_dequeue_tail_loop
 
-check_mve_loop_counter:
-	CBZ R6, done
-
+is_done:
+	CBZ R6, store_success_flag
 
 deque_mve_loop:
 	@ Front = R2, Avail = R1
 	CBZ R2, handle_underflow0	@ if Front == NULL: underflow
 	LDR R3, [R2, #NODE_LINK]	@ 2. R3 = P->link;
-	LDR R5, [R2, #NODE_INFO]	@ 3. R4 = P->info
+	LDR R5, [R2, #NODE_INFO]	@ 3. R5 = P->info
 	STR R1, [R2, #NODE_LINK]	@ P->link = Avail
 	@SUBS R6, R6, #1
 
 	@ Front = R3, Avail = R2
 	CBZ R3, handle_underflow1	@ if Front == NULL: underflow
 	LDR R4, [R3, #NODE_LINK]	@ 2. R3 = P->link;
-	LDR R5, [R3, #NODE_INFO]	@ 3. R4 = P->info
+	LDR R5, [R3, #NODE_INFO]	@ 3. R5 = P->info
 	STR R2, [R3, #NODE_LINK]	@ P->link = Avail
 	@SUBS R6, R6, #1
 
 	@ Front = R4, Avail = R3
 	CBZ R4, handle_underflow2	@ if Front == NULL: underflow
 	LDR R1, [R4, #NODE_LINK]	@ 2. R3 = P->link;
-	LDR R5, [R4, #NODE_INFO]	@ 3. R4 = P->info
+	LDR R5, [R4, #NODE_INFO]	@ 3. R5 = P->info
 	STR R3, [R4, #NODE_LINK]	@ P->link = Avail
 	@SUBS R6, R6, #1
 
 	@ Front = R1, Avail = R4
 	CBZ R1, handle_underflow3	@ if Front == NULL: underflow
 	LDR R2, [R1, #NODE_LINK]	@ 2. R3 = P->link;
-	LDR R5, [R1, #NODE_INFO]	@ 3. R4 = P->info
+	LDR R5, [R1, #NODE_INFO]	@ 3. R5 = P->info
 	STR R4, [R1, #NODE_LINK]	@ P->link = Avail
 
 	SUBS R6, R6, #1
 
 	BNE deque_mve_loop
 
+store_success_flag:
+	MOVS R6, #1
+
 done:
 	STR R1, [R0, #QUEUE_AVAIL]	@ store Avail
 	STR R2, [R0, #QUEUE_FRONT]	@ store queue->front
 
 early_return:
-	MOVS R0, #1
+	MOVS R0, R6
 	POP {R4-R6, PC}
 
 handle_underflow0:

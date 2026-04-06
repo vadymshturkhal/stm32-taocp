@@ -62,13 +62,13 @@ Node* init_queue_storage_pool(Queue* queue, uint32_t size) {
 	Node* avail = (Node*)(queue + 1);
 	Node* tmp;
 
-	avail->info = size;
+	// avail->info = size;
 	avail->link = NULL;
 	size--;
 
 	while (size > 0) {
 		tmp = avail+1;
-		tmp->info = size;
+		// tmp->info = size;
 		tmp->link = avail;
 
 		avail = tmp;
