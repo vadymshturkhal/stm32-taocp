@@ -22,12 +22,14 @@
 @ R2 Rear
 @ R3 P->link
 @ R5 tail, 0
-@ R6 mve iterations counter
+@ R6 mve iterations counter, flag (0 or 1)
 
 @ Return: 1 if success else 0
 
 asm_enqueue_mve4:
 	PUSH {R4-R6, LR}
+
+	MOVS R6, #0					@ set flag to 0
 	CBZ R1, early_return
 
 	@MOVS R6, R1
@@ -37,7 +39,7 @@ asm_enqueue_mve4:
 	LDR R1, [R0, #QUEUE_REAR]	@ R1 = address held in rear (e.g. &queue->front)
 	LDR R2, [R0, #QUEUE_AVAIL]	@ R2 = P = Avail
 
-	CBZ R5, check_mve_loop_counter
+	CBZ R5, enqueue_mve_loop
 
 .balign 4
 handle_enqueue_tail_loop:
@@ -53,13 +55,17 @@ handle_enqueue_tail_loop:
 	SUBS R5, R5, #1
 	BNE handle_enqueue_tail_loop
 
-check_mve_loop_counter:
-	CBZ R6, done
-	MOVS R5, #0
+is_done:
+	CBZ R6, store_success_flag
 
+@ R5 is 0 at the moment
+@ set_null_pointer:
+@	MOVS R5, #0
+
+.balign 4
 enqueue_mve_loop:
 	@ R1 = Rear, R2 = Avail
-	CBZ R2, handle_overflow0	@ if Avail == NULL: return false
+	CBZ R2, overflow	@ if Avail == NULL: return false
 	LDR R3, [R2, #NODE_LINK]	@ R3 = P->link
 	STR R6, [R2, #NODE_INFO]	@ 2. P->info = info (iterations)
 	STR R2, [R1]				@ 4. *queue->rear = P
@@ -90,38 +96,32 @@ enqueue_mve_loop:
 	SUBS R6, R6, #1
 	BNE enqueue_mve_loop
 
+store_success_flag:
+	MOVS R6, #1
+
 done:
 	STR R5, [R1]				@ *queue->rear = NULL
 	STR R1, [R0, #QUEUE_REAR]	@ queue->rear = &P->link
 	STR R2, [R0, #QUEUE_AVAIL]	@ Avail = Avail->link (from stage 1)
 
 early_return:
-	MOVS R0, #1
+	MOVS R0, R6
 	POP {R4-R6, PC}
 
-handle_overflow0:
-	STR R5, [R1]				@ *queue->rear = NULL
-	STR R1, [R0, #QUEUE_REAR]	@ queue->rear = &P->link
-	STR R2, [R0, #QUEUE_AVAIL]	@ Avail = Avail->link (from stage 1)
-	B overflow
-
 handle_overflow1:
-	STR R5, [R2]				@ *queue->rear = NULL
-	STR R2, [R0, #QUEUE_REAR]	@ queue->rear = &P->link
-	STR R3, [R0, #QUEUE_AVAIL]	@ Avail = Avail->link (from stage 1)
+	MOVS R1, R2					@ R1 = Rear
+	MOVS R2, R3					@ R2 = Avail
 	B overflow
 
 handle_overflow2:
-	STR R5, [R3]				@ *queue->rear = NULL
-	STR R3, [R0, #QUEUE_REAR]	@ queue->rear = &P->link
-	STR R4, [R0, #QUEUE_AVAIL]	@ Avail = Avail->link (from stage 1)
+	MOVS R1, R3					@ R1 = Rear
+	MOVS R2, R4					@ R2 = Avail
 	B overflow
 
 handle_overflow3:
-	STR R5, [R4]				@ *queue->rear = NULL
-	STR R4, [R0, #QUEUE_REAR]	@ queue->rear = &P->link
-	STR R1, [R0, #QUEUE_AVAIL]	@ Avail = Avail->link (from stage 1)
+	MOVS R2, R1					@ R2 = Avail
+	MOVS R1, R4					@ R1 = Rear
 
 overflow:
-	MOVS R0, #0
-	POP {R4-R6, PC}
+	MOVS R6, #0					@ set false flag
+	B done

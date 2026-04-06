@@ -28,23 +28,23 @@ void comparing_queue_unroll_mve() {
 
 	// GCC -O3
 	// with 128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc)
-	// cycles_cold = [4106, cycles_warm = [4034], size = 380 bytes
-	start = DWT->CYCCNT;
-	volatile uint8_t c_queue_status = c_perform_queue_operations_unroll(max_nodes);
-	if (c_queue_status == 0) return;
-	end = DWT->CYCCNT;
-	volatile uint32_t c_queue_cycles_cold = (end - start) - overhead;
-
-	start = DWT->CYCCNT;
-	c_queue_status = c_perform_queue_operations_unroll(max_nodes);
-	if (c_queue_status == 0) return;
-	end = DWT->CYCCNT;
-	volatile uint32_t c_queue_cycles_warm = (end - start) - overhead;
+	// cycles_cold = [3724], cycles_warm = [3653], size = 376 bytes
+//	start = DWT->CYCCNT;
+//	volatile uint8_t c_queue_status = c_perform_queue_operations_unroll(max_nodes);
+//	if (c_queue_status == 0) return;
+//	end = DWT->CYCCNT;
+//	volatile uint32_t c_queue_cycles_cold = (end - start) - overhead;
+//
+//	start = DWT->CYCCNT;
+//	c_queue_status = c_perform_queue_operations_unroll(max_nodes);
+//	if (c_queue_status == 0) return;
+//	end = DWT->CYCCNT;
+//	volatile uint32_t c_queue_cycles_warm = (end - start) - overhead;
 
 
 	// ARM Assembly
 	// with 128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc)
-	// cycles_cold = [2955], cycles_warm = [2901], size = 382 bytes
+	// cycles_cold = [2431-2449], cycles_warm = [2373], size = 372 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t asm_queue_status = asm_perform_queue_operations_mve4(max_nodes);
 	if (asm_queue_status == 0) return;

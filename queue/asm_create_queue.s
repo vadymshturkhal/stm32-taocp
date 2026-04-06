@@ -4,6 +4,9 @@
     .global asm_create_queue
 
 
+@ don't init node->info
+
+
 @ Struct memory offset
 .equ NODE_INFO,		0
 .equ NODE_LINK, 	4
@@ -34,17 +37,19 @@ asm_create_queue:
 	STR R0, [R0, #QUEUE_REAR]	@ queue->rear = &queue->front
 	CBZ R1, early_exit			@ queue size == 0?
 
+.balign 4
 init_storage_pool:
 	ADDS R3, R0, #QUEUE_SIZE	@ Node* avail = (Node*)(queue + 1), since Queue is 12 bytes
-	STR R1, [R3, #NODE_INFO]	@ avail->info = size
+	@ STR R1, [R3, #NODE_INFO]	@ avail->info = size
 	STR R2, [R3, #NODE_LINK]	@ avail->link = NULL
 
 	SUBS R1, R1, #1				@ size--
 	CBZ R1, done				@ if queue is len 1
 
+.balign 4
 linking_loop:
 	ADDS R2, R3, #NODE_SIZE		@ tmp = avail+1
-	STR R1, [R2, #NODE_INFO]	@ tmp->info = size
+	@ STR R1, [R2, #NODE_INFO]	@ tmp->info = size
 	STR R3, [R2, #NODE_LINK]	@ tmp->link = avail
 
 	MOVS R3, R2					@ avail = tmp
