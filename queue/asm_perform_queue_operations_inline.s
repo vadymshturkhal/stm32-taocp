@@ -66,8 +66,8 @@ enqueue_loop:
 
 	LDR R3, [R1, #NODE_LINK]	@ R3 = P->link
 	STR R6, [R1, #NODE_INFO]	@ 2. P->info = info
-	@ STR R5, [R1, #NODE_LINK]	@ 3. P->link = NULL only for the last rear
-	@ STR R1, [R2]				@ 4. *queue->rear = P
+	@ STR R5, [R1, #NODE_LINK]	@ 3. P->link = NULL (do it only for the last rear)
+	@ STR R1, [R2]				@ 4. *queue->rear = P (already linked due to Avail list)
 	ADDS R2, R1, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
 	MOVS R1, R3					@ P = P->link
 
@@ -75,8 +75,7 @@ enqueue_loop:
 	BNE enqueue_loop
 
 enqueue_loop_sync:
-	@ last rear link = NULL
-	STR R5, [R2]				@ *queue->rear = NULL
+	STR R5, [R2]				@ *queue->rear = NULL (last rear link = NULL)
 	STR R2, [R0, #QUEUE_REAR]	@ queue->rear = &P->link
 	STR R1, [R0, #QUEUE_AVAIL]	@ Avail = Avail->link (from stage 1)
 
