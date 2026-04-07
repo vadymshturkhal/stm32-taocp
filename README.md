@@ -149,9 +149,9 @@
             * **Insight (uint32_t for Push/Pop loops):** The fastest way to iterate over max_nodes is to create uint32_t i and iterating from end to start
 
     * **Inlined Enqueue/Dequeue (integrated) with ASM Hoisting:**
-        * GCC -O3 (Clean Code): cycles_cold = [4338-4369], cycles_warm = [4318-4327], size = 212 bytes
-        * ARM Assembly: cycles_cold = [3430-3452], cycles_warm = [3405-3414], size = 194 bytes
-        * **Summary:** Hand-tuned ASM won by ~908 cycles (**~20.9% time reduction**) in the cold run and by ~913 cycles (**~21.1% time reduction**) in the warm run, with ASM consuming **8.4%** less Flash memory
+        * GCC -O3 (Clean Code): cycles_cold = [3957], cycles_warm = [3937], size = 208 bytes
+        * ARM Assembly: cycles_cold = [3179], cycles_warm = [3151], size = 192 bytes
+        * **Summary:** Hand-tuned ASM won by ~778 cycles (**~19.6% time reduction**) in the cold run and by ~786 cycles (**~19.9% time reduction**) in the warm run, with ASM consuming **7.6%** less Flash memory
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Front`, `Rear` and `Avail` pointers entirely into registers, bypassing memory wait-states across all iterations
             * **L0 Caching:** Used CPU Registers as Level 0 Cache across all iterations
