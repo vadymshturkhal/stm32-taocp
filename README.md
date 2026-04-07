@@ -136,7 +136,7 @@
     * **Translation Unit Boundary Enqueue/Dequeue (not inline integrated):**
         * GCC -O3 (Clean Code): cycles_cold = [9468-9507], cycles_warm = [9438-9442], size = 288 bytes
         * ARM Assembly: cycles_cold = [6634-6641], cycles_warm = 6600, size = 236 bytes
-        * **Summary:** Hand-tuned ASM won by ~2,834 cycles (**~30% time reduction**) in the cold version and by ~2,838 cycles (**~30% time reduction**) in the warm one, with ASM consuming **~18%** less Flash memory
+        * **Summary:** Hand-tuned ASM outperformed GCC by ~2,834 cycles (**~30% time reduction**) in the cold version and by ~2,838 cycles (**~30% time reduction**) in the warm one, with ASM consuming **~18%** less Flash memory
         * **Tricks & Insights:** 
             * **Branchless enqueue (Knuth/Torvalds Trick):** Redefined `rear `as `Node**` — writing `P` into either `queue->front` or the old tail's link field through the same pointer, eliminating the empty-queue branch entirely
             * **Load scheduling/latency hiding:** M4 has 2-cycle load latency. Independent loads are issued early and interleaved with stores so every load is exactly when consumed — zero stall cycles in the hot path
@@ -151,7 +151,7 @@
     * **Inlined Enqueue/Dequeue (integrated) with ASM Hoisting:**
         * GCC -O3 (Clean Code): cycles_cold = [3957], cycles_warm = [3937], size = 208 bytes
         * ARM Assembly: cycles_cold = [3179], cycles_warm = [3151], size = 192 bytes
-        * **Summary:** Hand-tuned ASM won by ~778 cycles (**~19.6% time reduction**) in the cold run and by ~786 cycles (**~19.9% time reduction**) in the warm run, with ASM consuming **7.6%** less Flash memory
+        * **Summary:** Hand-tuned ASM outperformed GCC by ~778 cycles (**~19.6% time reduction**) in the cold run and by ~786 cycles (**~19.9% time reduction**) in the warm run, with ASM consuming **~7.6%** less Flash memory
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Front`, `Rear` and `Avail` pointers entirely into registers, bypassing memory wait-states across all iterations
             * **L0 Caching:** Used CPU Registers as Level 0 Cache across all iterations
@@ -162,6 +162,6 @@
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Insight (Flag Trick):** Register R5 pulls double duty — NULL sentinel during Enqueue loop and pessimistic false flag for unified exit. A single `MOVS R5, #1` is the entire success acknowledgement
             * **Insight (Deferred NULL Linkage):** Removed `P->link = NULL` from Enqueue hot loop - only the final rear node requires explicit nulling, deferred to `enqueue_loop_sync`
-            * **Insight (Two-Pointer Tax Absorption):** The Queue's structural overhead over Stack collapses from ~645 cycles (TUB boundary case) to ~10 cycles (inline hoisted) — proving that the tax is a memory-boundary artifact, not an algorithmic property
+            * **Insight (Two-Pointer Credit & Avail Linking):** Hand-tuned ASM Queue inline outperforms hand-tuned ASM Stack inline by ~247 cycles. This is achieved via initial Avail List bulk-linking and the Knuth/Torvalds double-pointer trick — inverting the conventional Stack is faster than Queue assumption
 </details>
     
