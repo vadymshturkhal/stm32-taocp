@@ -7,7 +7,7 @@
 extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 
-uint8_t perform_c_stack_operations_inline(uint16_t max_nodes){
+uint8_t perform_c_stack_operations_unroll(uint16_t max_nodes){
 	// node info is uint32_t
 
 	void* c_stack_memory = asm_balloc(max_nodes * sizeof(Node) + sizeof(Stack));
@@ -17,6 +17,7 @@ uint8_t perform_c_stack_operations_inline(uint16_t max_nodes){
 	bool pop_is_success = true;	// flag for Underflow checking
 	uint32_t info;
 
+	#pragma GCC unroll 4
 	for (uint32_t i = max_nodes; i > 0; i--){
 		if (c_stack_push(stack, i) == false) {
 			asm_balloc_free(c_stack_memory);
@@ -24,6 +25,7 @@ uint8_t perform_c_stack_operations_inline(uint16_t max_nodes){
 		}
 	}
 
+	#pragma GCC unroll 4
 	for (uint32_t i = max_nodes; i > 0; i--){
 		info = c_stack_pop(stack, &pop_is_success);
 		if (pop_is_success == false) {
