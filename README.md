@@ -89,8 +89,8 @@
 
 * **Base case = `128 nodes, 128 Push and 128 Pop using Bump Allocator (balloc)`:**
     * **Translation Unit Boundary Push/Pop (not inline integrated):**
-        * GCC -O3 (Clean Code): cycles_cold = 8756, cycles_warm = 8538, size = 256 bytes
-        * ARM Assembly: cycles_cold = 6016, cycles_warm = 5958, size = 220 bytes
+        * GCC -O3 (Clean Code): cold cycles = 8,756 | warm cycles = 8,538 | size = 256 bytes
+        * ARM Assembly: cold cycles = 6,016 | warm cycles = 5,958 | size = 220 bytes
         * **Summary:** Hand-tuned ASM won by ~2,740 cycles (**~31.2% time reduction**) in the cold run and by ~2,580 cycles (**~30.2% time reduction**) in the warm run, with ASM consuming **~14%** less Flash memory
         * **Tricks & Insights:** 
             * **Aggressive use of Scratch Registers:** Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations
@@ -102,8 +102,8 @@
             * **Insight (Flag usage for error handling):** In Pop function C version used flag instead of Struct with two elements (which is ~100 cycles slower) while ASM simply used R0 and R1 for returning error and info
 
     * **Inlined Push/Pop (integrated) with ASM Hoisting:**
-        * GCC -O3 (Clean Code): cycles_cold = 3863, cycles_warm = 3792, size = 200 bytes
-        * ARM Assembly: cycles_cold = [3313-3340], cycles_warm = 3273, size = 180 bytes
+        * GCC -O3 (Clean Code): cold cycles = 3,863 | warm cycles = 3,792 | size = 200 bytes
+        * ARM Assembly: cold cycles = [3,313-3,340] | warm cycles = 3,273 | size = 180 bytes
         * **Summary:** Hand-tuned ASM won by ~550 cycles (**~14.2% time reduction**) in the cold run and by ~519 cycles (**~13.6% time reduction**) in the warm run, with ASM consuming **10%** less Flash memory
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` entirely into registers, bypassing memory wait-states
@@ -116,10 +116,9 @@
             * **Insight:** Proved that `STRD` (Double-Word Store) is at least two times slower than two consecutive `STR` instructions in this case
 
     * **Inlined Push/Pop (integrated) with GCC -O3 (#pragma unroll 4) vs ASM Modulo Variable Expansion (MVE mod 4):**
-        * GCC -O3 (Clean Code): cycles_cold = [3422-3423], cycles_warm = 3268, size = 448 bytes
-        * ARM Assembly: cycles_cold = [2316-2344], cycles_warm = 2239, size = 372 bytes
-        * **Summary:** Hand-tuned ASM won by ~1,106 cycles (**~32.3% time reduction**) in the cold run and by ~1,029
-            cycles (**~31.4% time reduction**) in the warm run, with ASM consuming **16.9%** less Flash memory
+        * GCC -O3 (Clean Code): cold cycles = [3,422-3,423] | warm cycles = 3,268 | size = 448 bytes
+        * ARM Assembly: cold cycles = [2,316-2,344] | warm cycles = 2,239 | size = 372 bytes
+        * **Summary:** Hand-tuned ASM outperformed GCC by ~1,106 cycles (**~32.3% time reduction**) in the cold run and by ~1,029 cycles (**~31.4% time reduction**) in the warm run, with ASM consuming **16.9%** less Flash memory
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes entirely into registers, bypassing memory wait-states
             * **16-bit Thumb-2 Density:** Forced all operations into low registers to maximize instruction density and shrink the binary footprint 
