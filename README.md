@@ -89,9 +89,9 @@
 
 * **Base case = `128 nodes, 128 Push and 128 Pop using Bump Allocator (balloc)`:**
     * **Translation Unit Boundary Push/Pop (not inline integrated):**
-        * GCC -O3 (Clean Code): cycles_cold = 9119, cycles_warm = 9051, size = 268 bytes
-        * ARM Assembly: cycles_cold = [5988-6006], cycles_warm = 5955, size = 212 byte
-        * **Summary:** Hand-tuned ASM won by ~3,131 cycles (**~34.3% time reduction**) in the cold version and by ~3,096 cycles (**~34.2% time reduction**) in the warm one, with ASM consuming **~20%** less Flash memory
+        * GCC -O3 (Clean Code): cycles_cold = 8756, cycles_warm = 8538, size = 256 bytes
+        * ARM Assembly: cycles_cold = 6016, cycles_warm = 5958, size = 220 bytes
+        * **Summary:** Hand-tuned ASM won by ~2,740 cycles (**~31.2% time reduction**) in the cold run and by ~2,580 cycles (**~30.2% time reduction**) in the warm run, with ASM consuming **~14%** less Flash memory
         * **Tricks & Insights:** 
             * **Aggressive use of Scratch Registers:** Exploiting the lack of branches to safely place the Stack pointer in a scratch register across 256 loop iterations
             * **Strict AAPCS 8-byte Stack Alignment**
@@ -102,9 +102,9 @@
             * **Insight (Flag usage for error handling):** In Pop function C version used flag instead of Struct with two elements (which is ~100 cycles slower) while ASM simply used R0 and R1 for returning error and info
 
     * **Inlined Push/Pop (integrated) with ASM Hoisting:**
-        * GCC -O3 (Clean Code): cycles_cold = [4096-4098], cycles_warm = 4045, size = 200 bytes
-        * ARM Assembly: cycles_cold = [3421-3444], cycles_warm = 3398, size = 174 bytes
-        * **Summary:** Hand-tuned ASM won by ~675 cycles (**~16.4% time reduction**) in the cold run and by ~647 cycles (**~16% time reduction**) in the warm run, with ASM consuming **13%** less Flash memory
+        * GCC -O3 (Clean Code): cycles_cold = 3863, cycles_warm = 3792, size = 200 bytes
+        * ARM Assembly: cycles_cold = [3313-3340], cycles_warm = 3273, size = 180 bytes
+        * **Summary:** Hand-tuned ASM won by ~550 cycles (**~14.2% time reduction**) in the cold run and by ~519 cycles (**~13.6% time reduction**) in the warm run, with ASM consuming **10%** less Flash memory
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` entirely into registers, bypassing memory wait-states
             * **L0 Caching:** Used CPU Registers as Level 0 Cache across loops
