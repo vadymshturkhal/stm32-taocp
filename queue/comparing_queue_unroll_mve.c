@@ -7,7 +7,7 @@ uint8_t run_all_asm_queue_tests(uint16_t max_nodes);
 
 uint8_t c_perform_queue_operations_unroll(uint16_t max_nodes);
 uint8_t c_perform_queue_operations_integrated(uint16_t max_nodes);
-uint8_t asm_perform_queue_operations_mve4(uint16_t max_nodes);
+extern uint8_t asm_perform_queue_operations_mve4(uint16_t max_nodes);
 
 
 void comparing_queue_unroll_mve() {
@@ -23,7 +23,7 @@ void comparing_queue_unroll_mve() {
 
 	// GCC -O3 (C)
 	// with 128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc)
-	// cycles_cold = 2747, cycles_warm = 2653-2678, size = 428 bytes
+	// cycles_cold = [2747-2835], cycles_warm = 2653-2678, size = 428 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t c_queue_status = c_perform_queue_operations_integrated(max_nodes);
 	if (c_queue_status == 0) return;

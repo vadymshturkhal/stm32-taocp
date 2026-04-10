@@ -1,14 +1,10 @@
 .syntax unified
     .thumb
     .cpu cortex-m4
-
     .global rust_asm_perform_queue_operations_gem2
-
+    .type rust_asm_perform_queue_operations_gem2, %function
     .extern asm_balloc
     .extern asm_balloc_free
-
-    .section .text
-    .balign 4
 
 
 @ Stats with 128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc)

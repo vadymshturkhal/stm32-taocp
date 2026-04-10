@@ -7,7 +7,6 @@
 // Stats with 128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc)
 // cycles_cold = [2747], cycles_warm = [2653], size = 428 bytes
 
-
 // FFI Allocator Definitions
 extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* ptr);

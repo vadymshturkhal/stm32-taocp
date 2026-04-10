@@ -6,7 +6,7 @@ uint8_t run_all_queue_tests(uint16_t max_nodes);
 uint8_t run_all_asm_queue_tests(uint16_t max_nodes);
 
 uint8_t c_perform_queue_operations_inline(uint16_t max_nodes);
-uint8_t asm_perform_queue_operations_inline(uint16_t max_nodes);
+extern uint8_t asm_perform_queue_operations_inline(uint16_t max_nodes);
 
 
 void comparing_queue_inline() {

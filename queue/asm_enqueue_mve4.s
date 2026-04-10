@@ -2,7 +2,7 @@
     .thumb
     .cpu cortex-m4
     .global asm_enqueue_mve4
-
+	.type asm_enqueue_mve4, %function
 
 @ Memory offsets
 .equ NODE_INFO, 	0
@@ -71,28 +71,28 @@ enqueue_mve_loop:
 	LDR R3, [R2, #NODE_LINK]	@ R3 = P->link
 	STR R6, [R2, #NODE_INFO]	@ 2. P->info = info (iterations)
 	@STR R2, [R1]				@ 4. *queue->rear = P
-	ADDS R2, R2, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
+	@ ADDS R2, R2, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
 
 	@ R2 = Rear, R3 = Avail
 	CBZ R3, handle_overflow1	@ if Avail == NULL: return false
 	LDR R4, [R3, #NODE_LINK]	@ R3 = P->link
 	STR R6, [R3, #NODE_INFO]	@ 2. P->info = info (iterations)
 	@STR R3, [R2]				@ 4. *queue->rear = P
-	ADDS R3, R3, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
+	@ ADDS R3, R3, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
 
 	@ R3 = Rear, R4 = Avail
 	CBZ R4, handle_overflow2	@ if Avail == NULL: return false
 	LDR R1, [R4, #NODE_LINK]	@ R3 = P->link
 	STR R6, [R4, #NODE_INFO]	@ 2. P->info = info (iterations)
 	@STR R4, [R3]				@ 4. *queue->rear = P
-	ADDS R4, R4, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
+	@ ADDS R4, R4, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
 
 	@ R4 = Rear, R1 = Avail
 	CBZ R1, handle_overflow3	@ if Avail == NULL: return false
 	LDR R2, [R1, #NODE_LINK]	@ R3 = P->link
 	STR R6, [R1, #NODE_INFO]	@ 2. P->info = info (iterations)
-	@STR R1, [R4]				@ 4. *queue->rear = P
-	ADDS R1, R1, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
+	@ STR R1, [R4]				@ 4. *queue->rear = P
+	@ ADDS R1, R1, #NODE_LINK		@ 5. R2 = Address of P->link (&P->link)
 
 	SUBS R6, R6, #1
 	BNE enqueue_mve_loop
@@ -101,7 +101,8 @@ store_success_flag:
 	MOVS R6, #1
 
 done:
-	STR R5, [R1]				@ *queue->rear = NULL
+	STR R5, [R1, #NODE_LINK]	@ queue->rear = NULL
+	ADDS R1, R1, #NODE_LINK		@ Torvalds Tax
 	STR R1, [R0, #QUEUE_REAR]	@ queue->rear = &P->link
 	STR R2, [R0, #QUEUE_AVAIL]	@ Avail = Avail->link (from stage 1)
 

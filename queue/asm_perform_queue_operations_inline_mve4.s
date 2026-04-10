@@ -2,6 +2,7 @@
     .thumb
     .cpu cortex-m4
     .global asm_perform_queue_operations_mve4
+	.type asm_perform_queue_operations_mve4, %function
 
 @ Performs max_nodes Enqueue and Dequeue
 @ Stats with 128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc):

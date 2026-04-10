@@ -2,7 +2,7 @@
     .thumb
     .cpu cortex-m4
     .global asm_dequeue_mve4
-
+	.type asm_dequeue_mve4, %function
 
 @ Memory offsets
 .equ NODE_INFO, 	0

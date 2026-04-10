@@ -7,6 +7,8 @@
 // Prototypes
 bool c_enqueue_tub(Queue* queue, uint32_t info);
 uint32_t c_dequeue_tub(Queue* queue, bool* pop_is_success);
+extern void* asm_balloc(uint32_t size);
+extern void asm_balloc_free(void* memory_pointer);
 
 
 uint8_t c_test_queue_values(uint16_t max_nodes) {

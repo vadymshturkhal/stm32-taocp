@@ -3,11 +3,14 @@
 #include <stdbool.h>
 #include "c_queue.h"
 
+// Stats with 128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc)
+// cycles_cold = [3724], cycles_warm = [3653], size = 376 bytes
 
 // Prototypes
+extern void* asm_balloc(uint32_t size);
+extern void asm_balloc_free(void* memory_pointer);
 bool c_enqueue_tub(Queue* queue, uint32_t info);
 uint32_t c_dequeue_tub(Queue* queue, bool* pop_is_success);
-
 
 uint8_t c_perform_queue_operations_unroll(uint16_t max_nodes) {
 	// node info is uint32_t

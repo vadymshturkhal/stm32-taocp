@@ -3,11 +3,11 @@
 #include <stdbool.h>
 #include "c_queue.h"
 
-
+// Prototypes
+extern void* asm_balloc(uint32_t size);
+extern void asm_balloc_free(void* memory_pointer);
 extern bool asm_enqueue(Queue* queue, uint32_t info);
-// AAPCS guarantees uint64_t returns in R0 (low) and R1 (high)
 extern uint64_t asm_dequeue(Queue* queue);
-
 
 uint8_t asm_test_queue_values(uint16_t max_nodes) {
 	if (max_nodes == 0) return 0;

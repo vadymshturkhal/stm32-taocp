@@ -2,7 +2,7 @@
     .thumb
     .cpu cortex-m4
     .global asm_perform_queue_operations
-
+    .type asm_perform_queue_operations, %function
 
 @ Performs max_nodes Push and Pop
 

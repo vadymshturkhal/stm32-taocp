@@ -2,6 +2,7 @@
     .thumb
     .cpu cortex-m4
     .global asm_dequeue
+    .type asm_dequeue, %function
 
 
 @ Memory offsets

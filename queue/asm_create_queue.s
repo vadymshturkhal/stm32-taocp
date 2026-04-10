@@ -2,10 +2,10 @@
     .thumb
     .cpu cortex-m4
     .global asm_create_queue
-
+	.type asm_create_queue, %function
 
 @ don't init node->info
-
+@ takes 948 cycles for 128 nodes
 
 @ Struct memory offset
 .equ NODE_INFO,		0

@@ -3,11 +3,11 @@
 #include <stdbool.h>
 #include "c_queue.h"
 
-
 // Prototypes
+extern void* asm_balloc(uint32_t size);
+extern void asm_balloc_free(void* memory_pointer);
 bool c_enqueue_tub(Queue* queue, uint32_t info);
 uint32_t c_dequeue_tub(Queue* queue, bool* pop_is_success);
-
 
 uint8_t c_perform_queue_operations(uint16_t max_nodes) {
 	// node info is uint32_t
