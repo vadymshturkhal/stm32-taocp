@@ -14,6 +14,15 @@
 - Navigate to the specific algorithm's folder;
 - Run the C script starting with the word `comparing`;
 - Note: The latest ARM Assembly versions have the highest trailing number in their filename (e.g., `asm_get_auxiliary_table4.s` is the fully optimized version).
+- for cycles measurements use:
+void DWT_Init(void)
+{
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // enable trace
+    DWT->CYCCNT = 0;                                // reset counter
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;            // enable counter
+}
+
+and then `DWT_Init();` in `main.c`
 
 ## Performance summary GCC -O3 and ARM Assembly:
 ### All cycle counts measured using the internal DWT cycle counter on the Cortex-M4
