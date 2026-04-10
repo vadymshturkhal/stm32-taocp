@@ -44,7 +44,7 @@ asm_dequeue_mve4:
 
 .balign 4
 handle_dequeue_tail_loop:
-	CBZ R2, handle_underflow0			@ if Front == NULL: underflow
+	CBZ R2, underflow			@ if Front == NULL: underflow
 
 	LDR R3, [R2, #NODE_LINK]	@ 2. R3 = P->link;
 	LDR R5, [R2, #NODE_INFO]	@ 3. R4 = P->info
@@ -63,7 +63,7 @@ is_done:
 
 deque_mve_loop:
 	@ Front = R2, Avail = R1
-	CBZ R2, handle_underflow0	@ if Front == NULL: underflow
+	CBZ R2, underflow	@ if Front == NULL: underflow
 	LDR R3, [R2, #NODE_LINK]	@ 2. R3 = P->link;
 	LDR R5, [R2, #NODE_INFO]	@ 3. R5 = P->info
 	STR R1, [R2, #NODE_LINK]	@ P->link = Avail
@@ -104,25 +104,20 @@ early_return:
 	MOVS R0, R6
 	POP {R4-R6, PC}
 
-handle_underflow0:
-	STR R1, [R0, #QUEUE_AVAIL]	@ store Avail
-	STR R2, [R0, #QUEUE_FRONT]	@ store queue->front
-	B underflow
-
 handle_underflow1:
-	STR R2, [R0, #QUEUE_AVAIL]	@ store Avail
-	STR R3, [R0, #QUEUE_FRONT]	@ store queue->front
+	MOVS R1, R2					@ Avail to R1
+	MOVS R2, R3					@ Front to R2
 	B underflow
 
 handle_underflow2:
-	STR R3, [R0, #QUEUE_AVAIL]	@ store Avail
-	STR R4, [R0, #QUEUE_FRONT]	@ store queue->front
+	MOVS R1, R3					@ Avail to R1
+	MOVS R2, R4					@ Front to R2
 	B underflow
 
 handle_underflow3:
-	STR R4, [R0, #QUEUE_AVAIL]	@ store Avail
-	STR R1, [R0, #QUEUE_FRONT]	@ store queue->front
+	MOVS R2, R1					@ Front to R2
+	MOVS R1, R4					@ Avail to R1
 
 underflow:
-	MOVS R0, #0
-	POP {R4-R6, PC}
+	MOVS R6, #0
+	B done

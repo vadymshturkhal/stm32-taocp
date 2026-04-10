@@ -39,7 +39,7 @@ void comparing_queue_unroll_mve() {
 
 	// ARM Assembly
 	// with 128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc)
-	// cycles_cold = [2210-2237], cycles_warm = 2120, size = 368 bytes
+	// cycles_cold = [2210-2237], cycles_warm = 2120, size = 360 bytes
 	start = DWT->CYCCNT;
 	volatile uint8_t asm_queue_status = asm_perform_queue_operations_mve4(max_nodes);
 	if (asm_queue_status == 0) return;
