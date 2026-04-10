@@ -134,9 +134,9 @@
 
 * **Base case = `128 nodes, 128 Enqueue and 128 Dequeue using Bump Allocator (balloc)`:**
     * **Translation Unit Boundary Enqueue/Dequeue (not inline integrated):**
-        * GCC -O3 (Clean Code): cycles_cold = [9468-9507], cycles_warm = [9438-9442], size = 288 bytes
-        * ARM Assembly: cycles_cold = [6634-6641], cycles_warm = 6600, size = 236 bytes
-        * **Summary:** Hand-tuned ASM outperformed GCC by ~2,834 cycles (**~30% time reduction**) in the cold version and by ~2,838 cycles (**~30% time reduction**) in the warm one, with ASM consuming **~18%** less Flash memory
+        * GCC -O3 (Clean Code): cold cycles = 8,820 | warm cycles = 8,793 | size = 272 bytes
+        * ARM Assembly: cold cycles = 6,514 | warm cycles = 6,473 | size = 234 bytes
+        * **Summary:** Hand-tuned ASM outperformed GCC by ~2,306 cycles (**~26.1% time reduction**) in the cold run and by ~2,320 cycles (**~26.3% time reduction**) in the warm run, with ASM consuming **~13.9%** less Flash memory
         * **Tricks & Insights:** 
             * **Branchless enqueue (Knuth/Torvalds Trick):** Redefined `rear `as `Node**` — writing `P` into either `queue->front` or the old tail's link field through the same pointer, eliminating the empty-queue branch entirely
             * **Load scheduling/latency hiding:** M4 has 2-cycle load latency. Independent loads are issued early and interleaved with stores so every load is exactly when consumed — zero stall cycles in the hot path
@@ -149,8 +149,8 @@
             * **Insight (uint32_t for Push/Pop loops):** The fastest way to iterate over max_nodes is to create uint32_t i and iterating from end to start
 
     * **Inlined Enqueue/Dequeue (integrated) with ASM Hoisting:**
-        * GCC -O3 (Clean Code): cycles_cold = [3957], cycles_warm = [3937], size = 208 bytes
-        * ARM Assembly: cycles_cold = [3179], cycles_warm = [3151], size = 192 bytes
+        * GCC -O3 (Clean Code): cold cycles = 3,957 | warm cycles = 3,937 | size = 208 bytes
+        * ARM Assembly: cold cycles = 3,179 | warm cycles = 3,151 | size = 192 bytes
         * **Summary:** Hand-tuned ASM outperformed GCC by ~778 cycles (**~19.6% time reduction**) in the cold run and by ~786 cycles (**~19.9% time reduction**) in the warm run, with ASM consuming **~7.6%** less Flash memory
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Front`, `Rear` and `Avail` pointers entirely into registers, bypassing memory wait-states across all iterations
@@ -160,7 +160,7 @@
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
             * **Cascade Return Architecture:** Fall-through error handling with unified `free_queue_memory_store_avail` exit minimizing epilogue redundancy
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
-            * **Insight (Flag Trick):** Register R5 pulls double duty — NULL sentinel during Enqueue loop and pessimistic false flag for unified exit. A single `MOVS R5, #1` is the entire success acknowledgement
+            * **Insight (Flag Trick):** Register R5 pulls double duty — NULL sentinel during Enqueue loop and pessimistic false flag for unified exit. Storing 1 to R5 is the entire success acknowledgement
             * **Insight (Deferred NULL Linkage):** Removed `P->link = NULL` from Enqueue hot loop - only the final rear node requires explicit nulling, deferred to `enqueue_loop_sync`
             * **Insight (Two-Pointer Credit & Avail Linking):** Hand-tuned ASM Queue inline outperforms hand-tuned ASM Stack inline by ~247 cycles. This is achieved via initial Avail List bulk-linking and the Knuth/Torvalds double-pointer trick — inverting the conventional Stack is faster than Queue assumption
 </details>
