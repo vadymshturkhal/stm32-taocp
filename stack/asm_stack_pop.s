@@ -2,6 +2,7 @@
     .thumb
     .cpu cortex-m4
     .global asm_stack_pop
+    .type asm_stack_pop, %function
 
 @ Memory offsets
 .equ NODE_INFO, 	0

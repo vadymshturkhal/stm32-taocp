@@ -2,6 +2,7 @@
     .thumb
     .cpu cortex-m4
     .global asm_stack_push
+    .type asm_stack_push, %function
 
 
 @ Memory offsets

@@ -2,6 +2,7 @@
     .thumb
     .cpu cortex-m4
     .global asm_stack_push_mve
+    .type asm_stack_push_mve, %function
 
 
 @ Using:
@@ -38,6 +39,7 @@ asm_stack_push_mve:
 	LDR R3, [R0, #STACK_TOP]	@ R3 = Top
 	LDR R4, [R0, #STACK_AVAIL]	@ R4 = Avail
 
+	LSRS R1, R1, #2
 	ANDS R6, R1, #3				@ Remainder of R1(number of iterations) mod 4
 	BEQ push_mve_loop
 
@@ -63,27 +65,28 @@ push_mve_loop:
 	LDR R5, [R4, #NODE_LINK]	@ R5 = next avail node
 	STR R1, [R4, #NODE_INFO]	@ P->info = iterations
 	STR R3, [R4, #NODE_LINK]	@ P->link = stack->top
-	SUBS R1, R1, #1				@ decrement iterations
+	@ SUBS R1, R1, #1				@ decrement iterations
 
 	@ R4 = Top, R5 = Avail
 	CBZ R5, handle_overflow1
 	LDR R6, [R5, #NODE_LINK]	@ R6 = next avail node
 	STR R1, [R5, #NODE_INFO]	@ P->info = iterations
 	STR R4, [R5, #NODE_LINK]	@ P->link = stack->top
-	SUBS R1, R1, #1				@ decrement iterations
+	@ SUBS R1, R1, #1				@ decrement iterations
 
 	@ R5 = Top, R6 = Avail
 	CBZ R6, handle_overflow2
 	LDR	R3, [R6, #NODE_LINK]	@ R3 = next avail node
 	STR R1, [R6, #NODE_INFO]	@ P->info = iterations
 	STR R5, [R6, #NODE_LINK]	@ P->link = stack->top
-	SUBS R1, R1, #1				@ decrement iterations
+	@ SUBS R1, R1, #1				@ decrement iterations
 
 	@ R6 = Top, R3 = Avail
 	CBZ R3, handle_overflow3
 	LDR	R4, [R3, #NODE_LINK]	@ R3 = next avail node
 	STR R1, [R3, #NODE_INFO]	@ P->info = iterations
 	STR R6, [R3, #NODE_LINK]	@ P->link = stack->top
+
 	SUBS R1, R1, #1				@ decrement iterations
 
 	@ R3 = Top, R4 = Avail now

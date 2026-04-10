@@ -2,6 +2,10 @@
     .thumb
     .cpu cortex-m4
     .global asm_create_stack
+    .type asm_create_stack, %function
+
+
+@ don't init node->info
 
 
 @ Struct memory offset
@@ -33,15 +37,16 @@ asm_create_stack:
 .balign 4
 init_storage_pool:
 	ADDS R3, R0, #STACK_SIZE	@ Node* avail = (Node*)(stack + 1), since Stack is 8 bytes
-	STR R1, [R3, #NODE_INFO]	@ avail->info = size
+	@ STR R1, [R3, #NODE_INFO]	@ avail->info = size
 	STR R2, [R3, #NODE_LINK]	@ avail->link = NULL
 
 	SUBS R1, R1, #1				@ size--
 	CBZ R1, done				@ if stack is len 1
 
+.balign 4
 linking_loop:
 	ADDS R2, R3, #NODE_SIZE		@ tmp = avail+1
-	STR R1, [R2, #NODE_INFO]	@ tmp->info = size
+	@ STR R1, [R2, #NODE_INFO]	@ tmp->info = size
 	STR R3, [R2, #NODE_LINK]	@ tmp->link = avail
 
 	MOVS R3, R2					@ avail = tmp

@@ -2,6 +2,7 @@
     .thumb
     .cpu cortex-m4
     .global asm_perform_stack_operations_inline
+    .type asm_perform_stack_operations_inline, %function
 
 
 @ Performs max_nodes Push and Pop with integrated Push/Pop

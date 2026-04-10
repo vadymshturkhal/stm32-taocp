@@ -2,12 +2,13 @@
     .thumb
     .cpu cortex-m4
     .global asm_perform_stack_operations_inline_hoisting
+    .type asm_perform_stack_operations_inline_hoisting, %function
 
 
 @ Performs max_nodes Push and Pop with integrated Push/Pop
 
 @ Stats with 128 nodes, 128 Push/Pop using Bump Allocator (balloc):
-@ cycles_cold = [3421-3444], cycles_warm = 3398, size = 174 bytes
+@ cycles_cold = [3299], cycles_warm = 3273, size = 180 bytes
 
 @ Tricks & Insights:
 @ Hoisting, Using Registers as Level 0 Cache, Redundant Load Elimination,
@@ -35,7 +36,7 @@
 @ R3 Top
 @ R4 Avail
 @ R5 max_nodes, Next_Avail, Next_Top
-@ R6 0 or false flag
+@ R6 0 or 1 flag
 
 asm_perform_stack_operations_inline_hoisting:
 	PUSH {R4-R6, LR}

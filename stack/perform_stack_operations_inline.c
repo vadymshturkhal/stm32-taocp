@@ -3,6 +3,9 @@
 #include <stdbool.h>
 #include "c_stack.h"
 
+// Prototypes
+extern void* asm_balloc(uint32_t size);
+extern void asm_balloc_free(void* memory_pointer);
 
 uint8_t perform_c_stack_operations_inline(uint16_t max_nodes){
 	// node info is uint32_t
