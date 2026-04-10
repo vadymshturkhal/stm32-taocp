@@ -116,9 +116,10 @@
             * **Insight:** Proved that `STRD` (Double-Word Store) is at least two times slower than two consecutive `STR` instructions in this case
 
     * **Inlined Push/Pop (integrated) with GCC -O3 (#pragma unroll 4) vs ASM Modulo Variable Expansion (MVE mod 4):**
-        * GCC -O3 (Clean Code): cycles_cold = 3662, cycles_warm = 3524, size = 452 bytes
-        * ARM Assembly: cycles_cold = [2609-2626], cycles_warm = [2554-2555], size = 374 bytes
-        * **Summary:** Hand-tuned ASM won by ~1,053 cycles (**~28.7% time reduction**) in the cold run and by ~970 cycles (**~27.5% time reduction**) in the warm run, with ASM consuming **17.2%** less Flash memory
+        * GCC -O3 (Clean Code): cycles_cold = [3422-3423], cycles_warm = 3268, size = 448 bytes
+        * ARM Assembly: cycles_cold = [2316-2344], cycles_warm = 2239, size = 372 bytes
+        * **Summary:** Hand-tuned ASM won by ~1,106 cycles (**~32.3% time reduction**) in the cold run and by ~1,029
+            cycles (**~31.4% time reduction**) in the warm run, with ASM consuming **16.9%** less Flash memory
         * **Tricks & Insights:** 
             * **Reduced SRAM traffic:** Hoisted `Top` and `Avail` nodes entirely into registers, bypassing memory wait-states
             * **16-bit Thumb-2 Density:** Forced all operations into low registers to maximize instruction density and shrink the binary footprint 
