@@ -18,6 +18,7 @@ heap_head:
 .section .text
 	.global heap_head
 	.global asm_balloc
+	.type asm_balloc, %function
 
 asm_balloc:
 	ADDS R0, R0, #7			@ ADD 7 to the requested size
