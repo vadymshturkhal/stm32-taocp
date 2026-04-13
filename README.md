@@ -172,6 +172,6 @@ and then `DWT_Init();` in `main.c`
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Insight (Flag Trick):** Register R5 pulls double duty — NULL sentinel during Enqueue loop and pessimistic false flag for unified exit. Storing 1 to R5 is the entire success acknowledgement
             * **Insight (Deferred NULL Linkage):** Removed `P->link = NULL` from Enqueue hot loop - only the final rear node requires explicit nulling, deferred to `enqueue_loop_sync`
-            * **Insight (Two-Pointer Credit & Avail Linking):** Hand-tuned ASM Queue inline outperforms hand-tuned ASM Stack inline by ~247 cycles. This is achieved via initial Avail List bulk-linking and the Knuth/Torvalds double-pointer trick — inverting the conventional Stack is faster than Queue assumption
+            * **Insight (Two-Pointer Credit & Avail Linking):** Hand-tuned ASM Queue inline outperforms hand-tuned ASM Stack inline by ~2*max_nodes cycles. This is achieved via initial Avail List bulk-linking and the Knuth/Torvalds double-pointer trick — inverting the conventional Stack is faster than Queue assumption
 </details>
     
