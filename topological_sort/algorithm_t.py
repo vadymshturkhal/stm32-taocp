@@ -16,6 +16,7 @@ def algorithm_t(n, input_pairs):
     QLINK = COUNT
     TOP = [None for _ in range(n+1)]
     N = n
+    sorted_sequence = []
 
     # T2 (Next relation)
     for pair in input_pairs:
@@ -38,7 +39,8 @@ def algorithm_t(n, input_pairs):
 
     while N != 0:
         # T5 (Output front of queue)
-        print(f'{F=}')
+        # print(f'{F=}')
+        sorted_sequence.append(F)
         if F == 0:
             # Go to T8
             break
@@ -63,8 +65,11 @@ def algorithm_t(n, input_pairs):
         # Go back to T5
 
     # T8 (End of process)
+    return sorted_sequence
+
 
 if __name__ == "__main__":
+    # [1, 9, 3, 2, 7, 4, 5, 8, 6]
     n = 9
     input_pairs = [
         (9, 2),
@@ -78,5 +83,33 @@ if __name__ == "__main__":
         (9, 5),
         (2, 8),
     ]
+    print(algorithm_t(n, input_pairs))
 
-    algorithm_t(n, input_pairs)
+    # [8, 7, 3, 2, 1, 6, 5, 4]
+    n = 8
+    input_pairs = [
+        (8, 3),
+        (1, 4),
+        (7, 2),
+        (3, 1),
+        (2, 6),
+        (8, 7),
+        (1, 5),
+        (3, 2),
+        (7, 6),
+        (2, 5),
+    ]
+    print(algorithm_t(n, input_pairs))
+
+    # [4, 6, 1, 5, 2, 3]
+    n = 6
+    input_pairs = [
+        (4, 5),
+        (1, 3),
+        (6, 2),
+        (5, 3),
+        (4, 1),
+        (2, 3),
+        (6, 5)
+    ]
+    print(algorithm_t(n, input_pairs))
