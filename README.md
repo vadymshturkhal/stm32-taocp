@@ -158,7 +158,7 @@ and then `DWT_Init();` in `main.c`
             * **Insight (Flag usage for error handling):** In Dequeue function C version used flag instead of Struct with two elements (which is ~100 cycles slower) while ASM simply used R0 and R1 for returning error and info
             * **Insight (uint32_t for Push/Pop loops):** The fastest way to iterate over max_nodes is to create uint32_t i and iterating from end to start
 
-    * **Inlined Enqueue/Dequeue (integrated) with ASM Hoisting:**
+    * **Inlined Enqueue/Dequeue with ASM Hoisting:**
         * GCC -O3 (Clean Code): cold cycles = 3,957 | warm cycles = 3,937 | size = 208 bytes
         * ARM Assembly: cold cycles = 3,179 | warm cycles = 3,151 | size = 192 bytes
         * **Summary:** Hand-tuned ASM outperformed GCC by ~778 cycles (**~19.6% time reduction**) in the cold run and by ~786 cycles (**~19.9% time reduction**) in the warm run, with ASM consuming **~7.6%** less Flash memory
@@ -173,5 +173,22 @@ and then `DWT_Init();` in `main.c`
             * **Insight (Flag Trick):** Register R5 pulls double duty — NULL sentinel during Enqueue loop and pessimistic false flag for unified exit. Storing 1 to R5 is the entire success acknowledgement
             * **Insight (Deferred NULL Linkage):** Removed `P->link = NULL` from Enqueue hot loop - only the final rear node requires explicit nulling, deferred to `enqueue_loop_sync`
             * **Insight (Two-Pointer Credit & Avail Linking):** Hand-tuned ASM Queue inline outperforms hand-tuned ASM Stack inline by ~2*max_nodes cycles. This is achieved via initial Avail List bulk-linking and the Knuth/Torvalds double-pointer trick — inverting the conventional Stack is faster than Queue assumption
+
+    * **Integrated Enqueue/Dequeue (GCC unroll 4 and MVE mod 4):**
+        * GCC -O3 (Clean Code): cold cycles = [2,747-2,835] | warm cycles = [2,653-2,678] | size = 428 bytes
+        * ARM Assembly: cold cycles = [2,210-2,237] | warm cycles = 2,120 | size = 360 bytes
+        * **Summary:** Hand-tuned ASM outperformed GCC by ~537 cycles (**~19.5% time reduction**) in the cold run and by ~533 cycles (**~20% time reduction**) in the warm run, with ASM consuming **~15.8%** less Flash memory
+        * **Tricks & Insights:** 
+            * **Reduced SRAM traffic:** Hoisted `Front`, `Rear` and `Avail` pointers entirely into registers, bypassing memory wait-states across all iterations
+            * **L0 Caching:** Used CPU Registers as Level 0 Cache across all iterations
+            * **Redundant Load Elimination:** Carried over `Avail` register state from Enqueue into Dequeue loop, bypassing `LDR R1, [R0, #QUEUE_AVAIL]` entirely
+            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrinking the binary footprint 
+            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+            * **Cascade Return Architecture:** Fall-through error handling with unified `free_queue_memory_store_avail` exit minimizing epilogue redundancy
+            * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
+            * **Insight (Two-Pointer Credit & Avail Linking):** Hand-tuned `ASM MVE mod 4 Queue` outperforms hand-tuned `ASM MVE mod 4 Stack` by ~max_nodes cycles
+            * **Insight (The Permutation Identity):** The register permutation returns to identity after 4 iterations
+            * **Insight (Why GCC loses despite unrolling):** The permutation identity trick is mathematical and mechanical unrolling, that replicates the loop body, cannot eliminate inter-iteration register moves
+            * **Note (MVE mod 4 naming):** Named MVE mod 4 trick after Witold Lipski, now it's called Lipski trick 
 </details>
     
