@@ -31,7 +31,8 @@ def algorithm_t(n, input_pairs):
     R = 0
     QLINK[0] = 0
     
-    for k in range(1, n+1):
+    # for k in range(1, n+1):
+    for k in range(n, 0, -1):
         if COUNT[k] == 0:
             QLINK[R] = k
             R = k
@@ -39,19 +40,19 @@ def algorithm_t(n, input_pairs):
     F = QLINK[0]
 
     while N != 0:
-        # T5 (Output front of queue)
-        # print(f'{F=}')
-        sorted_sequence.append(F)
         if F == 0:
             # Go to T8
             break
+
+        # T5 (Output front of queue)
+        sorted_sequence.append(F)
+
 
         N = N - 1
         P = TOP[F]
 
         # T6 (Erase relations)
         while P is not None:
-            # print(P)
             COUNT[P.succ] -= 1
 
             if COUNT[P.succ] == 0:
