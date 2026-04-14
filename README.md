@@ -9,6 +9,7 @@
 - Josephus Problem (Generalized);
 - Stack;
 - Queue;
+- Topological Sort;
 
 ## How to run:
 - Navigate to the specific algorithm's folder;
