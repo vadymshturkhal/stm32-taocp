@@ -30,6 +30,7 @@ def algorithm_t(n, input_pairs):
 	# T4 (At this point we have completed the input phase)
     R = 0
     QLINK[0] = 0
+    
     for k in range(1, n+1):
         if COUNT[k] == 0:
             QLINK[R] = k
@@ -65,7 +66,10 @@ def algorithm_t(n, input_pairs):
         # Go back to T5
 
     # T8 (End of process)
-    return sorted_sequence
+    if N == 0:
+        return sorted_sequence
+
+    raise Exception("Contain a loop")
 
 
 if __name__ == "__main__":
