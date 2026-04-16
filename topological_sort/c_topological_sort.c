@@ -3,7 +3,7 @@
 #include "pairs.h"
 
 
-uint8_t c_topological_sort(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output) {
+uint8_t c_algorithm_t(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output) {
 	// T1 (Initialize)
 	TopologicalNode* P;
 	uint32_t FRONT;
@@ -11,6 +11,8 @@ uint8_t c_topological_sort(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len
 
 	// Init COUNT
 	uint32_t* COUNT = asm_balloc((n+1)*sizeof(uint32_t));
+	if (COUNT == NULL) return 0;	// Nothing to free
+
 	for (int32_t i = n; i > -1; i--) {
 		COUNT[i] = 0;
 	}
@@ -20,6 +22,8 @@ uint8_t c_topological_sort(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len
 
 	// Init TOP
 	TopologicalNode** TOP = asm_balloc((n + 1) * sizeof(TopologicalNode*));
+	if (TOP == NULL) goto exceptions;
+
 	for (int32_t i = n; i > -1; i--) {
 		TOP[i] = NULL;
 	}
@@ -27,9 +31,17 @@ uint8_t c_topological_sort(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len
 	uint32_t N = n;
 
 	// Init Avail List
-	void* AVAIL_LIST = asm_balloc(input_pairs_len * sizeof(TopologicalNode));
-	TopologicalNode* Avail = init_avail_list(AVAIL_LIST, input_pairs_len);
-	if (Avail == NULL) return 0;
+	void* AVAIL_LIST = NULL;
+	TopologicalNode* Avail = NULL;
+
+	// In case of 0 edges
+	if (input_pairs_len > 0) {
+		AVAIL_LIST = asm_balloc(input_pairs_len * sizeof(TopologicalNode));
+		if (AVAIL_LIST == NULL) goto exceptions;
+
+		Avail = init_avail_list(AVAIL_LIST, input_pairs_len);
+		if (Avail == NULL) goto exceptions;
+	}
 
 	// T2 (Next relation)
 	for (int32_t i = input_pairs_len - 1; i > -1; i--) {
@@ -42,8 +54,7 @@ uint8_t c_topological_sort(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len
 		P = Avail;
 		if (P == NULL) {
 			// overflow
-			asm_balloc_free(COUNT);
-			return 0;
+			goto exceptions;
 		}
 		Avail = Avail->next;
 		P->succ = k;
@@ -97,10 +108,16 @@ uint8_t c_topological_sort(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len
 		// Go back to T5
 	}
 
+	// T8 (End of process)
+	uint8_t topological_status = (N == 0) ? 1 : 0;
+
+cleanup:
 	// Free all memory at once
 	asm_balloc_free(COUNT);
+	return topological_status;
 
-	// T8 (End of process)
-	if (N == 0) return 1;
+exceptions:
+	// Free all memory at once
+	asm_balloc_free(COUNT);
 	return 0;
 };
