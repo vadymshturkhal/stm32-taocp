@@ -1,9 +1,7 @@
-.syntax unified
 .section .text
     .thumb
     .cpu cortex-m4
 	.global asm_balloc_free
-	.type asm_balloc_free, %function
 
 
 @ Free Bump Allocator or Arena Allocator
