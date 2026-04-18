@@ -10,7 +10,7 @@ uint8_t c_algorithm_t(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uin
 	uint32_t REAR;
 
 	// Init COUNT
-	uint32_t* COUNT = asm_balloc((n+1)*sizeof(uint32_t));
+	uint32_t* COUNT = asm_balloc((n + 1)*sizeof(uint32_t));
 	if (COUNT == NULL) return 0;	// Nothing to free
 
 	for (int32_t i = n; i > -1; i--) {
