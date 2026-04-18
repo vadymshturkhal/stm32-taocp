@@ -21,7 +21,7 @@ void comparing_topological_sort() {
 	uint32_t* asm_output = asm_balloc(n * sizeof(uint32_t));
 
 	// GCC -O3
-	// cycles_cold = 10494, cycles_warm = 10394, size = 384 bytes
+	// cold cycles = 10494 | warm cycles= 10394 | size = 384 bytes
 	start = DWT->CYCCNT;
 	uint8_t topological_status = c_algorithm_t(n, input_pairs, input_pairs_len, output);
 	if (topological_status == 0) return 0;
@@ -35,7 +35,7 @@ void comparing_topological_sort() {
 	volatile uint32_t c_topological_sort_cycles_warm = (end - start) - overhead;
 
 	// ARM Assembly
-	// cycles_cold = 7867, cycles_warm = 7822, size = 308 bytes
+	// cold cycles = 7867 | warm cycles= 7822 | size = 308 bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_topological_status = asm_algorithm_t(n, input_pairs, input_pairs_len, asm_output);
 	if (asm_topological_status == 0) return 0;
