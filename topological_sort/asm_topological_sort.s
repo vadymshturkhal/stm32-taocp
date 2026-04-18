@@ -152,7 +152,7 @@ erase_relations:
 	CBZ R3, remove_from_queue
 
 	LDR R6, [R3, #NODE_INFO]
-
+	LDR R3, [R3, #NODE_LINK]		@ P = P->next
 	ADD R2, R8, R6, LSL #3			@ COUNT[P->succ] address
 	LDR R1, [R2]					@ COUNT[P->succ]
 	SUBS R1, R1, #1
@@ -164,7 +164,6 @@ erase_relations:
 	MOV R5, R2						@ REAR = P->succ;
 
 next_p:
-	LDR R3, [R3, #NODE_LINK]		@ P = P->next
 	B erase_relations				@ FIXME unconditional branch
 
 @ T7
