@@ -167,7 +167,7 @@ and then `DWT_Init();` in `main.c`
             * **Reduced SRAM traffic:** Hoisted `Front`, `Rear` and `Avail` pointers entirely into registers, bypassing memory wait-states across all iterations
             * **L0 Caching:** Used CPU Registers as Level 0 Cache across all iterations
             * **Redundant Load Elimination:** Carried over `Avail` register state from Enqueue into Dequeue loop, bypassing `LDR R1, [R0, #QUEUE_AVAIL]` entirely
-            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrinking the binary footprint 
+            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrink the binary footprint 
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
             * **Cascade Return Architecture:** Fall-through error handling with unified `free_queue_memory_store_avail` exit minimizing epilogue redundancy
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
@@ -183,7 +183,7 @@ and then `DWT_Init();` in `main.c`
             * **Reduced SRAM traffic:** Hoisted `Front`, `Rear` and `Avail` pointers entirely into registers, bypassing memory wait-states across all iterations
             * **L0 Caching:** Used CPU Registers as Level 0 Cache across all iterations
             * **Redundant Load Elimination:** Carried over `Avail` register state from Enqueue into Dequeue loop, bypassing `LDR R1, [R0, #QUEUE_AVAIL]` entirely
-            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrinking the binary footprint 
+            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrink the binary footprint 
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
             * **Cascade Return Architecture:** Fall-through error handling with unified `free_queue_memory_store_avail` exit minimizing epilogue redundancy
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
@@ -192,4 +192,26 @@ and then `DWT_Init();` in `main.c`
             * **Insight (Why GCC loses despite unrolling):** The permutation identity trick is mathematical and mechanical unrolling, that replicates the loop body, cannot eliminate inter-iteration register moves
             * **Note (MVE mod 4 naming):** Named MVE mod 4 trick after Witold Lipski, now it's called Lipski trick 
 </details>
-    
+
+<details>
+<summary><b>Algorithm T (Topological Sort)</b></summary>
+
+* **Base case: `n = 50, input_pairs_len = 139 (Hamiltonian Path with 90 cache-thrashing jump edges)`:**
+    * GCC -O3: cold cycles = `10494` | warm cycles= `10394` | size = `384` bytes
+    * ARM Assembly: cold cycles = `7867` | warm cycles= `7822` | size = `308` bytes
+    * **Summary:** Hand-tuned ASM outperformed GCC by `~2,627` cycles (**~25% time reduction**) in the cold run and by `~2,572` cycles (**~24.7% time reduction**) in the warm run, with ASM consuming **~19.7%** less Flash memory
+    * **Tricks & Insights:** 
+        * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrink the binary footprint
+        * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+        * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
+        * **Memory Allocation:** Allocated `COUNT`, `TOP` and `AVAIL_LIST` memory at once, perfectly interleaving `COUNT` and `TOP` arrays to maximize bus bandwidth during initialization (`STMIA`)
+        * **Post-Increment Queuing:** Replaced integer `output` counter with hardware post-increment writeback to auto-advance the `output` pointer in 1 clock cycle
+        * **Zero-Flag Branching:** Favored 16-bit `CBZ/CBNZ` over standard `CMP + Branch` to execute conditional jumps natively in the hardware without touching the ALU
+        * **Insight (MOV 16-bit instructions):** Difference between `MOV R2, #0 then MOV R9, R2` and `MOV R9, #0`
+
+    * **Additional LeetCode Guys stats with C&GCC -O3:** 
+        * **LeetCode Regular:** cold cycles = `47308` | warm cycles = `35891` | size = `772` bytes
+        * **LeetCode Hero:** cold cycles = `22431` | warm cycles = `22385` | size = `924` bytes
+        * **Summary (Knuth vs LeetCode Regular):** C Algorithm T outperformed LeetCode Regular by `36,814` cycles (**~77.8% time reduction**) in the cold run and by `25,497` cycles (**~71% time reduction**) in the warm run, with Algorithm T consuming **~50.2%** less Flash memory (`384` bytes vs `772` bytes)
+        * **Summary (Knuth vs LeetCode Hero):** C Algorithm T outperformed LeetCode Hero by `11,937` cycles (**~53.2% time reduction**) in the cold run and by `11,991` cycles (**~53.5% time reduction**) in the warm run, with Algorithm T consuming **~58.4%** less Flash memory (`384` bytes vs `924` bytes)
+</details>
