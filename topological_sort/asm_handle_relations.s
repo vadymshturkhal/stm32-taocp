@@ -36,13 +36,15 @@ asm_handle_relations:
 @ T2 (Next relation)
 .balign 4
 handle_relations_loop:
-	LDRD R4, R5, [R1, #-8]!
+	@ LDRD R4, R5, [R1, #-8]!
+	LDR R5, [R1, #-4]!		@ Load successor (k) from 4 bytes ahead of the newly updated R1
+	LDR R4, [R1, #-4]!		@ R1 -= 8 (Writeback!); Load predecessor (j) from the new R1
 
 	@ T3
-	ADD R6, R3, R5, LSL #3		@ R6 = COUNT[k] memory address
-	LDR R7, [R6]				@ R7 = COUNT[k]
+	LDR R7, [R3, R5, LSL #3]	@ R7 = COUNT[k]
+	ADDS R6, R3, R4, LSL #3		@ R6 = TOP[j] memory address
 	ADDS R7, R7, #1				@ COUNT[k]++
-	STR R7, [R6]				@ Store COUNT[k]
+	STR R7, [R3, R5, LSL #3]	@ Store COUNT[k]
 
 	MOVS R7, R0					@ P = Avail
 	CBZ R7, overflow			@ P == NULL?
@@ -50,7 +52,6 @@ handle_relations_loop:
 	LDR R0, [R0, #NODE_LINK]	@ Avail = Avail->link
 	STR R5, [R7, #NODE_INFO]	@ P->info = k
 
-	ADD R6, R3, R4, LSL #3		@ R6 = TOP[j] memory address
 	LDR R5, [R6, #TOP_OFFSET]	@ R5 = TOP[j]
 	STR R5, [R7, #NODE_LINK]	@ P->next = TOP[j]
 

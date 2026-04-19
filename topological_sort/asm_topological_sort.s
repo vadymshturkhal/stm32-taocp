@@ -145,14 +145,14 @@ output_front_of_queue:
 
 	ADD R2, R8, R0, LSL #3		@ Address of TOP[FRONT]
 	LDR R3, [R2, #TOP_OFFSET]	@ P = TOP[FRONT]
+	CBZ R3, remove_from_queue
 
 @ T6
 .balign 4
 erase_relations:
-	CBZ R3, remove_from_queue
-
 	LDR R6, [R3, #NODE_INFO]
 	LDR R3, [R3, #NODE_LINK]		@ P = P->next
+
 	ADD R2, R8, R6, LSL #3			@ COUNT[P->succ] address
 	LDR R1, [R2]					@ COUNT[P->succ]
 	SUBS R1, R1, #1
@@ -164,7 +164,8 @@ erase_relations:
 	MOV R5, R2						@ REAR = P->succ;
 
 next_p:
-	B erase_relations				@ FIXME unconditional branch
+	CMP R3, #0
+	BNE erase_relations
 
 @ T7
 remove_from_queue:
