@@ -11,7 +11,7 @@ uint8_t leetcode_regular_topological_sort(uint8_t n, Pair* input_pairs, uint8_t 
 uint8_t leetcode_hero_topological_sort(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
 
 
-void comparing_c_topological_sort() {
+void comparing_knuth_and_leetcode_topological_sort(void) {
     volatile uint32_t start, end, overhead;
 
 	start = DWT->CYCCNT;
