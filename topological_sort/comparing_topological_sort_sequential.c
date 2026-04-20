@@ -22,8 +22,7 @@ void comparing_topological_sort_sequential() {
 	uint32_t* output = asm_balloc(n * sizeof(uint32_t));
 	uint32_t* asm_output = asm_balloc(n * sizeof(uint32_t));
 
-	// GCC -O3
-	// cold cycles = 8665 | warm cycles = 8568 | size = 324 bytes
+	// GCC -O3: cold cycles = 8665 | warm cycles = 8568 | size = 324 bytes
 	start = DWT->CYCCNT;
 	uint8_t gcc_topological_status = c_algorithm_t_sequential(n, input_pairs, input_pairs_len, output);
 	if (gcc_topological_status == 0) return 0;
@@ -36,8 +35,7 @@ void comparing_topological_sort_sequential() {
 	end = DWT->CYCCNT;
 	volatile uint32_t c_topological_sort_cycles_warm = (end - start) - overhead;
 
-	// Clang -O3 --target=arm-none-eabi -mcpu=cortex-m4 -mthumb
-	// cold cycles = 6742-6760 | warm cycles = 6703-6706 | size = 736 bytes
+	// Clang -O3 (--target=arm-none-eabi -mcpu=cortex-m4 -mthumb): cold cycles = 6742-6760 | warm cycles = 6703-6706 | size = 736 bytes
 	start = DWT->CYCCNT;
 	uint8_t clang_topological_status = clang_algorithm_t_sequential(n, input_pairs, input_pairs_len, output);
 	if (clang_topological_status == 0) return 0;
@@ -50,8 +48,7 @@ void comparing_topological_sort_sequential() {
 	end = DWT->CYCCNT;
 	volatile uint32_t clang_topological_sort_cycles_warm = (end - start) - overhead;
 
-	// ARM Assembly
-	// cold cycles = 5948-5967 | warm cycles = 5915-5918 | size = 264 bytes
+	// ARM Assembly: cold cycles = 5599 | warm cycles = 5541 | size = 276 bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_topological_status = asm_algorithm_t_sequential(n, input_pairs, input_pairs_len, asm_output);
 	if (asm_topological_status == 0) return 0;
@@ -64,7 +61,7 @@ void comparing_topological_sort_sequential() {
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_topological_sort_cycles_warm = (end - start) - overhead;
 
-	// LLVM (Rust)
+	// Rust: rustc (LLVM backend) --target thumbv7em-none-eabi -C opt-level=3 -C target-cpu=cortex-m4
 	// cold cycles = 7376-7398 | warm cycles = 7238-7239 | size = 742 bytes
 	start = DWT->CYCCNT;
 	uint8_t rust_asm_topological_status = rust_asm_algorithm_t(n, input_pairs, input_pairs_len, asm_output);

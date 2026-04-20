@@ -4,6 +4,8 @@
     .global asm_handle_relations_sequential
 	.type asm_handle_relations_sequential, %function
 
+@ Info: does not return any error
+
 @ Memory offsets
 .equ NODE_INFO, 	0
 .equ NODE_LINK, 	4
@@ -51,7 +53,7 @@ handle_relations_loop:
 
 	@ Load TOP[j]
 	ADD R7, R3, R4, LSL #3		@ R7 = TOP[j] memory address
-	LDR R6, [R7, #TOP_OFFSET]	@ R8 = TOP[j]
+	LDR R6, [R7, #TOP_OFFSET]	@ R6 = TOP[j]
 
 	@ STRD R5, R6, [R0, #-8]!
 	@ STMDB R0!, {R5, R6}			@ Avail -= 8; Avail->succ = k; Avail->next = TOP[j]

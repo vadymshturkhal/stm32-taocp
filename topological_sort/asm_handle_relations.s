@@ -4,6 +4,10 @@
     .global asm_handle_relations
 	.type asm_handle_relations, %function
 
+
+@ Info: does not return any error
+
+
 @ Memory offsets
 .equ NODE_INFO, 	0
 .equ NODE_LINK, 	4

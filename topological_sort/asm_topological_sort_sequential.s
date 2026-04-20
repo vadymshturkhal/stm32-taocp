@@ -107,12 +107,13 @@ prepare_to_scan_for_zeros:
 
 .balign 4
 scan_for_zeros:
-	ADD R3, R8, R1, LSL #3		@ Address of COUNT[k]
-	LDR R2, [R3]				@ R2 = COUNT[k]
+	@ADD R3, R8, R1, LSL #3		@ Address of COUNT[k]
+	LDR R2, [R8, R1, LSL #3]				@ R2 = COUNT[k]
 	CBNZ R2, continue_to_scan	@ COUNT[k] == 0?
 
 	STR R1, [R5]			@ QLINK[REAR] = k
-	MOVS R5, R3				@ Updare REAR pointer
+	ADD R5, R8, R1, LSL #3		@ R5 = REAR pointer = Address of COUNT[k]
+	@ MOVS R5, R3				@ Updare REAR pointer
 
 continue_to_scan:
 	SUBS R1, R1, #1
@@ -143,16 +144,15 @@ output_front_of_queue:
 erase_relations:
 	LDR R6, [R3, #NODE_INFO]
 	LDR R3, [R3, #NODE_LINK]		@ P = P->next
-	ADD R2, R8, R6, LSL #3			@ COUNT[P->succ] address
 
-	LDR R1, [R2]					@ COUNT[P->succ]
+	LDR R1, [R8, R6, LSL #3]		@ COUNT[P->succ]
 	SUBS R1, R1, #1
-	STR R1, [R2]					@ COUNT[P->succ] -= 1
+	STR R1, [R8, R6, LSL #3]		@ COUNT[P->succ] -= 1
 
 	CBNZ R1, next_p
 
 	STR R6, [R5]					@ QLINK[REAR] = P->succ;
-	MOV R5, R2						@ REAR = P->succ;
+	ADD R5, R8, R6, LSL #3			@ R5 = REAR = COUNT[P->succ]
 
 next_p:
 	CMP R3, #0
