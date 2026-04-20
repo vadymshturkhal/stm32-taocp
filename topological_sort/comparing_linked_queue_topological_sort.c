@@ -9,7 +9,7 @@ extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 extern uint8_t asm_algorithm_t(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
 
-void comparing_topological_sort() {
+void comparing_linked_queue_topological_sort() {
     volatile uint32_t start, end, overhead;
 
 	start = DWT->CYCCNT;
