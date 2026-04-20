@@ -11,7 +11,7 @@ extern uint8_t asm_algorithm_t_sequential(uint8_t n, Pair* input_pairs, uint8_t 
 extern uint8_t rust_asm_algorithm_t(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
 extern uint8_t clang_algorithm_t_sequential(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
 
-void comparing_topological_sort_sequential() {
+void comparing_topological_sort_sequential(void) {
     volatile uint32_t start, end, overhead;
 
 	start = DWT->CYCCNT;
