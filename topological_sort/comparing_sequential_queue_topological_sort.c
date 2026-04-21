@@ -8,7 +8,7 @@ uint8_t c_algorithm_t_queue_sequential(uint8_t n, Pair* input_pairs, uint8_t inp
 extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 extern uint8_t asm_algorithm_t_sequential(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
-extern uint8_t rust_asm_algorithm_t(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
+extern uint8_t rust_asm_queue_sequential_algorithm_t(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
 extern uint8_t clang_algorithm_t_sequential(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
 
 void comparing_sequential_queue_topological_sort(void) {
@@ -67,13 +67,13 @@ void comparing_sequential_queue_topological_sort(void) {
 	// Rust (rustc/LLVM backend) --target thumbv7em-none-eabi -C opt-level=3 -C target-cpu=cortex-m4
 	// cold cycles = 7376-7398 | warm cycles = 7235-7239 | size = 742 bytes
 	start = DWT->CYCCNT;
-	uint8_t rust_asm_topological_status = rust_asm_algorithm_t(n, input_pairs, input_pairs_len, asm_output);
+	uint8_t rust_asm_topological_status = rust_asm_queue_sequential_algorithm_t(n, input_pairs, input_pairs_len, asm_output);
 	if (rust_asm_topological_status == 0) return 0;
 	end = DWT->CYCCNT;
 	volatile uint32_t rust_asm_topological_sort_cycles_cold = (end - start) - overhead;
 
 	start = DWT->CYCCNT;
-	rust_asm_topological_status = rust_asm_algorithm_t(n, input_pairs, input_pairs_len, asm_output);
+	rust_asm_topological_status = rust_asm_queue_sequential_algorithm_t(n, input_pairs, input_pairs_len, asm_output);
 	if (rust_asm_topological_status == 0) return 0;
 	end = DWT->CYCCNT;
 	volatile uint32_t rust_asm_topological_sort_cycles_warm = (end - start) - overhead;

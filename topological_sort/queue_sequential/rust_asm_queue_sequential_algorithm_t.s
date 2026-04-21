@@ -1,7 +1,7 @@
 .syntax unified
     .thumb
     .cpu cortex-m4
-    .global rust_asm_algorithm_t
+    .global rust_asm_queue_sequential_algorithm_t
     .type rust_asm_algorithm_t, %function
 
 
@@ -11,7 +11,7 @@ __rustc_rust_begin_unwind:
 .LBB0_1:
         b       .LBB0_1
 
-rust_asm_algorithm_t:
+rust_asm_queue_sequential_algorithm_t:
         push    {r4, r5, r6, r7, lr}
         add     r7, sp, #12
         push.w  {r8, r9, r10, r11}
