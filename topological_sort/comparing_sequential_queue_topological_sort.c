@@ -37,7 +37,7 @@ void comparing_sequential_queue_topological_sort(void) {
 	volatile uint32_t c_topological_sort_cycles_warm = (end - start) - overhead;
 
 	// Clang -O3 --target=arm-none-eabi -mcpu=cortex-m4 -mthumb
-	// cold cycles = 6742-6760 | warm cycles = 6703-6706 | size = 736 bytes
+	// cold cycles = 6735-6760 | warm cycles = 6698-6706 | size = 736 bytes
 	start = DWT->CYCCNT;
 	uint8_t clang_topological_status = clang_algorithm_t_sequential(n, input_pairs, input_pairs_len, output);
 	if (clang_topological_status == 0) return 0;
@@ -51,7 +51,7 @@ void comparing_sequential_queue_topological_sort(void) {
 	volatile uint32_t clang_topological_sort_cycles_warm = (end - start) - overhead;
 
 	// ARM Assembly
-	// cold cycles = 5599 | warm cycles = 5541 | size = 276 bytes
+	// cold cycles = 5580-5599 | warm cycles = 5538-5541 | size = 276 bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_topological_status = asm_algorithm_t_sequential(n, input_pairs, input_pairs_len, asm_output);
 	if (asm_topological_status == 0) return 0;
@@ -65,7 +65,7 @@ void comparing_sequential_queue_topological_sort(void) {
 	volatile uint32_t asm_topological_sort_cycles_warm = (end - start) - overhead;
 
 	// Rust (rustc/LLVM backend) --target thumbv7em-none-eabi -C opt-level=3 -C target-cpu=cortex-m4
-	// cold cycles = 7376-7398 | warm cycles = 7238-7239 | size = 742 bytes
+	// cold cycles = 7376-7398 | warm cycles = 7235-7239 | size = 742 bytes
 	start = DWT->CYCCNT;
 	uint8_t rust_asm_topological_status = rust_asm_algorithm_t(n, input_pairs, input_pairs_len, asm_output);
 	if (rust_asm_topological_status == 0) return 0;
