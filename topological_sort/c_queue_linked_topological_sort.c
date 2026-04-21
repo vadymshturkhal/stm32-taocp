@@ -6,7 +6,7 @@
 extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 
-uint8_t c_algorithm_t(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output) {
+uint8_t c_algorithm_t_queue_linked(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output) {
 	// T1 (Initialize)
 	TopologicalNode* P;
 	uint32_t FRONT;
