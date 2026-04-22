@@ -96,7 +96,6 @@ handle_relations:
 	MOVS R3, R8			@ R3 COUNT and TOP
 
 	BL asm_handle_relations_sequential
-	CBZ R0, exception
 
 @ T4
 prepare_to_scan_for_zeros:
@@ -111,7 +110,7 @@ scan_for_zeros:
 	LDR R2, [R8, R1, LSL #3]				@ R2 = COUNT[k]
 	CBNZ R2, continue_to_scan	@ COUNT[k] == 0?
 
-	STR R1, [R5]			@ QLINK[REAR] = k
+	STR R1, [R5]				@ QLINK[REAR] = k
 	ADD R5, R8, R1, LSL #3		@ R5 = REAR pointer = Address of COUNT[k]
 	@ MOVS R5, R3				@ Updare REAR pointer
 
@@ -136,7 +135,6 @@ output_front_of_queue:
 
 	ADD R2, R8, R0, LSL #3		@ Address of TOP[FRONT]
 	LDR R3, [R2, #TOP_OFFSET]	@ P = TOP[FRONT]
-
 	CBZ R3, remove_from_queue
 
 @ T6
@@ -147,14 +145,14 @@ erase_relations:
 
 	LDR R1, [R8, R6, LSL #3]		@ COUNT[P->succ]
 	SUBS R1, R1, #1
+
+	@ CMP R1, #0
+	ITT EQ
+	STREQ R6, [R5]					@ QLINK[REAR] = P->succ;
+	ADDEQ R5, R8, R6, LSL #3		@ R5 = REAR = COUNT[P->succ]
+
 	STR R1, [R8, R6, LSL #3]		@ COUNT[P->succ] -= 1
 
-	CBNZ R1, next_p
-
-	STR R6, [R5]					@ QLINK[REAR] = P->succ;
-	ADD R5, R8, R6, LSL #3			@ R5 = REAR = COUNT[P->succ]
-
-next_p:
 	CMP R3, #0
 	BNE erase_relations
 
