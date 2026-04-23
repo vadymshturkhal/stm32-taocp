@@ -251,4 +251,5 @@ and then `DWT_Init();` in `main.c`
             * Rust (rustc/LLVM):    cold cycles = `45740` | warm cycles = `45574` | size = `742` bytes
             * Clang:                cold cycles = `56560` | warm cycles = `56448` | size = `736` bytes
             * GCC:                  cold cycles = `75760` | warm cycles = `75700` | size = `324` bytes
+            * **Insight (Crashing Clang):**  Commenting {462,461} pair will crash the Clang, while ASM, Rust and GCC are effectively handle that case 
 </details>
