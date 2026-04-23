@@ -11,6 +11,10 @@
 - Queue;
 - Topological Sort;
 
+## Setup:
+- Hardware: STM32G431RB (ARM Cortex-M4)
+- Profiler: Internal DWT Cycle Counter
+
 ## How to run:
 - Navigate to the specific algorithm's folder;
 - Run the C script starting with the word `comparing`;
@@ -198,7 +202,7 @@ and then `DWT_Init();` in `main.c`
 
 * **Base case: `n = 50, input_pairs_len = 139 (Hamiltonian Path with 90 cache-thrashing jump edges)`:**
     * **`Queue based` with `Linked Memory Allocation`:**
-        * GCC -O3: cold cycles = `10494` | warm cycles= `10394` | size = `384` bytes
+        * GCC -O3: cold cycles = `10494` | warm cycles = `10394` | size = `384` bytes
         * ARM Assembly: cold cycles = `7867` | warm cycles= `7822` | size = `308` bytes
         * **Summary:** Hand-tuned ASM outperformed GCC by `~2,627` cycles (**~25% time reduction**) in the cold run and by `~2,572` cycles (**~24.7% time reduction**) in the warm run, with ASM consuming **~19.7%** less Flash memory
         * **Tricks & Insights:** 
@@ -215,4 +219,29 @@ and then `DWT_Init();` in `main.c`
             * **LeetCode Hero:** cold cycles = `22431` | warm cycles = `22385` | size = `924` bytes
             * **Summary (Knuth vs LeetCode Regular):** C Algorithm T outperformed LeetCode Regular by `36,814` cycles (**~77.8% time reduction**) in the cold run and by `25,497` cycles (**~71% time reduction**) in the warm run, with Algorithm T consuming **~50.2%** less Flash memory (`384` bytes vs `772` bytes)
             * **Summary (Knuth vs LeetCode Hero):** C Algorithm T outperformed LeetCode Hero by `11,937` cycles (**~53.2% time reduction**) in the cold run and by `11,991` cycles (**~53.5% time reduction**) in the warm run, with Algorithm T consuming **~58.4%** less Flash memory (`384` bytes vs `924` bytes)
+
+    * **`Queue based` with `Sequential Memory Allocation`:**
+        * GCC:                  cold cycles = `8665-8672` | warm cycles = `8565-8568` | size = `324` bytes
+        * Clang:                cold cycles = `6735-6760` | warm cycles = `6685-6706` | size = `736` bytes
+        * ARM Assembly:         cold cycles = `5252` | warm cycles= `5207` | size = `280` bytes
+        * Rust (rustc/LLVM):    cold cycles = `7376-7398` | warm cycles = `7235-7239` | size = `742` bytes
+
+        * **Compiler Configuration Notes:** 
+            * GCC: -O3 -mcpu=cortex-m4 -mthumb
+            * Clang: -O3 --target=arm-none-eabi -mcpu=cortex-m4 -mthumb
+            * Rust (rustc): --target thumbv7em-none-eabi -C opt-level=3 -C target-cpu=cortex-m4
+
+        * **Summary:** 
+            * Handwritten ASM: Achieves the fastest execution time and produces the absolute smallest binary footprint
+            * Clang (LLVM): Prioritizes raw throughput over space. It trades massive flash memory bloat (nearly 3x larger than the ASM) for speed through aggressive loop unrolling
+            * Rust (LLVM): Shares the same massive LLVM footprint as Clang but bleeds ~530 extra cycles
+            * GCC: The slowest, it maintained a tight binary size by conservatively refusing to unroll the loops, and paid a heavy price in execution time 
+
+        * **Tricks & Insights:** 
+            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrink the binary footprint
+            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+            * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
+            * **Memory Allocation:** Allocated `COUNT`, `TOP` and `AVAIL_LIST` memory at once, perfectly interleaving `COUNT` and `TOP` arrays to maximize bus bandwidth during initialization (`STMIA`)
+            * **Registers:**  Store and Load data one by one
+            * **Latency Hiding**
 </details>
