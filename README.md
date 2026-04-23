@@ -242,6 +242,6 @@ and then `DWT_Init();` in `main.c`
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Memory Allocation:** Allocated `COUNT`, `TOP` and `AVAIL_LIST` memory at once, perfectly interleaving `COUNT` and `TOP` arrays to maximize bus bandwidth during initialization (`STMIA`)
-            * **Registers:**  Store and Load data one by one
             * **Latency Hiding**
+            * **Insight (Step-by-step data usage):**  Replaced bulk `LDM/STM` instructions with targeted single loads `LDR/STR` inside the main loop to prevent bus saturation and perfectly interleave memory access with ALU math for Latency Hiding
 </details>
