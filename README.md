@@ -212,7 +212,7 @@ and then `DWT_Init();` in `main.c`
             * **Memory Allocation:** Allocated `COUNT`, `TOP` and `AVAIL_LIST` memory at once, perfectly interleaving `COUNT` and `TOP` arrays to maximize bus bandwidth during initialization (`STMIA`)
             * **Post-Increment Queuing:** Replaced integer `output` counter with hardware post-increment writeback to auto-advance the `output` pointer in 1 clock cycle
             * **Zero-Flag Branching:** Favored 16-bit `CBZ/CBNZ` over standard `CMP + Branch` to execute conditional jumps natively in the hardware without touching the ALU
-            * **Insight (MOV 16-bit instructions):** Difference between `MOV R2, #0 then MOV R9, R2` and `MOV R9, #0`
+            * **Insight (MOV 16-bit instructions):** Difference between `MOV R2, #0 then MOV R9, R2` and `MOV R9, #0`, proxying through low register forces 16-bit encoding, direct high register load requires 32-bit
 
         * **Additional LeetCode Guys stats with C&GCC -O3:** 
             * **LeetCode Regular:** cold cycles = `47308` | warm cycles = `35891` | size = `772` bytes
@@ -244,4 +244,6 @@ and then `DWT_Init();` in `main.c`
             * **Memory Allocation:** Allocated `COUNT`, `TOP` and `AVAIL_LIST` memory at once, perfectly interleaving `COUNT` and `TOP` arrays to maximize bus bandwidth during initialization (`STMIA`)
             * **Latency Hiding**
             * **Insight (Step-by-step data usage):**  Replaced bulk `LDM/STM` instructions with targeted single loads `LDR/STR` inside the main loop to prevent bus saturation and perfectly interleave memory access with ALU math for Latency Hiding
+            * **Insight (Bounds check performance paradox):**  adding bounds check in C version made GCC code 137 cycles faster by giving aliasing proof
+
 </details>
