@@ -4,12 +4,12 @@
 #include "test_data.h"
 
 // Prototypes
-uint8_t c_algorithm_t_queue_sequential(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
+uint8_t c_algorithm_t_queue_sequential(uint32_t n, Pair* input_pairs, uint32_t input_pairs_len, uint32_t* output);
 extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
-extern uint8_t asm_algorithm_t_sequential(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
-extern uint8_t rust_asm_queue_sequential_algorithm_t(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
-extern uint8_t clang_algorithm_t_sequential(uint8_t n, Pair* input_pairs, uint8_t input_pairs_len, uint32_t* output);
+extern uint8_t asm_algorithm_t_sequential(uint32_t n, Pair* input_pairs, uint32_t input_pairs_len, uint32_t* output);
+extern uint8_t rust_asm_queue_sequential_algorithm_t(uint32_t n, Pair* input_pairs, uint32_t input_pairs_len, uint32_t* output);
+extern uint8_t clang_algorithm_t_sequential(uint32_t n, Pair* input_pairs, uint32_t input_pairs_len, uint32_t* output);
 
 void comparing_sequential_queue_topological_sort(void) {
     volatile uint32_t start, end, overhead;
@@ -51,7 +51,7 @@ void comparing_sequential_queue_topological_sort(void) {
 	volatile uint32_t clang_topological_sort_cycles_warm = (end - start) - overhead;
 
 	// ARM Assembly
-	// cold cycles = 5299-5319 | warm cycles = 5255-5258 | size = 280 bytes
+	// cold cycles = 5252 | warm cycles = 5207 | size = 280 bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_topological_status = asm_algorithm_t_sequential(n, input_pairs, input_pairs_len, asm_output);
 	if (asm_topological_status == 0) return 0;
