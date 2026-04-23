@@ -34,6 +34,7 @@ asm_handle_relations_sequential:
 
 	@ Set R1 to point to the END of input_pairs
 	ADDS R1, R1, R2, LSL #3		@ R1 = R1 + (input_pairs_len * pair_size)
+	ADDS R6, R3, #TOP_OFFSET	@ R6 = TOP pointer
 
 @ T2 (Next relation)
 .balign 4
@@ -50,19 +51,11 @@ handle_relations_loop:
 	STR R5, [R0, #-8]!			@ Avail -= 8; Avail->succ = k
 	ADDS R7, R7, #1				@ COUNT[k]++
 
-	@ Load TOP[j]
-	ADD R6, R3, R4, LSL #3		@ R7 = TOP[j] memory address
 	STR R7, [R3, R5, LSL #3]	@ Store COUNT[k]
-	LDR R7, [R6, #TOP_OFFSET]	@ R6 = TOP[j]
 
-	@ STRD R5, R6, [R0, #-8]!
-	@ STMDB R0!, {R5, R6}			@ Avail -= 8; Avail->succ = k; Avail->next = TOP[j]
-
-	@ Split STMDB into two STR instructions:
-	@ STR R5, [R0, #-8]!			@ Avail -= 8; Avail->succ = k
+	LDR R7, [R6, R4, LSL #3]	@ R7 = TOP[j]
 	STR R7, [R0, #4]			@ Avail->next = TOP[j]
-
-	STR R0, [R6, #TOP_OFFSET]	@ TOP[j] = Avail (our newly allocated node)
+	STR R0, [R6, R4, LSL #3]	@ TOP[j] = Avail
 
 	SUBS R2, R2, #1
 	BNE handle_relations_loop

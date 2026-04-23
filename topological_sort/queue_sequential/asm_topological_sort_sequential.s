@@ -106,15 +106,13 @@ prepare_to_scan_for_zeros:
 
 .balign 4
 scan_for_zeros:
-	@ADD R3, R8, R1, LSL #3		@ Address of COUNT[k]
-	LDR R2, [R8, R1, LSL #3]				@ R2 = COUNT[k]
-	CBNZ R2, continue_to_scan	@ COUNT[k] == 0?
+	LDR R2, [R8, R1, LSL #3]	@ R2 = COUNT[k]
 
-	STR R1, [R5]				@ QLINK[REAR] = k
-	ADD R5, R8, R1, LSL #3		@ R5 = REAR pointer = Address of COUNT[k]
-	@ MOVS R5, R3				@ Updare REAR pointer
+	CMP R2, #0
+	ITT EQ
+	STREQ R1, [R5]				@ QLINK[REAR] = k
+	ADDEQ R5, R8, R1, LSL #3	@ R5 = REAR pointer = Address of COUNT[k]
 
-continue_to_scan:
 	SUBS R1, R1, #1
 	BNE scan_for_zeros
 
