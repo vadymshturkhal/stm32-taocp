@@ -251,5 +251,5 @@ and then `DWT_Init();` in `main.c`
             * Rust (rustc/LLVM):    cold cycles = `45740` | warm cycles = `45574` | size = `742` bytes
             * Clang:                cold cycles = `56560` | warm cycles = `56448` | size = `736` bytes
             * GCC:                  cold cycles = `75760` | warm cycles = `75700` | size = `324` bytes
-            * **Insight (Crashing Clang):**  Commenting {462,461} pair will crash the Clang, while ASM, Rust and GCC are effectively handle that case 
+            * **Insight (Crashing Clang):**  Commenting {462,461} pair will crash the Clang, while ASM, Rust and GCC are effectively handle that case. Why? Hypothesis: Clang's aggressive -O3 loop unrolling in C likely exploited Undefined Behavior and stripped a termination safeguard, leading to a HardFault. Rust's strict bounds checking and ASM's explicit hardware checks survived the cycle/disjoint safely.
 </details>
