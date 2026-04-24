@@ -242,8 +242,8 @@ and then `DWT_Init();` in `main.c`
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
             * **Bump Allocator:** Created and integrated a custom Bump Allocator (`balloc`)
             * **Memory Allocation:** Allocated `COUNT`, `TOP` and `AVAIL_LIST` memory at once, perfectly interleaving `COUNT` and `TOP` arrays to maximize bus bandwidth during initialization (`STMIA`)
-            * **Latency Hiding**
-            * **Insight (Step-by-step data usage):**  Replaced bulk `LDM/STM` instructions with targeted single loads `LDR/STR` inside the main loop to prevent bus saturation and perfectly interleave memory access with ALU math for Latency Hiding
+            * **Latency Hiding:** Independent loads issued early and interleaved with ALU operations to absorb M4's 2-cycle load latency across the successor traversal chain
+            * **Insight (Step-by-step data usage):**  Replaced bulk `LDM/STM` instructions with targeted single loads `LDR/STR` inside the main loop to prevent bus saturation
             * **Insight (Bounds check performance paradox):**  adding bounds check in C version made GCC code 137 cycles faster by giving aliasing proof
 
         * **Additional `n = 500, input_pairs_len = 1000` case stats:**
