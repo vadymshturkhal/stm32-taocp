@@ -201,7 +201,7 @@ and then `DWT_Init();` in `main.c`
 <summary><b>Algorithm T (Topological Sort)</b></summary>
 
 * **Base case: `n = 50, input_pairs_len = 139 (Hamiltonian Path with 90 cache-thrashing jump edges)`:**
-    * **`Queue based` with `Linked Memory Allocation`:**
+    * **`Queue Based` with `Linked Memory Allocation`:**
         * GCC -O3: cold cycles = `10494` | warm cycles = `10394` | size = `384` bytes
         * ARM Assembly: cold cycles = `7867` | warm cycles= `7822` | size = `308` bytes
         * **Summary:** Hand-tuned ASM outperformed GCC by `~2,627` cycles (**~25% time reduction**) in the cold run and by `~2,572` cycles (**~24.7% time reduction**) in the warm run, with ASM consuming **~19.7%** less Flash memory
@@ -220,7 +220,7 @@ and then `DWT_Init();` in `main.c`
             * **Summary (Knuth vs LeetCode Regular):** C Algorithm T outperformed LeetCode Regular by `36,814` cycles (**~77.8% time reduction**) in the cold run and by `25,497` cycles (**~71% time reduction**) in the warm run, with Algorithm T consuming **~50.2%** less Flash memory (`384` bytes vs `772` bytes)
             * **Summary (Knuth vs LeetCode Hero):** C Algorithm T outperformed LeetCode Hero by `11,937` cycles (**~53.2% time reduction**) in the cold run and by `11,991` cycles (**~53.5% time reduction**) in the warm run, with Algorithm T consuming **~58.4%** less Flash memory (`384` bytes vs `924` bytes)
 
-    * **`Queue based` with `Sequential Memory Allocation`:**
+    * **`Queue Based` with `Sequential Memory Allocation`:**
         * ARM Assembly:         cold cycles = `5152-5167` | warm cycles= `5106-5109` | size = `280` bytes
         * Clang:                cold cycles = `6735-6760` | warm cycles = `6685-6706` | size = `736` bytes
         * Rust (rustc/LLVM):    cold cycles = `7376-7398` | warm cycles = `7235-7239` | size = `742` bytes
@@ -254,4 +254,23 @@ and then `DWT_Init();` in `main.c`
             * **Short Summary:** Clang beats Rust at `n=50` but loses at `n=500`. GCC is slowest at both but scales most predictably. ASM wins at both
             * **Long Summary:** Compiler scaling behavior flips drastically at scale. Clang beats Rust at a small `N=50` dataset and loses heavily at `N=500`, proving its aggressive loop unrolling (736 bytes) chokes at scale, likely due to I-Cache pressure. Rust scales efficiently due to its strict aliasing guarantees. GCC is the slowest at both but scales predictably. Handwritten ASM is the absolute winner in both cases and its 280-byte footprint easily fits in the cache, allowing it to scale flawlessly without LLVM's bloat
             * **Insight (Crashing Clang):**  Commenting {462,461} pair will crash the Clang, while ASM, Rust and GCC effectively handle that case. Why? Hypothesis: Clang's aggressive -O3 loop unrolling in C likely exploited Undefined Behavior and stripped a termination safeguard, leading to a HardFault. Rust's strict bounds checking and ASM's explicit hardware checks survived the cycle/disjoint safely
+
+    * **`Stack Based` with `Sequential Memory Allocation`:**
+        * ARM Assembly:         cold cycles = `4999-5013` | warm cycles= `4955-4964` | size = `272` bytes
+        * Clang:                cold cycles = `5733-5758` | warm cycles = `5562-5564` | size = `812` bytes
+        * Rust (rustc/LLVM):    cold cycles = `6546-6551` | warm cycles = `6367-6372` | size = `596` bytes
+        * GCC:                  cold cycles = `7200-7206` | warm cycles = `6968-6969` | size = `416` bytes
+
+        * **Compiler Configuration Notes:** 
+            * GCC: -O3 -mcpu=cortex-m4 -mthumb
+            * Clang: -O3 --target=arm-none-eabi -mcpu=cortex-m4 -mthumb
+            * Rust (rustc): --target thumbv7em-none-eabi -C opt-level=3 -C target-cpu=cortex-m4
+
+        * **Additional `n = 500, input_pairs_len = 1000` case stats:**
+            * ARM Assembly:         cold cycles = `41096` | warm cycles= `41024` | size = `274` bytes
+            * Clang:                cold cycles = `49494` | warm cycles = `49389` | size = `812` bytes
+            * Rust (rustc/LLVM):    cold cycles = `52535` | warm cycles = `52431` | size = `596` bytes
+            * GCC:                  cold cycles = `59069` | warm cycles = `58021` | size = `416` bytes
+
+            * **Insight (Crashing Clang):**  Commenting {462,461} pair won't crash the Clang in that case
 </details>
