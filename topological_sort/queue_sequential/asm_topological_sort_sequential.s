@@ -117,6 +117,7 @@ scan_for_zeros:
 	BNE scan_for_zeros
 
 @ R0 Front
+@ R2 TOP
 @ R3 P
 @ R4 N
 @ R5 REAR
@@ -126,6 +127,7 @@ scan_for_zeros:
 prepare_t5:
 	LDR R0, [R8]			@ FRONT = QLINK[0];
 
+.balign 4
 output_front_of_queue:
 	CBZ R0, end_of_process
 
@@ -136,7 +138,6 @@ output_front_of_queue:
 	CBZ R3, remove_from_queue
 
 @ T6
-.balign 4
 erase_relations:
 	LDR R6, [R3, #NODE_INFO]
 	LDR R3, [R3, #NODE_LINK]		@ P = P->next
@@ -156,8 +157,11 @@ erase_relations:
 
 @ T7
 remove_from_queue:
-	ADD R1, R8, R0, LSL #3
-	LDR R0, [R1, #QLINK_OFFSET]		@ FRONT = QLINK[FRONT]
+	@ ADD R1, R8, R0, LSL #3
+	@ LDR R0, [R1, #QLINK_OFFSET]		@ FRONT = QLINK[FRONT]
+
+	@ Don't need to ADD as #QLINK_OFFSET is 0
+	LDR R0, [R8, R0, LSL #3]		@ FRONT = QLINK[FRONT]
 	SUBS R4, R4, #1					@ N--
 	BNE output_front_of_queue
 
