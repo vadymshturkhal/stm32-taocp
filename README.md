@@ -275,6 +275,6 @@ and then `DWT_Init();` in `main.c`
             * Rust (rustc/LLVM):    cold cycles = `52535` | warm cycles = `52431` | size = `596` bytes
             * GCC:                  cold cycles = `59069` | warm cycles = `58021` | size = `416` bytes
 
-            * **Insight (Crashing Clang):**  Commenting {462,461} pair won't crash the Clang in that case
+            * **Insight (Crashing Clang):**  Commenting {462,461} pair won't crash the Clang in that case, proved that the crash is structure-specific — Queue's linked traversal creates a code path Clang's optimizer incorrectly eliminates. Stack's sequential traversal doesn't trigger the same UB exploitation
             * **Insight (Rust (LLVM)):**  Rust Stack based is faster than Rust Queue based in `n = 50, input_pairs_len = 139` case, but it's slower in `n = 500, input_pairs_len = 1000` case
 </details>
