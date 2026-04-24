@@ -266,6 +266,9 @@ and then `DWT_Init();` in `main.c`
             * Clang: -O3 --target=arm-none-eabi -mcpu=cortex-m4 -mthumb
             * Rust (rustc): --target thumbv7em-none-eabi -C opt-level=3 -C target-cpu=cortex-m4
 
+        * **Tricks & Insights:**
+            * **Registers Permutation:** Lipski Trick at T6
+
         * **Additional `n = 500, input_pairs_len = 1000` case stats:**
             * ARM Assembly:         cold cycles = `41096` | warm cycles= `41024` | size = `274` bytes
             * Clang:                cold cycles = `49494` | warm cycles = `49389` | size = `812` bytes
