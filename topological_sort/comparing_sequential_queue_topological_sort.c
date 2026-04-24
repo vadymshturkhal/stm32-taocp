@@ -51,7 +51,7 @@ void comparing_sequential_queue_topological_sort(void) {
 	volatile uint32_t clang_topological_sort_cycles_warm = (end - start) - overhead;
 
 	// ARM Assembly
-	// cold cycles = 5252 | warm cycles = 5207 | size = 280 bytes
+	// cold cycles = 5152-5167 | warm cycles = 5106-5109 | size = 280 bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_topological_status = asm_algorithm_t_sequential(n, input_pairs, input_pairs_len, asm_output);
 	if (asm_topological_status == 0) return 0;
