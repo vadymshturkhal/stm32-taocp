@@ -210,15 +210,24 @@ Pair input_pairs[] = {
 //};
 
 // Output: [500, 499, 498, ... 3, 2, 1]
+// Queue Sequential Stats:
 // ASM: cycles_cold = 43598, cycles_warm = 43520, size = 280 bytes
 // Rust: cycles_cold = 45740, cycles_warm = 45574, size = 742 bytes
 // Clang: cycles_cold = 56560, cycles_warm = 56448, size = 736 bytes
 // GCC: cycles_cold = 75760, cycles_warm = 75700, size = 324 bytes
+
+// Stack Sequential Stats:
+// ASM: cycles_cold = 41096, cycles_warm = 41024, size = 274 bytes
+// Clang: cycles_cold = 49494, cycles_warm = 49389, size = 812 bytes
+// Rust: cycles_cold = 52535, cycles_warm = 52431, size = 596 bytes
+// GCC: cycles_cold = 59069, cycles_warm = 58021, size = 416 bytes
+// Note: Clang don't crash in that case
+
 //const uint32_t n = 500;
 //const uint32_t input_pairs_len = 1000;
 //Pair input_pairs[] = {
 //    {200,106},
-//	{462,461}, // Comment for crashing Clang
+//	{462,461}, // Comment for crashing Clang in Queue Sequential case
 //	{162,8}, {230,173}, {339,338}, {365,311}, {408,350}, {332,331}, {208,80}, {282,274},
 //    {260,55}, {382,381}, {432,431}, {277,276}, {345,344}, {141,140}, {240,1}, {406,247}, {433,235}, {144,143},
 //    {328,327}, {52,29}, {463,265}, {85,84}, {259,71}, {440,136}, {67,4}, {228,176}, {31,12}, {434,240},
