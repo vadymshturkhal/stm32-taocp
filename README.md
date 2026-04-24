@@ -1,4 +1,6 @@
 # Implementation of The Art of Computer Programming Vol.1 in C and ARM Assembly
+- This repository contains C and hand-tuned ARM Assembly implementations of TAOCP algorithms on STM32G431RB
+- It focuses on reproducible cycle-count benchmarking, code-size trade-offs, and low-level optimization techniques
 
 # Implemented algorithms:
 - Algorithm P (Print table of 500 primes);
