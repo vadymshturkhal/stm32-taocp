@@ -221,7 +221,7 @@ and then `DWT_Init();` in `main.c`
             * **Summary (Knuth vs LeetCode Hero):** C Algorithm T outperformed LeetCode Hero by `11,937` cycles (**~53.2% time reduction**) in the cold run and by `11,991` cycles (**~53.5% time reduction**) in the warm run, with Algorithm T consuming **~58.4%** less Flash memory (`384` bytes vs `924` bytes)
 
     * **`Queue based` with `Sequential Memory Allocation`:**
-        * ARM Assembly:         cold cycles = `5252` | warm cycles= `5207` | size = `280` bytes
+        * ARM Assembly:         cold cycles = `5152-5167` | warm cycles= `5106-5109` | size = `280` bytes
         * Clang:                cold cycles = `6735-6760` | warm cycles = `6685-6706` | size = `736` bytes
         * Rust (rustc/LLVM):    cold cycles = `7376-7398` | warm cycles = `7235-7239` | size = `742` bytes
         * GCC:                  cold cycles = `8665-8672` | warm cycles = `8565-8568` | size = `324` bytes
@@ -247,7 +247,7 @@ and then `DWT_Init();` in `main.c`
             * **Insight (Bounds check performance paradox):**  adding bounds check in C version made GCC code 137 cycles faster by giving aliasing proof
 
         * **Additional `n = 500, input_pairs_len = 1000` case stats:**
-            * ARM Assembly:         cold cycles = `43598` | warm cycles= `43520` | size = `280` bytes
+            * ARM Assembly:         cold cycles = `42598` | warm cycles= `42525` | size = `280` bytes
             * Rust (rustc/LLVM):    cold cycles = `45740` | warm cycles = `45574` | size = `742` bytes
             * Clang:                cold cycles = `56560` | warm cycles = `56448` | size = `736` bytes
             * GCC:                  cold cycles = `75760` | warm cycles = `75700` | size = `324` bytes
