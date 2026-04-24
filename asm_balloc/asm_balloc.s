@@ -8,7 +8,7 @@
 .section .bss				@ Block Started by Symbol (Uninitialized Memory)
 .balign 8
 custom_heap_base:
-	.space 8192				@ 8 * 1024
+	.space 16384			@ 16 * 1024
 custom_heap_end:
 
 .section .data				@ Initialized Memory
