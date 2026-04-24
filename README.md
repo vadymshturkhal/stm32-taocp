@@ -276,5 +276,5 @@ and then `DWT_Init();` in `main.c`
             * GCC:                  cold cycles = `59069` | warm cycles = `58021` | size = `416` bytes
 
             * **Insight (Crashing Clang):**  Commenting {462,461} pair won't crash the Clang in that case
-            * **Insight (Rust (LLVM)):**  Rust Stack based is faster than Rust Queue based in the `n = 50, input_pairs_len = 139` case but it's slower than Rust Queue based in the `n = 500, input_pairs_len = 1000` case
+            * **Insight (Rust (LLVM)):**  Rust Stack based is faster than Rust Queue based in `n = 50, input_pairs_len = 139` case, but it's slower in `n = 500, input_pairs_len = 1000` case
 </details>
