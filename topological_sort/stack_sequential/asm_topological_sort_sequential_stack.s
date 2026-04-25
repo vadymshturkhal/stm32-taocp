@@ -109,7 +109,9 @@ scan_for_zeros:
 @ R3 P
 @ R4 N
 @ R5 TOP
-@ R1, R2, R5, R6 scratch registers
+@ R6 P-> succ
+@ R1 tmp
+@ R2  free register
 
 @ T5
 .balign 4
