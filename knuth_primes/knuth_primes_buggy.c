@@ -104,7 +104,7 @@ uint32_t* c_knuth_primes_buggy(uint32_t* primes_array, uint32_t primes_to_find) 
 //	primes_found++;
 
 	while (1) {
-		if (is_prime_buggy(candidate, primes_array)) {
+		if (is_prime_correct(candidate, primes_array)) {
 			// go to P2. (in such case candidate must be prime)
 			primes_array[primes_found] = candidate;
 			primes_found++;
@@ -119,3 +119,31 @@ uint32_t* c_knuth_primes_buggy(uint32_t* primes_array, uint32_t primes_to_find) 
 		candidate += 2;
 	}
 }
+
+
+//uint32_t* c_knuth_primes_buggy(uint32_t* primes_array, uint32_t primes_to_find) {
+//	// P1
+//	primes_array[0] = 2;
+//	uint32_t primes_found = 1;
+//	uint32_t candidate = 3;
+//
+//	// P2
+//	primes_array[primes_found] = candidate;
+//	primes_found++;
+//
+//	while (1) {
+//		// P3
+//		if (primes_found == primes_to_find) {
+//			return;
+//		}
+//
+//		// P4
+//		candidate += 2;
+//
+//		if (is_prime(candidate, primes_array)) {
+//			// go to P2. (in such case candidate must be prime)
+//			primes_array[primes_found] = candidate;
+//			primes_found++;
+//		}
+//	}
+//}

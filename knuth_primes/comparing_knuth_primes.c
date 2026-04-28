@@ -18,7 +18,9 @@ void comparing_primes() {
 	// GCC -O3
 	// with 500 primes;
 	// cycles_cold = [120736-120741], cycles_warm = [120712-120713], size = 76 bytes;
-	volatile uint32_t* c_primes_array = malloc(PRIMES_TO_PRINT * sizeof(uint32_t));
+	volatile uint32_t* c_primes_array = asm_balloc(PRIMES_TO_PRINT * sizeof(uint32_t));
+	if (c_primes_array == NULL) return 0;
+//	static volatile uint32_t c_primes_array[500];	// uncomment and comment ARM Assembly to gain same speed as balloc
 	start = DWT->CYCCNT;
 	c_knuth_primes_mod_3_hack_xor(c_primes_array, PRIMES_TO_PRINT);
 	end = DWT->CYCCNT;
@@ -33,7 +35,7 @@ void comparing_primes() {
 	// ARM Assembly
 	// with 500 primes;
 	// cycles_cold = [115679-115712], cycles_warm = [115654-115692], size = 72 bytes;
-	volatile uint32_t* asm_primes_array = malloc(PRIMES_TO_PRINT * sizeof(uint32_t));
+	volatile uint32_t* asm_primes_array = asm_balloc(PRIMES_TO_PRINT * sizeof(uint32_t));
 	start = DWT->CYCCNT;
 	asm_knuth_primes_mod_3_hack_xor(asm_primes_array, PRIMES_TO_PRINT);
 	end = DWT->CYCCNT;
@@ -45,6 +47,6 @@ void comparing_primes() {
 	volatile uint32_t asm_cycles_warm_knuth_primes = (end - start) - overhead;
 
 
-	free(c_primes_array);
 	free(asm_primes_array);
+	free(c_primes_array);
 }
