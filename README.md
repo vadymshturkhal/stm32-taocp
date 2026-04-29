@@ -2,7 +2,7 @@
 - This repository contains C and hand-tuned ARM Assembly implementations of TAOCP algorithms on STM32G431RB
 - It focuses on reproducible cycle-count benchmarking, code-size trade-offs, and low-level optimization techniques
 
-# Implemented algorithms:
+# Implemented Algorithms and Data Structures:
 - Algorithm P (Print table of 500 primes);
 - Algorithm A (Multiply permutations in cycle form);
 - Algorithm B (Multiply permutations in cycle form);
