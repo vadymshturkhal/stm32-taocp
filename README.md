@@ -196,6 +196,7 @@ and then `DWT_Init();` in `main.c`
             * **Insight (Two-Pointer Credit & Avail Linking):** Hand-tuned `ASM MVE mod 4 Queue` outperforms hand-tuned `ASM MVE mod 4 Stack` by ~max_nodes cycles
             * **Insight (The Permutation Identity):** The register permutation returns to identity after 4 iterations
             * **Insight (Why GCC loses despite unrolling):** The permutation identity trick is mathematical and mechanical unrolling, that replicates the loop body, cannot eliminate inter-iteration register moves
+            * **Insight (Physical limits):** Stripped the pipeline down to physical limits, achieving `~4 cycles` per Enqueue and `~5 cycles` per Dequeue
             * **Note (MVE mod 4 naming):** Named MVE mod 4 trick after Witold Lipski, now it's called Lipski trick 
 </details>
 
