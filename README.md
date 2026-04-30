@@ -12,6 +12,7 @@
 - Stack;
 - Queue;
 - Topological Sort;
+- Circular List;
 
 ## Setup:
 - Hardware: STM32G431RB (ARM Cortex-M4)
