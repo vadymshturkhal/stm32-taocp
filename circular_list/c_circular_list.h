@@ -24,6 +24,6 @@ bool circular_list_insert_left(CircularList* circular_list, uint32_t info);
 bool circular_list_insert_right(CircularList* circular_list, uint32_t info);
 uint32_t circular_list_pop(CircularList* circular_list, bool* pop_is_success);
 void circular_list_clear(CircularList* circular_list);
-circular_list_union(CircularList* circular_list_a, CircularList* circular_list_b);
+void circular_list_union(CircularList* circular_list_a, CircularList* circular_list_b);
 
 #endif
