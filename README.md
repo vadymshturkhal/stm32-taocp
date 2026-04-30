@@ -11,7 +11,7 @@
 - Josephus Problem (Generalized);
 - Stack;
 - Queue;
-- Topological Sort;
+- Algorithm T(Topological Sort);
 - Circular List;
 
 ## Setup:
