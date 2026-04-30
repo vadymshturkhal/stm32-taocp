@@ -12,7 +12,7 @@
 .equ NODE_LINK, 	4
 .equ NODE_SIZE,		8
 
-.equ PTR, 			0
+.equ CIRCULAR_PTR, 	0
 .equ CIRCULAR_AVAIL,4
 .equ CIRCULAR_SIZE, 8
 
@@ -28,7 +28,7 @@
 
 asm_create_circular_list_hoisted:
 	MOVS R2, #0
-	STR R2, [R0, #PTR]	@ circular_list->ptr = NULL
+	STR R2, [R0, #CIRCULAR_PTR]	@ circular_list->ptr = NULL
 	CBZ R1, early_exit
 
 .balign 4
