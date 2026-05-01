@@ -1,11 +1,11 @@
 .syntax unified
     .thumb
     .cpu cortex-m4
-    .global asm_create_circular_list_hoisted
-	.type asm_create_circular_list_hoisted, %function
+    .global asm_create_circular_list_lipski_mod2
+	.type asm_create_circular_list_lipski_mod2, %function
 
-@ Used Lipski Trick (MVE mod 2) with hoisting
-@ ~4.7 cycles per node
+@ Used Lipski Trick (MVE mod 2) with hoisting and Duff's Device
+@ ~4.25 cycles per node, 64 bytes
 
 @ Struct memory offset
 .equ NODE_INFO,		0
@@ -26,7 +26,7 @@
 @ R2 NULL or 0, tmp
 @ R3 Avail
 
-asm_create_circular_list_hoisted:
+asm_create_circular_list_lipski_mod2:
 	MOVS R2, #0
 	STR R2, [R0, #CIRCULAR_PTR]	@ circular_list->ptr = NULL
 	CBZ R1, early_exit
@@ -39,29 +39,33 @@ init_storage_pool:
 	SUBS R1, R1, #1				@ max_nodes--
 	CBZ R1, done				@ if there is only 1 node
 
+	@ check mod 2 (Duff's Device)
+	TST R1, #1					@ if max_nodes is even jump to hoist_tmp
+	BEQ hoist_tmp
+
+	ADDS R2, R3, #NODE_SIZE		@ tmp = avail+1
+	STR R3, [R2, #NODE_LINK]	@ tmp->link = avail
+
+	MOVS R3, R2					@ avail = tmp
+	SUBS R1, R1, #1				@ max_nodes--
+	CBZ R1, done
+
+hoist_tmp:
 	ADDS R2, R3, #NODE_SIZE		@ tmp = avail+1
 
 .balign 4
 linking_loop:
 	STR R3, [R2, #NODE_LINK]	@ tmp->link = avail
 	ADDS R3, R2, #NODE_SIZE		@ tmp = avail+1
-	@ MOVS R3, R2					@ avail = tmp
-	SUBS R1, R1, #1				@ max_nodes--
-	CBZ R1, done
 
-	@ADDS R3, R2, #NODE_SIZE		@ tmp = avail+1
 	STR R2, [R3, #NODE_LINK]	@ tmp->link = avail
-
-	@ MOVS R2, R3					@ avail = tmp
 	ADDS R2, R3, #NODE_SIZE		@ tmp = avail+1
-	SUBS R1, R1, #1				@ max_nodes--
+
+	SUBS R1, R1, #2				@ max_nodes -= 2
 	BNE linking_loop
 
-sync_avail:
-	MOVS R2, R3
-
 done:
-	STR R2, [R0, #CIRCULAR_AVAIL]	@ circular_list->avail = avail
+	STR R3, [R0, #CIRCULAR_AVAIL]	@ circular_list->avail = avail
 	BX LR
 
 early_exit:
