@@ -35,7 +35,7 @@ void comparing_circular_list_init() {
 	void* memory2 = asm_balloc(max_nodes * sizeof(CircularNode) + sizeof(CircularList));
 	if (memory2 == NULL) return 0;
 
-	// GCC -O3 -mcpu=cortex-m4 -mthumb: cycles_cold = 1730, cycles_warm = 1691, size = 112 bytes
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 1722-1730 | warm cycles = 1690-1691 | size = 112 bytes
 	start = DWT->CYCCNT;
 	CircularList* circular_list = c_create_circular_list(memory1, max_nodes);
 	end = DWT->CYCCNT;
@@ -47,7 +47,7 @@ void comparing_circular_list_init() {
 	volatile uint32_t gcc_cycles_warm = (end - start) - overhead;
 
 	// Clang -O3 -mcpu=cortex-m4 -mthumb --target=arm-none-eabi:
-	// cycles_cold = 1471-1478, cycles_warm = 1440-1445, size = 244 bytes
+	// cold cycles = 1471-1478 | warm cycles = 1440-1445 | size = 244 bytes
 	start = DWT->CYCCNT;
 	CircularList* clang_circular_list = clang_asm_circular_list_init(memory2, max_nodes);
 	end = DWT->CYCCNT;
@@ -58,7 +58,7 @@ void comparing_circular_list_init() {
 	end = DWT->CYCCNT;
 	volatile uint32_t clang_cycles_warm = (end - start) - overhead;
 
-	// ARM Assembly: cycles_cold = 1458-1465, cycles_warm = 1439-1440, size = 100 bytes
+	// ARM Assembly: cold cycles = 1458-1465 | warm cycles = 1439-1440 | size = 100 bytes
 	start = DWT->CYCCNT;
 	CircularList* asm_circular_list = asm_create_circular_list_lipski_mod4(memory1, max_nodes);
 	end = DWT->CYCCNT;
