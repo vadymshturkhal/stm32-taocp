@@ -3,25 +3,25 @@
 - It focuses on reproducible cycle-count benchmarking, code-size trade-offs, and low-level optimization techniques
 
 # Implemented Algorithms and Data Structures:
-- Algorithm P (Print table of 500 primes);
-- Algorithm A (Multiply permutations in cycle form);
-- Algorithm B (Multiply permutations in cycle form);
-- Algorithm I (Inverse permutation in place);
-- Algorithm J (Inverse permutation in place);
-- Josephus Problem (Generalized);
-- Stack;
-- Queue;
-- Algorithm T(Topological Sort);
-- Circular List;
+- Algorithm P (Print table of 500 primes)
+- Algorithm A (Multiply permutations in cycle form)
+- Algorithm B (Multiply permutations in cycle form)
+- Algorithm I (Inverse permutation in place)
+- Algorithm J (Inverse permutation in place)
+- Josephus Problem (Generalized)
+- Stack
+- Queue
+- Algorithm T(Topological Sort)
+- Circular List
 
 ## Setup:
 - Hardware: STM32G431RB (ARM Cortex-M4)
 - Profiler: Internal DWT Cycle Counter
 
 ## How to run:
-- Navigate to the specific algorithm's folder;
-- Run the C script starting with the word `comparing`;
-- Note: The latest ARM Assembly versions have the highest trailing number in their filename (e.g., `asm_get_auxiliary_table4.s` is the fully optimized version).
+- Navigate to the specific algorithm's folder
+- Run the C script starting with the word `comparing`
+- Note: The latest ARM Assembly versions have the highest trailing number in their filename (e.g., `asm_get_auxiliary_table4.s` is the fully optimized version)
 - for cycles measurements use:
 ```
 void DWT_Init(void)
