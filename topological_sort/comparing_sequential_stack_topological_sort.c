@@ -22,8 +22,7 @@ void comparing_sequential_stack_topological_sort(void) {
 	uint32_t* output = asm_balloc(n * sizeof(uint32_t));
 	uint32_t* asm_output = asm_balloc(n * sizeof(uint32_t));
 
-	// GCC -O3 -mcpu=cortex-m4 -mthumb
-	// cold cycles = 7200-7206 | warm cycles = 6968-6969 | size = 416 bytes
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 7198-7206 | warm cycles = 6966-6969 | size = 416 bytes
 	start = DWT->CYCCNT;
 	uint8_t gcc_topological_status = c_algorithm_t_stack_sequential(n, input_pairs, input_pairs_len, output);
 	if (gcc_topological_status == 0) return 0;
@@ -36,8 +35,7 @@ void comparing_sequential_stack_topological_sort(void) {
 	end = DWT->CYCCNT;
 	volatile uint32_t gcc_topological_sort_cycles_warm = (end - start) - overhead;
 
-	// Clang -O3 --target=arm-none-eabi -mcpu=cortex-m4 -mthumb
-	// cold cycles = 5733-5758 | warm cycles = 5562-5564 | size = 812 bytes
+	// Clang -O3 --target=arm-none-eabi -mcpu=cortex-m4 -mthumb: cold cycles = 5733-5758 | warm cycles = 5556-5564 | size = 812 bytes
 	start = DWT->CYCCNT;
 	uint8_t clang_topological_status = clang_stack_sequential_algorithm_t(n, input_pairs, input_pairs_len, asm_output);
 	if (clang_topological_status == 0) return 0;
@@ -50,8 +48,7 @@ void comparing_sequential_stack_topological_sort(void) {
 	end = DWT->CYCCNT;
 	volatile uint32_t clang_topological_sort_cycles_warm = (end - start) - overhead;
 
-	// ARM Assembly
-	// cold cycles = 4999-5013 | warm cycles = 4955-4964 | size = 272 bytes
+	// ARM Assembly: cold cycles = 4999-5013 | warm cycles = 4955-4964 | size = 272 bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_topological_status = asm_algorithm_t_sequential_stack(n, input_pairs, input_pairs_len, output);
 	if (asm_topological_status == 0) return 0;
