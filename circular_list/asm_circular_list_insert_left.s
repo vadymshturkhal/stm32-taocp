@@ -1,6 +1,7 @@
 .syntax unified
     .thumb
     .cpu cortex-m4
+    .section .text
     .global asm_circular_list_insert_left
 	.type asm_circular_list_insert_left, %function
 
@@ -31,17 +32,14 @@ asm_circular_list_insert_left:
 	LDR R2, [R0, #CIRCULAR_AVAIL]	@ R2 = Avail
 	CBZ R2, overflow
 
-	@ MOVS R3, R2					@ P = Avail
-
 	LDR R3, [R2, #NODE_LINK]		@ R3 = Avail->link;
 	STR R3, [R0, #CIRCULAR_AVAIL]	@ circular_list->avail = Avail->link;
 
+	LDR R3, [R0, #CIRCULAR_PTR]		@ Load R3
+
 	@ 2
 	STR R1, [R2, #NODE_INFO]		@ P->info = info
-
-	@ R1 and R2 can be reused
-	LDR R3, [R0, #CIRCULAR_PTR]
-	CBNZ R3, insert_p_at_front
+	CBNZ R3, insert_p_at_front		@ Compare R3
 
 	@ P points to itself
 	STR R2, [R2, #NODE_LINK]		@ P->link = P
