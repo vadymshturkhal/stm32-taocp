@@ -11,6 +11,7 @@ CircularNode* init_circular_list_storage_pool(CircularList* circular_list, uint3
 	avail->link = NULL;
 	nodes--;
 
+	//#pragma GCC unroll 4
 	while (nodes > 0) {
 		tmp = avail+1;
 		// tmp->info = size;
@@ -36,17 +37,18 @@ CircularList* c_create_circular_list(void* memory, uint32_t nodes) {
 	return circular_list;
 }
 
-// TUB ~29 cycles, ~14 cycles static inline
+// TUB ~23.17 cycles per node
 bool circular_list_insert_left(CircularList* circular_list, uint32_t info) {
 	// return false if Overflow, else true
 
 	// 1 (P <= Avail)
 	if (circular_list->avail == NULL) return false;	// Overflow
 	CircularNode* P = circular_list->avail;
-	circular_list->avail = circular_list->avail->link;
 
 	// 2
 	P->info = info;
+
+	circular_list->avail = circular_list->avail->link;
 
 	// 3
 	if (circular_list->ptr == NULL) {
@@ -62,7 +64,7 @@ bool circular_list_insert_left(CircularList* circular_list, uint32_t info) {
 	return true;
 }
 
-// TUB ~31 cycles
+// TUB ~24.14 cycles per node
 bool circular_list_insert_right(CircularList* circular_list, uint32_t info) {
 	if (!circular_list_insert_left(circular_list, info)) return false;
 
@@ -70,11 +72,11 @@ bool circular_list_insert_right(CircularList* circular_list, uint32_t info) {
 	return true;
 }
 
-// TUB ~36 cycles
-uint32_t circular_list_pop(CircularList* circular_list, bool* pop_is_success) {
-	// return false if Underflow, else true
-	// input pop_is_success flag must always be true
+// TUB ~29.17 cycles per node
+uint32_t circular_list_pop(bool* pop_is_success, CircularList* circular_list) {
 	// pop left
+	// return 0 if Underflow, else P->info
+	// input pop_is_success flag must always be true
 
 	if (circular_list->ptr == NULL) {
 		*pop_is_success = false;	// Underflow
@@ -82,7 +84,7 @@ uint32_t circular_list_pop(CircularList* circular_list, bool* pop_is_success) {
 	}
 
 	CircularNode* P = circular_list->ptr->link;
-	uint32_t Y = P->info;
+//	uint32_t Y = P->info;
 
 	if (circular_list->ptr == P) {
 		circular_list->ptr = NULL;
@@ -93,8 +95,8 @@ uint32_t circular_list_pop(CircularList* circular_list, bool* pop_is_success) {
 	P->link = circular_list->avail;
 	circular_list->avail = P;
 
-//	return P->info;
-	return Y;
+	return P->info;
+//	return Y;
 }
 
 void circular_list_clear(CircularList* circular_list) {
