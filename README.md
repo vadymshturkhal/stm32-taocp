@@ -282,3 +282,21 @@ and then `DWT_Init();` in `main.c`
             * **Insight (Crashing Clang):**  Commenting {462,461} pair won't crash the Clang in that case, proved that the crash is structure-specific — Queue's linked traversal creates a code path Clang's optimizer incorrectly eliminates. Stack's sequential traversal doesn't trigger the same Undefined Behavior (UB) exploitation
             * **Insight (Rust (LLVM)):**  Rust Stack based is faster than Rust Queue based in `n = 50, input_pairs_len = 139` case, but it's slower in `n = 500, input_pairs_len = 1000` case
 </details>
+
+<details>
+<summary><b>Circular List</b></summary>
+
+* **Base case = `Init Avail List with 128 nodes, Insert Left 128 nodes, Pop 128 nodes, Insert Right 128 nodes, Clear`:**
+    * GCC: cold cycles = 10650-10662 | warm cycles = 10576-10577 | size = 432 bytes
+    * ARM Assembly: same as GCC
+    * **Summary:** For the first time GCC matches hand-tuned ASM in both cycles and Flash size — proved across three functions (insert_left, insert_right, pop) by generating gold-standard all-16-bit ASM by using latency hiding heuristics and zero-stack, branchless instructions order in pure C
+    * **Tricks & Insights:**
+        * **ABI-Driven Argument Ordering** Changed circular_list_pop signature to avoid MOVS instruction
+        * **Manual Register Allocation in C:** Changed instructions order in circular_list_insert_left to avoid unnecessary PUSH to the stack and saving ~25% execution time
+        * **GCC Latency Hiding:** GCC independently proved aliasing safety and hoisted P->info load before two STRs in circular_list_pop — zero stall cycles on return path without any source hint
+        * **Cold Measurement Isolation (Useless):** DSB+ISB+.balign 16 does not fix layout variance when the entire benchmark is one GCC compilation unit — barriers flush pipeline state but cannot change where instructions land in Flash
+
+    * **Compiler Configuration Notes:** 
+        * GCC: -O3 -mcpu=cortex-m4 -mthumb
+
+</details>
