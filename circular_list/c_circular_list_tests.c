@@ -78,7 +78,7 @@ bool test_pop(void) {
     bool pop_success = true;
 
     // 1. Underflow check
-    uint32_t val = circular_list_pop(list, &pop_success);
+    uint32_t val = circular_list_pop(&pop_success, list);
     TEST_ASSERT(pop_success == false);
 
     // 2. FIFO behavior
@@ -87,14 +87,14 @@ bool test_pop(void) {
     circular_list_insert_right(list, 33);
 
     pop_success = true;
-    val = circular_list_pop(list, &pop_success);
+    val = circular_list_pop(&pop_success, list);
     TEST_ASSERT(pop_success == true && val == 11);
 
-    val = circular_list_pop(list, &pop_success);
+    val = circular_list_pop(&pop_success, list);
     TEST_ASSERT(pop_success == true && val == 22);
 
     // 3. Pop the very last item
-    val = circular_list_pop(list, &pop_success);
+    val = circular_list_pop(&pop_success, list);
     TEST_ASSERT(pop_success == true && val == 33);
     TEST_ASSERT(list->ptr == NULL);
 
@@ -137,14 +137,14 @@ bool test_union(void) {
     TEST_ASSERT(list_b->ptr == NULL);
 
     bool pop_ok;
-    TEST_ASSERT(circular_list_pop(list_a, &pop_ok) == 1);
-    TEST_ASSERT(circular_list_pop(list_a, &pop_ok) == 2);
-    TEST_ASSERT(circular_list_pop(list_a, &pop_ok) == 3);
-    TEST_ASSERT(circular_list_pop(list_a, &pop_ok) == 4);
+    TEST_ASSERT(circular_list_pop(&pop_ok, list_a) == 1);
+    TEST_ASSERT(circular_list_pop(&pop_ok, list_a) == 2);
+    TEST_ASSERT(circular_list_pop(&pop_ok, list_a) == 3);
+    TEST_ASSERT(circular_list_pop(&pop_ok, list_a) == 4);
 
     circular_list_insert_right(list_a, 99);
     circular_list_union(list_a, list_b);
-    TEST_ASSERT(circular_list_pop(list_a, &pop_ok) == 99);
+    TEST_ASSERT(circular_list_pop(&pop_ok, list_a) == 99);
 
     // Important: Free both memory blocks!
     FREE_TEST_LIST(list_a);
