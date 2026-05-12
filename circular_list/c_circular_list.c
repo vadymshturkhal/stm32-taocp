@@ -5,15 +5,14 @@
 
 CircularNode* init_circular_list_storage_pool(CircularList* circular_list, uint32_t nodes) {
 	CircularNode* avail = (CircularNode*)(circular_list + 1);
-	CircularNode* tmp;
 
 	// avail->info = size;
 	avail->link = NULL;
 	nodes--;
 
-	//#pragma GCC unroll 4
+	#pragma GCC unroll 4
 	while (nodes > 0) {
-		tmp = avail+1;
+		CircularNode* tmp = avail+1;
 		// tmp->info = size;
 		tmp->link = avail;
 
