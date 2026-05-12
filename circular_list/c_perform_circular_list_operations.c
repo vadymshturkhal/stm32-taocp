@@ -20,7 +20,7 @@ uint8_t c_perform_circular_list_operations(uint32_t max_nodes) {
 
 	// Insert Left max_nodes times
 	for (uint32_t i = max_nodes; i > 0; i--){
-		if (circular_list_insert_left(circular_list, i) == false) {		// 2967
+		if (circular_list_insert_left(circular_list, i) == false) {
 			asm_balloc_free(c_circular_list_memory);
 			return 0;
 		}
@@ -38,11 +38,12 @@ uint8_t c_perform_circular_list_operations(uint32_t max_nodes) {
 
 	// Insert Right max_nodes times
 	for (uint32_t i = max_nodes; i > 0; i--){
-		if (circular_list_insert_right(circular_list, i) == false) {		// 3090
+		if (circular_list_insert_right(circular_list, i) == false)
 			asm_balloc_free(c_circular_list_memory);
 			return 0;
 		}
 	}
+
 	circular_list_clear(circular_list);
 
 	asm_balloc_free(c_circular_list_memory);
