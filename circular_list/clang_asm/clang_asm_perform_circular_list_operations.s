@@ -31,7 +31,8 @@ clang_asm_perform_circular_list_operations:
 .LBB0_3:
 	mov	r0, r6
 	mov	r1, r5
-	bl	circular_list_insert_left
+	@ bl	circular_list_insert_left
+	bl clang_asm_circular_list_insert_left
 	cbz	r0, .LBB0_11
 	subs	r5, #1
 	bne	.LBB0_3
@@ -57,7 +58,8 @@ clang_asm_perform_circular_list_operations:
 .LBB0_9:
 	mov	r0, r6
 	mov	r1, r4
-	bl	circular_list_insert_right
+	@ bl	circular_list_insert_right
+	bl clang_asm_circular_list_insert_right
 	cmp	r0, #0
 	bne	.LBB0_8
 .LBB0_10:
@@ -76,7 +78,8 @@ clang_asm_perform_circular_list_operations:
 	.p2align	2
 .LBB0_13:
 	mov	r0, r6
-	bl	circular_list_clear
+	@ bl	circular_list_clear
+	bl clang_asm_circular_list_clear
 	movs	r5, #1
 .LBB0_14:
 	mov	r0, r8

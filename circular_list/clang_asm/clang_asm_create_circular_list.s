@@ -4,7 +4,6 @@
     .global clang_asm_create_circular_list
 	.type clang_asm_create_circular_list, %function
 
-@ ~3.2 cycles per node, 244 bytes
 
 init_circular_list_storage_pool:
         movs    r2, #0
