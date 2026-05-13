@@ -23,7 +23,8 @@ clang_asm_perform_circular_list_operations:
 	cbz	r0, .LBB0_12
 	mov	r1, r4
 	mov	r8, r0
-	bl	c_create_circular_list
+	@ bl	c_create_circular_list
+	bl clang_asm_create_circular_list
 	mov	r6, r0
 	mov	r5, r4
 	.p2align	2
@@ -42,7 +43,8 @@ clang_asm_perform_circular_list_operations:
 .LBB0_6:
 	mov	r0, r9
 	mov	r1, r6
-	bl	circular_list_pop
+	@ bl	circular_list_pop
+	bl clang_asm_circular_list_pop
 	ldrb	r0, [r7, #-25]
 	cbz	r0, .LBB0_10
 	adds	r5, #1
