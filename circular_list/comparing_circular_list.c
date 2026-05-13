@@ -5,6 +5,8 @@
 // Prototypes
 bool run_all_tests(void);
 uint8_t c_perform_circular_list_operations(uint32_t max_nodes);
+extern uint8_t clang_asm_perform_circular_list_operations(uint32_t max_nodes);
+extern uint8_t asm_perform_circular_list_operations(uint32_t max_nodes);
 
 void comparing_circular_lists(void) {
     volatile uint32_t start, end, overhead;
@@ -49,6 +51,19 @@ void comparing_circular_lists(void) {
 	if (clang_circular_list_status == 0) return 0;
 	end = DWT->CYCCNT;
 	volatile uint32_t clang_circular_list_cycles_warm = (end - start) - overhead;
+
+	// ASM cold cycles = 10526 | warm cycles = 10441 | size = ? bytes
+	start = DWT->CYCCNT;
+	uint8_t asm_circular_list_status = asm_perform_circular_list_operations(max_nodes);
+	if (asm_circular_list_status == 0) return 0;
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_circular_list_cycles_cold = (end - start) - overhead;
+
+	start = DWT->CYCCNT;
+	asm_circular_list_status = asm_perform_circular_list_operations(max_nodes);
+	if (asm_circular_list_status == 0) return 0;
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_circular_list_cycles_warm = (end - start) - overhead;
 
 
 	end = DWT->CYCCNT;
