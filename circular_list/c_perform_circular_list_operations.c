@@ -38,7 +38,7 @@ uint8_t c_perform_circular_list_operations(uint32_t max_nodes) {
 
 	// Insert Right max_nodes times
 	for (uint32_t i = max_nodes; i > 0; i--){
-		if (circular_list_insert_right(circular_list, i) == false)
+		if (circular_list_insert_right(circular_list, i) == false) {
 			asm_balloc_free(c_circular_list_memory);
 			return 0;
 		}
