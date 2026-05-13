@@ -6,6 +6,7 @@
 
 @ Used Lipski Trick (MVE mod 4) with hoisting, Duff's Device
 @ and Instruction Scheduling for handling Address Generation Interlock (AGI)
+@ 411, 383
 @ ~3.2 cycles per node, 100 bytes
 
 @ Struct memory offset

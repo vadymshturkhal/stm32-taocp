@@ -29,6 +29,7 @@
 @ return 0 if Underflow, else P->info
 @ input pop_is_success flag must always be true
 
+.balign 4
 asm_circular_list_pop:
 	LDR R2, [R1, #CIRCULAR_PTR]
 	CBZ R2, underflow
@@ -37,14 +38,14 @@ asm_circular_list_pop:
 
 	@ we can use MOVSEQ R1, #0 as GNU Assembler (gas) automatically promoted
 	@ it to a 32-bit Thumb-2 instruction (movseq.w).
-	CMP R2, R3					@ if (circular_list->ptr == P)
-	ITTEE EQ						@ if (circular_list->ptr == P)
-	MOVEQ R0, #0				@ R1 = NULL
+	CMP R2, R3
+	ITTEE EQ					@ if (circular_list->ptr == P)
+	MOVEQ R0, #0				@ R0 = NULL
 	STREQ R0, [R1]				@ circular_list->ptr = NULL
-	LDRNE R0, [R3, #NODE_LINK]	@ R1 = P->link
+	LDRNE R0, [R3, #NODE_LINK]	@ R0 = P->link
 	STRNE R0, [R2, #NODE_LINK]	@ circular_list->ptr->link = P->link
 
-	LDR R2, [R1, #CIRCULAR_AVAIL]	@ R1 = circular_list->avail
+	LDR R2, [R1, #CIRCULAR_AVAIL]	@ R2 = circular_list->avail
 	LDR R0, [R3, #NODE_INFO]		@ R0 = P->info
 	STR R2, [R3, #NODE_LINK]		@ P->link = circular_list->avail
 	STR R3, [R1, #CIRCULAR_AVAIL]	@ circular_list->avail = P
@@ -53,6 +54,7 @@ done:
 	BX LR
 
 underflow:
-	MOVS R0, #0
-	STRB R0, [R1]		@ Store byte
+	MOVS R1, #0
+	STRB R1, [R0]		@ *pop_is_success = false
+	MOVS R0, #0			@ return 0
 	BX LR

@@ -26,7 +26,6 @@
 
 @ Return 0 or 1
 
-.balign 4
 asm_circular_list_insert_left:
 	@ 1
 	LDR R2, [R0, #CIRCULAR_AVAIL]	@ R2 = Avail
