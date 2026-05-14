@@ -313,4 +313,5 @@ and then `DWT_Init();` in `main.c`
         * **Compiler Configuration Notes:** 
             * GCC: -O3 -mcpu=cortex-m4 -mthumb
             * Clang: -O3 -mcpu=cortex-m4 -mthumb --target=arm-none-eabi
+            * Rust (rustc): --target thumbv7em-none-eabi -C opt-level=3 -C target-cpu=cortex-m4
 </details>
