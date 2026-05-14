@@ -61,6 +61,7 @@ save_circular_list_and_set_loop_counter:
 	MOVS R5, R0			@ R5 = circular_list
 	MOVS R6, R4			@ R6 = max_nodes loop counter
 
+.balign 4
 insert_left_loop:
 	MOVS R0, R5			@ R0 = circular_list
 	MOVS R1, R6			@ R1 = i
@@ -74,10 +75,11 @@ insert_left_loop:
 set_loop_counter:
 	MOVS R6, R4			@ R6 = max_nodes loop counter
 
+.balign 4
 pop_loop:
 	MOV R0, SP			@ R0 = bool pop_is_success
 	MOVS R1, R5			@ R1 = circular_list
-	BL circular_list_pop
+	BL asm_circular_list_pop
 
 	@ R0 = info
 
@@ -88,6 +90,7 @@ pop_loop:
 	BNE pop_loop
 
 @ use R4 instead of init R6
+.balign 4
 insert_right_loop:
 	MOVS R0, R5			@ R0 = circular_list
 	MOVS R1, R4			@ R1 = i

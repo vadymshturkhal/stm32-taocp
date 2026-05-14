@@ -38,22 +38,23 @@ asm_circular_list_insert_right_inline:
 
 	@ 2
 	STR R1, [R2, #NODE_INFO]		@ P->info = info
-	CBNZ R3, insert_p_at_front		@ Compare R3
+	CBZ R3, insert_p				@ Compare R3
 
-	@ P points to itself
-	STR R2, [R2, #NODE_LINK]		@ P->link = P
+	@ insert_p_at_front
+	LDR R1, [R3, #NODE_LINK]		@ R1 = ptr->link
+	STR R1, [R2, #NODE_LINK]		@ P->link = circular_list->ptr->link
+	STR R2, [R3, #NODE_LINK]		@ circular_list->ptr->link = P;
+
+	@ move_ptr
 	STR R2, [R0, #CIRCULAR_PTR]		@ circular_list->ptr = P
 
 	@ done
 	MOVS R0, #1
 	BX LR
 
-insert_p_at_front:
-	LDR R1, [R3, #NODE_LINK]		@ R1 = ptr->link
-	STR R1, [R2, #NODE_LINK]		@ P->link = circular_list->ptr->link
-	STR R2, [R3, #NODE_LINK]		@ circular_list->ptr->link = P
-
-move_ptr:
+insert_p:
+	@ P points to itself
+	STR R2, [R2, #NODE_LINK]		@ P->link = P
 	STR R2, [R0, #CIRCULAR_PTR]		@ circular_list->ptr = P
 
 done:
