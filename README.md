@@ -288,16 +288,20 @@ and then `DWT_Init();` in `main.c`
 
 * **Base case = `Init Avail List with 128 nodes, Insert Left 128 nodes, Pop 128 nodes, Insert Right 128 nodes, Clear`:**
     * **With `Translation Unit Boundary (TUB)`:**
-        * GCC: cold cycles = 10650-10662 | warm cycles = 10576-10577 | size = 432 bytes
-        * ARM Assembly: same as GCC
-        * **Summary:** For the first time GCC matches hand-tuned ASM in both cycles and Flash size — proved across three functions (insert_left, insert_right, pop) by generating gold-standard all-16-bit ASM by using latency hiding heuristics and zero-stack, branchless instructions order in pure C
+        * ARM Assembly: cold cycles = 9887-9901 | warm cycles = 9812-9814 | size = 406 bytes
+        * GCC: cold cycles = 10318-10319 | warm cycles = 10268 | size = 476 bytes
+        * Clang (LLVM): cold cycles = 11879-11885 | warm cycles = 11770-11772 | size = 590 bytes
+        * **Summary:** 
+            * GCC matches hand-tuned ASM across three functions (insert_left, insert_right, pop) by generating gold-standard all-16-bit ASM and using latency hiding heuristics with zero-stack, branchless instructions order according to pure C, the only function where GCC lost is "Create Circular List"
+            * Clang outperformed GCC in "Create Circular List" function and loses badly on other functions
         * **Tricks & Insights:**
-            * **ABI-Driven Argument Ordering** Changed circular_list_pop signature to avoid MOVS instruction
-            * **Manual Register Allocation in C:** Changed instructions order in circular_list_insert_left to avoid unnecessary PUSH to the stack and saving ~25% execution time
-            * **GCC Latency Hiding:** GCC independently proved aliasing safety and hoisted P->info load before two STRs in circular_list_pop — zero stall cycles on return path without any source hint
+            * **ABI-Driven Argument Ordering in C** GCC grasped that signature "uint32_t circular_list_pop(bool* pop_is_success, CircularList* circular_list)" is faster than "uint32_t circular_list_pop(CircularList* circular_list, bool* pop_is_success)", and Clang didn't notice the difference
+            * **Manual Register Allocation in C:** GCC grasped that changing instructions order in"circular_list_insert_left" function allow compiler to avoid unnecessary PUSH to the stack, saving ~25% execution time, and Clang didn't notice the difference
             * **Cold Measurement Isolation (Useless):** DSB+ISB+.balign 16 does not fix layout variance when the entire benchmark is one GCC compilation unit — barriers flush pipeline state but cannot change where instructions land in Flash
+            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrink the binary footprint 
+            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
 
         * **Compiler Configuration Notes:** 
             * GCC: -O3 -mcpu=cortex-m4 -mthumb
-
+            * Clang: -O3 -mcpu=cortex-m4 -mthumb --target=arm-none-eabi
 </details>
