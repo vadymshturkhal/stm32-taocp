@@ -295,11 +295,20 @@ and then `DWT_Init();` in `main.c`
             * GCC matches hand-tuned ASM across three functions (insert_left, insert_right, pop) by generating gold-standard all-16-bit ASM and using latency hiding heuristics with zero-stack, branchless instructions order according to pure C, the only function where GCC lost is "Create Circular List"
             * Clang outperformed GCC in "Create Circular List" function and loses badly on other functions
         * **Tricks & Insights:**
-            * **ABI-Driven Argument Ordering in C** GCC grasped that signature "uint32_t circular_list_pop(bool* pop_is_success, CircularList* circular_list)" is faster than "uint32_t circular_list_pop(CircularList* circular_list, bool* pop_is_success)", and Clang didn't notice the difference
+            * **ABI-Driven Argument Ordering in C:** GCC grasped that signature "uint32_t circular_list_pop(bool* pop_is_success, CircularList* circular_list)" is faster than "uint32_t circular_list_pop(CircularList* circular_list, bool* pop_is_success)", and Clang didn't notice the difference
             * **Manual Register Allocation in C:** GCC grasped that changing instructions order in"circular_list_insert_left" function allow compiler to avoid unnecessary PUSH to the stack, saving ~25% execution time, and Clang didn't notice the difference
             * **Cold Measurement Isolation (Useless):** DSB+ISB+.balign 16 does not fix layout variance when the entire benchmark is one GCC compilation unit — barriers flush pipeline state but cannot change where instructions land in Flash
             * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrink the binary footprint 
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+
+        * **Additional Info:** 
+            In ASM Create Circular List function I used Lipski Trick (Modular Variable Expansion or MVE mod 4) with hoisting, Duff's Device and Instruction Scheduling for handling Address Generation Interlock (AGI) which I called simply "Back in Time". That version has the same speed as Clang and Rust but used completely different approach and takes less memory. 
+            Here are stats for Create Circular List function:
+
+            * ARM Assembly: cold cycles = 1458-1465 | warm cycles = 1439-1440 | size = 100 bytes
+            * GCC: cold cycles = 1722-1730 | warm cycles = 1690-1691 | size = 112 bytes
+            * Clang (LLVM): cold cycles = 1471-1478 | warm cycles = 1440-1445 | size = 244 bytes
+            * Rust (rustc/LLVM): cold cycles = 1480-1488 | warm cycles = 1441-1446 | size = 128 bytes
 
         * **Compiler Configuration Notes:** 
             * GCC: -O3 -mcpu=cortex-m4 -mthumb
