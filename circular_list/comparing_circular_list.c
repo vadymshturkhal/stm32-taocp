@@ -25,7 +25,7 @@ void comparing_circular_lists(void) {
 	// __DSB();						// 2. Data Synchronization Barrier: Wait for all pending memory stores to finish
 	// __ISB();						// 3. Instruction Synchronization Barrier: Flush the CPU pipeline completely
 
-	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 10318 | warm cycles = 10268 | size = 476 bytes
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 10318-10319 | warm cycles = 10268 | size = 476 bytes
 	start = DWT->CYCCNT;
 	uint8_t gcc_circular_list_status = c_perform_circular_list_operations(max_nodes);
 	if (gcc_circular_list_status == 0) return 0;
@@ -39,7 +39,7 @@ void comparing_circular_lists(void) {
 	volatile uint32_t gcc_circular_list_cycles_warm = (end - start) - overhead;
 
 	// Clang -O3 -mcpu=cortex-m4 -mthumb --target=arm-none-eabi:
-	// cold cycles = 11879 | warm cycles = 11772 | size = 590 bytes (without clang_asm_circular_list_union)
+	// cold cycles = 11879-11885 | warm cycles = 11770-11772 | size = 590 bytes (without clang_asm_circular_list_union)
 	start = DWT->CYCCNT;
 	uint8_t clang_circular_list_status = clang_asm_perform_circular_list_operations(max_nodes);
 	if (clang_circular_list_status == 0) return 0;
@@ -52,7 +52,7 @@ void comparing_circular_lists(void) {
 	end = DWT->CYCCNT;
 	volatile uint32_t clang_circular_list_cycles_warm = (end - start) - overhead;
 
-	// ASM cold cycles = 10526 | warm cycles = 10441 | size = ? bytes
+	// ASM cold cycles = 9887-9901 | warm cycles = 9812-9814 | size = 406 bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_circular_list_status = asm_perform_circular_list_operations(max_nodes);
 	if (asm_circular_list_status == 0) return 0;
