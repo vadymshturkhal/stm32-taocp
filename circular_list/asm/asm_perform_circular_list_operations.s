@@ -5,6 +5,8 @@
     .global asm_perform_circular_list_operations
 	.type asm_perform_circular_list_operations, %function
 
+@ With Flamboyant Exit using R6
+
 @ Struct memory offset
 .equ NODE_INFO,		0
 .equ NODE_LINK, 	4
@@ -106,6 +108,7 @@ clear_circular_list:
 	MOVS R0, R5			@ R0 = circular_list
 	BL circular_list_clear
 
+@ Flamboyant Exit
 set_success_return_value:
 	MOVS R6, #1
 	B free_memory
