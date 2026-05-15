@@ -300,7 +300,7 @@ and then `DWT_Init();` in `main.c`
             * **Cold Measurement Isolation (Useless):** DSB+ISB+.balign 16 does not fix layout variance when the entire benchmark is one GCC compilation unit — barriers flush pipeline state but cannot change where instructions land in Flash
             * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrink the binary footprint 
             * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
-            * **Flamboyant Exit:** Used a non-volatile register for storing flag value and applied one branch jump in return phase, avoided redundant copy-paste if-else return block. Implementation of Don't Repeat Yourself (DRY) at the Silicon Level and Single-Entry Single-Exit (SESE) pattern
+            * **Flamboyant Exit:** Used a non-volatile register for storing flag value and applied one branch jump in return phase, avoided redundant copy-paste if-else return block. Implementation of Don't Repeat Yourself (DRY) at the Silicon Level and Single-Entry Single-Exit (SESE) control flow pattern
 
         * **Additional Info:** 
             In ASM Create Circular List function I used Lipski Trick (Modular Variable Expansion or MVE mod 4) with hoisting, Duff's Device and Instruction Scheduling for handling Address Generation Interlock (AGI) which I called simply "Back in Time". That version has the same speed as Clang and Rust but used completely different approach and takes less memory. 
