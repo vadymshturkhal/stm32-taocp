@@ -5,7 +5,7 @@
     .global asm_perform_circular_list_operations
 	.type asm_perform_circular_list_operations, %function
 
-@ With Flamboyant Exit using R6: Single-Entry Single-Exit (SESE), single unified cleanup for all exit paths
+@ With Flamboyant Exit using R6: Single-Entry Single-Exit (SESE) routing, single unified cleanup for all exit paths
 
 @ Struct memory offset
 .equ NODE_INFO,		0
