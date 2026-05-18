@@ -65,39 +65,26 @@ save_circular_list_and_set_loop_counter:
 	MOVS R5, R0			@ R5 = circular_list
 	MOVS R6, R4			@ R6 = max_nodes loop counter
 
-	MOVS R0, R5			@ R0 = circular_list
-	@ MOVS R1, R6			@ R1 = i
-
 insert_first_node:
 	LDR R2, [R0, #CIRCULAR_AVAIL]	@ R2 = Avail
 	CBZ R2, error_exit
 
 	LDR R3, [R2, #NODE_LINK]		@ R3 = Avail->link;
-	STR R3, [R0, #CIRCULAR_AVAIL]	@ circular_list->avail = Avail->link;
-
-	LDR R7, [R0, #CIRCULAR_PTR]		@ Load R3
 	STR R6, [R2, #NODE_INFO]		@ P->info = info
-
-insert_p:
-	@ P points to itself
 	STR R2, [R2, #NODE_LINK]		@ P->link = P
-	STR R2, [R0, #CIRCULAR_PTR]		@ circular_list->ptr = P
+
+	MOVS R7, R2						@ PTR cache
 
 	SUBS R6, R6, #1
-	CBZ R6, set_loop_counter
+	CBZ R6, synchronize
+
+	MOVS R2, R3						@ Avail cache
 
 .balign 4
 insert_left_loop:
-	@ 1
-	LDR R2, [R0, #CIRCULAR_AVAIL]	@ R2 = Avail
-	CBZ R2, error_exit
+	CBZ R2, synchronize_and_error_exit
 
 	LDR R3, [R2, #NODE_LINK]		@ R3 = Avail->link;
-	STR R3, [R0, #CIRCULAR_AVAIL]	@ circular_list->avail = Avail->link;
-
-	LDR R7, [R0, #CIRCULAR_PTR]		@ Load R3
-
-	@ 2
 	STR R6, [R2, #NODE_INFO]		@ P->info = info
 
 	@ insert_p_at_front
@@ -105,8 +92,22 @@ insert_left_loop:
 	STR R1, [R2, #NODE_LINK]		@ P->link = circular_list->ptr->link
 	STR R2, [R7, #NODE_LINK]		@ circular_list->ptr->link = P;
 
+	MOVS R2, R3						@ Avail = Avail->link
+
 	SUBS R6, R6, #1
 	BNE insert_left_loop
+
+synchronize:
+	STR R2, [R0, #CIRCULAR_AVAIL]
+	STR R7, [R0, #CIRCULAR_PTR]
+
+	@ jump over synchronize_and_error_exit
+	B set_loop_counter
+
+synchronize_and_error_exit:
+	STR R2, [R0, #CIRCULAR_AVAIL]
+	STR R7, [R0, #CIRCULAR_PTR]
+	B error_exit
 
 set_loop_counter:
 	MOVS R6, R4			@ R6 = max_nodes loop counter
