@@ -39,11 +39,11 @@ asm_circular_list_pop:
 	@ we can use MOVSEQ R1, #0 as GNU Assembler (gas) automatically promoted
 	@ it to a 32-bit Thumb-2 instruction (movseq.w).
 	CMP R2, R3
-	ITTEE EQ					@ if (circular_list->ptr == P)
-	MOVEQ R0, #0				@ R0 = NULL
-	STREQ R0, [R1]				@ circular_list->ptr = NULL
-	LDRNE R0, [R3, #NODE_LINK]	@ R0 = P->link
-	STRNE R0, [R2, #NODE_LINK]	@ circular_list->ptr->link = P->link
+	ITTEE EQ						@ if (circular_list->ptr == P)
+	MOVEQ R0, #0					@ R0 = NULL
+	STREQ R0, [R1, #CIRCULAR_PTR]	@ circular_list->ptr = NULL
+	LDRNE R0, [R3, #NODE_LINK]		@ R0 = P->link
+	STRNE R0, [R2, #NODE_LINK]		@ circular_list->ptr->link = P->link
 
 	LDR R2, [R1, #CIRCULAR_AVAIL]	@ R2 = circular_list->avail
 	LDR R0, [R3, #NODE_INFO]		@ R0 = P->info

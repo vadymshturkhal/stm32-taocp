@@ -6,6 +6,7 @@
 	.type asm_perform_circular_list_operations_inline, %function
 
 @ With Flamboyant Exit using R6: Single-Entry Single-Exit (SESE) control flow pattern, single unified cleanup for all exit paths
+@ With PTR and AVAIL caching
 
 @ Struct memory offset
 .equ NODE_INFO,		0
@@ -46,7 +47,8 @@ take_memory:
 	ADDS R0, R0, #CIRCULAR_SIZE
 	BL asm_balloc
 
-	CBZ R0, error_exit
+	CMP R0, #0
+	BEQ error_exit
 
 set_success_flag_on_stack:
 	@ bool pop_is_success = true
@@ -76,13 +78,13 @@ insert_first_node:
 	MOVS R7, R2						@ PTR cache
 
 	SUBS R6, R6, #1
-	CBZ R6, synchronize
+	CBZ R6, synchronize_insert_left
 
 	MOVS R2, R3						@ Avail cache
 
 .balign 4
 insert_left_loop:
-	CBZ R2, synchronize_and_error_exit
+	CBZ R2, synchronize_insert_left_and_error_exit
 
 	LDR R3, [R2, #NODE_LINK]		@ R3 = Avail->link;
 	STR R6, [R2, #NODE_INFO]		@ P->info = info
@@ -97,34 +99,60 @@ insert_left_loop:
 	SUBS R6, R6, #1
 	BNE insert_left_loop
 
-synchronize:
+synchronize_insert_left:
 	STR R2, [R0, #CIRCULAR_AVAIL]
 	STR R7, [R0, #CIRCULAR_PTR]
 
 	@ jump over synchronize_and_error_exit
 	B set_loop_counter
 
-synchronize_and_error_exit:
+synchronize_insert_left_and_error_exit:
 	STR R2, [R0, #CIRCULAR_AVAIL]
 	STR R7, [R0, #CIRCULAR_PTR]
 	B error_exit
 
 set_loop_counter:
 	MOVS R6, R4			@ R6 = max_nodes loop counter
+	@ MOV R0, SP			@ R0 = bool pop_is_success
+	MOVS R1, R5			@ R1 = circular_list
+
+	@ don't need to load
+	@ LDR R2, [R0, #CIRCULAR_AVAIL]
+	@ LDR R7, [R0, #CIRCULAR_PTR]
 
 .balign 4
 pop_loop:
-	MOV R0, SP			@ R0 = bool pop_is_success
-	MOVS R1, R5			@ R1 = circular_list
-	BL asm_circular_list_pop
+	CBZ R7, synchronize_pop_and_error_exit
 
-	@ R0 = info
+	LDR R3, [R7, #NODE_LINK]	@ R3 = P
 
-	LDRB R1, [SP]
-	CBZ R1, set_false_return_value
+	@ we can use MOVSEQ R1, #0 as GNU Assembler (gas) automatically promoted
+	@ it to a 32-bit Thumb-2 instruction (movseq.w).
+	CMP R7, R3
+	ITEE EQ						@ if (circular_list->ptr == P)
+	MOVEQ R7, #0				@ R7 = NULL
+	LDRNE R1, [R3, #NODE_LINK]	@ R1 = P->link
+	STRNE R1, [R7, #NODE_LINK]	@ circular_list->ptr->link = P->link
+
+	LDR R1, [R3, #NODE_INFO]	@ R1 = P->info
+	STR R2, [R3, #NODE_LINK]	@ P->link = circular_list->avail
+
+	MOVS R2, R3
 
 	SUBS R6, R6, #1
 	BNE pop_loop
+
+synchronize_pop:
+	STR R2, [R0, #CIRCULAR_AVAIL]
+	STR R7, [R0, #CIRCULAR_PTR]
+
+	@ jump over synchronize_and_error_exit
+	B insert_right_loop
+
+synchronize_pop_and_error_exit:
+	STR R2, [R0, #CIRCULAR_AVAIL]
+	STR R7, [R0, #CIRCULAR_PTR]
+	B error_exit
 
 @ use R4 instead of init R6
 .balign 4
