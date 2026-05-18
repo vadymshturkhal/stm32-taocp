@@ -35,7 +35,7 @@ asm_perform_circular_list_operations_inline:
 	MOVS R6, #0			@ for return synchronization
 
 	CMP R0, #0
-	BEQ error_exit
+	BEQ set_false_return_value
 
 	MOVS R4, R0			@ R4 = max_nodes
 
@@ -48,13 +48,7 @@ take_memory:
 	BL asm_balloc
 
 	CMP R0, #0
-	BEQ error_exit
-
-set_success_flag_on_stack:
-	@ bool pop_is_success = true
-	SUB SP, SP, #8
-	MOVS R5, #1
-	STRB R5, [SP, #0]
+	BEQ set_false_return_value
 
 create_circular_list:
 	@ CircularList* circular_list = c_create_circular_list(c_circular_list_memory, max_nodes)
@@ -69,18 +63,18 @@ save_circular_list_and_set_loop_counter:
 
 insert_first_node:
 	LDR R2, [R0, #CIRCULAR_AVAIL]	@ R2 = Avail
-	CBZ R2, error_exit
+	CMP R2, #0
+	BEQ set_false_return_value
 
 	LDR R3, [R2, #NODE_LINK]		@ R3 = Avail->link;
 	STR R6, [R2, #NODE_INFO]		@ P->info = info
 	STR R2, [R2, #NODE_LINK]		@ P->link = P
 
 	MOVS R7, R2						@ PTR cache
+	MOVS R2, R3						@ Avail cache
 
 	SUBS R6, R6, #1
 	CBZ R6, synchronize_insert_left
-
-	MOVS R2, R3						@ Avail cache
 
 .balign 4
 insert_left_loop:
@@ -109,7 +103,7 @@ synchronize_insert_left:
 synchronize_insert_left_and_error_exit:
 	STR R2, [R0, #CIRCULAR_AVAIL]
 	STR R7, [R0, #CIRCULAR_PTR]
-	B error_exit
+	B set_false_return_value
 
 set_loop_counter:
 	MOVS R6, R4			@ R6 = max_nodes loop counter
@@ -147,24 +141,58 @@ synchronize_pop:
 	STR R7, [R0, #CIRCULAR_PTR]
 
 	@ jump over synchronize_and_error_exit
-	B insert_right_loop
+	B insert_right_first_node
 
 synchronize_pop_and_error_exit:
 	STR R2, [R0, #CIRCULAR_AVAIL]
 	STR R7, [R0, #CIRCULAR_PTR]
 	B error_exit
 
-@ use R4 instead of init R6
+insert_right_first_node:
+	MOVS R6, R4
+
+	@ LDR R2, [R0, #CIRCULAR_AVAIL]	@ R2 = Avail
+	CBZ R2, set_false_return_value
+
+	LDR R3, [R2, #NODE_LINK]		@ R3 = Avail->link;
+	STR R6, [R2, #NODE_INFO]		@ P->info = info
+	STR R2, [R2, #NODE_LINK]		@ P->link = P
+
+	MOVS R7, R2						@ PTR cache
+	MOVS R2, R3						@ Avail cache
+
+	SUBS R6, R6, #1
+	CBZ R6, synchronize_insert_right
+
 .balign 4
 insert_right_loop:
-	MOVS R0, R5			@ R0 = circular_list
-	MOVS R1, R4			@ R1 = i
-	BL asm_circular_list_insert_right_inline
+	CBZ R2, synchronize_insert_right_and_error_exit
 
-	CBZ R0, set_false_return_value
+	LDR R3, [R2, #NODE_LINK]		@ R3 = Avail->link;
+	STR R6, [R2, #NODE_INFO]		@ P->info = info
 
-	SUBS R4, R4, #1
+	@ insert_p_at_front
+	LDR R1, [R7, #NODE_LINK]		@ R1 = ptr->link
+	STR R1, [R2, #NODE_LINK]		@ P->link = circular_list->ptr->link
+	STR R2, [R7, #NODE_LINK]		@ circular_list->ptr->link = P;
+
+	MOVS R7, R2						@ circular_list->ptr = P
+	MOVS R2, R3						@ Avail = Avail->link
+
+	SUBS R6, R6, #1
 	BNE insert_right_loop
+
+synchronize_insert_right:
+	STR R2, [R0, #CIRCULAR_AVAIL]
+	STR R7, [R0, #CIRCULAR_PTR]
+
+	@ jump over synchronize_and_error_exit
+	B clear_circular_list
+
+synchronize_insert_right_and_error_exit:
+	STR R2, [R0, #CIRCULAR_AVAIL]
+	STR R7, [R0, #CIRCULAR_PTR]
+	B set_false_return_value
 
 @ FIXME: write in ASM
 clear_circular_list:
@@ -182,9 +210,6 @@ set_false_return_value:
 free_memory:
 	MOVS R0, R5			@ R1 = circular_list
 	BL asm_balloc_free
-
-	@ remove pop_is_success from stack
-	ADD SP, SP, #8
 
 error_exit:
 	MOVS R0, R6
