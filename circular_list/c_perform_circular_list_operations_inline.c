@@ -8,7 +8,7 @@
 extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 
-uint8_t c_perform_circular_list_operations(uint32_t max_nodes) {
+uint8_t c_perform_circular_list_operations_inline(uint32_t max_nodes) {
 	// node info is uint32_t
 	if (max_nodes == 0) return 0;
 
@@ -20,7 +20,7 @@ uint8_t c_perform_circular_list_operations(uint32_t max_nodes) {
 
 	// Insert Left max_nodes times
 	for (uint32_t i = max_nodes; i > 0; i--){
-		if (circular_list_insert_left(circular_list, i) == false) {
+		if (circular_list_insert_left_inline(circular_list, i) == false) {
 			asm_balloc_free(c_circular_list_memory);
 			return 0;
 		}
@@ -29,7 +29,7 @@ uint8_t c_perform_circular_list_operations(uint32_t max_nodes) {
 	// Pop max_nodes times
 	bool pop_is_success = true;		// flag for Underflow checking
 	for (uint32_t i = max_nodes; i > 0; i--){
-		info = circular_list_pop(&pop_is_success, circular_list);
+		info = circular_list_pop_inline(&pop_is_success, circular_list);
 		if (pop_is_success == false) {
 			asm_balloc_free(c_circular_list_memory);
 			return 0;
@@ -38,7 +38,7 @@ uint8_t c_perform_circular_list_operations(uint32_t max_nodes) {
 
 	// Insert Right max_nodes times
 	for (uint32_t i = max_nodes; i > 0; i--){
-		if (circular_list_insert_right(circular_list, i) == false) {
+		if (circular_list_insert_right_inline(circular_list, i) == false) {
 			asm_balloc_free(c_circular_list_memory);
 			return 0;
 		}
