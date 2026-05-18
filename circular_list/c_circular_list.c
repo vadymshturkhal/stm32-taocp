@@ -23,7 +23,6 @@ CircularNode* init_circular_list_storage_pool(CircularList* circular_list, uint3
 	return avail;
 }
 
-// ~5 cycles per node
 CircularList* c_create_circular_list(void* memory, uint32_t nodes) {
 	// nodes must be greater than 0
 
@@ -36,7 +35,6 @@ CircularList* c_create_circular_list(void* memory, uint32_t nodes) {
 	return circular_list;
 }
 
-// TUB ~23.17 cycles per node
 bool circular_list_insert_left(CircularList* circular_list, uint32_t info) {
 	// return false if Overflow, else true
 
@@ -63,7 +61,6 @@ bool circular_list_insert_left(CircularList* circular_list, uint32_t info) {
 	return true;
 }
 
-// TUB ~24.14 cycles per node
 bool circular_list_insert_right(CircularList* circular_list, uint32_t info) {
 	if (!circular_list_insert_left(circular_list, info)) return false;
 
@@ -71,7 +68,6 @@ bool circular_list_insert_right(CircularList* circular_list, uint32_t info) {
 	return true;
 }
 
-// TUB ~29.17 cycles per node
 uint32_t circular_list_pop(bool* pop_is_success, CircularList* circular_list) {
 	// pop left
 	// return 0 if Underflow, else P->info

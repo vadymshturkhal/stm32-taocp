@@ -5,8 +5,8 @@
 // Prototypes
 bool run_all_tests(void);
 uint8_t c_perform_circular_list_operations_inline(uint32_t max_nodes);
-extern uint8_t clang_asm_perform_circular_list_operations(uint32_t max_nodes);
-extern uint8_t asm_perform_circular_list_operations(uint32_t max_nodes);
+//extern uint8_t clang_asm_perform_circular_list_operations(uint32_t max_nodes);
+//extern uint8_t asm_perform_circular_list_operations(uint32_t max_nodes);
 
 void comparing_circular_lists_inline(void) {
     volatile uint32_t start, end, overhead;

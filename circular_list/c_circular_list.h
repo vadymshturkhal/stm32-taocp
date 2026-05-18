@@ -52,7 +52,7 @@ static inline bool circular_list_insert_left_inline(CircularList* circular_list,
 	return true;
 }
 
-// TUB ~24.14 cycles per node
+
 static inline bool circular_list_insert_right_inline(CircularList* circular_list, uint32_t info) {
 	if (!circular_list_insert_left_inline(circular_list, info)) return false;
 
@@ -60,7 +60,7 @@ static inline bool circular_list_insert_right_inline(CircularList* circular_list
 	return true;
 }
 
-// TUB ~29.17 cycles per node
+
 static inline uint32_t circular_list_pop_inline(bool* pop_is_success, CircularList* circular_list) {
 	// pop left
 	// return 0 if Underflow, else P->info
