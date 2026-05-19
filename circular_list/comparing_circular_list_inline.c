@@ -38,14 +38,21 @@ void comparing_circular_lists_inline(void) {
 	end = DWT->CYCCNT;
 	volatile uint32_t gcc_circular_list_cycles_warm = (end - start) - overhead;
 
-	// ASM cold cycles = 9887-9901 | warm cycles = 9812-9814 | size = 406 bytes
-	// ASM cold cycles = 8912 | warm cycles = 8838 | size = ? bytes
-	// ASM cold cycles = 8773 | warm cycles = 8709 | size = ? bytes
-	// ASM cold cycles = 8533 | warm cycles = 8459 | size = ? bytes
-	// ASM cold cycles = 8408 | warm cycles = 8330 | size = ? bytes
-	// ASM cold cycles = 6946 | warm cycles = 6876 | size = ? bytes
-	// ASM cold cycles = 6440 | warm cycles = 6367 | size = ? bytes
-	// ASM cold cycles = 4903 | warm cycles = 4832 | size = ? bytes
+	// Clang -O3 -mcpu=cortex-m4 -mthumb --target=arm-none-eabi:
+	// cold cycles = 7243 | warm cycles = 7191 | size = ? bytes
+	start = DWT->CYCCNT;
+	uint8_t clang_circular_list_status = clang_asm_perform_circular_list_operations_inline(max_nodes);
+	if (clang_circular_list_status == 0) return 0;
+	end = DWT->CYCCNT;
+	volatile uint32_t clang_circular_list_cycles_cold = (end - start) - overhead;
+
+	start = DWT->CYCCNT;
+	clang_circular_list_status = clang_asm_perform_circular_list_operations_inline(max_nodes);
+	if (clang_circular_list_status == 0) return 0;
+	end = DWT->CYCCNT;
+	volatile uint32_t clang_circular_list_cycles_warm = (end - start) - overhead;
+
+	// ASM: cold cycles = 4898 | warm cycles = 4827 | size = ? bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_circular_list_status = asm_perform_circular_list_operations_inline(max_nodes);
 	if (asm_circular_list_status == 0) return 0;
