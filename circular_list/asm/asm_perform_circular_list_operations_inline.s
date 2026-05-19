@@ -146,7 +146,7 @@ synchronize_pop:
 synchronize_pop_and_error_exit:
 	STR R2, [R0, #CIRCULAR_AVAIL]
 	STR R7, [R0, #CIRCULAR_PTR]
-	B error_exit
+	B set_false_return_value
 
 insert_right_first_node:
 	MOVS R6, R4
