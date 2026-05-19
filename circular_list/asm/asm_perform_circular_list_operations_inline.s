@@ -194,10 +194,9 @@ synchronize_insert_right_and_error_exit:
 	STR R7, [R0, #CIRCULAR_PTR]
 	B set_false_return_value
 
-@ FIXME: write in ASM
 clear_circular_list:
 	MOVS R0, R5			@ R0 = circular_list
-	BL circular_list_clear
+	BL asm_circular_list_clear
 
 @ Flamboyant Exit
 set_success_return_value:

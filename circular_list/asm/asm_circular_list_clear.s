@@ -18,17 +18,6 @@
 @ R0 CircularList* circular_list
 
 @ Return: void
-
-
-void circular_list_clear(CircularList* circular_list) {
-	if (circular_list->ptr != NULL) {
-		CircularNode* P = circular_list->avail;
-		circular_list->avail = circular_list->ptr->link;
-		circular_list->ptr->link = P;
-		circular_list->ptr = NULL;
-	}
-}
-
 asm_circular_list_clear:
 	@ 1
 	LDR R1, [R0, #CIRCULAR_PTR]		@ R1 = PTR

@@ -103,10 +103,9 @@ insert_right_loop:
 	SUBS R4, R4, #1
 	BNE insert_right_loop
 
-@ FIXME: write in ASM
 clear_circular_list:
 	MOVS R0, R5			@ R0 = circular_list
-	BL circular_list_clear
+	BL asm_circular_list_clear
 
 @ Flamboyant Exit
 set_success_return_value:
