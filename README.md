@@ -287,7 +287,7 @@ and then `DWT_Init();` in `main.c`
 <summary><b>Circular List</b></summary>
 
 * **Base case = `Init Avail List with 128 nodes, Insert Left 128 nodes, Pop 128 nodes, Insert Right 128 nodes, Clear`:**
-    * **With `Translation Unit Boundary (TUB)`:**
+    * **`Translation Unit Boundary (TUB) case`:**
         * ARM Assembly: cold cycles = 9887-9901 | warm cycles = 9812-9814 | size = 406 bytes
         * GCC: cold cycles = 10318-10319 | warm cycles = 10268 | size = 476 bytes
         * Clang (LLVM): cold cycles = 11879-11885 | warm cycles = 11770-11772 | size = 590 bytes
@@ -315,4 +315,35 @@ and then `DWT_Init();` in `main.c`
             * GCC: -O3 -mcpu=cortex-m4 -mthumb
             * Clang: -O3 -mcpu=cortex-m4 -mthumb --target=arm-none-eabi
             * Rust (rustc): --target thumbv7em-none-eabi -C opt-level=3 -C target-cpu=cortex-m4
+
+    * **`Inline case`:**
+        * ARM Assembly: cold cycles = 4898 | warm cycles = 4827 | size = 374 bytes
+        * GCC: cold cycles = 5821 | warm cycles = 5770 | size = 340 bytes
+        * Clang: cold cycles = 7243 | warm cycles = 7191 | size = 348 bytes
+        * **Summary:** 
+            * ASM is ~1.19 times faster than GCC and ~1.47 times faster than Clang
+            * ASM is 34 bytes larger than GCC and 26 bytes larger than Clang in Flash
+            * GCC is ~1.24 times faster than Clang and takes 4 bytes less in Flash
+        * **Tricks & Insights:**
+            * **Loop Peeling:** handle first node and then do the loop
+            * **PTR and AVAIL caching:** store PTR and AVAIL into registers before loops and synchronize them after the loop, which takes some additional bytes
+            * **Cross-Phase Caching:** caching was maintained across phase boundaries (e.g., from the Pop loop directly into the Insert Right loop)
+            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrink the binary footprint 
+            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+            * **Flamboyant Exit:** Used a non-volatile register for storing flag value and applied one branch jump in return phase, avoided redundant copy-paste if-else return block. Implementation of Don't Repeat Yourself (DRY) at the Silicon Level and Single-Entry Single-Exit (SESE) control flow pattern
+            * **ASM, GCC and Clang don't use any unrolling**
+            * **One can shrink ASM binary without losing performance (Hometask)**
+
+        * **Additional nodes=512 results:** 
+            * ASM: cold cycles = 19006 | warm cycles = 18938 | size = 374 bytes
+            * GCC: cold cycles = 22813 | warm cycles = 22763 | size = 340 bytes
+            * Clang: cold cycles = 28459 | warm cycles = 28456 | size = 348 bytes
+
+        * **Additional nodes=512 summary:** 
+            * ASM is ~1.2 times faster than GCC and ~1.5 times faster than Clang
+            * GCC is ~1.24 times faster than Clang, which is the same as in 128 nodes stats
+
+        * **Compiler Configuration Notes:** 
+            * GCC: -O3 -mcpu=cortex-m4 -mthumb
+            * Clang: -O3 -mcpu=cortex-m4 -mthumb --target=arm-none-eabi
 </details>
