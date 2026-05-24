@@ -52,7 +52,7 @@ void comparing_circular_lists(void) {
 	end = DWT->CYCCNT;
 	volatile uint32_t clang_circular_list_cycles_warm = (end - start) - overhead;
 
-	// ASM cold cycles = 9887-9901 | warm cycles = 9812-9814 | size = 406 bytes
+	// ASM cold cycles = 9882-9901 | warm cycles = 9806-9814 | size = 406 bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_circular_list_status = asm_perform_circular_list_operations(max_nodes);
 	if (asm_circular_list_status == 0) return 0;
