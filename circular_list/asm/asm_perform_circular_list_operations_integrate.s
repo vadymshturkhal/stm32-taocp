@@ -32,7 +32,7 @@
 
 @ Return 0 or 1
 asm_perform_circular_list_operations_integrate:
-	PUSH {R4-R8, LR}
+	PUSH {R4-R9, LR}
 
 	MOVS R6, #0			@ for return synchronization
 
@@ -116,31 +116,35 @@ set_loop_counter:
 	@ LDR R2, [R0, #CIRCULAR_AVAIL]
 	@ LDR R7, [R0, #CIRCULAR_PTR]
 
-	LDR R8, [R7, #NODE_LINK]	@ Save Head
+	@ LDR R8, [R7, #NODE_LINK]	@ Save Head
+	LDR R3, [R7, #NODE_LINK]	@ R3 = P
+	MOV R8, R3
 
 @ There is no error
 .balign 4
 pop_loop:
 	@ CBZ R7, synchronize_pop_and_error_exit
 
-	LDR R3, [R7, #NODE_LINK]	@ R3 = P
+	LDR R1, [R3, #NODE_INFO]	@ R1 = P->info
+	MOV R9, R3
 
 	@ we can use MOVSEQ R1, #0 as GNU Assembler (gas) automatically promoted
 	@ it to a 32-bit Thumb-2 instruction (movseq.w)
 	CMP R7, R3
-	ITTEE EQ						@ if (circular_list->ptr == P)
+	ITTE EQ					@ if (circular_list->ptr == P)
 	MOVEQ R7, #0				@ R7 = NULL
 	MOVEQ R6, #1
-	LDRNE R1, [R3, #NODE_LINK]	@ R1 = P->link
-	STRNE R1, [R7, #NODE_LINK]	@ circular_list->ptr->link = P->link
-
-	LDR R1, [R3, #NODE_INFO]	@ R1 = P->info
+	LDRNE R3, [R3, #NODE_LINK]	@ R3 = P
+	@ STRNE R1, [R7, #NODE_LINK]	@ circular_list->ptr->link = P->link
 
 	SUBS R6, R6, #1
 	BNE pop_loop
 
+	CBZ R7, synchronize_pop
+	STR R3, [R7, #NODE_LINK]	@ circular_list->ptr->link = P->link
+
 synchronize_pop:
-	STR R2, [R3, #NODE_LINK]	@ P->link = circular_list->avail
+	STR R2, [R9, #NODE_LINK]	@ P->link = circular_list->avail
 	MOV R2, R8					@ R2 = Head
 
 	STR R2, [R0, #CIRCULAR_AVAIL]
@@ -210,4 +214,4 @@ free_memory:
 
 error_exit:
 	MOVS R0, R6
-	POP {R4-R8, PC}
+	POP {R4-R9, PC}
