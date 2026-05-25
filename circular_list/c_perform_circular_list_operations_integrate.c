@@ -77,6 +77,7 @@ uint8_t c_perform_circular_list_operations_integrate(uint32_t max_nodes) {
 	    if (circular_list->ptr == P) {
 	        circular_list->ptr = NULL;
 	    } else {
+			// FIXME: cache
 	        circular_list->ptr->link = P->link;
 	    }
 
@@ -92,6 +93,12 @@ uint8_t c_perform_circular_list_operations_integrate(uint32_t max_nodes) {
 
 // Insert Right max_nodes times
 	P = circular_list->avail;
+
+	if (P == NULL) {
+		asm_balloc_free(c_circular_list_memory);
+		return 0;
+	}
+
 	CircularNode* P_next = P;
 
 	for (uint32_t i = max_nodes; i > 0; i--){
