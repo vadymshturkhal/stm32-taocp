@@ -107,18 +107,16 @@ synchronize_insert_left_and_error_exit:
 	STR R7, [R0, #CIRCULAR_PTR]
 	B set_false_return_value
 
+@ FIXME: apply checking for zero
 set_loop_counter:
 	MOVS R6, R4			@ R6 = max_nodes loop counter
-	@ MOV R0, SP			@ R0 = bool pop_is_success
-	MOVS R1, R5			@ R1 = circular_list
 
 	@ don't need to load
 	@ LDR R2, [R0, #CIRCULAR_AVAIL]
 	@ LDR R7, [R0, #CIRCULAR_PTR]
 
-	@ LDR R8, [R7, #NODE_LINK]	@ Save Head
 	LDR R3, [R7, #NODE_LINK]	@ R3 = P
-	MOV R8, R3
+	MOV R8, R3					@ R8 = Head
 
 @ There is no error
 .balign 4
@@ -126,22 +124,21 @@ pop_loop:
 	@ CBZ R7, synchronize_pop_and_error_exit
 
 	LDR R1, [R3, #NODE_INFO]	@ R1 = P->info
-	MOV R9, R3
+	MOV R9, R3					@ R9 = Current P
 
 	@ we can use MOVSEQ R1, #0 as GNU Assembler (gas) automatically promoted
 	@ it to a 32-bit Thumb-2 instruction (movseq.w)
 	CMP R7, R3
 	ITTE EQ					@ if (circular_list->ptr == P)
 	MOVEQ R7, #0				@ R7 = NULL
-	MOVEQ R6, #1
+	MOVEQ R6, #1				@ Reset Counter for break
 	LDRNE R3, [R3, #NODE_LINK]	@ R3 = P
-	@ STRNE R1, [R7, #NODE_LINK]	@ circular_list->ptr->link = P->link
 
 	SUBS R6, R6, #1
 	BNE pop_loop
 
 	CBZ R7, synchronize_pop
-	STR R3, [R7, #NODE_LINK]	@ circular_list->ptr->link = P->link
+	STR R3, [R7, #NODE_LINK]	@ PRT->link = P->link if slice a part of the list
 
 synchronize_pop:
 	STR R2, [R9, #NODE_LINK]	@ P->link = circular_list->avail
