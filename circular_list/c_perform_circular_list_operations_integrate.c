@@ -122,6 +122,7 @@ uint8_t c_perform_circular_list_operations_integrate(uint32_t max_nodes) {
 		P->link = circular_list->ptr->link;
 		circular_list->ptr->link = circular_list->avail;
 		circular_list->avail = P_next;
+		circular_list->ptr = P;
 	}
 
 	circular_list_clear(circular_list);
