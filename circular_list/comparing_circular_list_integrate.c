@@ -41,15 +41,15 @@ void comparing_circular_lists_integrate(void) {
 	end = DWT->CYCCNT;
 	volatile uint32_t gcc_circular_list_cycles_warm = (end - start) - overhead;
 
-	// ASM: cold cycles = 4898 | warm cycles = 4827 | size = 366 bytes
-	// ASM: cold cycles = 4771 | warm cycles = 4771 | size = 370 bytes
-	// ASM: cold cycles = 4646 | warm cycles = 4580 | size = 374 bytes
-
-	// ASM: cold cycles = 4678 | warm cycles = 4608 | size = 398 bytes
-
 	// ASM: cold cycles = 4387 | warm cycles = 4325 | size = ? bytes
 	// ASM: cold cycles = 3627 | warm cycles = 3562 | size = ? bytes
 	// ASM: cold cycles = 4470 | warm cycles = 4392 | size = 410 bytes
+
+	// ASM: cold cycles = 4898 | warm cycles = 4827 | size = 366 bytes
+	// ASM: cold cycles = 4771 | warm cycles = 4771 | size = 370 bytes
+	// ASM: cold cycles = 4646 | warm cycles = 4580 | size = 374 bytes
+	// ASM: cold cycles = 4678 | warm cycles = 4608 | size = 398 bytes
+	// ASM: cold cycles = 4493 | warm cycles = 4419 | size = 418 bytes
 	start = DWT->CYCCNT;
 	uint8_t asm_circular_list_status = asm_perform_circular_list_operations_integrate(max_nodes);
 	if (asm_circular_list_status == 0) return 0;

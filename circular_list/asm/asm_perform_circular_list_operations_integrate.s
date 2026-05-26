@@ -110,7 +110,8 @@ synchronize_insert_left_and_error_exit:
 @ Topological Slice Pop
 topological_slice_pop:
 	MOVS R1, R4			@ R1 = max_nodes loop counter
-	BL asm_circular_list_topological_slice_pop
+	@ BL asm_circular_list_topological_slice_pop
+	BL asm_circular_list_topological_slice_pop_lipski
 
 	CBZ R0, set_false_return_value
 	MOVS R0, R5			@ R0 = Circular List
