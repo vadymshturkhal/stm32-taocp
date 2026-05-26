@@ -44,6 +44,8 @@ void comparing_circular_lists_integrate(void) {
 	// ASM: cold cycles = 4387 | warm cycles = 4325 | size = ? bytes
 	// ASM: cold cycles = 3627 | warm cycles = 3562 | size = ? bytes
 	// ASM: cold cycles = 4470 | warm cycles = 4392 | size = 410 bytes
+	// ASM: cold cycles = 4433 | warm cycles = 4355 | size = 410 bytes
+	// ASM: cold cycles = 4371 | warm cycles = 4289 | size = 418 bytes
 
 	// ASM: cold cycles = 4898 | warm cycles = 4827 | size = 366 bytes
 	// ASM: cold cycles = 4771 | warm cycles = 4771 | size = 370 bytes

@@ -48,31 +48,28 @@ asm_circular_list_topological_slice_pop_lipski:
 
 .balign 4
 pop_loop:
+@ First Half
 	@ R6 = current = tail, R3 = P
 
 	LDR R5, [R6, #NODE_INFO]	@ R5 = P->info
 
-	@ we can use MOVSEQ R1, #0 as GNU Assembler (gas) automatically promoted
-	@ it to a 32-bit Thumb-2 instruction (movseq.w)
 	CMP R2, R6
-	ITTE EQ					@ if (circular_list->ptr == P)
-	MOVEQ R2, #0				@ R2 = NULL
-	MOVEQ R1, #1				@ Reset Counter for break
-	LDRNE R3, [R6, #NODE_LINK]	@ P = P->link
+	BEQ synchronize_pop_reached_end_first_half
+
+	LDR R3, [R6, #NODE_LINK]	@ P = P->link
 
 	SUBS R1, R1, #1
 	CBZ R1, update_ptr_link
 
+@ Second Half
 	@ R3 = current = tail, R6 = P
+
 	LDR R5, [R3, #NODE_INFO]	@ R5 = P->info
 
-	@ we can use MOVSEQ R1, #0 as GNU Assembler (gas) automatically promoted
-	@ it to a 32-bit Thumb-2 instruction (movseq.w)
 	CMP R2, R3
-	ITTE EQ					@ if (circular_list->ptr == P)
-	MOVEQ R2, #0				@ R2 = NULL
-	MOVEQ R1, #1				@ Reset Counter for break
-	LDRNE R6, [R3, #NODE_LINK]	@ P = P->link
+	BEQ synchronize_pop_reached_end_second_half
+
+	LDR R6, [R3, #NODE_LINK]	@ P = P->link
 
 	SUBS R1, R1, #1
 	BNE pop_loop
@@ -83,7 +80,6 @@ unify_values:
 	MOVS R6, R5		@ Tail = R6
 
 update_ptr_link:
-	CBZ R2, synchronize_pop
 	STR R3, [R2, #NODE_LINK]	@ PRT->link = P->link, if slice a part of the list
 
 synchronize_pop:
@@ -99,3 +95,13 @@ done:
 return_error:
 	MOVS R0, #0
 	POP {R4-R6, PC}
+
+synchronize_pop_reached_end_second_half:
+@ unify_values:
+	MOVS R5, R3
+	MOVS R3, R6		@ P = R3
+	MOVS R6, R5		@ Tail = R6
+
+synchronize_pop_reached_end_first_half:
+	MOVS R2, #0
+	B synchronize_pop
