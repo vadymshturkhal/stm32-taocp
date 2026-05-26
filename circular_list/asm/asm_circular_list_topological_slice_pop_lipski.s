@@ -9,7 +9,9 @@
 @ Using Topological Slice
 @ Using Loop Unrolling by 2
 @ Using Lipski Trick: Registers Identity with Unrolling
-
+@ Using Peeling
+@ Without If-Then-Else blocks
+@ Using Latency Hiding (Instruction Scheduling)
 
 @ Struct memory offset
 .equ NODE_INFO,		0
@@ -46,32 +48,45 @@ asm_circular_list_topological_slice_pop_lipski:
 	LDR R6, [R2, #NODE_LINK]	@ R6 = P
 	MOVS R4, R6					@ R4 = Head
 
+	TST R1, #1
+	BEQ pop_loop				@ if R1 is even go to loop
+
+peel_one_node:
+	LDR R5, [R6, #NODE_INFO]	@ R5 = P->info
+	CMP R2, R6
+	BEQ synchronize_pop_reached_end_first_half
+	LDR R3, [R6, #NODE_LINK]	@ P = P->link
+	SUBS R1, R1, #1
+	CBZ R1, update_ptr_link
+
+	MOVS R6, R3					@ R6 = current
+
 .balign 4
 pop_loop:
 @ First Half
 	@ R6 = current = tail, R3 = P
 
 	LDR R5, [R6, #NODE_INFO]	@ R5 = P->info
+	LDR R3, [R6, #NODE_LINK]	@ P = P->link
 
 	CMP R2, R6
 	BEQ synchronize_pop_reached_end_first_half
 
-	LDR R3, [R6, #NODE_LINK]	@ P = P->link
+	@ LDR R3, [R6, #NODE_LINK]	@ P = P->link
 
-	SUBS R1, R1, #1
-	CBZ R1, update_ptr_link
+	@ SUBS R1, R1, #1
+	@ CBZ R1, update_ptr_link
 
 @ Second Half
 	@ R3 = current = tail, R6 = P
 
 	LDR R5, [R3, #NODE_INFO]	@ R5 = P->info
+	LDR R6, [R3, #NODE_LINK]	@ P = P->link
 
 	CMP R2, R3
 	BEQ synchronize_pop_reached_end_second_half
 
-	LDR R6, [R3, #NODE_LINK]	@ P = P->link
-
-	SUBS R1, R1, #1
+	SUBS R1, R1, #2
 	BNE pop_loop
 
 unify_values:
