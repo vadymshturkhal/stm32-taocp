@@ -7,8 +7,8 @@
 
 
 @ Using Topological Slice
-@ Using Loop Unrolling by 2
-@ Using Lipski Trick: Registers Identity with Unrolling
+@ Using Loop Unrolling 2
+@ Using Lipski Trick (Registers Permutation Identity)
 @ Using Peeling
 @ Without If-Then-Else blocks
 @ Using Latency Hiding (Instruction Scheduling)

@@ -117,7 +117,8 @@ topological_slice_pop:
 insert_right_first_node:
 	MOVS R0, R5			@ R0 = Circular List
 	MOVS R1, R4			@ R1 = max_nodes loop counter
-	BL asm_circular_list_topological_slice_insert_right
+	@ BL asm_circular_list_topological_slice_insert_right
+	BL asm_circular_list_topological_slice_insert_right_lipski
 
 
 clear_circular_list:
