@@ -2,8 +2,8 @@
     .thumb
     .cpu cortex-m4
     .section .text
-    .global asm_circular_list_topological_slice_insert_right_lipski
-	.type asm_circular_list_topological_slice_insert_right_lipski, %function
+    .global asm_circular_list_topological_slice_insert_left_lipski
+	.type asm_circular_list_topological_slice_insert_left_lipski, %function
 
 
 @ Using Topological Slice
@@ -11,6 +11,7 @@
 @ Using Lipski Trick (Registers Permutation Identity) mod 2
 @ Using Peeling
 @ Using Latency Hiding (Instruction Scheduling)
+@ Same as insert right with starting to add info from the end
 
 @ Struct memory offset
 .equ NODE_INFO,		0
@@ -30,11 +31,12 @@
 @ R1 nodes to Insert Right
 @ R2 Avail, P, P->link
 @ R3 P
+@ R4 max_nodes
 @ R6 AVAIL
 
 @ Return 0 or 1
 
-asm_circular_list_topological_slice_insert_right_lipski:
+asm_circular_list_topological_slice_insert_left_lipski:
 	PUSH {R4-R6, LR}
 	CBZ R0, return_error
 	CBZ R1, return_error
@@ -42,14 +44,17 @@ asm_circular_list_topological_slice_insert_right_lipski:
 	LDR R3, [R0, #CIRCULAR_AVAIL]	@ R2 = AVAIL = P
 	MOVS R6, R3						@ R6 = AVAIL
 
+	ADDS R4, R1, #1
+
 	TST R1, #1
 	BEQ insert_right_loop			@ if R1 is even go to loop
 
 peel_one_node:
 	CBZ R3, return_error
 
-	STR R1, [R3, #NODE_INFO]		@ Store Info
+	SUBS R5, R4, R1					@ Update INFO
 	LDR R2, [R3, #NODE_LINK]		@ P = P->link
+	STR R5, [R3, #NODE_INFO]		@ Store Info
 
 	SUBS R1, R1, #1
 	CBZ R1, synchronize_insert_right
@@ -62,18 +67,16 @@ insert_right_loop:
 @ First Part
 	CBZ R3, return_error
 
-	@ MOVS R3, R2						@ Update Prev P
+	SUBS R5, R4, R1					@ Update INFO
 	LDR R2, [R3, #NODE_LINK]		@ P = P->link
-	STR R1, [R3, #NODE_INFO]		@ Store Info
-	@ SUBS R1, R1, #1
-	@ CBZ R1, synchronize_insert_right
+	STR R5, [R3, #NODE_INFO]		@ Store Info
 
 @ Second Part
 	CBZ R2, return_error
 
-	@ MOVS R3, R2						@ Update Prev P
+	SUBS R5, R4, R1					@ Update INFO
 	LDR R3, [R2, #NODE_LINK]		@ P = P->link
-	STR R1, [R2, #NODE_INFO]		@ Store Info
+	STR R5, [R3, #NODE_INFO]		@ Store Info
 
 	SUBS R1, R1, #2
 	BNE insert_right_loop

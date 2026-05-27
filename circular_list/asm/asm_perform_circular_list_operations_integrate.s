@@ -64,51 +64,13 @@ save_circular_list_and_set_loop_counter:
 	MOVS R6, R4			@ R6 = max_nodes loop counter
 
 insert_first_node:
-	LDR R2, [R0, #CIRCULAR_AVAIL]	@ R2 = Avail
-	CMP R2, #0
-	BEQ set_false_return_value
-
-	LDR R3, [R2, #NODE_LINK]		@ R3 = Avail->link;
-	STR R6, [R2, #NODE_INFO]		@ P->info = info
-	STR R2, [R2, #NODE_LINK]		@ P->link = P
-
-	MOVS R7, R2						@ PTR cache
-	MOVS R2, R3						@ Avail cache
-
-	SUBS R6, R6, #1
-	CBZ R6, synchronize_insert_left
-
-.balign 4
-insert_left_loop:
-	CBZ R2, synchronize_insert_left_and_error_exit
-
-	LDR R3, [R2, #NODE_LINK]		@ R3 = Avail->link;
-	STR R6, [R2, #NODE_INFO]		@ P->info = info
-
-	@ insert_p_at_front
-	LDR R1, [R7, #NODE_LINK]		@ R1 = ptr->link
-	STR R1, [R2, #NODE_LINK]		@ P->link = circular_list->ptr->link
-	STR R2, [R7, #NODE_LINK]		@ circular_list->ptr->link = P;
-
-	MOVS R2, R3						@ Avail = Avail->link
-
-	SUBS R6, R6, #1
-	BNE insert_left_loop
-
-synchronize_insert_left:
-	STR R2, [R0, #CIRCULAR_AVAIL]
-	STR R7, [R0, #CIRCULAR_PTR]
-
-	@ jump over synchronize_and_error_exit
-	B topological_slice_pop
-
-synchronize_insert_left_and_error_exit:
-	STR R2, [R0, #CIRCULAR_AVAIL]
-	STR R7, [R0, #CIRCULAR_PTR]
-	B set_false_return_value
+	MOVS R1, R4			@ R1 = max_nodes loop counter
+	BL asm_circular_list_topological_slice_insert_left_lipski
+	CBZ R0, set_false_return_value
 
 @ Topological Slice Pop
 topological_slice_pop:
+	MOVS R0, R5			@ R0 = Circular List
 	MOVS R1, R4			@ R1 = max_nodes loop counter
 	@ BL asm_circular_list_topological_slice_pop
 	BL asm_circular_list_topological_slice_pop_lipski

@@ -56,6 +56,11 @@ void comparing_circular_lists_integrate(void) {
 	// ASM: cold cycles = 3708 | warm cycles = 3617 | size = ? bytes
 	// ASM: cold cycles = 3581 | warm cycles = 3492 | size = ? bytes
 	// ASM: cold cycles = 3461 | warm cycles = 3366 | size = 470 bytes
+	// ASM: cold cycles = 3398 | warm cycles = 3302 | size = 470 bytes
+	// ASM: cold cycles = 3335 | warm cycles = 3238 | size = 470 bytes
+	// ASM: cold cycles = 2928 | warm cycles = 2830 | size = ? bytes
+	// ASM: cold cycles = 2865 | warm cycles = 2766 | size = 516 bytes
+
 	start = DWT->CYCCNT;
 	uint8_t asm_circular_list_status = asm_perform_circular_list_operations_integrate(max_nodes);
 	if (asm_circular_list_status == 0) return 0;
