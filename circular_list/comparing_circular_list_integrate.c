@@ -15,9 +15,6 @@ void comparing_circular_lists_integrate(void) {
 	end = DWT->CYCCNT;
 	overhead = end - start;
 
-	// Run tests
-	if (!run_all_tests()) return 0;  // increases cold cycles run by ~2*max_nodes cycles
-
 	// Useless Cold Measurement Isolation
 	// __asm volatile(".balign 16");	// 1. Flash alignment for the benchmark block
 	// __DSB();						// 2. Data Synchronization Barrier: Wait for all pending memory stores to finish
@@ -52,7 +49,6 @@ void comparing_circular_lists_integrate(void) {
 	if (clang_circular_list_status == 0) return 0;
 	end = DWT->CYCCNT;
 	volatile uint32_t clang_circular_list_cycles_warm = (end - start) - overhead;
-
 
 	// ASM: cold cycles = 4898 | warm cycles = 4827 | size = 366 bytes
 	// ASM: cold cycles = 4771 | warm cycles = 4771 | size = 370 bytes
