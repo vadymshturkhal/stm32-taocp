@@ -49,13 +49,6 @@ uint8_t c_perform_circular_list_operations_integrate(uint32_t max_nodes) {
 		circular_list->avail = P1_next;
 	}
 
-//	for (uint32_t i = max_nodes; i > 0; i--){
-//		if (circular_list_insert_left_inline(circular_list, i) == false) {
-//			asm_balloc_free(c_circular_list_memory);
-//			return 0;
-//		}
-//	}
-
 // Pop max_nodes times
 	// Topological Slice
 	if (circular_list->ptr == NULL || max_nodes == 0) {
@@ -65,30 +58,24 @@ uint8_t c_perform_circular_list_operations_integrate(uint32_t max_nodes) {
 
 	CircularNode* head = circular_list->ptr->link;
 	CircularNode* P = head;
+	CircularNode* prev_P = P;
 
 	for (uint32_t i = max_nodes; i > 0; i--){
-		if (circular_list->ptr == NULL) {
-			asm_balloc_free(c_circular_list_memory);
-			return 0;
-		}
-
-		P = circular_list->ptr->link;
-
-	    if (circular_list->ptr == P) {
-	        circular_list->ptr = NULL;
-	    } else {
-			// FIXME: cache
-	        circular_list->ptr->link = P->link;
-	    }
-
-		// P->link = circular_list->avail;
-		// circular_list->avail = P;
-
+		prev_P = P;
 		info = P->info;
+		P = P->link;
+
+		if (P == head) {
+			circular_list->ptr = NULL;
+			goto reached_head;
+		}
 	}
 
+	circular_list->ptr->link = prev_P->link;
+
+reached_head:
 	// AVAIL <= P(slice)
-	P->link = circular_list->avail;
+	prev_P->link = circular_list->avail;
 	circular_list->avail = head;
 
 // Insert Right max_nodes times
