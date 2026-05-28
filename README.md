@@ -346,4 +346,52 @@ and then `DWT_Init();` in `main.c`
         * **Compiler Configuration Notes:** 
             * GCC: -O3 -mcpu=cortex-m4 -mthumb
             * Clang: -O3 -mcpu=cortex-m4 -mthumb --target=arm-none-eabi
+
+
+    * **`Integrate case`:**
+        * ARM Assembly: cold cycles = 2865 | warm cycles = 2766 | size = 516 bytes
+        * GCC: cold cycles = 3946 | warm cycles = 3886 | size = 396 bytes
+        * Clang: cold cycles = 3410 | warm cycles = 3313 | size = 702 bytes
+        * **Summary:** 
+            * ASM is ~1.405 times (40.5%) faster than GCC and ~1.198 times (19.8%) faster than Clang
+            * ASM is 120 bytes (30.3%) larger than GCC and 186 bytes (26.5%) smaller than Clang in Flash
+            * Clang is ~1.17 times (17.3%) faster than GCC but 306 bytes (77.3%) larger in Flash
+        * **Tricks & Insights:**
+            * **Topological Slice:** exploiting the AVAIL_LIST internal structure to reduce O(N) memory writes to O(1), splicing N nodes at once instead of updating LINK of every single node
+            * **Loop Peeling:** handle first node and then do the loop
+            * **PTR and AVAIL caching:** store PTR and AVAIL into registers before loops and synchronize them after
+            * **16-bit Narrow Encoding:** Forced all operations into low registers to guarantee 16-bit Thumb encodings and shrink the binary footprint 
+            * **Pipeline Alignment:** Used `.balign 4` to prevent fetch-stalls
+            * **Lipski Trick mod 2:** Registers Permutation Identity which remove MOVS instructions in unrolling
+            * **Latency Hiding (Instruction Scheduling):** changed instructions order to avoid pipeline stalls
+            * **Removed If-Then-Else blocks in ASM Circular List Pop**
+
+        * **Additional nodes=512 Stats:** 
+            * **Results:** 
+                * ASM: cold cycles = 10445 | warm cycles = 10349 | size = 516 bytes
+                * GCC: cold cycles = 15229 | warm cycles = 15121 | size = 396 bytes
+                * Clang: cold cycles = 12914 | warm cycles = 12818 | size = 702 bytes
+
+            * **Ratios:** 
+                * GCC / ASM: 15121 / 10349 = 1.461 → ASM 46.1% faster than GCC 
+                * Clang / ASM: 12818 / 10349 = 1.239 → ASM 23.9% faster than Clang 
+                * GCC / Clang: 15121 / 12818 = 1.180 → Clang 18.0% faster than GCC
+            
+            * **Per node warm cycles / (512*4):** 
+                * ASM:  10349 / 2048 = 5.05 cycles/node
+                * GCC:  15121 / 2048 = 7.38 cycles/node
+                * Clang: 12818 / 2048 = 6.26 cycles/node
+
+            * **Summary: The performance delta between ASM and both compilers widens with N** 
+                * **N=128 ratios:** 
+                    * GCC / ASM: 3886 / 2766 = 1.405 (40.5%) 
+                    * Clang / ASM: 3313 / 2766 = 1.198 (19.8%)
+
+                  * **N=512 ratios:** 
+                    * GCC / ASM: 15121 / 10349 = 1.461 (46.1%)
+                    * Clang / ASM: 12818 / 10349 = 1.239 (23.9%)
+
+        * **Compiler Configuration Notes:** 
+            * GCC: -O3 -mcpu=cortex-m4 -mthumb
+            * Clang: -O3 -mcpu=cortex-m4 -mthumb --target=arm-none-eabi
 </details>
