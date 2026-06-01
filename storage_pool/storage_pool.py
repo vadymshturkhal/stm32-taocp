@@ -6,19 +6,19 @@ class STORAGE_POOL:
     def __init__(self, node_class, size):
         self.node_class = node_class
         self.size = max(0, size)
-        self.avail = None
+        self._avail = None
         self._init_storage_pool()
 
     def _init_storage_pool(self):
         for _ in range(self.size):
-            self.avail = self.node_class(link=self.avail)
+            self._avail = self.node_class(link=self._avail)
 
     def pop(self):
-        if self.avail is None:
+        if self._avail is None:
             raise Exception("Memory Overflow: STORAGE POOL is empty")
         
-        P = self.avail
-        self.avail = self.avail.link
+        P = self._avail
+        self._avail = self._avail.link
 
         return P
 
@@ -26,5 +26,11 @@ class STORAGE_POOL:
         if node is None:
             raise Exception("Pushed null to STORAGE POOL")
     
-        node.link = self.avail
-        self.avail = node
+        node.link = self._avail
+        self._avail = node
+
+    def union(self, head_node, tail_node):
+        """Returns an entire chain to the pool in O(1) time."""
+        P = self._avail
+        self._avail = head_node
+        tail_node.link = P

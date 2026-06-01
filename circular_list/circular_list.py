@@ -1,37 +1,13 @@
-class Node:
-        def __init__(self, info=None, link=None):
-            self.info = info
-            self.link = link
-
 class CircularLinkedList:
-    def __init__(self, size):
-        self.size = size
-        self.avail = None
-        self.ptr = None
-        self._init_storage_pool()
+    """
+    Node class used by the storage_pool must have 'link' and 'info' attributes.
+    """
+    def __init__(self, storage_pool):
+        self.storage_pool = storage_pool
+        self.ptr = None  # Points to the rightmost/rear node
 
-    def _init_storage_pool(self):
-        """Create list of available nodes from end to start"""
-        if self.size <= 0:
-            return
-                
-        size = self.size
-        avail = Node(info=size)
-
-        size -= 1
-        while size > 0:
-            avail = Node(size, avail)
-            size -= 1
-
-        self.avail = avail
-        
     def insert_at_left(self, Y):
-        if self.avail is None:
-            raise Exception("Overflow")
-
-        P = self.avail
-        self.avail = self.avail.link
-        
+        P = self.storage_pool.pop()
         P.info = Y
         
         if self.ptr is None:
@@ -43,11 +19,11 @@ class CircularLinkedList:
         
     def insert_at_right(self, Y):
         self.insert_at_left(Y)
-        self.ptr = self.ptr.link
+        self.ptr = self.ptr.link  # Shift rear pointer to the newly added node
         
     def pop_left(self):
         if self.ptr is None:
-            raise Exception("Underflow")
+            raise Exception("List Underflow: CircularLinkedList is empty")
 
         P = self.ptr.link
         Y = P.info
@@ -57,16 +33,12 @@ class CircularLinkedList:
         else:
             self.ptr.link = P.link
         
-        P.link = self.avail
-        self.avail = P
-        
+        self.storage_pool.push(P)        
         return Y
         
     def clear(self):
         if self.ptr is not None:
-            P = self.avail
-            self.avail = self.ptr.link
-            self.ptr.link = P
+            self.storage_pool.union(head=self.ptr.link, tail=self.ptr)
             self.ptr = None
     
     def union(self, circular_linked_list):
@@ -81,7 +53,3 @@ class CircularLinkedList:
         
         self.ptr = circular_linked_list.ptr
         circular_linked_list.ptr = None
-        
-        
-            
-        
