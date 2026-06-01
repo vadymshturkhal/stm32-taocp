@@ -1,22 +1,17 @@
+from storage_pool import STORAGE_POOL, Node
 from circular_list import CircularLinkedList
 import unittest
 
-# Assuming your class is imported here
-# from your_module import CircularLinkedList
-
-class TestCircularLinkedList(unittest.TestCase):
+class TestDecoupledCircularLinkedList(unittest.TestCase):
 
     def setUp(self):
-        """Set up fresh instances before each test."""
+        """Set up a single storage pool and a primary list instance."""
         self.capacity = 5
-        self.cll = CircularLinkedList(size=self.capacity)
+        self.pool = STORAGE_POOL(node_class=Node, size=self.capacity)
+        self.cll = CircularLinkedList(storage_pool=self.pool)
 
     def test_initialization(self):
-        """Test if the list initializes correctly."""
-        # Assuming your class exposes a way to check current size/length
-        # self.assertEqual(len(self.cll), 0)
-        
-        # Popping from a brand new list should raise an error or return None
+        """Test if the list initializes correctly and handles empty pops."""
         with self.assertRaises(Exception):
             self.cll.pop_left()
 
@@ -26,7 +21,7 @@ class TestCircularLinkedList(unittest.TestCase):
         self.cll.insert_at_left(20)
         self.cll.insert_at_left(30)
         
-        # Should pop in reverse order of insertion (30, then 20, then 10)
+        # Should pop in reverse order of insertion (30 -> 20 -> 10)
         self.assertEqual(self.cll.pop_left(), 30)
         self.assertEqual(self.cll.pop_left(), 20)
         self.assertEqual(self.cll.pop_left(), 10)
@@ -37,7 +32,7 @@ class TestCircularLinkedList(unittest.TestCase):
         self.cll.insert_at_right(2)
         self.cll.insert_at_right(3)
         
-        # Should pop in the exact order of insertion (1, then 2, then 3)
+        # Should pop in the exact order of insertion (1 -> 2 -> 3)
         self.assertEqual(self.cll.pop_left(), 1)
         self.assertEqual(self.cll.pop_left(), 2)
         self.assertEqual(self.cll.pop_left(), 3)
@@ -53,7 +48,7 @@ class TestCircularLinkedList(unittest.TestCase):
         self.assertEqual(self.cll.pop_left(), 3)
 
     def test_clear(self):
-        """Test clearing the linked list."""
+        """Test clearing the linked list back to the pool in O(1) time."""
         self.cll.insert_at_right(100)
         self.cll.insert_at_right(200)
         
@@ -64,8 +59,9 @@ class TestCircularLinkedList(unittest.TestCase):
             self.cll.pop_left()
 
     def test_union_standard(self):
-        """Test unioning two non-empty circular linked lists."""
-        cll2 = CircularLinkedList(size=3)
+        """Test unioning two lists that share the exact same storage pool."""
+        # Both lists consume memory from the same central pool
+        cll2 = CircularLinkedList(storage_pool=self.pool)
         
         self.cll.insert_at_right("A")
         self.cll.insert_at_right("B")
@@ -73,10 +69,10 @@ class TestCircularLinkedList(unittest.TestCase):
         cll2.insert_at_right("C")
         cll2.insert_at_right("D")
         
-        # Union cll2 into self.cll
+        # Union cll2 into self.cll (Total 4 nodes used out of 5 capacity)
         self.cll.union(cll2)
         
-        # Output should be A -> B -> C -> D
+        # Output sequence: A -> B -> C -> D
         self.assertEqual(self.cll.pop_left(), "A")
         self.assertEqual(self.cll.pop_left(), "B")
         self.assertEqual(self.cll.pop_left(), "C")
@@ -84,7 +80,7 @@ class TestCircularLinkedList(unittest.TestCase):
 
     def test_union_with_empty(self):
         """Test unioning an empty list into a populated list."""
-        empty_cll = CircularLinkedList(size=5)
+        empty_cll = CircularLinkedList(storage_pool=self.pool)
         self.cll.insert_at_right(1)
         
         self.cll.union(empty_cll)
@@ -96,22 +92,22 @@ class TestCircularLinkedList(unittest.TestCase):
 
     def test_empty_union_with_populated(self):
         """Test unioning a populated list into an empty list."""
-        populated_cll = CircularLinkedList(size=5)
+        populated_cll = CircularLinkedList(storage_pool=self.pool)
         populated_cll.insert_at_right(99)
         
         self.cll.union(populated_cll)
         self.assertEqual(self.cll.pop_left(), 99)
 
     def test_capacity_overflow(self):
-        """Test inserting beyond the initialized size constraint."""
-        # Fill the list to capacity (5)
+        """Test inserting beyond the global storage pool constraint."""
+        # Fill the pool to its maximum capacity (5 nodes)
         for i in range(self.capacity):
             self.cll.insert_at_right(i)
             
-        # The 6th insertion should raise an exception
-        with self.assertRaises(Exception): # Replace Exception with your specific error
+        # The 6th node request should throw a contextually accurate Memory Overflow exception
+        with self.assertRaisesRegex(Exception, "Memory Overflow: STORAGE POOL is empty"):
             self.cll.insert_at_right(99)
-            
+
 
 if __name__ == '__main__':
     unittest.main()

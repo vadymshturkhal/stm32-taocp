@@ -1,3 +1,8 @@
+class Node:
+        def __init__(self, info=None, link=None):
+            self.info = info
+            self.link = link
+
 class STORAGE_POOL:
     """
     "node_class" is any Node class factory;
@@ -29,8 +34,8 @@ class STORAGE_POOL:
         node.link = self._avail
         self._avail = node
 
-    def union(self, head_node, tail_node):
+    def union(self, head, tail):
         """Returns an entire chain to the pool in O(1) time."""
         P = self._avail
-        self._avail = head_node
-        tail_node.link = P
+        self._avail = head
+        tail.link = P
