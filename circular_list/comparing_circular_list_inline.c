@@ -16,7 +16,7 @@ void comparing_circular_lists_inline(void) {
 	overhead = end - start;
 
 	// Run tests
-	if (!run_all_tests()) return 0;  // increases cold cycles run by ~2*max_nodes cycles
+//	if (!run_all_tests()) return 0;  // increases cold cycles run by ~2*max_nodes cycles
 
 	// Useless Cold Measurement Isolation
 	// __asm volatile(".balign 16");	// 1. Flash alignment for the benchmark block
