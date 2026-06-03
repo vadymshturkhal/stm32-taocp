@@ -38,6 +38,8 @@ void comparing_circular_lists_abstraction_tax(void) {
 	// Storage Pool independent
 	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 20343 | warm cycles = 20003 | size = 520 bytes
 	// GCC -O3 -mcpu=cortex-m4 -mthumb -flto: cold cycles = 7294 | warm cycles = 7242 | size = ? bytes
+	// Static Inline: GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 7105 | warm cycles = 7043 | size = ? bytes
+	// Static Inline: GCC -O3 -mcpu=cortex-m4 -mthumb -flto: cold cycles = 7543 | warm cycles = 7497 | size = ? bytes
 	start = DWT->CYCCNT;
 	uint8_t gcc_circular_list_storage_pool_status = c_perform_circular_list_operations_storage_pool(max_nodes);
 	if (gcc_circular_list_storage_pool_status == 0) return 0;
