@@ -22,6 +22,7 @@ uint8_t test_circular_list_head(uint32_t max_nodes) {
 	if (storage_and_circular_list_memory == NULL) return 0;
 
 	Storage_Pool* storage_pool = create_storage_pool(storage_and_circular_list_memory, sizeof(CircularNode), max_nodes);
+	if (storage_pool == NULL) return 0;
 
 	uint8_t* circular_list_memory_start = (uint8_t*)storage_and_circular_list_memory + storage_pool_size;
 

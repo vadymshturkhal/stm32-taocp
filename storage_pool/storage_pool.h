@@ -14,4 +14,3 @@ bool storage_pool_push(Storage_Pool* storage_pool, void* node);
 bool storage_pool_add_slice(Storage_Pool* storage_pool, void* head, void* tail);
 
 #endif
-

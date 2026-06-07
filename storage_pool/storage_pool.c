@@ -5,7 +5,8 @@
 
 Storage_Pool* create_storage_pool(void* memory, uint32_t node_size, uint32_t storage_size) {
 	// Every Node must begin with a link pointer as its first field
-	// FIXME: check node_size and storage_size to be greater than 0
+
+	if (node_size == 0 || storage_size == 0) return NULL;
 
 	Storage_Pool* storage_pool = (Storage_Pool*)memory;
 	storage_pool->node_size = node_size;
