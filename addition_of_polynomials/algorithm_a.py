@@ -1,0 +1,163 @@
+from storage_pool import STORAGE_POOL
+
+
+class PolynomialNode:
+    def __init__(self, COEFF=None, ABC=None, link=None):
+        self.link = link
+        self.COEFF = COEFF
+        self.ABC = ABC
+
+    def __str__(self):
+        return f"{self.COEFF}, {self.ABC}"
+
+class NodeInfo:
+    def __init__(self, COEFF, sign, A, B, C):
+        self.COEFF = COEFF
+        self.sign = sign
+        self.ABC = self.sign * int(f"{A:04d}{B:04d}{C:04d}")
+
+class PolynomialCircularList:
+    """
+    Node class used by the storage_pool must have 'link' and 'info' attributes.
+    """
+    def __init__(self, storage_pool):
+        self.storage_pool = storage_pool
+        self.ptr = None
+
+    def insert_left(self, Y:NodeInfo):
+        P = self.storage_pool.pop()
+        P.COEFF = Y.COEFF
+        P.ABC = Y.ABC
+        
+        if self.ptr is None:
+            P.link = P
+            self.ptr = P
+        else:
+            P.link = self.ptr.link
+            self.ptr.link = P
+        
+    def insert_right(self, Y):
+        self.insert_left(Y)
+        self.ptr = self.ptr.link
+
+def fill_polynomial(polynomial:PolynomialCircularList, terms: tuple):
+    if polynomial == None:
+        return 1
+
+    if len(terms) < 1:
+        return 2
+
+    for term in terms:
+        node_info = NodeInfo(*term)
+        polynomial.insert_right(node_info)
+
+    return 0
+
+def addition_of_polynomials(P: PolynomialNode, Q: PolynomialNode, storage_pool):
+    # A1. [Initialize]
+    P = P.link
+    Q1 = Q
+    Q = Q.link
+
+    while True:
+        # A2. [ABC(P):ABC(Q)]
+        while P.ABC < Q.ABC:
+            Q1 = Q
+            Q = Q.link
+            continue
+
+        if P.ABC > Q.ABC:
+            # A5. [Insert new term]
+            # Q2 <= AVAIL
+            Q2 = storage_pool.pop()
+            Q2.COEFF = P.COEFF
+            Q2.ABC = P.ABC
+            Q2.link = Q
+            Q1.link = Q2
+            Q1 = Q2
+            P = P.link
+            
+            # Go to step 2 
+            continue
+
+        # Go to A3
+        # if P.ABC == Q.ABC:
+        #     pass
+
+        # A3. [Add coefficients]
+        if P.ABC < 0:
+            return 0
+        
+        Q.COEFF += P.COEFF
+        if Q.COEFF != 0:
+            # FIXME Go to A1
+            P = P.link
+            Q1 = Q
+            Q = Q.link
+    
+            # Go to A2
+            continue
+
+        # Go to A4
+        # if Q.COEFF == 0:
+        #     pass
+
+        # A4. [Delete zero term]
+        Q2 = Q
+        Q = Q.link
+        Q1.link = Q
+
+        # AVAIL <= Q2
+        storage_pool.push(Q2)
+
+        P = P.link
+        
+        # Go to A2
+        continue
+
+if __name__ == "__main__":
+    polynomial_P_size = 4
+    polynomial_Q_size = 4
+    max_size = 2 + 4 * (polynomial_P_size + polynomial_Q_size)
+    storage_pool = STORAGE_POOL(PolynomialNode, size=max_size)
+
+    polynomial_P = PolynomialCircularList(storage_pool)
+    polynomial_Q = PolynomialCircularList(storage_pool)
+
+    P_terms = ( (1,1,1,0,0), (1,1,0,1,0), (1,1,1,0,1), (0,-1,0,0,1) )  # x + y + z
+    Q_terms = ( (1,1,2,0,0), (-2,1,0,1,0), (-1,1,1,0,1), (0,-1,0,0,1) )  # x^2 - 2y - z
+
+    fill_polynomial(polynomial_P, P_terms)
+    fill_polynomial(polynomial_Q, Q_terms)
+
+    addition_of_polynomials(polynomial_P.ptr, polynomial_Q.ptr, storage_pool)
+
+    Q = polynomial_Q.ptr.link
+
+    while Q.ABC > 0:
+        print(Q)
+        Q = Q.link
+
+    print()
+
+    polynomial_P_size = 3
+    polynomial_Q_size = 3
+    max_size = 2 + 4 * (polynomial_P_size + polynomial_Q_size)
+    storage_pool = STORAGE_POOL(PolynomialNode, size=max_size)
+
+    polynomial_P = PolynomialCircularList(storage_pool)
+    polynomial_Q = PolynomialCircularList(storage_pool)
+
+    P_terms = ( (1,1,3,0,0), (1,1,0,0,2), (0,-1,0,0,1) )  # x^3 + z^2
+    Q_terms = ( (1,1,0,3,0), (1,1,0,0,2), (0,-1,0,0,1) )  # y^3 + z^2
+
+    fill_polynomial(polynomial_P, P_terms)
+    fill_polynomial(polynomial_Q, Q_terms)
+
+    addition_of_polynomials(polynomial_P.ptr, polynomial_Q.ptr, storage_pool)
+
+    Q = polynomial_Q.ptr.link
+
+    while Q.ABC > 0:
+        print(Q)
+        Q = Q.link
