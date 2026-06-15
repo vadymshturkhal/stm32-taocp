@@ -14,6 +14,7 @@
 - Algorithm T(Topological Sort)
 - Circular List
 - XOR CIrcular List
+- Algorithm A (Addition of polynomials)
 
 ## Setup:
 - Hardware: STM32G431RB (ARM Cortex-M4)
