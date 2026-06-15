@@ -40,6 +40,61 @@ class PolynomialCircularList:
         self.insert_left(Y)
         self.ptr = self.ptr.link
 
+    def __str__(self):
+        if self.ptr is None:
+            return ""
+
+        terms = []
+        P = self.ptr.link
+
+        is_first_term = True
+
+        while P.ABC > 0:
+            ABC = str(P.ABC)
+            ABC_len = len(ABC)
+
+            if ABC_len < 12:
+                ABC = ABC.zfill(12)
+
+            x_power = int(ABC[0:4])
+            y_power = int(ABC[4:8])
+            z_power = int(ABC[8:12])
+
+            term_block = []
+            if is_first_term:
+                coeff = "" if P.COEFF == 1 else str(P.COEFF)
+            else:
+                if P.COEFF == 1:
+                    coeff = f"+ "
+                    # coeff = "" if P.COEFF == 1 else str(P.COEFF)
+                elif P.COEFF < 0:
+                    coeff = f"- {-P.COEFF}" if P.COEFF != -1 else "- "
+                else:
+                    coeff = "+ " if P.COEFF == 1 else f"+ {P.COEFF}"
+                
+            term_block.append(coeff)
+
+            if x_power != 0:
+                x_term = f"x**{x_power}" if x_power != 1 else "x"
+                term_block.append(x_term)
+            
+            if y_power != 0:
+                y_term = f"y**{y_power}" if y_power != 1 else "y"
+                term_block.append(y_term)
+
+            if z_power != 0:
+                z_term = f"z**{z_power}" if z_power != 1 else "z"
+                term_block.append(z_term)
+
+            term = ''.join(term_block)
+            terms.append(term)
+
+            P = P.link
+            is_first_term = False
+
+        terms = ' '.join(terms)
+        return terms
+
 def fill_polynomial(polynomial:PolynomialCircularList, terms: tuple):
     if polynomial == None:
         return 1
@@ -69,6 +124,7 @@ def addition_of_polynomials(P: PolynomialNode, Q: PolynomialNode, storage_pool):
         if P.ABC > Q.ABC:
             # A5. [Insert new term]
             # Q2 <= AVAIL
+            # FIXME allow COEFF 0
             Q2 = storage_pool.pop()
             Q2.COEFF = P.COEFF
             Q2.ABC = P.ABC
@@ -125,7 +181,7 @@ if __name__ == "__main__":
     polynomial_Q = PolynomialCircularList(storage_pool)
 
     P_terms = ( (1,1,1,0,0), (1,1,0,1,0), (1,1,1,0,1), (0,-1,0,0,1) )  # x + y + z
-    Q_terms = ( (1,1,2,0,0), (-2,1,0,1,0), (-1,1,1,0,1), (0,-1,0,0,1) )  # x^2 - 2y - z
+    Q_terms = ( (1,1,2,0,0), (-2,1,0,1,0), (-1,1,1,0,1), (0,-1,0,0,1) )  # x**2 - 2y - z
 
     fill_polynomial(polynomial_P, P_terms)
     fill_polynomial(polynomial_Q, Q_terms)
@@ -133,10 +189,10 @@ if __name__ == "__main__":
     addition_of_polynomials(polynomial_P.ptr, polynomial_Q.ptr, storage_pool)
 
     Q = polynomial_Q.ptr.link
-
-    while Q.ABC > 0:
-        print(Q)
-        Q = Q.link
+    print(polynomial_Q)
+    # while Q.ABC > 0:
+    #     print(Q)
+    #     Q = Q.link
 
     print()
 
@@ -148,8 +204,8 @@ if __name__ == "__main__":
     polynomial_P = PolynomialCircularList(storage_pool)
     polynomial_Q = PolynomialCircularList(storage_pool)
 
-    P_terms = ( (1,1,3,0,0), (1,1,0,0,2), (0,-1,0,0,1) )  # x^3 + z^2
-    Q_terms = ( (1,1,0,3,0), (1,1,0,0,2), (0,-1,0,0,1) )  # y^3 + z^2
+    P_terms = ( (1,1,3,0,0), (1,1,0,0,2), (0,-1,0,0,1) )  # x**3 + z**2
+    Q_terms = ( (1,1,0,3,0), (1,1,0,0,2), (0,-1,0,0,1) )  # y**3 + z**2
 
     fill_polynomial(polynomial_P, P_terms)
     fill_polynomial(polynomial_Q, Q_terms)
@@ -158,6 +214,8 @@ if __name__ == "__main__":
 
     Q = polynomial_Q.ptr.link
 
-    while Q.ABC > 0:
-        print(Q)
-        Q = Q.link
+    # while Q.ABC > 0:
+    #     print(Q)
+    #     Q = Q.link
+
+    print(polynomial_Q)
