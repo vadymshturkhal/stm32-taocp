@@ -6,6 +6,7 @@
 typedef struct {
     void* avail;
     uint32_t node_size;  // there might be some Storage Pools with different node sizes
+    uint32_t size;
  } Storage_Pool;
 
 Storage_Pool* create_storage_pool(void* memory, uint32_t node_size, uint32_t storage_size);

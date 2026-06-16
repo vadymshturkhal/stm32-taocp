@@ -11,6 +11,7 @@ Storage_Pool* create_storage_pool(void* memory, uint32_t node_size, uint32_t sto
 	Storage_Pool* storage_pool = (Storage_Pool*)memory;
 	storage_pool->node_size = node_size;
 	storage_pool->avail = NULL;
+	storage_pool->size = storage_size;
 
 	// Nodes starting memory address
 	uint8_t* memory_cursor = (uint8_t*)(storage_pool + 1);
@@ -21,7 +22,7 @@ Storage_Pool* create_storage_pool(void* memory, uint32_t node_size, uint32_t sto
 		void* current_node = memory_cursor;  // Memory address of the current node
 		memory_cursor += node_size;		  // Memory address of the next node
 
-		// CRITICAL MAGIC: Cast the node address to a void** so we can write to its link field
+		// Cast the node address to a void** so we can write to its link field
 		void** link_field = (void**)current_node;
 
 		// Link it to the previous avail node
@@ -36,10 +37,8 @@ Storage_Pool* create_storage_pool(void* memory, uint32_t node_size, uint32_t sto
 }
 
 void* storage_pool_pop(Storage_Pool* storage_pool) {
-	// flag must always be true
-
 	if (storage_pool->avail == NULL) {
-		return NULL;
+		return NULL;  // Overflow
 	}
 
 	void* P = storage_pool->avail;
