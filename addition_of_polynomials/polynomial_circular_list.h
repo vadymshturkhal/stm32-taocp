@@ -1,9 +1,10 @@
-#ifndef POLYNOMIAL_CIRCULAR_LIST
-#define POLYNOMIAL_CIRCULAR_LIST
+#ifndef POLYNOMIAL_CIRCULAR_LIST_H
+#define POLYNOMIAL_CIRCULAR_LIST_H
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
 #include "storage_pool.h"
 
 typedef struct PolynomialNode {

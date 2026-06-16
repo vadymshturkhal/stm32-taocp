@@ -2,6 +2,7 @@
 #define POLYNOMIAL_TEST_CASES_H
 
 #include <stdint.h>
+
 #include "polynomial_circular_list.h"
 
 /* ─────────────────────────────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdbool.h>
+
 #include "main.h"
 #include "storage_pool.h"
 #include "polynomial_circular_list.h"
