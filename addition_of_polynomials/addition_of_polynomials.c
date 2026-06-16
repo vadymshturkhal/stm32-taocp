@@ -9,8 +9,12 @@
 
 // Return 0 if OK
 // Return 1 if storage_pool Overflow
-uint8_t addition_of_polynomials(PolynomialNode* P, PolynomialNode* Q, Storage_Pool* storage_pool) {
+//uint8_t addition_of_polynomials(PolynomialNode* P, PolynomialNode* Q, Storage_Pool* storage_pool) {
+uint8_t addition_of_polynomials(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q) {
+	PolynomialNode* P = polynomial_P->ptr;
+	PolynomialNode* Q = polynomial_Q->ptr;
 	PolynomialNode* Q1;
+	Storage_Pool* storage_pool = polynomial_Q->storage_pool;
 
 A1:
 	// A1 [Initialize]
@@ -33,15 +37,14 @@ A1:
 			if (Q2 == NULL) return 1;  // Overflow
 
 			Q2->COEFF = P->COEFF;
-			Q2->A = P->A;
-			Q2->B = P->B;
-			Q2->C = P->C;
 			Q2->ABC = P->ABC;
 
 			Q2->link = Q;
 			Q1->link = Q2;
 			Q1 = Q2;
 			P = P->link;
+
+			polynomial_Q->size++;
 
 			// Go to step 2
 			continue;
@@ -70,6 +73,7 @@ A1:
 
 		// AVAIL <= Q2
 		storage_pool_push(storage_pool, Q2);
+		polynomial_Q->size--;
 
 		P = P->link;
 

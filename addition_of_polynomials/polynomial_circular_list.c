@@ -7,6 +7,7 @@
 void polynomial_circular_list_init(PolynomialCircularList* circular_list, Storage_Pool* storage_pool) {
 	circular_list->ptr = NULL;
 	circular_list->storage_pool = storage_pool;
+	circular_list->size = 0;
 }
 
 bool polynomial_circular_list_insert_left(PolynomialCircularList* circular_list, NodeInfo info) {
@@ -19,10 +20,6 @@ bool polynomial_circular_list_insert_left(PolynomialCircularList* circular_list,
 
 	// 2
 	P->COEFF = info.COEFF;
-	P->sign = info.sign;
-	P->A = info.A;
-	P->B = info.B;
-	P->C = info.C;
 
 	// for int8_t sign, A, B and C
 	P->ABC = ((int32_t)info.sign << 24) |
@@ -47,6 +44,8 @@ bool polynomial_circular_list_insert_left(PolynomialCircularList* circular_list,
 		circular_list->ptr->link = P;
 	}
 
+	circular_list->size++;
+
 	return true;
 }
 
@@ -56,54 +55,44 @@ bool polynomial_circular_list_insert_right(PolynomialCircularList* circular_list
 	circular_list->ptr = circular_list->ptr->link;
 	return true;
 }
+
+uint8_t unpack_ABC_32(PolynomialNode* P, NodeInfo* info) {
+	if (P == NULL || info == NULL) return 1;
+
+	int32_t ABC = P->ABC;
+	info->COEFF= P->COEFF;
+    info->sign = (ABC >> 24) & 0xFF;
+    info->A    = (ABC >> 16) & 0xFF;
+    info->B    = (ABC >> 8)  & 0xFF;
+    info->C    = ABC         & 0xFF;
+}
+
+//int32_t polynomial_result_unpack(PolynomialCircularList* polynomial_Q, NodeInfo* infos[]) {
+//	if (polynomial_Q == NULL || polynomial_Q->ptr == NULL || info == NULL) return 1;
 //
-//uint32_t storage_circular_list_pop(bool* pop_is_success, CircularListStorage* circular_list) {
-//	// pop left
-//	// return 0 if Underflow, else P->info
-//	// input pop_is_success flag must always be true
-//
-//	if (circular_list->ptr == NULL) {
-//		*pop_is_success = false;	// Underflow
-//		return 0;
+//	// find polynomial size
+//	PolynomialNode* Q = polynomial_Q->ptr->link;
+//	uint32_t size = 0;
+//	while (Q->ABC > 0) {
+//		size++;
+//		Q = Q->link;
 //	}
 //
-//	CircularNode* P = circular_list->ptr->link;
+//	NodeInfo result_polynomial[size];
 //
-//	if (circular_list->ptr == P) {
-//		circular_list->ptr = NULL;
-//	} else {
-//		circular_list->ptr->link = P->link;
+//	// take the result
+//	Q = polynomial_Q->ptr->link;
+//	uint32_t i = 0;
+//	while (Q->ABC > 0) {
+//		NodeInfo* info = result_polynomial[i++];
+//
+//		int32_t ABC = Q->ABC;
+//		info->COEFF= Q->COEFF;
+//	    info->sign = (ABC >> 24) & 0xFF;
+//	    info->A    = (ABC >> 16) & 0xFF;
+//	    info->B    = (ABC >> 8)  & 0xFF;
+//	    info->C    = ABC         & 0xFF;
+//
+//		Q = Q->link;
 //	}
-//
-//	uint32_t info = P->info;
-//	storage_pool_push(circular_list->storage_pool, P);
-//	return info;
-//}
-//
-//void storage_circular_list_clear(CircularListStorage* circular_list) {
-//	if (circular_list == NULL) return;
-//
-//	if (circular_list->ptr != NULL) {
-//		CircularNode* head = circular_list->ptr->link;
-//		CircularNode* tail = circular_list->ptr;
-//
-//		storage_pool_add_slice(circular_list->storage_pool, head, tail);
-//		circular_list->ptr = NULL;
-//	}
-//}
-//
-//void storage_circular_list_union(CircularListStorage* circular_list_a, CircularListStorage* circular_list_b) {
-//	// Insert the entire circular_list_b at the right of circular circular_list_a list1
-//	// Implicitly reduce size of the circular_list_b
-//
-//	if (circular_list_b->ptr == NULL) return;
-//
-//	if (circular_list_a->ptr != NULL) {
-//		CircularNode* P = circular_list_a->ptr->link;
-//		circular_list_a->ptr->link = circular_list_b->ptr->link;
-//		circular_list_b->ptr->link = P;
-//	}
-//
-//	circular_list_a->ptr = circular_list_b->ptr;
-//	circular_list_b->ptr = NULL;
 //}
