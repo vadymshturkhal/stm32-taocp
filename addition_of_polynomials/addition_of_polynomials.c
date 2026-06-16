@@ -29,7 +29,6 @@ A1:
 		if (P->ABC > Q->ABC) {
 			// A5. [Insert new term]
 			// Q2 <= AVAIL
-			// FIXME allow COEFF 0
 			PolynomialNode* Q2 = storage_pool_pop(storage_pool);
 			if (Q2 == NULL) return 1;  // Overflow
 

@@ -124,7 +124,6 @@ def addition_of_polynomials(P: PolynomialNode, Q: PolynomialNode, storage_pool):
         if P.ABC > Q.ABC:
             # A5. [Insert new term]
             # Q2 <= AVAIL
-            # FIXME allow COEFF 0
             Q2 = storage_pool.pop()
             Q2.COEFF = P.COEFF
             Q2.ABC = P.ABC
