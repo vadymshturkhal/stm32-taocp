@@ -50,8 +50,5 @@ void polynomial_circular_list_init(PolynomialCircularList* circular_list, Storag
 bool polynomial_circular_list_insert_left(PolynomialCircularList* circular_list, NodeInfo info);
 bool polynomial_circular_list_insert_right(PolynomialCircularList* circular_list, NodeInfo info);
 uint8_t unpack_ABC_32(PolynomialNode* P, NodeInfo* info);
-//uint32_t storage_circular_list_pop(bool* pop_is_success, CircularListStorage* circular_list);
-//void storage_circular_list_clear(CircularListStorage* circular_list);
-//void storage_circular_list_union(CircularListStorage* circular_list_a, CircularListStorage* circular_list_b);
 
 #endif
