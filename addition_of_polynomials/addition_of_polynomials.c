@@ -18,7 +18,7 @@ uint8_t addition_of_polynomials(PolynomialCircularList* polynomial_P, Polynomial
 	Storage_Pool* storage_pool = polynomial_Q->storage_pool;
 
 A1:
-	// A1 [Initialize]
+	// A1. [Initialize]
 	P = P->link;
 	Q1 = Q;
 	Q = Q->link;
