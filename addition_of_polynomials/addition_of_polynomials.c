@@ -56,9 +56,10 @@ A1:
 
 		Q->COEFF += P->COEFF;
 		if (Q->COEFF != 0) {
+			// goto A1 is my own trick, pointed out by Knuth
 			goto A1;
 
-			// or
+			// instead of goto one can use next steps from Algorithm A
 			// P = P->link;
 			// Q1 = Q;
 			// Q = Q->link;
