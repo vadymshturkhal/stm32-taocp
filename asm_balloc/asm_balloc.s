@@ -8,7 +8,7 @@
 .section .bss				@ Block Started by Symbol (Uninitialized Memory)
 .balign 8
 custom_heap_base:
-	.space 16384			@ 16 * 1024
+	.space 21248			@ 0x5300
 custom_heap_end:
 
 .section .data				@ Initialized Memory
@@ -19,6 +19,8 @@ heap_head:
 .section .text
 	.global heap_head
 	.global asm_balloc
+	.type asm_balloc, %function
+	.thumb_func
 
 @ Input:
 @ R0 bytes quantity
