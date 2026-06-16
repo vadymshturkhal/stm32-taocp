@@ -37,12 +37,14 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 	PolynomialCircularList* polynomial_Q = polynomials.polynomial_Q;
 	void* starting_address = polynomials.starting_address;
 
-	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 4726 | warm cycles = 4444 | size = ? bytes
+	// Stats for TC4 with TC4_P_SIZE = 128 nodes and TC4_Q_SIZE = 128 nodes
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 4726 | warm cycles = 4444 | size = 140 bytes (addition_of_polynomials only)
 	start = DWT->CYCCNT;
 	addition_of_polynomials(polynomial_P, polynomial_Q);
 	end = DWT->CYCCNT;
 	volatile uint32_t addition_of_polynomials_cycles_cold = (end - start) - overhead;
 
+	// Create same polynomial_P and polynomial_Q
 	asm_balloc_free(starting_address);
 	create_polynomials(&polynomials_data, &polynomials);
 	if (creation_status != 0) return 1;
@@ -50,6 +52,7 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 	polynomial_Q = polynomials.polynomial_Q;
 	starting_address = polynomials.starting_address;
 
+	// Warm run
 	start = DWT->CYCCNT;
 	addition_of_polynomials(polynomial_P, polynomial_Q);
 	end = DWT->CYCCNT;
