@@ -49,6 +49,6 @@ typedef struct {
 void polynomial_circular_list_init(PolynomialCircularList* circular_list, Storage_Pool* storage_pool);
 bool polynomial_circular_list_insert_left(PolynomialCircularList* circular_list, NodeInfo info);
 bool polynomial_circular_list_insert_right(PolynomialCircularList* circular_list, NodeInfo info);
-uint8_t unpack_ABC_32(PolynomialNode* P, NodeInfo* info);
+void unpack_ABC_32(PolynomialNode* P, NodeInfo* info);
 
 #endif

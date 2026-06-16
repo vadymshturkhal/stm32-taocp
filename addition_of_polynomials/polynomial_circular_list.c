@@ -56,9 +56,7 @@ bool polynomial_circular_list_insert_right(PolynomialCircularList* circular_list
 	return true;
 }
 
-uint8_t unpack_ABC_32(PolynomialNode* P, NodeInfo* info) {
-	if (P == NULL || info == NULL) return 1;
-
+void unpack_ABC_32(PolynomialNode* P, NodeInfo* info) {
 	int32_t ABC = P->ABC;
 	info->COEFF= P->COEFF;
     info->sign = (ABC >> 24) & 0xFF;
