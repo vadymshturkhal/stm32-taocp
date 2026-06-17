@@ -91,7 +91,7 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 	// ASM: cold cycles = 4351 | warm cycles = 4313 | size = 124 bytes (addition_of_polynomials only) Placed P = P->link; between polynomial_Q->size--; in A4
 	// ASM: cold cycles = 4305 | warm cycles = 4266 | size = 124 bytes (addition_of_polynomials only) Placed load polynomial size before P = P->link; in A5
 	// ASM: cold cycles = 4259 | warm cycles = 4219 | size = 124 bytes (addition_of_polynomials only) Placed load polynomial size before Q2->link = Q; and advance polynomial size before P = P->link; in A5
-	// ASM: cold cycles = 4219 | warm cycles = 4180 | size = 124 bytes (addition_of_polynomials only) placed .balign 4 before A1
+	// ASM: cold cycles = 4219 | warm cycles = 4180 | size = 124 bytes (addition_of_polynomials only) Placed .balign 4 before A1
 	start = DWT->CYCCNT;
 	addition_status = asm_addition_of_polynomials_v1(polynomial_P, polynomial_Q);
 	if (addition_status != 0) return addition_status;
