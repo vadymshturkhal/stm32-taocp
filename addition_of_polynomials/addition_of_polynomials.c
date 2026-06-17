@@ -10,7 +10,6 @@
 
 // Return 0 if OK
 // Return 1 if storage_pool Overflow
-//uint8_t addition_of_polynomials(PolynomialNode* P, PolynomialNode* Q, Storage_Pool* storage_pool) {
 uint8_t addition_of_polynomials(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q) {
 	PolynomialNode* P = polynomial_P->ptr;
 	PolynomialNode* Q = polynomial_Q->ptr;

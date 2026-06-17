@@ -6,7 +6,6 @@
 	.type asm_addition_of_polynomials_v1, %function
 
 
-
 @ PolynomialCircularList fields definition
 .equ POLYNOMIAL_PTR, 			0
 .equ POLYNOMIAL_STORAGE_POOL,	4
@@ -22,8 +21,8 @@
 @ R1 PolynomialCircularList* polynomial_Q
 
 @ Runtime:
-@ R0 PolynomialCircularList* polynomial_P, P->ABC
-@ R1 PolynomialCircularList* polynomial_Q, Q->ABC
+@ R0 PolynomialCircularList* polynomial_P, P->ABC, scratch
+@ R1 PolynomialCircularList* polynomial_Q, Q->ABC, scratch
 @ R2 scratch
 @ R3 scratch
 @ R4 P
@@ -33,9 +32,6 @@
 @ R8 polynomial_Q
 
 @ Return: status
-
-@ Note:
-@ Can use R0
 
 asm_addition_of_polynomials_v1:
 	PUSH {R4-R8, LR}
