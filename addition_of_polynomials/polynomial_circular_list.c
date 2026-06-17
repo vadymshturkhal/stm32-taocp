@@ -65,33 +65,3 @@ void unpack_ABC_32(PolynomialNode* P, NodeInfo* info) {
     info->B    = (ABC >> 8)  & 0xFF;
     info->C    = ABC         & 0xFF;
 }
-
-//int32_t polynomial_result_unpack(PolynomialCircularList* polynomial_Q, NodeInfo* infos[]) {
-//	if (polynomial_Q == NULL || polynomial_Q->ptr == NULL || info == NULL) return 1;
-//
-//	// find polynomial size
-//	PolynomialNode* Q = polynomial_Q->ptr->link;
-//	uint32_t size = 0;
-//	while (Q->ABC > 0) {
-//		size++;
-//		Q = Q->link;
-//	}
-//
-//	NodeInfo result_polynomial[size];
-//
-//	// take the result
-//	Q = polynomial_Q->ptr->link;
-//	uint32_t i = 0;
-//	while (Q->ABC > 0) {
-//		NodeInfo* info = result_polynomial[i++];
-//
-//		int32_t ABC = Q->ABC;
-//		info->COEFF= Q->COEFF;
-//	    info->sign = (ABC >> 24) & 0xFF;
-//	    info->A    = (ABC >> 16) & 0xFF;
-//	    info->B    = (ABC >> 8)  & 0xFF;
-//	    info->C    = ABC         & 0xFF;
-//
-//		Q = Q->link;
-//	}
-//}

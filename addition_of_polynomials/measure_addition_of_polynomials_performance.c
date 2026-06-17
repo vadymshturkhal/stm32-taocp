@@ -11,9 +11,12 @@ extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 extern uint8_t asm_addition_of_polynomials(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
 extern uint8_t asm_addition_of_polynomials_v1(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
+extern uint8_t asm_addition_of_polynomials_integrated_avail(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
+
 
 uint8_t create_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
 uint8_t addition_of_polynomials(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
+uint8_t addition_of_polynomials_integrated_avail(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
 //
 
 uint8_t create_same_polynomials(
@@ -65,8 +68,12 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 
 	// Translation Unit Boundary Stats for TC4 with TC4_P_SIZE = 128 nodes and TC4_Q_SIZE = 128 nodes
 	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 4609-4726 | warm cycles = 4440-4444 | size = 140 bytes (addition_of_polynomials only)
+
+	// Integrated AVAIL Stats for TC4 with TC4_P_SIZE = 128 nodes and TC4_Q_SIZE = 128 nodes
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 3551 | warm cycles = 3512 | size = 148 bytes (addition_of_polynomials only)
 	start = DWT->CYCCNT;
-	addition_status = addition_of_polynomials(polynomial_P, polynomial_Q);
+//	addition_status = addition_of_polynomials(polynomial_P, polynomial_Q);
+	addition_status = addition_of_polynomials_integrated_avail(polynomial_P, polynomial_Q);
 	if (addition_status != 0) return addition_status;
 	end = DWT->CYCCNT;
 	volatile uint32_t addition_of_polynomials_cycles_cold = (end - start) - overhead;
@@ -77,7 +84,8 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 
 	// Warm run
 	start = DWT->CYCCNT;
-	addition_status = addition_of_polynomials(polynomial_P, polynomial_Q);
+//	addition_status = addition_of_polynomials(polynomial_P, polynomial_Q);
+	addition_status = addition_of_polynomials_integrated_avail(polynomial_P, polynomial_Q);
 	if (addition_status != 0) return addition_status;
 	end = DWT->CYCCNT;
 	volatile uint32_t addition_of_polynomials_cycles_warm = (end - start) - overhead;
@@ -92,8 +100,11 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 	// ASM: cold cycles = 4305 | warm cycles = 4266 | size = 124 bytes (addition_of_polynomials only) Placed load polynomial size before P = P->link; in A5
 	// ASM: cold cycles = 4259 | warm cycles = 4219 | size = 124 bytes (addition_of_polynomials only) Placed load polynomial size before Q2->link = Q; and advance polynomial size before P = P->link; in A5
 	// ASM: cold cycles = 4219 | warm cycles = 4180 | size = 124 bytes (addition_of_polynomials only) Placed .balign 4 before A1
+
+	// Integrated AVAIL Stats for TC4 with TC4_P_SIZE = 128 nodes and TC4_Q_SIZE = 128 nodes
+	// ASM: cold cycles = 3437 | warm cycles = 3400 | size = 120 bytes
 	start = DWT->CYCCNT;
-	addition_status = asm_addition_of_polynomials_v1(polynomial_P, polynomial_Q);
+	addition_status = asm_addition_of_polynomials_integrated_avail(polynomial_P, polynomial_Q);
 	if (addition_status != 0) return addition_status;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_addition_of_polynomials_cycles_cold = (end - start) - overhead;
@@ -103,7 +114,7 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 	if (creation_status != 0) return 1;
 
 	start = DWT->CYCCNT;
-	addition_status = asm_addition_of_polynomials_v1(polynomial_P, polynomial_Q);
+	addition_status = asm_addition_of_polynomials_integrated_avail(polynomial_P, polynomial_Q);
 	if (addition_status != 0) return addition_status;
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_addition_of_polynomials_cycles_warm = (end - start) - overhead;
