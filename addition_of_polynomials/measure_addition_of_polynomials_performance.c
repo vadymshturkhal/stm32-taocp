@@ -13,7 +13,6 @@ extern uint8_t asm_addition_of_polynomials(PolynomialCircularList* polynomial_P,
 extern uint8_t asm_addition_of_polynomials_v1(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
 extern uint8_t asm_addition_of_polynomials_integrated_avail(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
 
-
 uint8_t create_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
 uint8_t addition_of_polynomials(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
 uint8_t addition_of_polynomials_integrated_avail(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
@@ -103,6 +102,7 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 
 	// Integrated AVAIL Stats for TC4 with TC4_P_SIZE = 128 nodes and TC4_Q_SIZE = 128 nodes
 	// ASM: cold cycles = 3437 | warm cycles = 3400 | size = 120 bytes
+	// ASM: cold cycles = 3393 | warm cycles = 3360 | size = 120 bytes
 	start = DWT->CYCCNT;
 	addition_status = asm_addition_of_polynomials_integrated_avail(polynomial_P, polynomial_Q);
 	if (addition_status != 0) return addition_status;

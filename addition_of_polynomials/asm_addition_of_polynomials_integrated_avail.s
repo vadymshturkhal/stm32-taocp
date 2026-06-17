@@ -88,17 +88,16 @@ A3:
 A4:
 	MOVS R1, R5					@ Q2 = Q
 	LDR R5, [R5, #NODE_LINK]	@ Q = Q->link
-	STR R5, [R6, #NODE_LINK]
+	STR R5, [R6, #NODE_LINK]	@ Q1->link = Q
 
+	LDR R0, [R8, #POLYNOMIAL_SIZE]	@ load polynomial size
 	@ AVAIL <= Q2
 	STR R7, [R1, #NODE_LINK]	@ Q2->link = AVAIL
+	SUBS R0, R0, #1				@ polynomial size--;
 	MOVS R7, R1					@ AVAIL = Q2
 
-	@ polynomial_Q->size--;
-	LDR R0, [R8, #POLYNOMIAL_SIZE]	@ load polynomial size
 	LDR R4, [R4, #NODE_LINK]	@ P = P->link;
-	SUBS R0, R0, #1
-	STR R0, [R8, #POLYNOMIAL_SIZE]
+	STR R0, [R8, #POLYNOMIAL_SIZE]	@ store polynomial size;
 
 	B A2
 
