@@ -9,8 +9,11 @@
 // Prototypes
 extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
+extern uint8_t asm_addition_of_polynomials(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
+
 uint8_t create_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
 uint8_t addition_of_polynomials(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
+//
 
 uint8_t measure_addition_of_polynomials_performance(void) {
     volatile uint32_t start, end, overhead;
@@ -72,6 +75,11 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 
 		Q = Q->link;
 	}
+
+	start = DWT->CYCCNT;
+	asm_addition_of_polynomials(polynomial_P, polynomial_Q);
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_addition_of_polynomials_cycles_cold = (end - start) - overhead;
 
 
 
