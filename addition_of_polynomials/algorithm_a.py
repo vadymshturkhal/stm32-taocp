@@ -179,11 +179,13 @@ if __name__ == "__main__":
     polynomial_P = PolynomialCircularList(storage_pool)
     polynomial_Q = PolynomialCircularList(storage_pool)
 
-    P_terms = ( (1,1,1,0,0), (1,1,0,1,0), (1,1,1,0,1), (0,-1,0,0,1) )  # x + y + z
-    Q_terms = ( (1,1,2,0,0), (-2,1,0,1,0), (-1,1,1,0,1), (0,-1,0,0,1) )  # x**2 - 2y - z
+    P_terms = ( (1,1,1,0,0), (1,1,0,1,0), (1,1,1,0,1), (0,-1,0,0,1) )  # x + y + xz
+    Q_terms = ( (1,1,2,0,0), (-2,1,0,1,0), (-1,1,1,0,1), (0,-1,0,0,1) )  # x**2 - 2y - xz
 
     fill_polynomial(polynomial_P, P_terms)
     fill_polynomial(polynomial_Q, Q_terms)
+    print(polynomial_P)
+    print(polynomial_Q)
 
     addition_of_polynomials(polynomial_P.ptr, polynomial_Q.ptr, storage_pool)
 
@@ -208,6 +210,8 @@ if __name__ == "__main__":
 
     fill_polynomial(polynomial_P, P_terms)
     fill_polynomial(polynomial_Q, Q_terms)
+    print(polynomial_P)
+    print(polynomial_Q)
 
     addition_of_polynomials(polynomial_P.ptr, polynomial_Q.ptr, storage_pool)
 
