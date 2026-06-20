@@ -119,7 +119,6 @@ def addition_of_polynomials(P: PolynomialNode, Q: PolynomialNode, storage_pool):
         while P.ABC < Q.ABC:
             Q1 = Q
             Q = Q.link
-            continue
 
         if P.ABC > Q.ABC:
             # A5. [Insert new term]
