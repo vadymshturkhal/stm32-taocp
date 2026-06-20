@@ -179,8 +179,8 @@ def multiply_cycle(Q: PolynomialNode, M: PolynomialNode, P: PolynomialNode, stor
 
 def multiplication_of_polynomials(Q: PolynomialNode, M: PolynomialNode, P: PolynomialNode, storage_pool) -> int:
     """
-    Result: Polynomial Q + Polynomial M x Polynomial P;
-    Return: status;
+    Result: Polynomial Q + Polynomial M x Polynomial P
+    Return: status
     """
 
     # M1. [Next multiplier]
