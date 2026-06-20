@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "polynomial_circular_list.h"
+#include "../polynomials/polynomial_circular_list.h"
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Test Case 1: (x + y + xz) + (x^2 - 2y - z)
@@ -11,6 +11,7 @@
  * ───────────────────────────────────────────────────────────────────────────── */
 static const uint32_t TC1_P_SIZE = 4;
 static const uint32_t TC1_Q_SIZE = 4;
+static const uint32_t EMPTY_SIZE = 1;
 static const NodeInfo TC1_P_terms[] = {
     { .COEFF =  1, .sign =  1, .A = 1, .B = 0, .C = 0 },  // x
     { .COEFF =  1, .sign =  1, .A = 0, .B = 1, .C = 0 },  // y
@@ -22,6 +23,10 @@ static const NodeInfo TC1_Q_terms[] = {
     { .COEFF =  1, .sign =  1, .A = 2, .B = 0, .C = 0 },  // x^2
     { .COEFF = -2, .sign =  1, .A = 0, .B = 1, .C = 0 },  // -2y
     { .COEFF = -1, .sign =  1, .A = 0, .B = 0, .C = 1 },  // -z
+    { .COEFF =  0, .sign = -1, .A = 0, .B = 0, .C = 1 },  // sentinel
+};
+
+static const NodeInfo EMPTY_terms[] = {
     { .COEFF =  0, .sign = -1, .A = 0, .B = 0, .C = 1 },  // sentinel
 };
 
@@ -69,11 +74,11 @@ static const NodeInfo TC3_Q_terms[] = {
 * - 40 Nodes: Coefficients Cancel (COEFF 5 - 5 = 0 -> Node Removed)
 * - 47 Nodes: Interleaved Exponents (P even sequences, Q odd sequences)
  * ───────────────────────────────────────────────────────────────────────────── */
-const uint32_t TC4_P_SIZE = 128;
-const uint32_t TC4_Q_SIZE = 128;
-const uint32_t TC4_ANS_SIZE = 135; // 40 (Add) + 0 (Cancel) + 94 (Interleaved) + 1 (Sentinel)
+static const uint32_t TC4_P_SIZE = 128;
+static const uint32_t TC4_Q_SIZE = 128;
+static const uint32_t TC4_ANS_SIZE = 135; // 40 (Add) + 0 (Cancel) + 94 (Interleaved) + 1 (Sentinel)
 
-const NodeInfo TC4_P_terms[128] = {
+static const NodeInfo TC4_P_terms[128] = {
     // [0-39] Match & Add Section (Exponents step down dynamically)
     {1,1,125,0,0},   {1,1,124,100,0}, {1,1,124,0,0},   {1,1,123,100,0}, {1,1,123,0,0},
     {1,1,122,100,0}, {1,1,122,0,0},   {1,1,121,100,0}, {1,1,121,0,0},   {1,1,120,100,0},
@@ -110,7 +115,7 @@ const NodeInfo TC4_P_terms[128] = {
     {0,-1,0,0,1}
 };
 
-const NodeInfo TC4_Q_terms[128] = {
+static const NodeInfo TC4_Q_terms[128] = {
     // [0-39] Match & Add Section (Identical to P)
     {1,1,125,0,0},   {1,1,124,100,0}, {1,1,124,0,0},   {1,1,123,100,0}, {1,1,123,0,0},
     {1,1,122,100,0}, {1,1,122,0,0},   {1,1,121,100,0}, {1,1,121,0,0},   {1,1,120,100,0},
@@ -147,7 +152,7 @@ const NodeInfo TC4_Q_terms[128] = {
     {0,-1,0,0,1}
 };
 
-const NodeInfo TC4_Expected_Ans[135] = {
+static const NodeInfo TC4_Expected_Ans[135] = {
     // [0-39] Consolidated values (COEFF updated to 2)
     {2,1,125,0,0},   {2,1,124,100,0}, {2,1,124,0,0},   {2,1,123,100,0}, {2,1,123,0,0},
     {2,1,122,100,0}, {2,1,122,0,0},   {2,1,121,100,0}, {2,1,121,0,0},   {2,1,120,100,0},

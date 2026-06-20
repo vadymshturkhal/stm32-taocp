@@ -36,13 +36,16 @@ typedef struct {
 typedef struct {
 	NodeInfo* P_terms;
 	NodeInfo* Q_terms;
+	NodeInfo* M_terms;
 	uint32_t polynomial_P_size;
 	uint32_t polynomial_Q_size;
+	uint32_t polynomial_M_size;
 } PolynomialsData;
 
 typedef struct {
 	PolynomialCircularList* polynomial_P;
 	PolynomialCircularList* polynomial_Q;
+	PolynomialCircularList* polynomial_M;
 	void* starting_address;
 } Polynomials;
 
@@ -51,5 +54,7 @@ void polynomial_circular_list_init(PolynomialCircularList* circular_list, Storag
 bool polynomial_circular_list_insert_left(PolynomialCircularList* circular_list, NodeInfo info);
 bool polynomial_circular_list_insert_right(PolynomialCircularList* circular_list, NodeInfo info);
 void unpack_ABC_32(PolynomialNode* P, NodeInfo* info);
+uint8_t create_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
+uint32_t create_three_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
 
 #endif
