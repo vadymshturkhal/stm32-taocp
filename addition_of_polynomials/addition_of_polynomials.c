@@ -27,7 +27,6 @@ A1:
 		while (P->ABC < Q->ABC) {
 			Q1 = Q;
 			Q = Q->link;
-			continue;
 		}
 
 		if (P->ABC > Q->ABC) {
