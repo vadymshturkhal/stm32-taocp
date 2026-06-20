@@ -190,7 +190,7 @@ def multiplication_of_polynomials(Q: PolynomialNode, M: PolynomialNode, P: Polyn
         # M2. [Multiply cycle]
         status = multiply_cycle(Q, M, P, storage_pool)
         if status != 0:
-            return 1
+            return status
 
         # M1. [Next multiplier]
         M = M.link
