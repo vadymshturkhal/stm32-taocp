@@ -53,8 +53,16 @@ typedef struct {
 void polynomial_circular_list_init(PolynomialCircularList* circular_list, Storage_Pool* storage_pool);
 bool polynomial_circular_list_insert_left(PolynomialCircularList* circular_list, NodeInfo info);
 bool polynomial_circular_list_insert_right(PolynomialCircularList* circular_list, NodeInfo info);
+void polynomial_circular_list_clear(PolynomialCircularList* circular_list);
 void unpack_ABC_32(PolynomialNode* P, NodeInfo* info);
 uint8_t create_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
+uint8_t create_same_polynomials(
+		void** starting_address,
+		PolynomialsData* polynomials_data,
+		Polynomials* polynomials,
+		PolynomialCircularList** polynomial_P,
+		PolynomialCircularList** polynomial_Q
+);
 uint32_t create_three_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
 
 #endif

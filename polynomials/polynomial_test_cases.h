@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "../polynomials/polynomial_circular_list.h"
+#include "polynomial_circular_list.h"
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Test Case 1: (x + y + xz) + (x^2 - 2y - z)
@@ -29,6 +29,9 @@ static const NodeInfo TC1_Q_terms[] = {
 static const NodeInfo EMPTY_terms[] = {
     { .COEFF =  0, .sign = -1, .A = 0, .B = 0, .C = 1 },  // sentinel
 };
+
+static const NodeInfo EMPTY_term = { .COEFF =  0, .sign = -1, .A = 0, .B = 0, .C = 1 };  // sentinel
+
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Test Case 2: (x^3 + z^2) + (y^3 + z^2)

@@ -62,6 +62,19 @@ bool polynomial_circular_list_insert_right(PolynomialCircularList* circular_list
 	return true;
 }
 
+void polynomial_circular_list_clear(PolynomialCircularList* circular_list) {
+	if (circular_list == NULL) return;
+
+	if (circular_list->ptr != NULL) {
+		PolynomialNode* head = circular_list->ptr->link;
+		PolynomialNode* tail = circular_list->ptr;
+
+		storage_pool_add_slice(circular_list->storage_pool, head, tail);
+		circular_list->ptr = NULL;
+		circular_list->size = 0;
+	}
+}
+
 void unpack_ABC_32(PolynomialNode* P, NodeInfo* info) {
 	int32_t ABC = P->ABC;
 	info->COEFF= P->COEFF;
@@ -115,6 +128,25 @@ uint8_t create_polynomials(PolynomialsData* polynomials_data, Polynomials* polyn
 	return 0;
 }
 
+uint8_t create_same_polynomials(
+		void** starting_address,
+		PolynomialsData* polynomials_data,
+		Polynomials* polynomials,
+		PolynomialCircularList** polynomial_P,
+		PolynomialCircularList** polynomial_Q
+) {
+	asm_balloc_free(*starting_address);
+
+	int32_t creation_status = create_polynomials(polynomials_data, polynomials);
+	if (creation_status != 0) return 1;
+
+	*polynomial_P = polynomials->polynomial_P;
+	*polynomial_Q = polynomials->polynomial_Q;
+	*starting_address = polynomials->starting_address;
+
+	return 0;
+}
+
 uint32_t create_three_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials) {
 	NodeInfo* P_terms = polynomials_data->P_terms;
 	NodeInfo* Q_terms = polynomials_data->Q_terms;
@@ -124,7 +156,7 @@ uint32_t create_three_polynomials(PolynomialsData* polynomials_data, Polynomials
 	uint32_t polynomial_M_size = polynomials_data->polynomial_M_size;
 
 	const uint32_t polynomials_nodes = polynomial_P_size + polynomial_Q_size + polynomial_M_size;
-	const uint32_t max_Q_nodes = polynomial_P_size * polynomial_M_size;
+	const uint32_t max_Q_nodes = polynomial_Q_size + polynomial_P_size * polynomial_M_size - 2;  // -2 sentinels
 	const uint32_t max_nodes = polynomials_nodes + max_Q_nodes;
 
 	if (max_nodes <= 0) return 1;
