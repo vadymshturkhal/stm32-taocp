@@ -13,14 +13,7 @@ extern void asm_balloc_free(void* memory_pointer);
 
 uint32_t create_three_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
 uint32_t multiplication_of_polynomials(PolynomialCircularList* polynomial_Q, PolynomialCircularList* polynomial_M, PolynomialCircularList* polynomial_P);
-uint8_t recreate_three_polynomials(
-		void** starting_address,
-		PolynomialsData* polynomials_data,
-		Polynomials* polynomials,
-		PolynomialCircularList** polynomial_Q,
-		PolynomialCircularList** polynomial_M,
-		PolynomialCircularList** polynomial_P
-);
+
 
 uint32_t measure_multiplication_of_polynomials_performance() {
     volatile uint32_t start, end, overhead;
