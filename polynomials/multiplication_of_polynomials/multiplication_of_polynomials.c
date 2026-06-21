@@ -113,14 +113,5 @@ uint32_t multiplication_of_polynomials(PolynomialCircularList* polynomial_Q, Pol
 		M = M->link;
 	} ;
 
-//	do {
-//		// M1. [Next multiplier]
-//		M = M->link;
-//
-//		// M2. [Multiply cycle]
-//		uint32_t status = multiply_cycle(polynomial_Q, M, polynomial_P);
-//		if (status != 0) return status;
-//	} while (M->ABC >= 0);
-
 	return 0;
 }
