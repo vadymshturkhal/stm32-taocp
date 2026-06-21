@@ -7,12 +7,14 @@
 #include "polynomial_circular_list.h"
 #include "polynomial_test_cases.h"
 
+
 // Prototypes
 extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 
 uint32_t create_three_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
 uint32_t multiplication_of_polynomials(PolynomialCircularList* polynomial_Q, PolynomialCircularList* polynomial_M, PolynomialCircularList* polynomial_P);
+uint32_t multiplication_of_polynomials_avail_integrated(PolynomialCircularList* polynomial_Q, PolynomialCircularList* polynomial_M, PolynomialCircularList* polynomial_P);
 
 
 uint32_t measure_multiplication_of_polynomials_performance() {
@@ -49,8 +51,13 @@ uint32_t measure_multiplication_of_polynomials_performance() {
 
 	// Translation Unit Boundary Stats (Algorithm M -> Multiplication Subroutine -> Storage Pool) TC1
 	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 788 | warm cycles = 718 | size = 212 bytes (multiplication_of_polynomials only)
+
+	// Translation Unit Boundary AVAIL Integrated Stats (Algorithm M -> Multiplication Subroutine) TC1
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 677 | warm cycles = 612 | size = 204 bytes (multiplication_of_polynomials only)
+
 	start = DWT->CYCCNT;
-	multiplication_status = multiplication_of_polynomials(polynomial_Q, polynomial_M, polynomial_P);
+//	multiplication_status = multiplication_of_polynomials(polynomial_Q, polynomial_M, polynomial_P);
+	multiplication_status = multiplication_of_polynomials_avail_integrated(polynomial_Q, polynomial_M, polynomial_P);
 	if (multiplication_status != 0) return multiplication_status;
 	end = DWT->CYCCNT;
 	volatile uint32_t multiplication_of_polynomials_cycles_cold = (end - start) - overhead;
@@ -60,7 +67,8 @@ uint32_t measure_multiplication_of_polynomials_performance() {
 
 	// Warm run
 	start = DWT->CYCCNT;
-	multiplication_status = multiplication_of_polynomials(polynomial_Q, polynomial_M, polynomial_P);
+//	multiplication_status = multiplication_of_polynomials(polynomial_Q, polynomial_M, polynomial_P);
+	multiplication_status = multiplication_of_polynomials_avail_integrated(polynomial_Q, polynomial_M, polynomial_P);
 	if (multiplication_status != 0) return multiplication_status;
 	end = DWT->CYCCNT;
 	volatile uint32_t multiplication_of_polynomials_cycles_warm = (end - start) - overhead;
