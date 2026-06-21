@@ -3,8 +3,8 @@
 #include <stdbool.h>
 
 #include "main.h"
-#include "polynomial_circular_list.h"
 #include "storage_pool.h"
+#include "polynomial_circular_list.h"
 
 // A, B, C must be in int8_t range
 

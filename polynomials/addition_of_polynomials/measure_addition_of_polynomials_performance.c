@@ -3,8 +3,10 @@
 
 #include "main.h"
 #include "storage_pool.h"
+
 #include "polynomial_circular_list.h"
 #include "polynomial_test_cases.h"
+
 
 // Prototypes
 extern void* asm_balloc(uint32_t size);
@@ -16,28 +18,9 @@ extern uint8_t asm_addition_of_polynomials_integrated_avail(PolynomialCircularLi
 uint8_t create_polynomials(PolynomialsData* polynomials_data, Polynomials* polynomials);
 uint8_t addition_of_polynomials(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
 uint8_t addition_of_polynomials_integrated_avail(PolynomialCircularList* polynomial_P, PolynomialCircularList* polynomial_Q);
-//
 
-uint8_t create_same_polynomials(
-		void** starting_address,
-		PolynomialsData* polynomials_data,
-		Polynomials* polynomials,
-		PolynomialCircularList** polynomial_P,
-		PolynomialCircularList** polynomial_Q
-) {
-	asm_balloc_free(*starting_address);
 
-	int32_t creation_status = create_polynomials(polynomials_data, polynomials);
-	if (creation_status != 0) return 1;
-
-	*polynomial_P = polynomials->polynomial_P;
-	*polynomial_Q = polynomials->polynomial_Q;
-	*starting_address = polynomials->starting_address;
-
-	return 0;
-}
-
-uint8_t measure_addition_of_polynomials_performance(void) {
+uint32_t measure_addition_of_polynomials_performance(void) {
     volatile uint32_t start, end, overhead;
     uint8_t creation_status;
     uint8_t addition_status;
@@ -102,7 +85,6 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 
 	// Integrated AVAIL Stats for TC4 with TC4_P_SIZE = 128 nodes and TC4_Q_SIZE = 128 nodes
 	// ASM: cold cycles = 3437 | warm cycles = 3400 | size = 120 bytes
-	// ASM: cold cycles = 3393 | warm cycles = 3360 | size = 120 bytes
 	start = DWT->CYCCNT;
 	addition_status = asm_addition_of_polynomials_integrated_avail(polynomial_P, polynomial_Q);
 	if (addition_status != 0) return addition_status;
@@ -136,4 +118,5 @@ uint8_t measure_addition_of_polynomials_performance(void) {
 //	//
 
 	asm_balloc_free(starting_address);
+	return 0;
 }
