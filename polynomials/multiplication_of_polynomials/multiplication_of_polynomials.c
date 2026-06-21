@@ -6,7 +6,7 @@
 #include "storage_pool.h"
 #include "polynomial_circular_list.h"
 
-#define SENTINEL_NODE_ABC -16777215;
+#define SENTINEL_NODE_ABC -16777215
 
 // A, B, C must be in int8_t range
 uint32_t multiply_cycle(PolynomialCircularList* polynomial_Q, PolynomialNode* M, PolynomialCircularList* polynomial_P) {
