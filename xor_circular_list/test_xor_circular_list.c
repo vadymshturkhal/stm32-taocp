@@ -10,18 +10,23 @@ extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 
 
-uint8_t test_xor_circular_list(uint32_t max_nodes) {
+// Return 1 if max_nodes == 0
+// Return 2 if memory == NULL
+// Return 3 if insert left error
+// Return 4 if pop left error
+// Else Return 0
+uint32_t test_xor_circular_list(uint32_t max_nodes) {
 	// node info is uint32_t
-	if (max_nodes == 0) return 0;
+	if (max_nodes == 0) return 1;
 
 	uint32_t storage_pool_size = sizeof(Storage_Pool) + max_nodes * sizeof(XORCircularNode);
 	uint32_t storage_and_circular_list_size = storage_pool_size + sizeof(XORCircularList);
 
 	void* storage_and_circular_list_memory = asm_balloc(storage_and_circular_list_size);
-	if (storage_and_circular_list_memory == NULL) return 0;
+	if (storage_and_circular_list_memory == NULL) return 2;
 
 	Storage_Pool* storage_pool = create_storage_pool(storage_and_circular_list_memory, sizeof(XORCircularNode), max_nodes);
-	if (storage_pool == NULL) return 0;
+	if (storage_pool == NULL) return 2;
 
 	uint8_t* circular_list_memory_start = (uint8_t*)storage_and_circular_list_memory + storage_pool_size;
 
@@ -34,7 +39,7 @@ uint8_t test_xor_circular_list(uint32_t max_nodes) {
 	for (uint32_t i = max_nodes; i > 0; i--){
 		if (xor_circular_list_insert_left(circular_list, i) == false) {
 			asm_balloc_free(storage_and_circular_list_memory);
-			return 0;
+			return 3;
 		}
 	}
 
@@ -57,10 +62,10 @@ uint8_t test_xor_circular_list(uint32_t max_nodes) {
 		info = xor_circular_list_pop_left(&pop_is_success, circular_list);
 		if (pop_is_success == false) {
 			asm_balloc_free(storage_and_circular_list_memory);
-			return 0;
+			return 4;
 		}
 	}
 
 	asm_balloc_free(storage_and_circular_list_memory);
-	return 1;
+	return 0;
 }
