@@ -25,13 +25,15 @@ A1:
 	Q = Q->link;
 
 	while (1) {
+		int32_t ABC = P->ABC;
+
 		// A2. [ABC(P):ABC(Q)]
-		while (P->ABC < Q->ABC) {
+		while (ABC < Q->ABC) {
 			Q1 = Q;
 			Q = Q->link;
 		}
 
-		if (P->ABC > Q->ABC) {
+		if (ABC > Q->ABC) {
 			// A5. [Insert new term]
 			// Q2 <= AVAIL
 //			PolynomialNode* Q2 = storage_pool_pop(storage_pool);
@@ -43,7 +45,7 @@ A1:
 			AVAIL = AVAIL->link;
 
 			Q2->COEFF = P->COEFF;
-			Q2->ABC = P->ABC;
+			Q2->ABC = ABC;
 
 			Q2->link = Q;
 			Q1->link = Q2;
@@ -57,7 +59,7 @@ A1:
 		}
 
 		// A3. [Add coefficients]
-		if (P->ABC < 0) return 0;  // OK
+		if (ABC < 0) return 0;  // OK
 
 		Q->COEFF += P->COEFF;
 		if (Q->COEFF != 0) {

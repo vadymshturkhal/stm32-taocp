@@ -52,7 +52,7 @@ uint32_t measure_addition_of_polynomials_performance(void) {
 	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 4609-4726 | warm cycles = 4440-4444 | size = 140 bytes (addition_of_polynomials only)
 
 	// Integrated AVAIL Stats for TC4 with TC4_P_SIZE = 128 nodes and TC4_Q_SIZE = 128 nodes
-	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 3551 | warm cycles = 3512 | size = 148 bytes (addition_of_polynomials only)
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 3423 | warm cycles = 3378 | size = 148 bytes (addition_of_polynomials only)
 	start = DWT->CYCCNT;
 //	addition_status = addition_of_polynomials(polynomial_P, polynomial_Q);
 	addition_status = addition_of_polynomials_integrated_avail(polynomial_P, polynomial_Q);
