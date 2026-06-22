@@ -193,4 +193,122 @@ static const NodeInfo TC4_Expected_Ans[135] = {
     {0,-1,0,0,1}
 };
 
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Test Case 5: 32 nodes each, all operations exercised
+ *
+ * P (31 real terms + sentinel = 32 nodes):
+ *   x^2,x^4,...,x^20  COEFF= 1  [A4: cancel with Q]
+ *   x^21,x^23,x^25   COEFF= 1  [A5: insert, P only]
+ *   x^27,x^29,...,x^61 COEFF= 1  [A3: add]
+ *
+ * Q (31 real terms + sentinel = 32 nodes):
+ *   x^2,x^4,...,x^20  COEFF=-1  [A4: cancel with P]
+ *   x^22,x^24,x^26   COEFF= 1  [A2: advance, Q only]
+ *   x^27,x^29,...,x^61 COEFF= 3  [A3: add]
+ *
+ * Expected result (stored in Q after addition):
+ *   x^21 + x^22 + x^23 + x^24 + x^25 + x^26  (COEFF=1, A5+A2 terms)
+ *   4x^27 + 4x^29 + ... + 4x^61              (COEFF=4, A3 terms)
+ * ───────────────────────────────────────────────────────────────────────────── */
+static const uint32_t TC5_P_SIZE = 32;
+static const uint32_t TC5_Q_SIZE = 32;
+
+static const NodeInfo TC5_P_terms[32] = {
+    { .COEFF =  1, .sign =  1, .A =  61, .B = 0, .C = 0 },  // x^61 [A3: add → 4x^61]
+    { .COEFF =  1, .sign =  1, .A =  59, .B = 0, .C = 0 },  // x^59 [A3: add → 4x^59]
+    { .COEFF =  1, .sign =  1, .A =  57, .B = 0, .C = 0 },  // x^57 [A3: add → 4x^57]
+    { .COEFF =  1, .sign =  1, .A =  55, .B = 0, .C = 0 },  // x^55 [A3: add → 4x^55]
+    { .COEFF =  1, .sign =  1, .A =  53, .B = 0, .C = 0 },  // x^53 [A3: add → 4x^53]
+    { .COEFF =  1, .sign =  1, .A =  51, .B = 0, .C = 0 },  // x^51 [A3: add → 4x^51]
+    { .COEFF =  1, .sign =  1, .A =  49, .B = 0, .C = 0 },  // x^49 [A3: add → 4x^49]
+    { .COEFF =  1, .sign =  1, .A =  47, .B = 0, .C = 0 },  // x^47 [A3: add → 4x^47]
+    { .COEFF =  1, .sign =  1, .A =  45, .B = 0, .C = 0 },  // x^45 [A3: add → 4x^45]
+    { .COEFF =  1, .sign =  1, .A =  43, .B = 0, .C = 0 },  // x^43 [A3: add → 4x^43]
+    { .COEFF =  1, .sign =  1, .A =  41, .B = 0, .C = 0 },  // x^41 [A3: add → 4x^41]
+    { .COEFF =  1, .sign =  1, .A =  39, .B = 0, .C = 0 },  // x^39 [A3: add → 4x^39]
+    { .COEFF =  1, .sign =  1, .A =  37, .B = 0, .C = 0 },  // x^37 [A3: add → 4x^37]
+    { .COEFF =  1, .sign =  1, .A =  35, .B = 0, .C = 0 },  // x^35 [A3: add → 4x^35]
+    { .COEFF =  1, .sign =  1, .A =  33, .B = 0, .C = 0 },  // x^33 [A3: add → 4x^33]
+    { .COEFF =  1, .sign =  1, .A =  31, .B = 0, .C = 0 },  // x^31 [A3: add → 4x^31]
+    { .COEFF =  1, .sign =  1, .A =  29, .B = 0, .C = 0 },  // x^29 [A3: add → 4x^29]
+    { .COEFF =  1, .sign =  1, .A =  27, .B = 0, .C = 0 },  // x^27 [A3: add → 4x^27]
+    { .COEFF =  1, .sign =  1, .A =  25, .B = 0, .C = 0 },  // x^25 [A5: insert]
+    { .COEFF =  1, .sign =  1, .A =  23, .B = 0, .C = 0 },  // x^23 [A5: insert]
+    { .COEFF =  1, .sign =  1, .A =  21, .B = 0, .C = 0 },  // x^21 [A5: insert]
+    { .COEFF =  1, .sign =  1, .A =  20, .B = 0, .C = 0 },  // x^20 [A4: cancel]
+    { .COEFF =  1, .sign =  1, .A =  18, .B = 0, .C = 0 },  // x^18 [A4: cancel]
+    { .COEFF =  1, .sign =  1, .A =  16, .B = 0, .C = 0 },  // x^16 [A4: cancel]
+    { .COEFF =  1, .sign =  1, .A =  14, .B = 0, .C = 0 },  // x^14 [A4: cancel]
+    { .COEFF =  1, .sign =  1, .A =  12, .B = 0, .C = 0 },  // x^12 [A4: cancel]
+    { .COEFF =  1, .sign =  1, .A =  10, .B = 0, .C = 0 },  // x^10 [A4: cancel]
+    { .COEFF =  1, .sign =  1, .A =   8, .B = 0, .C = 0 },  // x^8 [A4: cancel]
+    { .COEFF =  1, .sign =  1, .A =   6, .B = 0, .C = 0 },  // x^6 [A4: cancel]
+    { .COEFF =  1, .sign =  1, .A =   4, .B = 0, .C = 0 },  // x^4 [A4: cancel]
+    { .COEFF =  1, .sign =  1, .A =   2, .B = 0, .C = 0 },  // x^2 [A4: cancel]
+    { .COEFF =  0, .sign = -1, .A =   0, .B = 0, .C = 1 },  // sentinel
+};
+
+static const NodeInfo TC5_Q_terms[32] = {
+    { .COEFF =  3, .sign =  1, .A =  61, .B = 0, .C = 0 },  // x^61 [A3: add → 4x^61]
+    { .COEFF =  3, .sign =  1, .A =  59, .B = 0, .C = 0 },  // x^59 [A3: add → 4x^59]
+    { .COEFF =  3, .sign =  1, .A =  57, .B = 0, .C = 0 },  // x^57 [A3: add → 4x^57]
+    { .COEFF =  3, .sign =  1, .A =  55, .B = 0, .C = 0 },  // x^55 [A3: add → 4x^55]
+    { .COEFF =  3, .sign =  1, .A =  53, .B = 0, .C = 0 },  // x^53 [A3: add → 4x^53]
+    { .COEFF =  3, .sign =  1, .A =  51, .B = 0, .C = 0 },  // x^51 [A3: add → 4x^51]
+    { .COEFF =  3, .sign =  1, .A =  49, .B = 0, .C = 0 },  // x^49 [A3: add → 4x^49]
+    { .COEFF =  3, .sign =  1, .A =  47, .B = 0, .C = 0 },  // x^47 [A3: add → 4x^47]
+    { .COEFF =  3, .sign =  1, .A =  45, .B = 0, .C = 0 },  // x^45 [A3: add → 4x^45]
+    { .COEFF =  3, .sign =  1, .A =  43, .B = 0, .C = 0 },  // x^43 [A3: add → 4x^43]
+    { .COEFF =  3, .sign =  1, .A =  41, .B = 0, .C = 0 },  // x^41 [A3: add → 4x^41]
+    { .COEFF =  3, .sign =  1, .A =  39, .B = 0, .C = 0 },  // x^39 [A3: add → 4x^39]
+    { .COEFF =  3, .sign =  1, .A =  37, .B = 0, .C = 0 },  // x^37 [A3: add → 4x^37]
+    { .COEFF =  3, .sign =  1, .A =  35, .B = 0, .C = 0 },  // x^35 [A3: add → 4x^35]
+    { .COEFF =  3, .sign =  1, .A =  33, .B = 0, .C = 0 },  // x^33 [A3: add → 4x^33]
+    { .COEFF =  3, .sign =  1, .A =  31, .B = 0, .C = 0 },  // x^31 [A3: add → 4x^31]
+    { .COEFF =  3, .sign =  1, .A =  29, .B = 0, .C = 0 },  // x^29 [A3: add → 4x^29]
+    { .COEFF =  3, .sign =  1, .A =  27, .B = 0, .C = 0 },  // x^27 [A3: add → 4x^27]
+    { .COEFF =  1, .sign =  1, .A =  26, .B = 0, .C = 0 },  // x^26 [A2: advance]
+    { .COEFF =  1, .sign =  1, .A =  24, .B = 0, .C = 0 },  // x^24 [A2: advance]
+    { .COEFF =  1, .sign =  1, .A =  22, .B = 0, .C = 0 },  // x^22 [A2: advance]
+    { .COEFF = -1, .sign = -1, .A =  20, .B = 0, .C = 0 },  // x^20 [A4: cancel]
+    { .COEFF = -1, .sign = -1, .A =  18, .B = 0, .C = 0 },  // x^18 [A4: cancel]
+    { .COEFF = -1, .sign = -1, .A =  16, .B = 0, .C = 0 },  // x^16 [A4: cancel]
+    { .COEFF = -1, .sign = -1, .A =  14, .B = 0, .C = 0 },  // x^14 [A4: cancel]
+    { .COEFF = -1, .sign = -1, .A =  12, .B = 0, .C = 0 },  // x^12 [A4: cancel]
+    { .COEFF = -1, .sign = -1, .A =  10, .B = 0, .C = 0 },  // x^10 [A4: cancel]
+    { .COEFF = -1, .sign = -1, .A =   8, .B = 0, .C = 0 },  // x^8 [A4: cancel]
+    { .COEFF = -1, .sign = -1, .A =   6, .B = 0, .C = 0 },  // x^6 [A4: cancel]
+    { .COEFF = -1, .sign = -1, .A =   4, .B = 0, .C = 0 },  // x^4 [A4: cancel]
+    { .COEFF = -1, .sign = -1, .A =   2, .B = 0, .C = 0 },  // x^2 [A4: cancel]
+    { .COEFF =  0, .sign = -1, .A =   0, .B = 0, .C = 1 },  // sentinel
+};
+
+static const NodeInfo TC5_Expected_Ans[25] = {
+    { .COEFF =  4, .sign =  1, .A =  61, .B = 0, .C = 0 },  // 4x^61
+    { .COEFF =  4, .sign =  1, .A =  59, .B = 0, .C = 0 },  // 4x^59
+    { .COEFF =  4, .sign =  1, .A =  57, .B = 0, .C = 0 },  // 4x^57
+    { .COEFF =  4, .sign =  1, .A =  55, .B = 0, .C = 0 },  // 4x^55
+    { .COEFF =  4, .sign =  1, .A =  53, .B = 0, .C = 0 },  // 4x^53
+    { .COEFF =  4, .sign =  1, .A =  51, .B = 0, .C = 0 },  // 4x^51
+    { .COEFF =  4, .sign =  1, .A =  49, .B = 0, .C = 0 },  // 4x^49
+    { .COEFF =  4, .sign =  1, .A =  47, .B = 0, .C = 0 },  // 4x^47
+    { .COEFF =  4, .sign =  1, .A =  45, .B = 0, .C = 0 },  // 4x^45
+    { .COEFF =  4, .sign =  1, .A =  43, .B = 0, .C = 0 },  // 4x^43
+    { .COEFF =  4, .sign =  1, .A =  41, .B = 0, .C = 0 },  // 4x^41
+    { .COEFF =  4, .sign =  1, .A =  39, .B = 0, .C = 0 },  // 4x^39
+    { .COEFF =  4, .sign =  1, .A =  37, .B = 0, .C = 0 },  // 4x^37
+    { .COEFF =  4, .sign =  1, .A =  35, .B = 0, .C = 0 },  // 4x^35
+    { .COEFF =  4, .sign =  1, .A =  33, .B = 0, .C = 0 },  // 4x^33
+    { .COEFF =  4, .sign =  1, .A =  31, .B = 0, .C = 0 },  // 4x^31
+    { .COEFF =  4, .sign =  1, .A =  29, .B = 0, .C = 0 },  // 4x^29
+    { .COEFF =  4, .sign =  1, .A =  27, .B = 0, .C = 0 },  // 4x^27
+    { .COEFF =  1, .sign =  1, .A =  26, .B = 0, .C = 0 },  // 1x^26
+    { .COEFF =  1, .sign =  1, .A =  25, .B = 0, .C = 0 },  // 1x^25
+    { .COEFF =  1, .sign =  1, .A =  24, .B = 0, .C = 0 },  // 1x^24
+    { .COEFF =  1, .sign =  1, .A =  23, .B = 0, .C = 0 },  // 1x^23
+    { .COEFF =  1, .sign =  1, .A =  22, .B = 0, .C = 0 },  // 1x^22
+    { .COEFF =  1, .sign =  1, .A =  21, .B = 0, .C = 0 },  // 1x^21
+    { .COEFF =  0, .sign = -1, .A =   0, .B = 0, .C = 1 },  // sentinel
+};
+
 #endif /* POLYNOMIAL_TEST_CASES_H */

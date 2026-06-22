@@ -28,13 +28,13 @@ uint32_t measure_multiplication_of_polynomials_performance() {
 
 	// test case
 	// Q is empty and M is proper Q
-	const uint32_t polynomial_P_size = TC1_P_SIZE;
+	const uint32_t polynomial_P_size = TC5_P_SIZE;
 	const uint32_t polynomial_Q_size = EMPTY_SIZE;
-	const uint32_t polynomial_M_size = TC1_Q_SIZE;
+	const uint32_t polynomial_M_size = TC5_Q_SIZE;
 	PolynomialsData polynomials_data = {
-		.P_terms = TC1_P_terms,
+		.P_terms = TC5_P_terms,
 		.Q_terms = EMPTY_terms,
-		.M_terms = TC1_Q_terms,
+		.M_terms = TC5_Q_terms,
 		.polynomial_P_size = polynomial_P_size,
 		.polynomial_Q_size = polynomial_Q_size,
 		.polynomial_M_size = polynomial_M_size,
