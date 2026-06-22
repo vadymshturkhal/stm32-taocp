@@ -62,6 +62,7 @@ init_A2:
 	LDR R0, [R4, #NODE_ABC]
 
 @ A2. [ABC(P):ABC(Q)]
+.balign 4
 A2:
 	LDR R1, [R5, #NODE_ABC]
 
