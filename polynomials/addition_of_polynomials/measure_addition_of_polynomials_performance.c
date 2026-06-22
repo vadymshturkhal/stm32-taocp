@@ -84,7 +84,7 @@ uint32_t measure_addition_of_polynomials_performance(void) {
 	// ASM: cold cycles = 4219 | warm cycles = 4180 | size = 124 bytes (addition_of_polynomials only) Placed .balign 4 before A1
 
 	// Integrated AVAIL Stats for TC4 with TC4_P_SIZE = 128 nodes and TC4_Q_SIZE = 128 nodes
-	// ASM: cold cycles = 3437 | warm cycles = 3400 | size = 120 bytes
+	// ASM: cold cycles = 3392 | warm cycles = 3363 | size = 120 bytes
 	start = DWT->CYCCNT;
 	addition_status = asm_addition_of_polynomials_integrated_avail(polynomial_P, polynomial_Q);
 	if (addition_status != 0) return addition_status;
@@ -101,21 +101,21 @@ uint32_t measure_addition_of_polynomials_performance(void) {
 	end = DWT->CYCCNT;
 	volatile uint32_t asm_addition_of_polynomials_cycles_warm = (end - start) - overhead;
 
-//	// take the result
-//	PolynomialNode* Q = polynomial_Q->ptr->link;
-//	volatile NodeInfo result_polynomial[polynomial_Q->size-1];  // Without last node
-//	Q = polynomial_Q->ptr->link;
-//	uint32_t i = 0;
-//	while (Q->ABC > 0) {
-//		unpack_ABC_32(Q, &result_polynomial[i++]);
-//
-//		// This is equivalent to &result_polynomial[i++]
-////		unpack_ABC_32(Q, result_polynomial + i);
-////		i++;
-//
-//		Q = Q->link;
-//	}
-//	//
+	// take the result
+	PolynomialNode* Q = polynomial_Q->ptr->link;
+	volatile NodeInfo result_polynomial[polynomial_Q->size-1];  // Without last node
+	Q = polynomial_Q->ptr->link;
+	uint32_t i = 0;
+	while (Q->ABC > 0) {
+		unpack_ABC_32(Q, &result_polynomial[i++]);
+
+		// This is equivalent to &result_polynomial[i++]
+//		unpack_ABC_32(Q, result_polynomial + i);
+//		i++;
+
+		Q = Q->link;
+	}
+	//
 
 	asm_balloc_free(starting_address);
 	return 0;

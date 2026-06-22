@@ -58,9 +58,11 @@ A1:
 	MOVS R6, R5 				@ Q1 = Q;
 	LDR R5, [R5, #NODE_LINK]	@ Q = Q->link;
 
+init_A2:
+	LDR R0, [R4, #NODE_ABC]
+
 @ A2. [ABC(P):ABC(Q)]
 A2:
-	LDR R0, [R4, #NODE_ABC]
 	LDR R1, [R5, #NODE_ABC]
 
 	CMP R0, R1
@@ -99,7 +101,8 @@ A4:
 	LDR R4, [R4, #NODE_LINK]	@ P = P->link;
 	STR R0, [R8, #POLYNOMIAL_SIZE]	@ store polynomial size;
 
-	B A2
+	@ B A2
+	B init_A2
 
 @ A5. [Insert new term]
 A5:
@@ -125,7 +128,7 @@ A5:
 	@ polynomial_Q->size++;
 	STR R1, [R8, #POLYNOMIAL_SIZE]	@ store polynomial size
 
-	B A2 						@ Go to step 2
+	B init_A2 						@ Go to step 2
 
 done:
 	MOVS R0, #0
