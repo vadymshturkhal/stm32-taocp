@@ -36,11 +36,10 @@ A1:
 		if (ABC > Q->ABC) {
 			// A5. [Insert new term]
 			// Q2 <= AVAIL
-//			PolynomialNode* Q2 = storage_pool_pop(storage_pool);
-//			if (Q2 == NULL) return 1;  // Overflow
-
-			if (AVAIL == NULL) return 1;  // Overflow
-
+			if (AVAIL == NULL) {
+				storage_pool->avail = AVAIL;  // sync AVAIL
+				return 1;  // Overflow
+			}
 			PolynomialNode* Q2 = AVAIL;
 			AVAIL = AVAIL->link;
 
@@ -87,7 +86,6 @@ A1:
 		Q2->link = AVAIL;
 		AVAIL = Q2;
 
-//		storage_pool_push(storage_pool, Q2);
 		polynomial_Q->size--;
 
 		P = P->link;
