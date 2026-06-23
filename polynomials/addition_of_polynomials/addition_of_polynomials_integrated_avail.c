@@ -59,7 +59,10 @@ A1:
 		}
 
 		// A3. [Add coefficients]
-		if (ABC < 0) return 0;  // OK
+		if (ABC < 0) {
+			storage_pool->avail = AVAIL;  // sync AVAIL
+			return 0;  // OK
+		}
 
 		Q->COEFF += P->COEFF;
 		if (Q->COEFF != 0) {
