@@ -117,7 +117,6 @@ A5:
 
 	LDR R0, [R0, #NODE_LINK]		@ P = P->link;
 
-	@ polynomial_Q->size++;
 	STR R2, [R1, #POLYNOMIAL_SIZE]	@ store polynomial size
 
 	B init_A2 						@ Go to step 2
