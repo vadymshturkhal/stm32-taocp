@@ -133,8 +133,12 @@ A5:
 
 done:
 	MOVS R0, #0
-	POP {R4-R8, PC}
+	B exit
 
 overflow:
 	MOVS R0, #1
+
+exit:
+	LDR R1, [R4, #POLYNOMIAL_STORAGE_POOL]
+	STR R7,	[R1, #STORAGE_POOL_AVAIL]		@ sync AVAIL
 	POP {R4-R8, PC}
