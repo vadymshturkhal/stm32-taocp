@@ -111,12 +111,11 @@ A5:
 	// LDMIA + STMIA are slower than 2 LDR + 2 STR
 
 	LDR R2, [R1, #POLYNOMIAL_SIZE]	@ load polynomial size
-	STR R5, [R3, #NODE_LINK]		@ Q2->link = Q;
-	STR R3, [R6, #NODE_LINK]		@ Q1->link = Q2;
+	STR R5, [R3, #NODE_LINK]		@ Q2->link = Q
+	STR R3, [R6, #NODE_LINK]		@ Q1->link = Q2
 	ADDS R2, R2, #1					@ advance polynomial size
-
-	LDR R0, [R0, #NODE_LINK]		@ P = P->link;
-
+	MOVS R6, R3						@ Q1 = Q2
+	LDR R0, [R0, #NODE_LINK]		@ P = P->link
 	STR R2, [R1, #POLYNOMIAL_SIZE]	@ store polynomial size
 
 	B init_A2 						@ Go to step 2
