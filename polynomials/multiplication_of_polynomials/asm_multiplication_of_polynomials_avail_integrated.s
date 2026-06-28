@@ -6,6 +6,9 @@
 	.type asm_multiplication_of_polynomials_avail_integrated, %function
 
 
+@ This is slightly modernized version of Algorithm A
+
+
 @ PolynomialCircularList fields definition
 .equ POLYNOMIAL_PTR, 			0
 .equ POLYNOMIAL_STORAGE_POOL,	4
