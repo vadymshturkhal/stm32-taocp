@@ -10,7 +10,7 @@
 
 // A, B, C must be in int8_t range
 uint32_t multiply_cycle(PolynomialCircularList* polynomial_Q, PolynomialNode* M, PolynomialCircularList* polynomial_P) {
-    // Based of Algorithm A (Addition of polynomials)
+    // Based on Algorithm A (Addition of polynomials)
     // Return status
 
 	PolynomialNode* Q = polynomial_Q->ptr;

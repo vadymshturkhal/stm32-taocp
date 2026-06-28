@@ -16,6 +16,8 @@ uint32_t create_three_polynomials(PolynomialsData* polynomials_data, Polynomials
 uint32_t multiplication_of_polynomials(PolynomialCircularList* polynomial_Q, PolynomialCircularList* polynomial_M, PolynomialCircularList* polynomial_P);
 uint32_t multiplication_of_polynomials_avail_integrated(PolynomialCircularList* polynomial_Q, PolynomialCircularList* polynomial_M, PolynomialCircularList* polynomial_P);
 
+extern uint32_t asm_multiplication_of_polynomials_avail_integrated(PolynomialCircularList* polynomial_Q, PolynomialCircularList* polynomial_M, PolynomialCircularList* polynomial_P);
+
 
 uint32_t measure_multiplication_of_polynomials_performance() {
     volatile uint32_t start, end, overhead;
@@ -49,14 +51,12 @@ uint32_t measure_multiplication_of_polynomials_performance() {
 	PolynomialCircularList* polynomial_M = polynomials.polynomial_M;
 	void* starting_address = polynomials.starting_address;
 
-	// Translation Unit Boundary Stats (Algorithm M -> Multiplication Subroutine -> Storage Pool) TC1
-	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 788 | warm cycles = 718 | size = 212 bytes (multiplication_of_polynomials only)
+	// Algorithm M AVAIL Integrated Stats TC1
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 677 | warm cycles = 608 | size = 204 bytes (multiplication_of_polynomials only)
 
-	// Translation Unit Boundary AVAIL Integrated Stats (Algorithm M -> Multiplication Subroutine) TC1
-	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 677 | warm cycles = 612 | size = 204 bytes (multiplication_of_polynomials only)
-
+	// Algorithm M AVAIL Integrated Stats TC5
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 24377 | warm cycles = 24310 | size = 204 bytes (multiplication_of_polynomials only)
 	start = DWT->CYCCNT;
-//	multiplication_status = multiplication_of_polynomials(polynomial_Q, polynomial_M, polynomial_P);
 	multiplication_status = multiplication_of_polynomials_avail_integrated(polynomial_Q, polynomial_M, polynomial_P);
 	if (multiplication_status != 0) return multiplication_status;
 	end = DWT->CYCCNT;
@@ -67,24 +67,43 @@ uint32_t measure_multiplication_of_polynomials_performance() {
 
 	// Warm run
 	start = DWT->CYCCNT;
-//	multiplication_status = multiplication_of_polynomials(polynomial_Q, polynomial_M, polynomial_P);
 	multiplication_status = multiplication_of_polynomials_avail_integrated(polynomial_Q, polynomial_M, polynomial_P);
 	if (multiplication_status != 0) return multiplication_status;
 	end = DWT->CYCCNT;
 	volatile uint32_t multiplication_of_polynomials_cycles_warm = (end - start) - overhead;
+
+	polynomial_circular_list_clear(polynomial_Q);
+	polynomial_circular_list_insert_right(polynomial_Q, EMPTY_term);
+
+	// Algorithm M AVAIL Integrated Stats TC1
+	// ASM: cold cycles = 630 | warm cycles = 585 | size = 178 bytes
+
+	// Algorithm M AVAIL Integrated Stats TC5
+	// ASM: cold cycles = 21969 | warm cycles = 21913 | size = 178 bytes
+	start = DWT->CYCCNT;
+	multiplication_status = asm_multiplication_of_polynomials_avail_integrated(polynomial_Q, polynomial_M, polynomial_P);
+	if (multiplication_status != 0) return multiplication_status;
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_multiplication_of_polynomials_cycles_cold = (end - start) - overhead;
+
+	polynomial_circular_list_clear(polynomial_Q);
+	polynomial_circular_list_insert_right(polynomial_Q, EMPTY_term);
+
+	// Warm run
+	start = DWT->CYCCNT;
+	multiplication_status = asm_multiplication_of_polynomials_avail_integrated(polynomial_Q, polynomial_M, polynomial_P);
+	if (multiplication_status != 0) return multiplication_status;
+	end = DWT->CYCCNT;
+	volatile uint32_t asm_multiplication_of_polynomials_cycles_warm = (end - start) - overhead;
 
 
 	// Showing result
 	PolynomialNode* Q = polynomial_Q->ptr->link;
 	volatile NodeInfo result_polynomial[polynomial_Q->size-1];  // Without last node
 	Q = polynomial_Q->ptr->link;
-	uint32_t i = 0;
+	volatile uint32_t i = 0;
 	while (Q->ABC > 0) {
 		unpack_ABC_32(Q, &result_polynomial[i++]);
-
-		// This is equivalent to &result_polynomial[i++]
-//		unpack_ABC_32(Q, result_polynomial + i);
-//		i++;
 
 		Q = Q->link;
 	}

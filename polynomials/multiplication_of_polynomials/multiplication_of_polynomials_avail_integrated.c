@@ -10,7 +10,7 @@
 
 // A, B, C must be in int8_t range
 uint32_t multiply_cycle_avail_integrated(PolynomialCircularList* polynomial_Q, PolynomialNode* M, PolynomialCircularList* polynomial_P) {
-    // Based of Algorithm A (Addition of polynomials)
+    // Based on Algorithm A (Addition of polynomials)
     // Return status
 
 	PolynomialNode* Q = polynomial_Q->ptr;
@@ -30,7 +30,6 @@ A1:
 		// A2. [ABC(P):ABC(Q)]
 		int32_t ABC;
 		if (P->ABC < 0) {
-			// ABC = -1;
 			ABC = SENTINEL_NODE_ABC;
 		} else {
 			ABC = P->ABC + M->ABC;
@@ -45,10 +44,6 @@ A1:
 
 		if (ABC > Q->ABC) {
 			// A5. [Insert new term]
-			// Q2 <= AVAIL
-//			PolynomialNode* Q2 = storage_pool_pop(storage_pool);
-//			if (Q2 == NULL) return 1;  // Overflow
-
 			// Q2 <= AVAIL
 			if (AVAIL == NULL) return 1;  // Overflow
 			PolynomialNode* Q2 = AVAIL;
@@ -69,7 +64,7 @@ A1:
 
 		// A3. [Add coefficients]
 		if (ABC < 0) {
-			storage_pool->avail = AVAIL;
+			storage_pool->avail = AVAIL;  // sync AVAIL
 			return 0;  // OK
 		}
 
@@ -91,9 +86,6 @@ A1:
 		PolynomialNode* Q2 = Q;
 		Q = Q->link;
 		Q1->link = Q;
-
-		// AVAIL <= Q2
-//		storage_pool_push(storage_pool, Q2);
 
 		// AVAIL <= Q2
 		Q2->link = AVAIL;
@@ -126,7 +118,7 @@ uint32_t multiplication_of_polynomials_avail_integrated(PolynomialCircularList* 
 
 		// M1. [Next multiplier]
 		M = M->link;
-	} ;
+	};
 
 	return 0;
 }
