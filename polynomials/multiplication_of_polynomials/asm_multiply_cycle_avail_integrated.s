@@ -45,11 +45,9 @@ asm_multiply_cycle_avail_integrated:
 	LDR R7, [R1, #NODE_COEFF]
 	LDR R8, [R1, #NODE_ABC]
 
-@ Sync Registers with Algorithm A
-@ R0 PolynomialCircularList* polynomial_P
-@ R1 PolynomialCircularList* polynomial_Q
-	MOVS R1, R0		@ R1 = polynomial_Q
-	MOVS R0, R2		@ R0 = polynomial_P
+@ Sync Registers with Algorithm A: R1 must be polynomial_Q, R0 must be polynomial_P
+	MOVS R1, R0		@ polynomial_Q to R1
+	MOVS R0, R2		@ polynomial_P to R0
 
 	LDR R2, [R1, #POLYNOMIAL_STORAGE_POOL]	@ Load polynomial_Q->storage_pool
 	LDR R0, [R0, #POLYNOMIAL_PTR]			@ P = polynomial_P->ptr
