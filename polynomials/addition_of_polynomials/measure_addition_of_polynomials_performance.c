@@ -84,7 +84,7 @@ uint32_t measure_addition_of_polynomials_performance(void) {
 	// ASM: cold cycles = 4219 | warm cycles = 4180 | size = 124 bytes (addition_of_polynomials only) Placed .balign 4 before A1
 
 	// Integrated AVAIL Stats for TC4 with TC4_P_SIZE = 128 nodes and TC4_Q_SIZE = 128 nodes
-	// ASM: cold cycles = 3296 | warm cycles = 3269 | size = 108 bytes
+	// ASM: cold cycles = 3344 | warm cycles = 3316 | size = 108 bytes
 	start = DWT->CYCCNT;
 	addition_status = asm_addition_of_polynomials_integrated_avail(polynomial_P, polynomial_Q);
 	if (addition_status != 0) return addition_status;
