@@ -33,15 +33,15 @@ bool xor_circular_list_insert_left(XORCircularList* circular_list, uint32_t info
     uintptr_t head2_address = (uintptr_t)head2;
     uintptr_t P_address  = (uintptr_t)P;
 
-    uintptr_t old_first_addr = head2->link ^ head1_address;
+    uintptr_t first_node_address = head2->link ^ head1_address;
 
     if (circular_list->size == 0) {
         P->link = head1_address ^ head2_address;
         head1->link = head2_address ^ P_address;
     } else {
-        XORCircularNode* old_first = (XORCircularNode*)old_first_addr;
-        P->link = old_first_addr ^ head2_address;
-        old_first->link = P_address ^ (old_first->link ^ head2_address);
+        XORCircularNode* first_node = (XORCircularNode*)first_node_address;
+        P->link = first_node_address ^ head2_address;
+        first_node->link = P_address ^ (first_node->link ^ head2_address);
     }
 
     head2->link = P_address ^ head1_address;
