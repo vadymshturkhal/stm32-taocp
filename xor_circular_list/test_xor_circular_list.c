@@ -50,6 +50,8 @@ uint32_t test_xor_circular_list(uint32_t max_nodes) {
 //	XORCircularNode* forward_node1 = (XORCircularNode*)(forward_node->link ^ (uintptr_t)head2);
 //	XORCircularNode* forward_node2 = (XORCircularNode*)(forward_node1->link ^ (uintptr_t)forward_node);
 //	XORCircularNode* forward_node3 = (XORCircularNode*)(forward_node2->link ^ (uintptr_t)forward_node1);
+//	XORCircularNode* forward_node4 = (XORCircularNode*)(forward_node3->link ^ (uintptr_t)forward_node2);
+//	XORCircularNode* forward_node5 = (XORCircularNode*)(forward_node4->link ^ (uintptr_t)forward_node3);
 //
 //	XORCircularNode* backward_node = (XORCircularNode*)(head1->link ^ (uintptr_t)head2);
 //	XORCircularNode* backward_node1 = (XORCircularNode*)(backward_node->link ^ (uintptr_t)head1);

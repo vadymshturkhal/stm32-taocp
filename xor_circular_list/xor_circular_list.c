@@ -12,6 +12,8 @@ void xor_circular_list_init(XORCircularList* circular_list, Storage_Pool* storag
     XORCircularNodeHead* head1 = (XORCircularNodeHead*)circular_list;
     XORCircularNodeHead* head2 = head1 + 1;
 
+//    Can't use XORCircularNodeHead* head1 = circular_list->head1 in this layout
+
     head1->link = 0;
     head2->link = 0;
 
@@ -35,7 +37,7 @@ bool xor_circular_list_insert_left(XORCircularList* circular_list, uint32_t info
 
     if (circular_list->size == 0) {
         P->link = head1_address ^ head2_address;
-        head2->link = P_address ^ head1_address;
+        head1->link = head2_address ^ P_address;
     } else {
         XORCircularNode* old_first = (XORCircularNode*)old_first_addr;
         P->link = old_first_addr ^ head2_address;
