@@ -7,6 +7,7 @@
 
 // Using Storage Pool
 
+
 void xor_circular_list_init(XORCircularList* circular_list, Storage_Pool* storage_pool) {
     XORCircularNodeHead* head1 = (XORCircularNodeHead*)circular_list;
     XORCircularNodeHead* head2 = head1 + 1;

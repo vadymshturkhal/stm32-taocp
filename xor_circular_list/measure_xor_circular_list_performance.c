@@ -2,10 +2,8 @@
 #include <stdbool.h>
 #include "main.h"
 
-
 // Prototypes
 uint32_t test_xor_circular_list(uint32_t max_nodes);
-
 
 uint32_t measure_xor_circular_list_performance() {
     volatile uint32_t start, end, overhead;
@@ -17,7 +15,8 @@ uint32_t measure_xor_circular_list_performance() {
 	const uint16_t max_nodes = 128;
 
 	// Translation Unit Boundary
-	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 18037 | warm cycles = 17897 | size = 328 bytes
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 18682 | warm cycles = 18537
+	// Flash size = 444 bytes: test_xor_circular_list(0x84) + balloc(0xc + 0x28) + storage_pool(0x38 + 0x14 + 0x18) + xor_circular_list(0xc + 0x48 + 0x4c)
 	start = DWT->CYCCNT;
 	uint8_t gcc_xor_circular_list_status = test_xor_circular_list(max_nodes);
 	if (gcc_xor_circular_list_status != 0) return gcc_xor_circular_list_status;
