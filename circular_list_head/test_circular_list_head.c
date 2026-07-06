@@ -10,7 +10,6 @@ extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 void circular_list_head_init(CircularListHead* circular_list, Storage_Pool* storage_pool);
 
-
 uint8_t test_circular_list_head(uint32_t max_nodes) {
 	// node info is uint32_t
 	if (max_nodes == 0) return 0;
