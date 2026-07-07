@@ -24,6 +24,9 @@ bool circular_list_head_insert_left(CircularListHead* circular_list, uint32_t in
 	// 2
 	P->info = info;
 
+	// Increment size
+    circular_list->size++;
+
 	// 3 Insert P at the front
 	P->link = (CircularNode*)circular_list->head->link;
 	circular_list->head->link = P;
@@ -41,6 +44,9 @@ uint32_t circular_list_head_pop(bool* pop_is_success, CircularListHead* circular
 	}
 
 	*pop_is_success = true;
+
+    // Decrement size
+    circular_list->size -= 1;
 
 	CircularNode* P = circular_list->head->link;
 	circular_list->head->link = P->link;

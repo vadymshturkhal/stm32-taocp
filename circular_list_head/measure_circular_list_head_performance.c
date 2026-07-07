@@ -15,7 +15,7 @@ uint8_t measure_circular_list_head_performance() {
 
 	const uint16_t max_nodes = 128;
 
-	// GCC -O3 -mcpu=cortex-m4 -mthumb (Translation Unit Boundary): cold cycles = 14307 | warm cycles = 14187
+	// GCC -O3 -mcpu=cortex-m4 -mthumb (Translation Unit Boundary): cold cycles = 15218 | warm cycles = 15096
 	// Flash size = 352 bytes: test_circular_list_head(0x70) + balloc(0xc + 0x28) + storage_pool(0x38 + 0x14 + 0x18) + circular_list_head(0x8 + 0x28 + 0x28)
 	// GCC -O3 -mcpu=cortex-m4 -mthumb -flto: cold cycles = 5521 | warm cycles = 5441
 	start = DWT->CYCCNT;

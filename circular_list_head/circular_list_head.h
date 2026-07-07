@@ -18,6 +18,7 @@ typedef struct CircularNodeHead{
 typedef struct {
 	CircularNodeHead* head;
 	Storage_Pool* storage_pool;
+	uint32_t size;
 } CircularListHead;
 
 // Prototypes
