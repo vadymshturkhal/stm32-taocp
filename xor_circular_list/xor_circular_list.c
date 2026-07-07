@@ -23,8 +23,15 @@ void xor_circular_list_init(XORCircularList* circular_list, Storage_Pool* storag
 bool xor_circular_list_insert_left(XORCircularList* circular_list, uint32_t info) {
     if (circular_list == NULL) return false;
 
+	// 1 (P <= Avail)
     XORCircularNode* P = storage_pool_pop(circular_list->storage_pool);
-    if (P == NULL) return false;
+    if (P == NULL) return false;  // Overflow
+
+	// 2
+    P->info = info;
+
+	// Increment size
+    circular_list->size++;
 
     XORCircularNodeHead* head1 = (XORCircularNodeHead*)circular_list;
     XORCircularNodeHead* head2 = head1 + 1;
@@ -35,6 +42,7 @@ bool xor_circular_list_insert_left(XORCircularList* circular_list, uint32_t info
 
     uintptr_t first_node_address = head2->link ^ head1_address;
 
+	// 3 Insert P at the front
     if (circular_list->size == 0) {
         P->link = head1_address ^ head2_address;
         head1->link = head2_address ^ P_address;
@@ -46,9 +54,6 @@ bool xor_circular_list_insert_left(XORCircularList* circular_list, uint32_t info
 
     head2->link = P_address ^ head1_address;
 
-    P->info = info;
-
-    circular_list->size++;
     return true;
 }
 
@@ -61,6 +66,9 @@ uint32_t xor_circular_list_pop_left(bool* pop_is_success, XORCircularList* circu
     }
 
 	*pop_is_success = true;
+
+	// Decrement size
+    circular_list->size -= 1;
 
     XORCircularNodeHead* head1 = (XORCircularNodeHead*)circular_list;
     XORCircularNodeHead* head2 = head1 + 1;
@@ -84,7 +92,6 @@ uint32_t xor_circular_list_pop_left(bool* pop_is_success, XORCircularList* circu
     uint32_t info = front_node->info;
     storage_pool_push(circular_list->storage_pool, front_node);
 
-    circular_list->size -= 1;
     return info;
 }
 

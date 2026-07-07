@@ -15,7 +15,7 @@ uint32_t measure_xor_circular_list_performance() {
 
 	const uint16_t max_nodes = 128;
 
-	// GCC -O3 -mcpu=cortex-m4 -mthumb (Translation Unit Boundary): cold cycles = 18692 | warm cycles = 18549
+	// GCC -O3 -mcpu=cortex-m4 -mthumb (Translation Unit Boundary): cold cycles = 17613 | warm cycles = 17528
 	// Flash size = 444 bytes: test_xor_circular_list(0x84) + balloc(0xc + 0x28) + storage_pool(0x38 + 0x14 + 0x18) + xor_circular_list(0xc + 0x48 + 0x4c)
 	// GCC -O3 -mcpu=cortex-m4 -mthumb -flto: cold cycles = 9331 | warm cycles = 9194
 	start = DWT->CYCCNT;
