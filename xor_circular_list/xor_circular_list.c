@@ -12,11 +12,13 @@
 void xor_circular_list_init(XORCircularList* circular_list, Storage_Pool* storage_pool) {
     XORCircularNodeHead* head1 = (XORCircularNodeHead*)circular_list;
     XORCircularNodeHead* head2 = head1 + 1;
+    circular_list->size = 0;
 
 //    Can't use XORCircularNodeHead* head1 = circular_list->head1 in this layout
 
     head1->link = 0;
     head2->link = 0;
+
 
     circular_list->storage_pool = storage_pool;
 }

@@ -10,6 +10,7 @@
 void circular_list_head_init(CircularListHead* circular_list, Storage_Pool* storage_pool) {
 	CircularNodeHead* head = (CircularNodeHead*)circular_list;
 	head->link = head;
+    circular_list->size = 0;
 	circular_list->storage_pool = storage_pool;
 }
 
