@@ -26,5 +26,6 @@ typedef struct XORCircularList {
 void xor_circular_list_init(XORCircularList* circular_list, Storage_Pool* storage_pool);
 bool xor_circular_list_insert_left(XORCircularList* circular_list, uint32_t info);
 uint32_t xor_circular_list_pop_left(bool* ok, XORCircularList* list);
+bool xor_circular_list_insert_right(XORCircularList* circular_list, uint32_t info);
 
 #endif

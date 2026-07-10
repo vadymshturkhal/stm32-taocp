@@ -37,7 +37,8 @@ uint32_t test_xor_circular_list(uint32_t max_nodes) {
 
 	// Insert Left max_nodes times
 	for (uint32_t i = max_nodes; i > 0; i--){
-		if (xor_circular_list_insert_left(circular_list, i) == false) {
+//		if (xor_circular_list_insert_left(circular_list, i) == false) {
+		if (xor_circular_list_insert_right(circular_list, i) == false) {
 			asm_balloc_free(storage_and_circular_list_memory);
 			return 3;
 		}

@@ -19,7 +19,6 @@ void xor_circular_list_init(XORCircularList* circular_list, Storage_Pool* storag
     head1->link = 0;
     head2->link = 0;
 
-
     circular_list->storage_pool = storage_pool;
 }
 
@@ -45,8 +44,8 @@ bool xor_circular_list_insert_left(XORCircularList* circular_list, uint32_t info
 
     uintptr_t front_node_address = head2->link ^ head1_address;
 
-	// 3 Insert P at the front
-    if (circular_list->size == 0) {
+	// 3 Insert P at Front
+    if (front_node_address == head1_address) {
         P->link = head1_address ^ head2_address;
         head1->link = head2_address ^ P_address;
     } else {
@@ -96,6 +95,43 @@ uint32_t xor_circular_list_pop_left(bool* pop_is_success, XORCircularList* circu
     storage_pool_push(circular_list->storage_pool, front_node);
 
     return info;
+}
+
+bool xor_circular_list_insert_right(XORCircularList* circular_list, uint32_t info) {
+    if (circular_list == NULL) return false;
+
+	// 1 (P <= Avail)
+    XORCircularNode* P = storage_pool_pop(circular_list->storage_pool);
+    if (P == NULL) return false;  // Overflow
+
+	// 2
+    P->info = info;
+
+	// Increment size
+    circular_list->size++;
+
+    XORCircularNodeHead* head1 = (XORCircularNodeHead*)circular_list;
+    XORCircularNodeHead* head2 = head1 + 1;
+
+    uintptr_t head1_address = (uintptr_t)head1;
+    uintptr_t head2_address = (uintptr_t)head2;
+    uintptr_t P_address  = (uintptr_t)P;
+
+    uintptr_t rear_node_address = head1->link ^ head2_address;
+
+	// 3 Insert P at Rear
+    if (rear_node_address == head2_address) {
+        P->link = head1_address ^ head2_address;
+        head2->link = P_address ^ head1_address;
+    } else {
+        XORCircularNode* rear_node = (XORCircularNode*)rear_node_address;
+        P->link = head1_address ^ rear_node_address;
+        rear_node->link = P_address ^ (rear_node->link ^ head1_address);
+    }
+
+    head1->link = P_address ^ head2_address;
+
+    return true;
 }
 
 // For O(1) Clear and Union operation there must be XOR Storage Pool
