@@ -50,7 +50,7 @@ bool xor_circular_list_insert_left(XORCircularList* circular_list, uint32_t info
     } else {
         XORCircularNode* front_node = (XORCircularNode*)front_node_address;
         P->link = front_node_address ^ head2_address;
-        front_node->link = P_address ^ (front_node->link ^ head2_address);
+        front_node->link = (front_node->link ^ head2_address) ^ P_address;
     }
 
     head2->link = P_address ^ head1_address;
