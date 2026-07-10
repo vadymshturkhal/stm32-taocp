@@ -62,7 +62,8 @@ uint32_t test_xor_circular_list(uint32_t max_nodes) {
 	// Pop max_nodes times
 	bool pop_is_success = true;		// flag for Underflow checking
 	for (uint32_t i = max_nodes; i > 0; i--){
-		info = xor_circular_list_pop_left(&pop_is_success, circular_list);
+//		info = xor_circular_list_pop_left(&pop_is_success, circular_list);
+		info = xor_circular_list_pop_right(&pop_is_success, circular_list);
 		if (pop_is_success == false) {
 			asm_balloc_free(storage_and_circular_list_memory);
 			return 4;

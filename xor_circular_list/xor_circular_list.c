@@ -134,6 +134,44 @@ bool xor_circular_list_insert_right(XORCircularList* circular_list, uint32_t inf
     return true;
 }
 
+uint32_t xor_circular_list_pop_right(bool* pop_is_success, XORCircularList* circular_list) {
+    if (circular_list == NULL) return 0;
+
+    if (circular_list->size == 0) {
+		*pop_is_success = false;	// Underflow
+		return 0;
+    }
+
+	*pop_is_success = true;
+
+	// Decrement size
+    circular_list->size -= 1;
+
+    XORCircularNodeHead* head1 = (XORCircularNodeHead*)circular_list;
+    XORCircularNodeHead* head2 = head1 + 1;
+
+    uintptr_t head1_address = (uintptr_t)head1;
+    uintptr_t head2_address = (uintptr_t)head2;
+
+    uintptr_t rear_node_address = head1->link ^ head2_address;
+    XORCircularNode* rear_node = (XORCircularNode*)rear_node_address;
+    uintptr_t rear_neighbour_address = rear_node->link ^ head1_address;
+
+	if (rear_neighbour_address == head2_address) {
+        head1->link = 0;
+        head2->link = 0;
+    } else {
+        XORCircularNode* rear_neighbour = (XORCircularNode*)rear_neighbour_address;
+        head1->link = head2_address ^ rear_neighbour_address;
+        rear_neighbour->link = (rear_neighbour->link ^ rear_node_address) ^ head1_address;
+    }
+
+    uint32_t info = rear_node->info;
+    storage_pool_push(circular_list->storage_pool, rear_node);
+
+    return info;
+}
+
 // For O(1) Clear and Union operation there must be XOR Storage Pool
 //void xor_circular_list_clear(XORCircularList* circular_list) {
 //
