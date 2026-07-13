@@ -16,6 +16,7 @@
 - XOR CIrcular List
 - Algorithm A (Addition of polynomials)
 - Algorithm M (Multiplication of polynomials)
+- Doubly Linked List
 
 ## Setup:
 - Hardware: STM32G431RB (ARM Cortex-M4)
