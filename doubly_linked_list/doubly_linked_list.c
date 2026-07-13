@@ -185,21 +185,3 @@ uint32_t doubly_linked_list_union(DoublyLinkedList* list_a, DoublyLinkedList* li
 
 	return 2;
 }
-
-
-
-//void circular_list_union(CircularList* circular_list_a, CircularList* circular_list_b) {
-//	// Insert the entire circular_list_b at the right of circular circular_list_a list1
-//	// Implicitly reduce size of the circular_list_b
-//
-//	if (circular_list_b->ptr == NULL) return;
-//
-//	if (circular_list_a->ptr != NULL) {
-//		CircularNode* P = circular_list_a->ptr->link;
-//		circular_list_a->ptr->link = circular_list_b->ptr->link;
-//		circular_list_b->ptr->link = P;
-//	}
-//
-//	circular_list_a->ptr = circular_list_b->ptr;
-//	circular_list_b->ptr = NULL;
-//}
