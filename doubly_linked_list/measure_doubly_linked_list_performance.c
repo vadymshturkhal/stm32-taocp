@@ -16,9 +16,9 @@ uint8_t measure_doubly_linked_list_performance() {
 
 	const uint16_t max_nodes = 128;
 
-	// GCC -O3 -mcpu=cortex-m4 -mthumb (Translation Unit Boundary) for 128*5 operations: cold cycles = 31189 | warm cycles = 31017
+	// GCC -O3 -mcpu=cortex-m4 -mthumb (Translation Unit Boundary) for 128*6 operations: cold cycles = 39581 | warm cycles = 39380
 	// Flash size = ? bytes: balloc(0xc + 0x28) + storage_pool(0x38 + 0x14 + 0x18) + ...
-	// GCC -O3 -mcpu=cortex-m4 -mthumb -flto for 128*5 operations: cold cycles = 13705 | warm cycles = 13558
+	// GCC -O3 -mcpu=cortex-m4 -mthumb -flto for 128*5 operations: cold cycles = 16012 | warm cycles = 15804
 	start = DWT->CYCCNT;
 	uint8_t gcc_doubly_linked_list_status = test_doubly_linked_list(max_nodes);
 	if (gcc_doubly_linked_list_status != 0) return gcc_doubly_linked_list_status;

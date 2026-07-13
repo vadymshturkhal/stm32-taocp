@@ -18,13 +18,13 @@ uint32_t test_doubly_linked_list(uint32_t max_nodes) {
 	if (max_nodes == 0) return 0;
 
 	// max_nodes + 1 means pool size + head node
-	uint32_t storage_pool_size = sizeof(Storage_Pool) + (max_nodes + 1) * sizeof(DoublyNode);
+	uint32_t storage_pool_size = sizeof(Storage_Pool) + (max_nodes + 2) * sizeof(DoublyNode);
 	uint32_t storage_and_list_size = storage_pool_size + sizeof(DoublyLinkedList);
 
 	void* storage_and_list_memory = asm_balloc(storage_and_list_size);
 	if (storage_and_list_memory == NULL) return 1;
 
-	Storage_Pool* storage_pool = create_storage_pool(storage_and_list_memory, sizeof(DoublyNode), max_nodes + 1);
+	Storage_Pool* storage_pool = create_storage_pool(storage_and_list_memory, sizeof(DoublyNode), max_nodes + 2);
 	if (storage_pool == NULL) return 2;
 
 	uint8_t* list_memory_start = (uint8_t*)storage_and_list_memory + storage_pool_size;
@@ -61,6 +61,7 @@ uint32_t test_doubly_linked_list(uint32_t max_nodes) {
 		}
 	}
 
+	// Clear
 	doubly_linked_list_clear(list);
 
 	// Insert Right max_nodes times
@@ -72,9 +73,15 @@ uint32_t test_doubly_linked_list(uint32_t max_nodes) {
 		}
 	}
 
+	// Union
+	volatile DoublyLinkedList stack_list;
+	volatile DoublyLinkedList* another_list = &stack_list;
+	doubly_linked_list_init(another_list, storage_pool);
+	doubly_linked_list_union(another_list, list);
+
 	// Pop Right max_nodes times
 	for (uint32_t i = max_nodes; i > 0; i--){
-		uint32_t status = doubly_linked_list_pop_right(&info, list);
+		uint32_t status = doubly_linked_list_pop_right(&info, another_list);
 		if (status != 0) {
 			asm_balloc_free(storage_and_list_memory);
 			return status;
