@@ -135,9 +135,24 @@ uint32_t doubly_linked_list_delete_node(DoublyLinkedList* doubly_list, DoublyNod
 	return 0;
 }
 
-//void doubly_linked_list_clear(DoublyLinkedList* doubly_list) {
+uint32_t doubly_linked_list_clear(DoublyLinkedList* list) {
+	if (list->head->left != list->head) {
+		// storage pool used node->left as a link
+		DoublyNode* head = list->head->left;
+		DoublyNode* tail = list->head->right;
 
-//}
+		storage_pool_add_slice(list->storage_pool, head, tail);
+		list->head->left = list->head;
+		list->head->right = list->head;
+
+		list->storage_pool->size += list->size;
+		list->size = 0;
+
+		return 0;
+	}
+
+	return 1;
+}
 
 //void doubly_linked_list_union(DoublyLinkedList* doubly_list_a, DoublyLinkedList* doubly_list_b) {
 

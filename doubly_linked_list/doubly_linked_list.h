@@ -32,9 +32,9 @@ uint32_t doubly_linked_list_insert_right(DoublyLinkedList* doubly_list, uint32_t
 uint32_t doubly_linked_list_pop_right(uint32_t* info, DoublyLinkedList* doubly_list);
 uint32_t doubly_linked_list_insert_node(DoublyLinkedList* doubly_list, DoublyNode* X);
 uint32_t doubly_linked_list_delete_node(DoublyLinkedList* doubly_list, DoublyNode* X);
+uint32_t doubly_linked_list_clear(DoublyLinkedList* doubly_list);
 
 // TODO
-//void doubly_linked_list_clear(DoublyLinkedList* doubly_list);
 //void doubly_linked_list_union(DoublyLinkedList* doubly_list_a, DoublyLinkedList* doubly_list_b);
 
 #endif
