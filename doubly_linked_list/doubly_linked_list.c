@@ -10,8 +10,13 @@
 uint32_t doubly_linked_list_init(DoublyLinkedList* doubly_list, Storage_Pool* storage_pool) {
 	if (doubly_list == NULL || storage_pool == NULL) return 1;
 
-	DoublyListHead* head = (DoublyListHead*)doubly_list;
-	head->link = head;
+	DoublyNode* head = storage_pool_pop(storage_pool);
+	if (head == NULL) return 2;	// Overflow
+
+	doubly_list->head = head;
+	doubly_list->head->left = doubly_list->head;
+	doubly_list->head->right = doubly_list->head;
+
 	doubly_list->size = 0;
 	doubly_list->storage_pool = storage_pool;
 	return 0;
@@ -32,7 +37,7 @@ uint32_t doubly_linked_list_insert_left(DoublyLinkedList* doubly_list, uint32_t 
 
 
 	// 3 Insert P at Front
-	DoublyListHead* X = doubly_list->head;
+	DoublyNode* X = doubly_list->head;
 
 	P->left = X;
 	P->right = X->right;
@@ -75,7 +80,7 @@ uint32_t doubly_linked_list_insert_right(DoublyLinkedList* doubly_list, uint32_t
 	doubly_list->size++;
 
 	// 3 Insert P at Rear
-	DoublyListHead* X = doubly_list->head->left;
+	DoublyNode* X = doubly_list->head->left;
 
 	P->left = X;
 	P->right = X->right;
@@ -105,10 +110,10 @@ uint32_t doubly_linked_list_pop_right(uint32_t* info, DoublyLinkedList* doubly_l
 }
 
 uint32_t doubly_linked_list_insert_node(DoublyLinkedList* doubly_list, DoublyNode* X) {
-	if (circular_list == NULL || X == NULL) return 1;
+	if (doubly_list == NULL || X == NULL) return 1;
 
 	// P <= Avail
-	DoublyNode* P = storage_pool_pop(circular_list->storage_pool);
+	DoublyNode* P = storage_pool_pop(doubly_list->storage_pool);
 	if (P == NULL) return 2;	// Overflow
 
 	P->left = X;
@@ -120,13 +125,13 @@ uint32_t doubly_linked_list_insert_node(DoublyLinkedList* doubly_list, DoublyNod
 }
 
 uint32_t doubly_linked_list_delete_node(DoublyLinkedList* doubly_list, DoublyNode* X) {
-	if (circular_list == NULL || X == NULL) return 1;
+	if (doubly_list == NULL || X == NULL) return 1;
 
 	X->left->right = X->right;
 	X->right->left = X->left;
 
 	// Avail <= X
-	storage_pool_push(circular_list->storage_pool, X);
+	storage_pool_push(doubly_list->storage_pool, X);
 
 	return 0;
 }

@@ -19,7 +19,7 @@ typedef struct DoublyListHead{
 } DoublyListHead;
 
 typedef struct {
-	DoublyListHead* head;
+	DoublyNode* head;
 	Storage_Pool* storage_pool;
 	uint32_t size;
 } DoublyLinkedList;
