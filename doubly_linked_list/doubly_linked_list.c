@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "doubly_linked_list.h"
 #include "storage_pool.h"
+#include "doubly_linked_list.h"
 
 // Using Storage Pool
 
@@ -35,7 +35,6 @@ uint32_t doubly_linked_list_insert_left(DoublyLinkedList* doubly_list, uint32_t 
 	// Increment size
 	doubly_list->size++;
 
-
 	// 3 Insert P at Front
 	DoublyNode* X = doubly_list->head;
 
@@ -48,7 +47,7 @@ uint32_t doubly_linked_list_insert_left(DoublyLinkedList* doubly_list, uint32_t 
 }
 
 uint32_t doubly_linked_list_pop_left(uint32_t* info, DoublyLinkedList* doubly_list) {
-	if (doubly_list == NULL) return 1;
+	if (doubly_list == NULL || info == NULL) return 1;
 
 	if (doubly_list->head == doubly_list->head->right) {
 		return 2;  // Underflow
@@ -91,7 +90,7 @@ uint32_t doubly_linked_list_insert_right(DoublyLinkedList* doubly_list, uint32_t
 }
 
 uint32_t doubly_linked_list_pop_right(uint32_t* info, DoublyLinkedList* doubly_list) {
-	if (doubly_list == NULL) return 1;
+	if (doubly_list == NULL || info == NULL) return 1;
 
 	if (doubly_list->head == doubly_list->head->right) {
 		return 2;  // Underflow
