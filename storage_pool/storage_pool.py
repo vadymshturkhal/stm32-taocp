@@ -29,7 +29,7 @@ class STORAGE_POOL:
 
     def push(self, node):
         if node is None:
-            raise Exception("Pushed null to STORAGE POOL")
+            raise Exception("Pushed None to STORAGE POOL")
     
         node.link = self._avail
         self._avail = node
