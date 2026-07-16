@@ -128,6 +128,7 @@ uint32_t doubly_linked_list_insert_node(DoublyLinkedList* doubly_list, DoublyNod
 
 uint32_t doubly_linked_list_delete_node(DoublyLinkedList* doubly_list, DoublyNode* X) {
 	if (doubly_list == NULL || X == NULL) return 1;
+	if (X == doubly_list->head) return 2;
 
     // Decrement size
 	doubly_list->size -= 1;
