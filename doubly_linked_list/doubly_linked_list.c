@@ -115,6 +115,9 @@ uint32_t doubly_linked_list_insert_node(DoublyLinkedList* doubly_list, DoublyNod
 	DoublyNode* P = storage_pool_pop(doubly_list->storage_pool);
 	if (P == NULL) return 2;	// Overflow
 
+	// Increment size
+	doubly_list->size++;
+
 	P->left = X;
 	P->right = X->right;
 	X->right->left = P;
@@ -125,6 +128,9 @@ uint32_t doubly_linked_list_insert_node(DoublyLinkedList* doubly_list, DoublyNod
 
 uint32_t doubly_linked_list_delete_node(DoublyLinkedList* doubly_list, DoublyNode* X) {
 	if (doubly_list == NULL || X == NULL) return 1;
+
+    // Decrement size
+	doubly_list->size -= 1;
 
 	X->left->right = X->right;
 	X->right->left = X->left;
