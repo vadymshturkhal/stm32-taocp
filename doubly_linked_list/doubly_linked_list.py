@@ -136,7 +136,32 @@ class DoublyLinkedList:
         self.storage_pool.push(X)
         
     def clear(self):
-        pass
+        head = self.head.right
+        tail = self.head.left
+
+        self.storage_pool.add_slice(head, tail, self.size)
+        self.head.left = self.head
+        self.head.right = self.head
+        self.size = 0
     
     def union(self, list_b):
         pass
+
+if __name__ == "__main__":
+    nodes = 128 + 1
+    storage_pool = STORAGE_POOL(node_class=DoublyNode, size=nodes)
+    doubly_linked_list = DoublyLinkedList(storage_pool)
+    n = DoublyNode(info=1)
+    n1 = DoublyNode(info=2)
+    n2 = DoublyNode(info=3)
+
+    doubly_linked_list.insert_left(n)
+    doubly_linked_list.insert_left(n1)
+    doubly_linked_list.insert_left(n2)
+    print(doubly_linked_list.size)
+    print(storage_pool.size)
+
+    doubly_linked_list.clear()
+    print(doubly_linked_list.size)
+    print(storage_pool.size)
+
