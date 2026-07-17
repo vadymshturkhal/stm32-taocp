@@ -163,31 +163,27 @@ uint32_t doubly_linked_list_clear(DoublyLinkedList* list) {
 uint32_t doubly_linked_list_union(DoublyLinkedList* list_a, DoublyLinkedList* list_b) {
 	// Insert the list_b at right of list_a
 	// Reduce the size of the list_b
-
 	if (list_a == NULL || list_b == NULL) return 1;
+	if (list_b->head->left == list_b->head) return 2;	// list_b is empty
 
-	if (list_b->head->left != list_b->head) {
-		DoublyNode* list_b_begin = list_b->head->right;
-		DoublyNode* list_b_end = list_b->head->left;
+	DoublyNode* list_b_begin = list_b->head->right;
+	DoublyNode* list_b_end = list_b->head->left;
 
-		DoublyNode* list_a_end = list_a->head->left;
+	DoublyNode* list_a_end = list_a->head->left;
 
-		// link end with start
-		list_a_end->right = list_b_begin;
-		list_b_begin->left = list_a_end;
+	// link end with start
+	list_a_end->right = list_b_begin;
+	list_b_begin->left = list_a_end;
 
-		// link all with head
-		list_b_end->right = list_a->head;
-		list_a->head->left = list_b_end;
+	// link all with head
+	list_b_end->right = list_a->head;
+	list_a->head->left = list_b_end;
 
-		// Empty list_b
-		list_b->head->left = list_b->head;
-		list_b->head->right = list_b->head;
-		list_a->size += list_b->size;
-		list_b->size = 0;
+	// Empty list_b
+	list_b->head->left = list_b->head;
+	list_b->head->right = list_b->head;
+	list_a->size += list_b->size;
+	list_b->size = 0;
 
-		return 0;
-	}
-
-	return 2;
+	return 0;
 }
