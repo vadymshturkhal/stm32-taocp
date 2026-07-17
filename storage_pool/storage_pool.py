@@ -25,6 +25,8 @@ class STORAGE_POOL:
         P = self._avail
         self._avail = self._avail.link
 
+        self.size -= 1
+
         return P
 
     def push(self, node):
@@ -34,7 +36,9 @@ class STORAGE_POOL:
         node.link = self._avail
         self._avail = node
 
-    def add_slice(self, head, tail):
+        self.size += 1
+
+    def add_slice(self, head, tail, size):
         """Returns an entire chain to the pool in O(1) time."""
         if head is None or tail is None:
             raise Exception("Storage Pool add_slice: Head or Tail is None")
@@ -42,3 +46,4 @@ class STORAGE_POOL:
         P = self._avail
         self._avail = head
         tail.link = P
+        self.size += size
