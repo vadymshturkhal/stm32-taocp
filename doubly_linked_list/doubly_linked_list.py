@@ -136,6 +136,9 @@ class DoublyLinkedList:
         self.storage_pool.push(X)
         
     def clear(self):
+        if self.head.left == self.head:
+            return
+
         head = self.head.right
         tail = self.head.left
 
@@ -144,8 +147,38 @@ class DoublyLinkedList:
         self.head.right = self.head
         self.size = 0
     
-    def union(self, list_b):
-        pass
+    def union(self, list_b: "DoublyLinkedList"):
+        if list_b is None:
+            return
+        
+        # list_b is empty
+        if list_b.head == list_b.head.left:
+            return
+        
+        # union same list
+        if self == list_b:
+            return
+        
+        list_b_start = list_b.head.right
+        list_b_end = list_b.head.left
+        list_a_end = self.head.left
+
+        # link end with start
+        list_a_end.right = list_b_start
+        list_b_start.left = list_a_end
+
+        # link all with head
+        list_b_end.right = self.head
+        self.head.left = list_b_end
+
+        # advance size
+        self.size += list_b.size
+
+        # empty list_b
+        list_b.head.left = list_b.head
+        list_b.head.right = list_b.head
+        list_b.size = 0
+
 
 if __name__ == "__main__":
     nodes = 128 + 1
@@ -164,4 +197,3 @@ if __name__ == "__main__":
     doubly_linked_list.clear()
     print(doubly_linked_list.size)
     print(storage_pool.size)
-
