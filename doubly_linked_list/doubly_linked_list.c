@@ -165,6 +165,7 @@ uint32_t doubly_linked_list_union(DoublyLinkedList* list_a, DoublyLinkedList* li
 	// Reduce the size of the list_b
 	if (list_a == NULL || list_b == NULL) return 1;
 	if (list_b->head->left == list_b->head) return 2;	// list_b is empty
+	if (list_a == list_b) return 3;						// union same list
 
 	DoublyNode* list_b_begin = list_b->head->right;
 	DoublyNode* list_b_end = list_b->head->left;
