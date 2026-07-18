@@ -33,7 +33,7 @@ uint32_t test_xor_circular_list(uint32_t max_nodes) {
 	XORCircularList* circular_list = (XORCircularList*)(circular_list_memory_start);
 
 	xor_circular_list_init(circular_list, storage_pool);
-	volatile uint32_t info;
+	uint32_t info;
 
 	// Insert Left max_nodes times
 	for (uint32_t i = max_nodes; i > 0; i--){
@@ -60,13 +60,11 @@ uint32_t test_xor_circular_list(uint32_t max_nodes) {
 //	XORCircularNode* backward_node3 = (XORCircularNode*)(backward_node2->link ^ (uintptr_t)backward_node1);
 
 	// Pop max_nodes times
-	bool pop_is_success = true;		// flag for Underflow checking
 	for (uint32_t i = max_nodes; i > 0; i--){
-//		info = xor_circular_list_pop_left(&pop_is_success, circular_list);
-		info = xor_circular_list_pop_right(&pop_is_success, circular_list);
-		if (pop_is_success == false) {
+		uint32_t status = xor_circular_list_pop_left(circular_list, &info);
+		if (status != 0) {
 			asm_balloc_free(storage_and_circular_list_memory);
-			return 4;
+			return status;
 		}
 	}
 

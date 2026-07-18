@@ -59,15 +59,12 @@ bool xor_circular_list_insert_left(XORCircularList* circular_list, uint32_t info
     return true;
 }
 
-uint32_t xor_circular_list_pop_left(bool* pop_is_success, XORCircularList* circular_list) {
-    if (circular_list == NULL) return 0;
+uint32_t xor_circular_list_pop_left(XORCircularList* circular_list, uint32_t* info) {
+    if (circular_list == NULL || info == NULL) return 1;
 
     if (circular_list->size == 0) {
-		*pop_is_success = false;	// Underflow
-		return 0;
+		return 2;  // Underflow
     }
-
-	*pop_is_success = true;
 
 	// Decrement size
     circular_list->size -= 1;
@@ -91,10 +88,9 @@ uint32_t xor_circular_list_pop_left(bool* pop_is_success, XORCircularList* circu
         front_neighbour->link = (front_neighbour->link ^ front_node_address) ^ head2_address;
     }
 
-    uint32_t info = front_node->info;
+	*info = front_node->info;
     storage_pool_push(circular_list->storage_pool, front_node);
-
-    return info;
+    return 0;
 }
 
 bool xor_circular_list_insert_right(XORCircularList* circular_list, uint32_t info) {
