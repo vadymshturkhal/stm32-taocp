@@ -61,7 +61,8 @@ uint32_t test_xor_circular_list(uint32_t max_nodes) {
 
 	// Pop max_nodes times
 	for (uint32_t i = max_nodes; i > 0; i--){
-		uint32_t status = xor_circular_list_pop_left(circular_list, &info);
+//		uint32_t status = xor_circular_list_pop_left(circular_list, &info);
+		uint32_t status = xor_circular_list_pop_right(circular_list, &info);
 		if (status != 0) {
 			asm_balloc_free(storage_and_circular_list_memory);
 			return status;

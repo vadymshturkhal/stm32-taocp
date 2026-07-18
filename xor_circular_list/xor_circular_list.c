@@ -130,15 +130,12 @@ bool xor_circular_list_insert_right(XORCircularList* circular_list, uint32_t inf
     return true;
 }
 
-uint32_t xor_circular_list_pop_right(bool* pop_is_success, XORCircularList* circular_list) {
-    if (circular_list == NULL) return 0;
+uint32_t xor_circular_list_pop_right(XORCircularList* circular_list, uint32_t* info) {
+    if (circular_list == NULL || info == NULL) return 1;
 
     if (circular_list->size == 0) {
-		*pop_is_success = false;	// Underflow
-		return 0;
+		return 2;  // Underflow
     }
-
-	*pop_is_success = true;
 
 	// Decrement size
     circular_list->size -= 1;
@@ -162,10 +159,9 @@ uint32_t xor_circular_list_pop_right(bool* pop_is_success, XORCircularList* circ
         rear_neighbour->link = (rear_neighbour->link ^ rear_node_address) ^ head1_address;
     }
 
-    uint32_t info = rear_node->info;
+	*info = rear_node->info;
     storage_pool_push(circular_list->storage_pool, rear_node);
-
-    return info;
+    return 0;
 }
 
 // For O(1) Clear and Union operation there must be XOR Storage Pool
