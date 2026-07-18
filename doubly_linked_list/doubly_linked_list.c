@@ -46,7 +46,7 @@ uint32_t doubly_linked_list_insert_left(DoublyLinkedList* doubly_list, uint32_t 
 	return 0;
 }
 
-uint32_t doubly_linked_list_pop_left(uint32_t* info, DoublyLinkedList* doubly_list) {
+uint32_t doubly_linked_list_pop_left(DoublyLinkedList* doubly_list, uint32_t* info) {
 	if (doubly_list == NULL || info == NULL) return 1;
 
 	if (doubly_list->head == doubly_list->head->right) {

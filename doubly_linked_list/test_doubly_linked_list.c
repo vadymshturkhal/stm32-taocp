@@ -45,7 +45,7 @@ uint32_t test_doubly_linked_list(uint32_t max_nodes) {
 	// Pop Left max_nodes times
 	uint32_t info;
 	for (uint32_t i = max_nodes; i > 0; i--){
-		uint32_t status = doubly_linked_list_pop_left(&info, list);
+		uint32_t status = doubly_linked_list_pop_left(list, &info);
 		if (status != 0) {
 			asm_balloc_free(storage_and_list_memory);
 			return status;

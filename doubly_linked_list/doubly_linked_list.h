@@ -27,7 +27,7 @@ typedef struct {
 // Prototypes
 uint32_t doubly_linked_list_init(DoublyLinkedList* doubly_list, Storage_Pool* storage_pool);
 uint32_t doubly_linked_list_insert_left(DoublyLinkedList* doubly_list, uint32_t info);
-uint32_t doubly_linked_list_pop_left(uint32_t* info, DoublyLinkedList* doubly_list);
+uint32_t doubly_linked_list_pop_left(DoublyLinkedList* doubly_list, uint32_t* info);
 uint32_t doubly_linked_list_insert_right(DoublyLinkedList* doubly_list, uint32_t info);
 uint32_t doubly_linked_list_pop_right(uint32_t* info, DoublyLinkedList* doubly_list);
 uint32_t doubly_linked_list_insert_node(DoublyLinkedList* doubly_list, DoublyNode* X);
