@@ -32,7 +32,7 @@ def decision(elevator: Elevator, caller: str | None = None):
         
     # no such j exists and invoked by E6
     if j == -1 and caller == "E6":
-        j = 2
+        j = INITIAL_FLOOR
 
     # D4 [Set STATE]
     if elevator.FLOOR > j:
@@ -41,7 +41,7 @@ def decision(elevator: Elevator, caller: str | None = None):
         elevator.STATE = STATE.GOINGUP
 
     # D5 [Elevator dormant]
-    if elevator.is_running("E1") and j != 2:
+    if elevator.is_running("E1") and j != INITIAL_FLOOR:
         # Prepare to move
         elevator.start_after(UNIT * 20, "E6")
     return
