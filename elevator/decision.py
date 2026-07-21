@@ -8,14 +8,13 @@ from main import STATE, FLOORS, INITIAL_FLOOR, UNIT
 
 
 def decision(elevator: Elevator, caller: str | None = None):
-    # D1
+    # D1 [Decision necessary?]
     if elevator.STATE != STATE.NEUTRAL:
         return
     
-    # D2
-    # if elevator positioned at E1
+    # D2 [Should door open?]
     if elevator.is_running("E1") and elevator.SHARED_STATE.CALLS[INITIAL_FLOOR] != 0:
-        # after 20 units of time start E3 and exit
+        # if elevator positioned at E1: after 20 units of time start E3 and exit
         elevator.start_after(UNIT * 20, "E3")
         return
 
