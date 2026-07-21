@@ -1,17 +1,15 @@
 import asyncio
 
-from main import STATE, FLOORS, INITIAL_FLOOR, UNIT
+from main import STATE, INITIAL_FLOOR, UNIT, CALLUP, CALLDOWN, CALLCAR, D1, D2, D3
 from decision import decision
 
 
 class Elevator:
-    def __init__(self, SHARED_STATE, FLOOR=2, STATE=STATE.NEUTRAL, D1=0, D2=0, D3=0):
+    def __init__(self, SHARED_STATE, STATE=STATE.NEUTRAL, D=0):
         self.SHARED_STATE = SHARED_STATE
-        self.FLOOR = FLOOR
+        self.FLOOR = INITIAL_FLOOR
         self.STATE = STATE
-        self.D1 = D1
-        self.D2 = D2
-        self.D3 = D3
+        self.D = D
         self.home_floor = INITIAL_FLOOR
         self.tasks: dict[str, asyncio.Task] = {}
 
@@ -55,17 +53,17 @@ class Elevator:
         # 1
         # CALLCAR[self.FLOOR] = 0
         # CALLCAR is the last bit of CALLS[self.FLOOR] and we need to set it zero
-        self.SHARED_STATE.CALLS[self.FLOOR] &= 0b110
+        self.SHARED_STATE.CALLS[self.FLOOR] &= ~CALLCAR
 
         # 2
         # CALLUP is the first bit of CALLS[self.FLOOR] and we need to set it zero
         if self.STATE != STATE.GOINGDOWN:
-            self.SHARED_STATE.CALLS[self.FLOOR] &= 0b011
+            self.SHARED_STATE.CALLS[self.FLOOR] &= ~CALLUP
 
         # 3
         # CALLDOWN is the middle bit of CALLS[self.FLOOR] and we need to set it zero
         if self.STATE != STATE.GOINGUP:
-            self.SHARED_STATE.CALLS[self.FLOOR] &= 0b101
+            self.SHARED_STATE.CALLS[self.FLOOR] &= ~CALLDOWN
 
         # 4
         # Perform the DECISION subroutine
@@ -78,7 +76,7 @@ class Elevator:
             return
 
         # 6
-        if self.D2 != 0:
+        if self.D & D2 != 0:
             # cancel E9
             self.cancel("E9")
             return
