@@ -1,4 +1,3 @@
-from enum import Enum
 import asyncio
 
 from main import STATE, FLOORS, INITIAL_FLOOR, UNIT
@@ -13,10 +12,7 @@ class Elevator:
         self.D1 = D1
         self.D2 = D2
         self.D3 = D3
-        self.home_floor = 2
-        self.CALLCAR = [0] * FLOORS
-        self.CALLUP = [0] * FLOORS
-        self.CALLDOWN = [0] * FLOORS
+        self.home_floor = INITIAL_FLOOR
         self.tasks: dict[str, asyncio.Task] = {}
 
     def is_running(self, name: str) -> bool:
