@@ -176,7 +176,6 @@ class Elevator:
     # [Set inaction indicator]
     async def E9(self):
         # set D2 = 0 and perform the DECISION subroutine
-        # FIXME: use self.D
-        self.D2 = 0
+        self.D &= ~D2
         decision(self, "E9")
         return
