@@ -1,6 +1,6 @@
 import asyncio
 
-from main import STATE, INITIAL_FLOOR, UNIT, CALLUP, CALLDOWN, CALLCAR, D1, D2, D3
+from main import STATE, INITIAL_FLOOR, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR, D1, D2, D3
 from decision import decision
 
 
@@ -105,9 +105,43 @@ class Elevator:
             self.start_after(UNIT * 15, "E8")
             return
 
+    # [Go up a floor]
     async def E7(self):
-        pass
+        """
+        should be: if not is_callcar_or_callup, then if not self.home_floor, then if not CALLDOWN[FLOOR}: repeat E7
+        else: check calls from above, if not: continue. else wait 14 units and go to E2
+        """
+        while True:
+            # 1 Set FLOOR += 1 and wait 51 units of time
+            self.FLOOR += 1
+            await asyncio.sleep(UNIT * 51)
 
+            # 2 Conditions
+            # is CALLCAR[FLOOR] == 1 or CALLUP[FLOOR] == 1
+            is_callcar_or_callup = self.SHARED_STATE.CALLS[self.FLOOR] & (CALLCAR | CALLUP)
+
+            if is_callcar_or_callup:
+                should_stop = True
+            else:
+                # if FLOOR == home_floor or CALLDOWN[FLOOR] == 1
+                at_home_or_down_call = self.FLOOR == self.home_floor or self.SHARED_STATE.CALLS[self.FLOOR] & CALLDOWN
+                if not at_home_or_down_call:
+                    should_stop = False
+                else:
+                    # and CALLS[j] == 0 for all j > FLOOR
+                    no_calls_above = all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR + 1, FLOORS))
+                    should_stop = no_calls_above
+
+            if should_stop:
+                # wait 14 units (for deceleration) and go to E2
+                await asyncio.sleep(UNIT * 14)
+                self.start("E2")
+                return
+
+            # 3
+            # otherwise repeat E7
+
+    # [Go down a floor]
     async def E8(self):
         pass
 
