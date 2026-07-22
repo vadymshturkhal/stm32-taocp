@@ -143,16 +143,40 @@ class Elevator:
 
     # [Go down a floor]
     async def E8(self):
-        pass
+        while True:
+            # 1 Set FLOOR -= 1 and wait 61 units of time
+            self.FLOOR -= 1
+            await asyncio.sleep(UNIT * 61)
+
+            # 2 Conditions
+            # is CALLCAR[FLOOR] == 1 or CALLDOWN[FLOOR] == 1
+            is_callcar_or_calldown = self.SHARED_STATE.CALLS[self.FLOOR] & (CALLCAR | CALLDOWN)
+
+            if is_callcar_or_calldown:
+                should_stop = True
+            else:
+                # if FLOOR == home_floor or CALLUP[FLOOR] == 1
+                at_home_or_up_call = self.FLOOR == self.home_floor or self.SHARED_STATE.CALLS[self.FLOOR] & CALLUP
+                if not at_home_or_up_call:
+                    should_stop = False
+                else:
+                    # and CALLS[j] == 0 for all j < FLOOR
+                    no_calls_below = all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR - 1, -1, -1))
+                    should_stop = no_calls_below
+
+            if should_stop:
+                # wait 23 units (for deceleration) and go to E2
+                await asyncio.sleep(UNIT * 23)
+                self.start("E2")
+                return
+
+            # 3
+            # otherwise repeat E8
 
     # [Set inaction indicator]
     async def E9(self):
         # set D2 = 0 and perform the DECISION subroutine
+        # FIXME: use self.D
         self.D2 = 0
         decision(self, "E9")
         return
-
-
-if __name__ == "__main__":
-    elevator = Elevator()
-    print(elevator.CALLCAR)
