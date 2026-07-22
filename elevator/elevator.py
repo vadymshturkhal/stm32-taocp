@@ -48,6 +48,18 @@ class Elevator:
     async def E1(self):
         await asyncio.sleep(0)
 
+    async def E2(self):
+        pass
+
+    async def E3(self):
+        pass
+
+    async def E4(self):
+        pass
+
+    async def E5(self):
+        pass
+
     # [Prepare to move]
     async def E6(self):
         # 1
