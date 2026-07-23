@@ -48,9 +48,33 @@ class Elevator:
     async def E1(self):
         await asyncio.sleep(0)
 
+    # [Change of state?]
     async def E2(self):
-        pass
+        # 1 State is Going Up
+        # Are there calls for other floors?
+        # if CALLUP[j] = CALLDOWN[j] = CALLCAR[j] = 0 for all j > FLOOR
+        if self.STATE == STATE.GOINGUP and all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR + 1, FLOORS)):
+            # If not, have passengers in the elevator called for lower floors?
+            # STATE <- NEUTRAL or GOINGDOWN, according as CALLCAR[j] = 0 for all j < FLOOR or not
+            if all(self.SHARED_STATE.CALLS[j] & CALLCAR == 0 for j in range(self.FLOOR)):
+                self.STATE = STATE.NEUTRAL
+            else:
+                self.STATE = STATE.GOINGDOWN
 
+        # 2 State is Going Down (direction reversed)
+        if self.STATE == STATE.GOINGDOWN and all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR)):
+            if all(self.SHARED_STATE.CALLS[j] & CALLCAR == 0 for j in range(self.FLOOR + 1, FLOORS)):
+                self.STATE = STATE.NEUTRAL
+            else:
+                self.STATE = STATE.GOINGUP
+
+        # 3 Set all CALL variables for the current FLOOR to zero
+        self.SHARED_STATE.CALLS[self.FLOOR] = 0b000
+
+        # 4 Open doors
+        self.start("E3")
+
+    # [Open doors]
     async def E3(self):
         pass
 
@@ -161,7 +185,7 @@ class Elevator:
                     should_stop = False
                 else:
                     # and CALLS[j] == 0 for all j < FLOOR
-                    no_calls_below = all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR - 1, -1, -1))
+                    no_calls_below = all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR))
                     should_stop = no_calls_below
 
             if should_stop:
