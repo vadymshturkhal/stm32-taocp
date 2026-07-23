@@ -50,31 +50,53 @@ class Elevator:
 
     # [Change of state?]
     async def E2(self):
-        # 1 State is Going Up
-        # Are there calls for other floors?
-        # if CALLUP[j] = CALLDOWN[j] = CALLCAR[j] = 0 for all j > FLOOR
-        if self.STATE == STATE.GOINGUP and all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR + 1, FLOORS)):
-            # If not, have passengers in the elevator called for lower floors?
-            # STATE <- NEUTRAL or GOINGDOWN, according as CALLCAR[j] = 0 for all j < FLOOR or not
-            if all(self.SHARED_STATE.CALLS[j] & CALLCAR == 0 for j in range(self.FLOOR)):
-                self.STATE = STATE.NEUTRAL
-            else:
-                self.STATE = STATE.GOINGDOWN
+        # Set default state to NEUTRAL
+        state = STATE.NEUTRAL
 
-        # 2 State is Going Down (direction reversed)
-        if self.STATE == STATE.GOINGDOWN and all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR)):
-            if all(self.SHARED_STATE.CALLS[j] & CALLCAR == 0 for j in range(self.FLOOR + 1, FLOORS)):
-                self.STATE = STATE.NEUTRAL
-            else:
-                self.STATE = STATE.GOINGUP
+        # 1 STATE is GOINGUP
+        if self.STATE == STATE.GOINGUP:
+            # Are there calls for higher floors?
+            calls_for_higher_floors = any(self.SHARED_STATE.CALLS[j] != 0 for j in range(self.FLOOR + 1, FLOORS))
 
-        # 3 Set all CALL variables for the current FLOOR to zero
+            # Have passengers in the elevator called for lower floors?
+            in_elevator_calls_for_lower_floors = any(self.SHARED_STATE.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR))
+
+            if calls_for_higher_floors:
+                   # if yes, go to E3
+                    self.start("E3")
+                    return
+
+            if in_elevator_calls_for_lower_floors:
+                # reverse direction of STATE
+                state = STATE.GOINGDOWN
+
+        # 2 STATE is GOINGDOWN
+        else:
+            # Have passengers in the elevator called for higher floors?
+            in_elevator_calls_for_higher_floors = any(self.SHARED_STATE.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR + 1, FLOORS))
+
+            # Are there calls for lower floors?
+            calls_for_lower_floors = any(self.SHARED_STATE.CALLS[j] != 0 for j in range(self.FLOOR))
+
+            if calls_for_lower_floors:
+                   # if yes, go to E3
+                    self.start("E3")
+                    return
+
+            if in_elevator_calls_for_higher_floors:
+                # reverse direction of STATE
+                state = STATE.GOINGUP
+
+        # set STATE to NEUTRAL or reversed
+        self.STATE = state
+
+        # Set all CALL variables for the current FLOOR to zero
         self.SHARED_STATE.CALLS[self.FLOOR] = 0b000
 
-        # 4 Open doors
+        # jump to E3
         self.start("E3")
 
-    # [Open doors]
+    # [Open door]
     async def E3(self):
         pass
 
