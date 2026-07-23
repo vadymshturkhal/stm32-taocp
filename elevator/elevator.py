@@ -98,7 +98,21 @@ class Elevator:
 
     # [Open door]
     async def E3(self):
-        pass
+        # 1 Set D1 and D2 to any nonzero values
+        self.D |= D1 | D2
+
+        # 2 Set E9 to start up independently after 300 units of time
+        # (This activity may be cancelled in step E6 before it occurs. 
+        # If it has already been scheduled and not cancelled, we cancel and reschedule it.)
+        self.cancel("E9")
+        self.cancel("E9_timer")
+        self.start_after(UNIT * 300, "E9")
+
+        # 3 Also set elevator activity E5 to start up independently after 76 units of time.
+        self.start_after(UNIT * 76, "E5")
+
+        # 4 Then wait 20 units of time (to simulate opening of the doors) and go to E4
+        self.start_after(UNIT * 20, "E4")
 
     async def E4(self):
         pass
