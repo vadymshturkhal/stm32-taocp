@@ -168,8 +168,22 @@ class Elevator:
             
             # await asyncio.sleep(0)
 
+    # [Close door]
     async def E5(self):
-        pass
+        # NOTE: start_after("E5") doesn't cancel a previous pending "E5" timer
+        # (unlike E9, which E3 explicitly cancels before rescheduling). If E3
+        # reopens the door before an earlier E5 chain resolves, both chains
+        # can independently fire E5 and double-schedule E6. See
+        # test_elevator.py::test_e5_runs_twice_if_scheduled_twice_before_it_fires.
+        # TODO: check whether the real MIX source guards against this.
+
+        # if D1 != 0: wait 40 units and repeat this step
+        # (the doors flutter a little, but they spring open again, since someone is still getting out or in)
+        if self.D1 != 0:
+            self.start_after(UNIT * 40, "E5")
+        else:  # set D3 = 0 and set elevator to start at step E6 after 20 units of time
+            self.D3 = 0
+            self.start_after(UNIT * 20, "E6")
 
     # [Prepare to move]
     async def E6(self):
