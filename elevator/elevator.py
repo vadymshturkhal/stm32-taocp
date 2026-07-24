@@ -12,6 +12,7 @@ class Elevator:
     def __init__(self, SHARED_STATE, USERS: "Users", STATE=STATE.NEUTRAL):
         self.SHARED_STATE = SHARED_STATE
         self.USERS = USERS
+        USERS.elevator = self
         self.FLOOR = INITIAL_FLOOR
         self.STATE = STATE
         self.D1 = 0  # a variable that is zero except during the time people are getting in or out of the elevator
@@ -138,7 +139,7 @@ class Elevator:
         # send the user of this type who has most recently entered, immediately to U6,
         if found_user is not None:
             nextinst = "U6"
-            self.USERS.immediately(self, found_user, nextinst)
+            self.USERS.immediately(found_user, nextinst)
 
             # wait 25 units, and repeat E4
             self.start_after(UNIT * 25, "E4")
@@ -149,7 +150,7 @@ class Elevator:
             # send the front person immediately to U5 instead of U4
             front_person = self.SHARED_STATE.QUEUE[self.FLOOR].head.right.info
             nextinst = "U5"
-            self.USERS.immediately(self, front_person, nextinst)
+            self.USERS.immediately(front_person, nextinst)
 
             # wait 25 units, and repeat E4
             self.start_after(UNIT * 25, "E4")
