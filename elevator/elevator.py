@@ -1,15 +1,22 @@
 import asyncio
+from typing import TYPE_CHECKING
 
-from main import STATE, INITIAL_FLOOR, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR, D1, D2, D3
+from main import STATE, INITIAL_FLOOR, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR
 from decision import decision
+
+if TYPE_CHECKING:
+    from users import Users
 
 
 class Elevator:
-    def __init__(self, SHARED_STATE, STATE=STATE.NEUTRAL, D=0):
+    def __init__(self, SHARED_STATE, USERS: "Users", STATE=STATE.NEUTRAL):
         self.SHARED_STATE = SHARED_STATE
+        self.USERS = USERS
         self.FLOOR = INITIAL_FLOOR
         self.STATE = STATE
-        self.D = D
+        self.D1 = 0  # nonzero while the door is open
+        self.D2 = 0  # nonzero while E9's independent inaction-check is still pending
+        self.D3 = None  # last ELEVATOR-search cursor left over from E4 (not yet consumed elsewhere)
         self.home_floor = INITIAL_FLOOR
         self.tasks: dict[str, asyncio.Task] = {}
 
@@ -99,7 +106,8 @@ class Elevator:
     # [Open door]
     async def E3(self):
         # 1 Set D1 and D2 to any nonzero values
-        self.D |= D1 | D2
+        self.D1 = 1
+        self.D2 = 1
 
         # 2 Set E9 to start up independently after 300 units of time
         # (This activity may be cancelled in step E6 before it occurs. 
@@ -114,8 +122,51 @@ class Elevator:
         # 4 Then wait 20 units of time (to simulate opening of the doors) and go to E4
         self.start_after(UNIT * 20, "E4")
 
+    # [Let people out, in]
     async def E4(self):
-        pass
+        # 1 if anyone in the ELEVATOR list has OUT == FLOOR
+        elevator_list = self.SHARED_STATE.ELEVATOR
+        node = elevator_list.head.left
+        found_user = None
+        while node is not elevator_list.head:
+            if node.info.OUT == self.FLOOR:
+                found_user = node.info
+                break
+
+            node = node.left
+
+        # send the user of this type who has most recently entered, immediately to U6,
+        if found_user is not None:
+            nextinst = "U6"
+            self.USERS.immediately(self, found_user, nextinst)
+
+            # wait 25 units, and repeat E4
+            self.start_after(UNIT * 25, "E4")
+            return
+
+        # 2 if no such user exist, but QUEUE[FLOOR] is not empty
+        if self.SHARED_STATE.QUEUE[self.FLOOR].size != 0:
+            # send the front person immediately to U5 instead of U4
+            front_person = self.SHARED_STATE.QUEUE[self.FLOOR].head.right.info
+            nextinst = "U5"
+            self.USERS.immediately(self, front_person, nextinst)
+
+            # wait 25 units, and repeat E4
+            self.start_after(UNIT * 25, "E4")
+
+        # 3 if empty
+        else:
+            # set D1 = 0
+            self.D1 = 0
+
+            # make D3 nonzero
+            self.D3 = 1
+
+            # No explicit yield needed here (Knuth's JMP CYCLE, "return to
+            # simulate other events"): once this coroutine returns, its Task
+            # completes and control goes back to the event loop on its own
+            
+            # await asyncio.sleep(0)
 
     async def E5(self):
         pass
@@ -148,7 +199,7 @@ class Elevator:
             return
 
         # 6
-        if self.D & D2 != 0:
+        if self.D2 != 0:
             # cancel E9
             self.cancel("E9")
             return
@@ -236,6 +287,6 @@ class Elevator:
     # [Set inaction indicator]
     async def E9(self):
         # set D2 = 0 and perform the DECISION subroutine
-        self.D &= ~D2
+        self.D2 = 0
         decision(self, "E9")
         return
