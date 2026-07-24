@@ -14,9 +14,9 @@ class Elevator:
         self.USERS = USERS
         self.FLOOR = INITIAL_FLOOR
         self.STATE = STATE
-        self.D1 = 0  # nonzero while the door is open
-        self.D2 = 0  # nonzero while E9's independent inaction-check is still pending
-        self.D3 = None  # last ELEVATOR-search cursor left over from E4 (not yet consumed elsewhere)
+        self.D1 = 0  # a variable that is zero except during the time people are getting in or out of the elevator
+        self.D2 = 0  # a variable that becomes zero if the elevator has sat on one floor without moving for 30 sec or more
+        self.D3 = 0  # a variable that is zero except when the doors are open but nobody is getting in or out of the elevator
         self.home_floor = INITIAL_FLOOR
         self.tasks: dict[str, asyncio.Task] = {}
 
