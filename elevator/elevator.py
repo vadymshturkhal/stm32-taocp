@@ -40,8 +40,6 @@ class Elevator:
 
     # [Change of state?]
     async def E2(self):
-        await asyncio.sleep(0)
-
         # Set default state to NEUTRAL
         state = STATE.NEUTRAL
 
@@ -95,7 +93,10 @@ class Elevator:
         await task
 
     # [Open door]
-    async def E3(self):
+    async def E3(self, delay=0):
+        if delay:
+            await asyncio.sleep(delay)
+
         # 1 Set D1 and D2 to any nonzero values
         self.D1 = 1
         self.D2 = 1
