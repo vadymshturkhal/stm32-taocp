@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 from typing import TYPE_CHECKING
 
 from main import STATE, INITIAL_FLOOR, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR
@@ -22,42 +23,25 @@ class Elevator:
         self.tasks: dict[str, asyncio.Task] = {}
 
     def is_running(self, name: str) -> bool:
-        """True if the coroutine named `name` (e.g. "E1") is currently active."""
         task = self.tasks.get(name)
-        return task is not None and not task.done()
+        if task is None:
+            return False
+        state = inspect.getcoroutinestate(task.get_coro())
+        return state != inspect.CORO_CLOSED
     
-    def start(self, name: str) -> asyncio.Task:
-        """Start the coroutine named `name` as a task, if not already running."""
-        if self.is_running(name):
-            return self.tasks[name]
-        coro_fn = getattr(self, name)
-        task = asyncio.create_task(coro_fn())
-        self.tasks[name] = task
-        return task
-    
-    def cancel(self, name: str) -> None:
+    def cancel(self, method) -> None:
         """Cancel the coroutine named `name`, if currently running."""
-        task = self.tasks.get(name)
+        task = self.tasks.get(method)
         if task is not None and not task.done():
             task.cancel()
-
-    def start_after(self, delay: float, name: str) -> asyncio.Task:
-        """Schedule start(name) to run after `delay`, without blocking the
-        caller. Tracked under "<name>_timer" so the pending delay itself
-        can be cancelled too, e.g. if conditions change before it elapses."""
-        async def _delayed():
-            await asyncio.sleep(delay)
-            self.start(name)
-
-        task = asyncio.create_task(_delayed())
-        self.tasks[f"{name}_timer"] = task
-        return task
 
     async def E1(self):
         await asyncio.sleep(0)
 
     # [Change of state?]
     async def E2(self):
+        await asyncio.sleep(0)
+
         # Set default state to NEUTRAL
         state = STATE.NEUTRAL
 
@@ -70,8 +54,10 @@ class Elevator:
             in_elevator_calls_for_lower_floors = any(self.SHARED_STATE.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR))
 
             if calls_for_higher_floors:
-                   # if yes, go to E3
-                    self.start("E3")
+                    # if yes, go to E3
+                    task = asyncio.create_task(self.E3())
+                    self.tasks[self.E3] = task
+                    await task
                     return
 
             if in_elevator_calls_for_lower_floors:
@@ -88,7 +74,9 @@ class Elevator:
 
             if calls_for_lower_floors:
                    # if yes, go to E3
-                    self.start("E3")
+                    task = asyncio.create_task(self.E3())
+                    self.tasks[self.E3] = task
+                    await task
                     return
 
             if in_elevator_calls_for_higher_floors:
@@ -102,7 +90,9 @@ class Elevator:
         self.SHARED_STATE.CALLS[self.FLOOR] = 0b000
 
         # jump to E3
-        self.start("E3")
+        task = asyncio.create_task(self.E3())
+        self.tasks[self.E3] = task
+        await task
 
     # [Open door]
     async def E3(self):
@@ -113,18 +103,23 @@ class Elevator:
         # 2 Set E9 to start up independently after 300 units of time
         # (This activity may be cancelled in step E6 before it occurs. 
         # If it has already been scheduled and not cancelled, we cancel and reschedule it.)
-        self.cancel("E9")
-        self.cancel("E9_timer")
-        self.start_after(UNIT * 300, "E9")
+        self.cancel(self.E9)
+        task = asyncio.create_task(self.E9(UNIT * 300))
+        self.tasks[self.E9] = task
 
         # 3 Also set elevator activity E5 to start up independently after 76 units of time.
-        self.start_after(UNIT * 76, "E5")
+        task = asyncio.create_task(self.E5(UNIT * 76))
+        self.tasks[self.E5] = task
 
         # 4 Then wait 20 units of time (to simulate opening of the doors) and go to E4
-        self.start_after(UNIT * 20, "E4")
+        task = asyncio.create_task(self.E4(UNIT * 20))
+        self.tasks[self.E4] = task
 
     # [Let people out, in]
-    async def E4(self):
+    async def E4(self, delay=0):
+        if delay:
+            await asyncio.sleep(delay)
+
         # 1 if anyone in the ELEVATOR list has OUT == FLOOR
         elevator_list = self.SHARED_STATE.ELEVATOR
         node = elevator_list.head.left
@@ -142,7 +137,9 @@ class Elevator:
             self.USERS.immediately(found_user, nextinst)
 
             # wait 25 units, and repeat E4
-            self.start_after(UNIT * 25, "E4")
+            self.cancel(self.E4)
+            task = asyncio.create_task(self.E4(UNIT * 25))
+            self.tasks[self.E4] = task
             return
 
         # 2 if no such user exist, but QUEUE[FLOOR] is not empty
@@ -153,7 +150,9 @@ class Elevator:
             self.USERS.immediately(front_person, nextinst)
 
             # wait 25 units, and repeat E4
-            self.start_after(UNIT * 25, "E4")
+            self.cancel(self.E4)
+            task = asyncio.create_task(self.E4(UNIT * 25))
+            self.tasks[self.E4] = task
 
         # 3 if empty
         else:
@@ -170,24 +169,28 @@ class Elevator:
             # await asyncio.sleep(0)
 
     # [Close door]
-    async def E5(self):
-        # NOTE: start_after("E5") doesn't cancel a previous pending "E5" timer
-        # (unlike E9, which E3 explicitly cancels before rescheduling). If E3
-        # reopens the door before an earlier E5 chain resolves, both chains
-        # can independently fire E5 and double-schedule E6. See
-        # test_elevator.py::test_e5_runs_twice_if_scheduled_twice_before_it_fires.
-        # TODO: check whether the real MIX source guards against this.
+    async def E5(self, delay=0):
+        if delay:
+            await asyncio.sleep(delay)
 
         # if D1 != 0: wait 40 units and repeat this step
         # (the doors flutter a little, but they spring open again, since someone is still getting out or in)
         if self.D1 != 0:
-            self.start_after(UNIT * 40, "E5")
+            self.cancel(self.E5)
+            task = asyncio.create_task(self.E5(UNIT * 40))
+            self.tasks[self.E5] = task
         else:  # set D3 = 0 and set elevator to start at step E6 after 20 units of time
             self.D3 = 0
-            self.start_after(UNIT * 20, "E6")
+
+            self.cancel(self.E6)
+            task = asyncio.create_task(self.E6(UNIT * 20))
+            self.tasks[self.E6] = task
 
     # [Prepare to move]
-    async def E6(self):
+    async def E6(self, delay=0):
+        if delay:
+            await asyncio.sleep(delay)
+
         # 1
         # CALLCAR[self.FLOOR] = 0
         # CALLCAR is the last bit of CALLS[self.FLOOR] and we need to set it zero
@@ -210,33 +213,43 @@ class Elevator:
         # 5
         if self.STATE == STATE.NEUTRAL:
             # Go to E1
-            self.start("E1")
+            self.cancel(self.E1)
+            task = asyncio.create_task(self.E1())
+            self.tasks[self.E1] = task
+            await task
             return
 
         # 6
         if self.D2 != 0:
             # cancel E9
-            self.cancel("E9")
+            self.cancel(self.E9)
             return
 
         # 7 
         if self.STATE == STATE.GOINGUP:
             # wait 15 units of time and go to E7
-            self.start_after(UNIT * 15, "E7")
+            self.cancel(self.E7)
+            task = asyncio.create_task(self.E7(UNIT * 15))
+            self.tasks[self.E7] = task
             return
 
         # 8
         if self.STATE == STATE.GOINGDOWN:
             # wait 15 units and go to E8
-            self.start_after(UNIT * 15, "E8")
+            self.cancel(self.E8)
+            task = asyncio.create_task(self.E8(UNIT * 15))
+            self.tasks[self.E8] = task
             return
 
     # [Go up a floor]
-    async def E7(self):
+    async def E7(self, delay=0):
         """
         should be: if not is_callcar_or_callup, then if not self.home_floor, then if not CALLDOWN[FLOOR}: repeat E7
         else: check calls from above, if not: continue. else wait 14 units and go to E2
         """
+        if delay:
+            await asyncio.sleep(delay)
+
         while True:
             # 1 Set FLOOR += 1 and wait 51 units of time
             self.FLOOR += 1
@@ -261,14 +274,19 @@ class Elevator:
             if should_stop:
                 # wait 14 units (for deceleration) and go to E2
                 await asyncio.sleep(UNIT * 14)
-                self.start("E2")
+                self.cancel(self.E2)
+                task = asyncio.create_task(self.E2())
+                self.tasks[self.E2] = task
                 return
 
             # 3
             # otherwise repeat E7
 
     # [Go down a floor]
-    async def E8(self):
+    async def E8(self, delay=0):
+        if delay:
+            await asyncio.sleep(delay)
+    
         while True:
             # 1 Set FLOOR -= 1 and wait 61 units of time
             self.FLOOR -= 1
@@ -293,14 +311,19 @@ class Elevator:
             if should_stop:
                 # wait 23 units (for deceleration) and go to E2
                 await asyncio.sleep(UNIT * 23)
-                self.start("E2")
+                self.cancel(self.E2)
+                task = asyncio.create_task(self.E2())
+                self.tasks[self.E2] = task
                 return
 
             # 3
             # otherwise repeat E8
 
     # [Set inaction indicator]
-    async def E9(self):
+    async def E9(self, delay=0):
+        if delay:
+            await asyncio.sleep(delay)
+
         # set D2 = 0 and perform the DECISION subroutine
         self.D2 = 0
         decision(self, "E9")
