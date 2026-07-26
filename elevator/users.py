@@ -1,9 +1,9 @@
 from __future__ import annotations
 import asyncio
 import random
-from typing import Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
-from main import User, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR
+from main import User, UNIT, CALLUP, CALLDOWN, CALLCAR
 from decision import decision
 
 if TYPE_CHECKING:
@@ -16,25 +16,10 @@ if TYPE_CHECKING:
 # INTERTIME
 # Another User = TIME + INTERTIME
 
-
 class Users:
-    def __init__(self, elevator: Elevator = None, next_user_params: Callable = None):
-        self.elevator = elevator  # set by Elevator.__init__ if not passed here
-
-        # Callable returning (IN, OUT, GIVEUPTIME, INTERTIME) for the next
-        # arrival. Knuth leaves the actual distribution "determined in some
-        # manner that will not be specified here", so this is injectable:
-        # tests can pass a fixed/fake generator instead of depending on
-        # real randomness, and the default below is only a placeholder
-        # guess, not something derived from the book.
-        self.next_user_params = next_user_params or self._default_next_user_params
-
-    def _default_next_user_params(self):
-        IN = random.randint(0, FLOORS - 1)
-        OUT = random.choice([floor for floor in range(FLOORS) if floor != IN])
-        GIVEUPTIME = random.uniform(50, 150) * UNIT
-        INTERTIME = random.expovariate(1 / (100 * UNIT))
-        return IN, OUT, GIVEUPTIME, INTERTIME
+    def __init__(self, elevator: Elevator=None, users=None):
+        self.elevator = elevator
+        self.users = users
 
     def delete_user_task(self, user: User) -> None:
         """Cancel `user`'s single pending activity, if any (Knuth's DELETEW)."""
@@ -44,21 +29,16 @@ class Users:
 
     # [Enter, prepare for successor]
     async def U1(self):
-        IN, OUT, GIVEUPTIME, INTERTIME = self.next_user_params()
-        user = User(self.elevator.SHARED_STATE, IN, OUT, GIVEUPTIME)
-        user.arrival_time = self.elevator.SHARED_STATE.TIME
-
         # Schedule the next arrival independently. Unlike Elevator's
         # E-steps, there's only ever one of these pending at a time, so no
         # cancel-before-reschedule bookkeeping is needed here.
-        async def _next_arrival():
+        for user in self.users:
+            user.arrival_time = self.elevator.SHARED_STATE.TIME
+
+            # This user proceeds to U2 immediately
+            user.task = asyncio.create_task(self.U2(user))
+            INTERTIME = random.expovariate(1 / (10 * UNIT))
             await asyncio.sleep(INTERTIME)
-            await self.U1()
-
-        asyncio.create_task(_next_arrival())
-
-        # This user proceeds to U2 immediately
-        user.task = asyncio.create_task(self.U2(user))
 
     # [Signal and wait]
     async def U2(self, user: User):
@@ -176,3 +156,4 @@ class Users:
     async def U6(self, user: User):
         # delete this user from the ELEVATOR list and from the simulated system
         self.elevator.SHARED_STATE.ELEVATOR.delete_node(user.position_node)
+

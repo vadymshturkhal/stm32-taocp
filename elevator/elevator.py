@@ -12,6 +12,8 @@ if TYPE_CHECKING:
 class Elevator:
     """
     Uses tasks dict as WAIT list analog for fast insert-remove nodes
+
+    Elevator set Users.elevator
     """
     def __init__(self, SHARED_STATE, USERS: "Users", STATE=0):
         self.SHARED_STATE = SHARED_STATE
