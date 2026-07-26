@@ -158,10 +158,11 @@ class Users:
         # 2 set CALLCAR[OUT] = 1
         elevator.SHARED_STATE.CALLS[user.OUT] |= CALLCAR
 
-        # 3 
+        # 3
         # if STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
         # Knuth's style
-        elevator.STATE = user.OUT - elevator.FLOOR
+        if elevator.STATE == 0:
+            elevator.STATE = user.OUT - elevator.FLOOR
         
         # 4
         # and set elevator's activity E5 to be executed after 25 units of time
