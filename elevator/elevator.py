@@ -8,7 +8,7 @@ from decision import decision
 if TYPE_CHECKING:
     from users import Users
 
-
+# FIXME: tasks and cancel
 class Elevator:
     """
     Uses tasks dict as WAIT list analog for fast insert-remove nodes
@@ -142,7 +142,9 @@ class Elevator:
 
         # send the user of this type who has most recently entered, immediately to U6
         if found_user is not None:
-            asyncio.create_task(self.USERS.U6(found_user))
+            # cancel U4
+            self.USERS.delete_user_task(found_user)
+            found_user.task = asyncio.create_task(self.USERS.U6(found_user))
 
             # wait 25 units, and repeat E4
             await asyncio.sleep(UNIT * 25)
@@ -154,7 +156,11 @@ class Elevator:
         if self.SHARED_STATE.QUEUE[self.FLOOR].size != 0:
             # send the front person immediately to U5 instead of U4
             front_person = self.SHARED_STATE.QUEUE[self.FLOOR].head.right.info
-            asyncio.create_task(self.USERS.U5(front_person))
+
+            # cancel U4
+            self.USERS.delete_user_task(front_person)
+            # send to U5
+            front_person.task = asyncio.create_task(self.USERS.U5(front_person))
 
             # wait 25 units, and repeat E4
             await asyncio.sleep(UNIT * 25)
