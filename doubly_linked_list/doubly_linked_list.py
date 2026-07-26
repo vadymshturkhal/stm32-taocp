@@ -41,7 +41,9 @@ class DoublyLinkedList:
         P.right = X.right
         X.right.left = P
         X.right = P
-        
+
+        return P
+
     def insert_right(self, Y):
         # P <= Avail
         P = self.storage_pool.pop()
@@ -49,13 +51,15 @@ class DoublyLinkedList:
 
         # Increment size
         self.size += 1
-        
+
         # Insert P at Front
         X = self.head.left
         P.left = X
         P.right = X.right
         X.right.left = P
         X.right = P
+
+        return P
         
     def pop_left(self):
         if self.head == self.head.right:
