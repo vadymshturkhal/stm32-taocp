@@ -37,7 +37,7 @@ class Users:
 
             # This user proceeds to U2 immediately
             user.task = asyncio.create_task(self.U2(user))
-            INTERTIME = random.expovariate(1 / (10 * UNIT))
+            INTERTIME = random.expovariate(1 / (100 * UNIT))
             await asyncio.sleep(INTERTIME)
 
     # [Signal and wait]
