@@ -3,7 +3,7 @@ import asyncio
 import random
 from typing import Callable, TYPE_CHECKING
 
-from main import User, STATE, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR
+from main import User, GOINGUP, GOINGDOWN, NEUTRAL, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR
 from decision import decision
 
 if TYPE_CHECKING:
@@ -166,12 +166,8 @@ class Users:
 
         # 3 
         # if STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
-        # FIXME using Knuth's style
-        if elevator.STATE == STATE.NEUTRAL:
-            if user.OUT > elevator.FLOOR:
-                elevator.STATE = STATE.GOINGUP
-            elif user.OUT < elevator.FLOOR:
-                elevator.STATE = STATE.GOINGDOWN
+        # Knuth's style
+        elevator.STATE = user.OUT - elevator.FLOOR
         
         # 4
         # and set elevator's activity E5 to be executed after 25 units of time
