@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from elevator import Elevator
 
-from main import GOINGUP, GOINGDOWN, NEUTRAL, FLOORS, INITIAL_FLOOR, UNIT
+from main import FLOORS, INITIAL_FLOOR, UNIT
 
 
 async def decision(elevator: Elevator, caller=None):

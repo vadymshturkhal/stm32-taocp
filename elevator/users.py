@@ -150,15 +150,9 @@ class Users:
         # this user now leaves QUEUE and enters ELEVATOR
         elevator = self.elevator
         elevator.SHARED_STATE.QUEUE[user.IN].delete_node(user.position_node)
-        # NOTE: must explicitly capture insert_right()'s return value here.
-        # Without it, position_node would *coincidentally* still point at
-        # the right node anyway -- delete_node() pushes the freed QUEUE
-        # node onto the storage pool's LIFO free list, and this insert_right()
-        # (no await in between) pops that exact same node right back out.
-        # That's an accident of the pool's LIFO implementation, not a
-        # guarantee insert_right()/delete_node() make -- a future pool
-        # change or an added await between these two lines would silently
-        # break it. Confirmed empirically before adding the explicit capture.
+
+        # NOTE: can avoid user.position_node = as delete_node pushed to stack-based storage_pool
+        # and insert_right gets same node from storage_pool 
         user.position_node = elevator.SHARED_STATE.ELEVATOR.insert_right(user)
 
         # 2 set CALLCAR[OUT] = 1
@@ -180,4 +174,4 @@ class Users:
     # [Get out]
     async def U6(self, user: User):
         # delete this user from the ELEVATOR list and from the simulated system
-        pass
+        self.elevator.SHARED_STATE.ELEVATOR.delete_node(user.position_node)
