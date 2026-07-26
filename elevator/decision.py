@@ -61,4 +61,3 @@ async def decision(elevator: Elevator, caller=None):
         elevator.cancel(elevator.E6)
         task = asyncio.create_task(elevator.E6())
         elevator.tasks[elevator.E6] = task
-    return
