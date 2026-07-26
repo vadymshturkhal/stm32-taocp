@@ -2,7 +2,7 @@ import asyncio
 import inspect
 from typing import TYPE_CHECKING
 
-from main import STATE, INITIAL_FLOOR, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR
+from main import INITIAL_FLOOR, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR
 from decision import decision
 
 if TYPE_CHECKING:
@@ -13,7 +13,7 @@ class Elevator:
     """
     Uses tasks dict as WAIT list analog for fast insert-remove nodes
     """
-    def __init__(self, SHARED_STATE, USERS: "Users", STATE=STATE.NEUTRAL):
+    def __init__(self, SHARED_STATE, USERS: "Users", STATE=0):
         self.SHARED_STATE = SHARED_STATE
         self.USERS = USERS
         USERS.elevator = self
@@ -45,48 +45,38 @@ class Elevator:
 
     # [Change of state?]
     async def E2(self):
-        # Set default state to NEUTRAL
-        state = STATE.NEUTRAL
-
         # 1 STATE is GOINGUP
-        if self.STATE == STATE.GOINGUP:
+        if self.STATE > 0:
             # Are there calls for higher floors?
-            calls_for_higher_floors = any(self.SHARED_STATE.CALLS[j] != 0 for j in range(self.FLOOR + 1, FLOORS))
-
-            # Have passengers in the elevator called for lower floors?
-            in_elevator_calls_for_lower_floors = any(self.SHARED_STATE.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR))
-
-            if calls_for_higher_floors:
+            if any(self.SHARED_STATE.CALLS[j] != 0 for j in range(self.FLOOR + 1, FLOORS)):
                     # if yes, go to E3
                     task = asyncio.create_task(self.E3())
                     self.tasks[self.E3] = task
                     return
 
-            if in_elevator_calls_for_lower_floors:
+            # Have passengers in the elevator called for lower floors?
+            if any(self.SHARED_STATE.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR)):
                 # reverse direction of STATE
-                state = STATE.GOINGDOWN
+                self.STATE = -self.STATE
+            else:
+                self.STATE = 0
 
         # 2 STATE is GOINGDOWN
         else:
-            # Have passengers in the elevator called for higher floors?
-            in_elevator_calls_for_higher_floors = any(self.SHARED_STATE.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR + 1, FLOORS))
-
             # Are there calls for lower floors?
-            calls_for_lower_floors = any(self.SHARED_STATE.CALLS[j] != 0 for j in range(self.FLOOR))
-
-            if calls_for_lower_floors:
+            if any(self.SHARED_STATE.CALLS[j] != 0 for j in range(self.FLOOR)):
                    # if yes, go to E3
                     task = asyncio.create_task(self.E3())
                     self.tasks[self.E3] = task
                     return
 
-            if in_elevator_calls_for_higher_floors:
+            # Have passengers in the elevator called for higher floors?
+            if any(self.SHARED_STATE.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR + 1, FLOORS)):
                 # reverse direction of STATE
-                state = STATE.GOINGUP
-
-        # set STATE to NEUTRAL or reversed
-        self.STATE = state
-
+                self.STATE = -self.STATE
+            else:
+                self.STATE = 0
+    
         # Set all CALL variables for the current FLOOR to zero
         self.SHARED_STATE.CALLS[self.FLOOR] = 0b000
 
@@ -207,12 +197,12 @@ class Elevator:
 
         # 2
         # CALLUP is the first bit of CALLS[self.FLOOR] and we need to set it zero
-        if self.STATE != STATE.GOINGDOWN:
+        if self.STATE >= 0:
             self.SHARED_STATE.CALLS[self.FLOOR] &= ~CALLUP
 
         # 3
         # CALLDOWN is the middle bit of CALLS[self.FLOOR] and we need to set it zero
-        if self.STATE != STATE.GOINGUP:
+        if self.STATE <= 0:
             self.SHARED_STATE.CALLS[self.FLOOR] &= ~CALLDOWN
 
         # 4
@@ -220,7 +210,7 @@ class Elevator:
         await decision(self, self.E6)
 
         # 5
-        if self.STATE == STATE.NEUTRAL:
+        if self.STATE == 0:
             # Go to E1
             self.cancel(self.E1)
             task = asyncio.create_task(self.E1())
@@ -232,8 +222,8 @@ class Elevator:
             # cancel E9
             self.cancel(self.E9)
 
-        # 7 
-        if self.STATE == STATE.GOINGUP:
+        # 7
+        if self.STATE > 0:
             # wait 15 units of time and go to E7
             await asyncio.sleep(UNIT * 15)
             task = asyncio.create_task(self.E7())
@@ -241,7 +231,7 @@ class Elevator:
             return
 
         # 8
-        if self.STATE == STATE.GOINGDOWN:
+        if self.STATE < 0:
             # wait 15 units and go to E8
             await asyncio.sleep(UNIT * 15)
             task = asyncio.create_task(self.E8())

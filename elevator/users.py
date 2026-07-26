@@ -3,7 +3,7 @@ import asyncio
 import random
 from typing import Callable, TYPE_CHECKING
 
-from main import User, GOINGUP, GOINGDOWN, NEUTRAL, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR
+from main import User, FLOORS, UNIT, CALLUP, CALLDOWN, CALLCAR
 from decision import decision
 
 if TYPE_CHECKING:
