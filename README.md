@@ -13,10 +13,11 @@
 - Queue
 - Algorithm T(Topological Sort)
 - Circular List
-- XOR CIrcular List
+- XOR Circular List
 - Algorithm A (Addition of polynomials)
 - Algorithm M (Multiplication of polynomials)
 - Doubly Linked List
+- Elevator discrete simulation program (Python)
 
 ## Setup:
 - Hardware: STM32G431RB (ARM Cortex-M4)
