@@ -35,8 +35,15 @@ async def decision(elevator: Elevator, caller=None):
         j = i
         break
         
-    # no such j exists and invoked by E6
-    if j == -1 and caller == elevator.E6:
+    if j == -1:
+        # no such j exists: only E6 gets the home-floor fallback. For any other
+        # caller Knuth exits the subroutine here -- without this return, j keeps
+        # its -1 sentinel and D4 below computes STATE = -1 - FLOOR, a bogus
+        # downward direction that drives the elevator past floor 0 forever
+        # (reachable via E9 firing while dormant with no calls pending).
+        if caller != elevator.E6:
+            return
+
         j = INITIAL_FLOOR
 
     # D4 [Set STATE]
