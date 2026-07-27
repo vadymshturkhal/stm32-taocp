@@ -253,69 +253,69 @@ class Elevator:
         should be: if not is_callcar_or_callup, then if not self.home_floor, then if not CALLDOWN[FLOOR}: repeat E7
         else: check calls from above, if not: continue. else wait 14 units and go to E2
         """
-        while True:
-            # 1 Set FLOOR += 1 and wait 51 units of time
-            self.FLOOR += 1
-            await asyncio.sleep(UNIT * 51)
+        # 1 Set FLOOR += 1 and wait 51 units of time
+        self.FLOOR += 1
+        await asyncio.sleep(UNIT * 51)
 
-            # 2 Conditions
-            # is CALLCAR[FLOOR] == 1 or CALLUP[FLOOR] == 1
-            is_callcar_or_callup = self.SHARED_STATE.CALLS[self.FLOOR] & (CALLCAR | CALLUP)
+        # 2 Conditions
+        # is CALLCAR[FLOOR] == 1 or CALLUP[FLOOR] == 1
+        is_callcar_or_callup = self.SHARED_STATE.CALLS[self.FLOOR] & (CALLCAR | CALLUP)
 
-            if is_callcar_or_callup:
-                should_stop = True
+        if is_callcar_or_callup:
+            should_stop = True
+        else:
+            # if FLOOR == home_floor or CALLDOWN[FLOOR] == 1
+            at_home_or_down_call = self.FLOOR == self.home_floor or self.SHARED_STATE.CALLS[self.FLOOR] & CALLDOWN
+            if not at_home_or_down_call:
+                should_stop = False
             else:
-                # if FLOOR == home_floor or CALLDOWN[FLOOR] == 1
-                at_home_or_down_call = self.FLOOR == self.home_floor or self.SHARED_STATE.CALLS[self.FLOOR] & CALLDOWN
-                if not at_home_or_down_call:
-                    should_stop = False
-                else:
-                    # and CALLS[j] == 0 for all j > FLOOR
-                    no_calls_above = all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR + 1, FLOORS))
-                    should_stop = no_calls_above
+                # and CALLS[j] == 0 for all j > FLOOR
+                no_calls_above = all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR + 1, FLOORS))
+                should_stop = no_calls_above
 
-            if should_stop:
-                # wait 14 units (for deceleration) and go to E2
-                await asyncio.sleep(UNIT * 14)
-                task = asyncio.create_task(self.E2())
-                self.tasks[self.E2] = task
-                return
+        if should_stop:
+            # wait 14 units (for deceleration) and go to E2
+            await asyncio.sleep(UNIT * 14)
+            self.tasks[self.E2] = asyncio.create_task(self.E2())
+            return
 
-            # 3
-            # otherwise repeat E7
+        # 3
+        # otherwise repeat E7 -- one scheduled activity per floor, mirroring
+        # MIX's "set NEXTINST <- E7 and reschedule" rather than an inner loop
+        self.tasks[self.E7] = asyncio.create_task(self.E7())
 
     # [Go down a floor]
     async def E8(self):
-        while True:
-            # 1 Set FLOOR -= 1 and wait 61 units of time
-            self.FLOOR -= 1
-            await asyncio.sleep(UNIT * 61)
+        # 1 Set FLOOR -= 1 and wait 61 units of time
+        self.FLOOR -= 1
+        await asyncio.sleep(UNIT * 61)
 
-            # 2 Conditions
-            # is CALLCAR[FLOOR] == 1 or CALLDOWN[FLOOR] == 1
-            is_callcar_or_calldown = self.SHARED_STATE.CALLS[self.FLOOR] & (CALLCAR | CALLDOWN)
+        # 2 Conditions
+        # is CALLCAR[FLOOR] == 1 or CALLDOWN[FLOOR] == 1
+        is_callcar_or_calldown = self.SHARED_STATE.CALLS[self.FLOOR] & (CALLCAR | CALLDOWN)
 
-            if is_callcar_or_calldown:
-                should_stop = True
+        if is_callcar_or_calldown:
+            should_stop = True
+        else:
+            # if FLOOR == home_floor or CALLUP[FLOOR] == 1
+            at_home_or_up_call = self.FLOOR == self.home_floor or self.SHARED_STATE.CALLS[self.FLOOR] & CALLUP
+            if not at_home_or_up_call:
+                should_stop = False
             else:
-                # if FLOOR == home_floor or CALLUP[FLOOR] == 1
-                at_home_or_up_call = self.FLOOR == self.home_floor or self.SHARED_STATE.CALLS[self.FLOOR] & CALLUP
-                if not at_home_or_up_call:
-                    should_stop = False
-                else:
-                    # and CALLS[j] == 0 for all j < FLOOR
-                    no_calls_below = all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR))
-                    should_stop = no_calls_below
+                # and CALLS[j] == 0 for all j < FLOOR
+                no_calls_below = all(self.SHARED_STATE.CALLS[j] == 0 for j in range(self.FLOOR))
+                should_stop = no_calls_below
 
-            if should_stop:
-                # wait 23 units (for deceleration) and go to E2
-                await asyncio.sleep(UNIT * 23)
-                task = asyncio.create_task(self.E2())
-                self.tasks[self.E2] = task
-                return
+        if should_stop:
+            # wait 23 units (for deceleration) and go to E2
+            await asyncio.sleep(UNIT * 23)
+            task = asyncio.create_task(self.E2())
+            self.tasks[self.E2] = task
+            return
 
-            # 3
-            # otherwise repeat E8
+        # 3
+        # otherwise repeat E8 -- see the note in E7
+        self.tasks[self.E8] = asyncio.create_task(self.E8())
 
     # [Set inaction indicator]
     async def E9(self, delay=0):

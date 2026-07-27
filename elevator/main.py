@@ -183,23 +183,6 @@ def instrument(shared_state, elevator, obj, names, delayed_names=()):
         setattr(obj, name, make_wrapper())
 
 
-async def watch_floor(shared_state, elevator):
-    """E7/E8 are single calls with an internal per-floor loop, so wrapping
-    the call itself only logs once, at the start of the whole multi-floor
-    trip. Table 1 instead shows a fresh row each time the elevator reaches
-    a new floor while still moving -- watching FLOOR for changes gets that
-    without needing to touch elevator.py's own loop."""
-    last_floor = elevator.FLOOR
-    while True:
-        await asyncio.sleep(UNIT * 5)
-        if elevator.FLOOR != last_floor:
-            step = "E7" if elevator.FLOOR > last_floor else "E8"
-            print(f"{shared_state.TIME:7.0f} {state_letter(elevator.STATE):<2} "
-                  f"{elevator.FLOOR:<3} {flag(elevator.D1)} {flag(elevator.D2)} "
-                  f"{flag(elevator.D3)}  {step:<3} {ACTIONS.get(step, '')}")
-            last_floor = elevator.FLOOR
-
-
 if __name__ == "__main__":
     from users import Users
     from elevator import Elevator
@@ -212,12 +195,12 @@ if __name__ == "__main__":
     elevator = Elevator(shared_state, users)
 
     print(f"{'TIME':>7} {'ST':<2} {'FLR':<3} D1 D2 D3  STEP ACTION")
-    instrument(shared_state, elevator, elevator, ["E1", "E2", "E3", "E4", "E5", "E6", "E9"],
+    instrument(shared_state, elevator, elevator,
+               ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9"],
                delayed_names=["E3", "E5", "E6", "E9"])
     instrument(shared_state, elevator, users, ["U2", "U3", "U4", "U5", "U6"])
 
     async def run_simulation(elevator, users):
-        asyncio.create_task(watch_floor(shared_state, elevator))
         elevator.tasks[elevator.E1] = asyncio.create_task(elevator.E1())
         await users.U1()
 
