@@ -56,7 +56,7 @@ def generate_users(shared_state, MAX_USERS: int) -> list:
         IN = random.randint(0, FLOORS - 1)
         OUT = random.choice([floor for floor in range(FLOORS) if floor != IN])
         GIVEUPTIME = random.uniform(100, 600) * UNIT
-        NAME = f"User{i}"
+        NAME = f"User {i}"
         users.append(User(shared_state, IN, OUT, GIVEUPTIME, NAME))
     return users
 
@@ -117,6 +117,7 @@ ACTIONS = {
     "U4": "User checks give-up",
     "U5": "User gets in",
     "U6": "User gets out",
+    "E9": "Elevator sets inaction indicator",
 }
 
 
@@ -131,6 +132,13 @@ def instrument(shared_state, elevator, obj, names, delayed_names=()):
                     giveup_at = shared_state.TIME + user.GIVEUPTIME / UNIT
                     action = (f"{user.NAME} arrives at floor {user.IN}, destination is {user.OUT}, "
                               f"GIVEUP at {giveup_at:.0f}.")
+                elif name == "E5" and elevator.D1 != 0:
+                    # E5 re-invokes itself every 40 units while D1 stays nonzero
+                    # (someone is still getting in/out), so the doors spring back
+                    # open instead of closing. Table 1 labels those rows "Doors
+                    # flutter." and reserves "doors start to close" for the D1 == 0
+                    # pass -- without the distinction the repeats read as duplicates.
+                    action = "Doors flutter."
                 else:
                     action = ACTIONS.get(name, "")
                     if user is not None:
@@ -196,7 +204,7 @@ if __name__ == "__main__":
     from users import Users
     from elevator import Elevator
 
-    MAX_USERS = 2
+    MAX_USERS = 4
     shared_state = SharedState(MAX_USERS)
     users_list = generate_users(shared_state, MAX_USERS)
 
@@ -204,8 +212,8 @@ if __name__ == "__main__":
     elevator = Elevator(shared_state, users)
 
     print(f"{'TIME':>7} {'ST':<2} {'FLR':<3} D1 D2 D3  STEP ACTION")
-    instrument(shared_state, elevator, elevator, ["E1", "E2", "E3", "E4", "E5", "E6"],
-               delayed_names=["E5"])
+    instrument(shared_state, elevator, elevator, ["E1", "E2", "E3", "E4", "E5", "E6", "E9"],
+               delayed_names=["E3", "E5", "E6", "E9"])
     instrument(shared_state, elevator, users, ["U2", "U3", "U4", "U5", "U6"])
 
     async def run_simulation(elevator, users):

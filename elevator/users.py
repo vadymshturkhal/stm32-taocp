@@ -86,7 +86,7 @@ class Users:
         # 5 
         # and if D2 == 0 or the elevator in its "dormant" position E1, the DESICION performed
         if elevator.D2 == 0 or elevator.is_running(elevator.E1):
-            asyncio.create_task(decision(elevator))
+            decision(elevator)
 
         user.task = asyncio.create_task(self.U3(user))
 

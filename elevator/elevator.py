@@ -87,7 +87,11 @@ class Elevator:
         self.tasks[self.E3] = task
 
     # [Open door]
-    async def E3(self):
+    async def E3(self, delay=0):
+        """delay is using by DECISION subroutine"""
+        if delay:
+            await asyncio.sleep(delay)
+
         # 1 Set D1 and D2 to any nonzero values
         self.D1 = 1
         self.D2 = 1
@@ -191,7 +195,10 @@ class Elevator:
             self.tasks[self.E6] = task
 
     # [Prepare to move]
-    async def E6(self):
+    async def E6(self, delay=0):
+        if delay:
+            await asyncio.sleep(delay)
+    
         # 1
         # CALLCAR[self.FLOOR] = 0
         # CALLCAR is the last bit of CALLS[self.FLOOR] and we need to set it zero
@@ -209,7 +216,7 @@ class Elevator:
 
         # 4
         # Perform the DECISION subroutine
-        await decision(self, self.E6)
+        decision(self, self.E6)
 
         # 5
         if self.STATE == 0:
@@ -317,4 +324,4 @@ class Elevator:
 
         # set D2 = 0 and perform the DECISION subroutine
         self.D2 = 0
-        await decision(self, self.E9)
+        decision(self, self.E9)
