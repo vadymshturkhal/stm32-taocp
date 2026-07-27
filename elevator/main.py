@@ -197,7 +197,7 @@ if __name__ == "__main__":
     print(f"{'TIME':>7} {'ST':<2} {'FLR':<3} D1 D2 D3  STEP ACTION")
     instrument(shared_state, elevator, elevator,
                ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9"],
-               delayed_names=["E3", "E5", "E6", "E9"])
+               delayed_names=["E3", "E4", "E5", "E6", "E9"])
     instrument(shared_state, elevator, users, ["U2", "U3", "U4", "U5", "U6"])
 
     async def run_simulation(elevator, users):

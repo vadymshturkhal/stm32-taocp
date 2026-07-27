@@ -124,7 +124,10 @@ class Elevator:
         self.tasks[self.E4] = task
 
     # [Let people out, in]
-    async def E4(self):
+    async def E4(self, delay=0):
+        if delay:
+            await asyncio.sleep(delay)
+
         # 1 if anyone in the ELEVATOR list has OUT == FLOOR
         elevator_list = self.SHARED_STATE.ELEVATOR
         node = elevator_list.head.left
@@ -143,9 +146,7 @@ class Elevator:
             found_user.task = asyncio.create_task(self.USERS.U6(found_user))
 
             # wait 25 units, and repeat E4
-            await asyncio.sleep(UNIT * 25)
-            task = asyncio.create_task(self.E4())
-            self.tasks[self.E4] = task
+            self.tasks[self.E4] = asyncio.create_task(self.E4(UNIT * 25))
             return
 
         # 2 if no such user exist, but QUEUE[FLOOR] is not empty
@@ -159,9 +160,7 @@ class Elevator:
             front_person.task = asyncio.create_task(self.USERS.U5(front_person))
 
             # wait 25 units, and repeat E4
-            await asyncio.sleep(UNIT * 25)
-            task = asyncio.create_task(self.E4())
-            self.tasks[self.E4] = task
+            self.tasks[self.E4] = asyncio.create_task(self.E4(UNIT * 25))
 
         # 3 if empty
         else:
