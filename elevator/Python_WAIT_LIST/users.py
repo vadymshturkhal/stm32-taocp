@@ -58,6 +58,15 @@ class Users:
                 elevator.D1 = 1
                 elevator.D3 = 0
 
+                # NOTE: no NEXTINST store and no DELETEW here -- both rely on
+                # the state E4 leaves behind when it finds nobody waiting: it
+                # sets D1 <- 0, D3 <- nonzero and returns WITHOUT rescheduling,
+                # so ELEV1 is out of the WAIT list with NEXTINST still E4.
+                # MIX 127-131 leans on exactly the same thing. Should E4 ever
+                # return leaving some other NEXTINST, this silently restarts
+                # the wrong step; should it return still scheduled, immed
+                # double-inserts ELEV1 and corrupts the list. Neither fails
+                # loudly, and the damage shows up here rather than in E4.
                 # JMP IMMED
                 immed(self.shared_state, elevator.ELEV1)
 
