@@ -1,10 +1,4 @@
 import random
-import sys
-import os
-
-# import DoublyLinkedList and STORAGE_POOL
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data_structures"))
-from storage_pool import STORAGE_POOL
 
 
 class ElevatorNode:
@@ -15,12 +9,11 @@ class ElevatorNode:
             self.link = link
 
 class ElevatorDoublyLinkedList:
-    def __init__(self, storage_pool: STORAGE_POOL):
-        self.head = storage_pool.pop()
+    def __init__(self):
+        self.head = ElevatorNode()
         self.head.left = self.head
         self.head.right = self.head
         self.size = 0
-        self.storage_pool = storage_pool
 
     def insert_node_at_front(self, node: ElevatorNode):
         # Increment size
@@ -80,25 +73,21 @@ class WaitInfo:
         self.NEXTINST = NEXTINST
 
 class SharedState:
-    def __init__(self, MAX_USERS: int = 128):
+    def __init__(self):
         self.TIME = 0
         self.CALLS = [0b000] * FLOORS
-        LINKED_LISTS = 3  # heads
-        WAIT_LIST_LEN = 32
-        self.storage_pool = STORAGE_POOL(node_class=ElevatorNode, size=MAX_USERS + LINKED_LISTS + FLOORS + WAIT_LIST_LEN)
-        self.ELEVATOR = ElevatorDoublyLinkedList(self.storage_pool)                      # Users currently riding the car
-        self.QUEUE = [ElevatorDoublyLinkedList(self.storage_pool) for _ in range(FLOORS)]  # Users waiting at each floor
-        self.WAIT_LIST = ElevatorDoublyLinkedList(self.storage_pool)
+        self.ELEVATOR = ElevatorDoublyLinkedList()                      # Users currently riding the car
+        self.QUEUE = [ElevatorDoublyLinkedList() for _ in range(FLOORS)]  # Users waiting at each floor
+        self.WAIT_LIST = ElevatorDoublyLinkedList()
 
-def generate_users(shared_state: SharedState, MAX_USERS: int) -> list:
+def generate_users(shared_state: SharedState, max_users: int) -> list:
     users = []
-    for i in range(MAX_USERS):
+    for i in range(max_users):
         IN = random.randint(0, FLOORS - 1)
         OUT = random.choice([floor for floor in range(FLOORS) if floor != IN])
         GIVEUPTIME = random.randint(200, 800) * UNIT
         NAME = f"User {i}"
-        user = shared_state.storage_pool.pop()
-        user.info = UserInfo(shared_state, IN, OUT, GIVEUPTIME, NAME)
+        user = ElevatorNode(UserInfo(shared_state, IN, OUT, GIVEUPTIME, NAME))
         users.append(user)
     return users
 
@@ -114,10 +103,8 @@ def immed(wait_node: ElevatorNode, shared_state: SharedState):
     shared_state.WAIT_LIST.insert_node_at_front(wait_node)
 
 
-
-
 if __name__ == "__main__":
-    MAX_USERS = 4
-    shared_state = SharedState(MAX_USERS)
-    users_list = generate_users(shared_state, MAX_USERS)
+    max_users = 4
+    shared_state = SharedState()
+    users_list = generate_users(shared_state, max_users)
     print(type(users_list[0]), users_list[0].info, users_list[1].info)
