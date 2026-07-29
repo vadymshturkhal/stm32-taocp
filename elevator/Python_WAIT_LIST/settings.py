@@ -149,6 +149,9 @@ def immed(shared_state: SharedState, wait_node: ElevatorNode):
     # 2 Insert wait_node
     shared_state.WAIT_LIST.insert_node_at_frontw(wait_node)
 
+def insert(list: ElevatorDoublyLinkedList, node: ElevatorNode):
+    list.insert_node_at_rear(node)
+
 def deletew(shared_state: SharedState, wait_node: ElevatorNode):
     """
     Delete wait_node from the WAIT list
