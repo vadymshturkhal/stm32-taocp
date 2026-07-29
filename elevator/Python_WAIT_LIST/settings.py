@@ -175,11 +175,27 @@ def sortin(shared_state: SharedState, C: ElevatorNode):
 
 def hold(shared_state: SharedState, node: ElevatorNode, delay: int):
     """
-    Schedule node to run delay units from now
+    Schedule node to run delay units from now, leaving NEXTINST alone
+
+    U1 needs this variant: USER1 must keep resuming at U1 forever, so its
+    NEXTINST has to survive being rescheduled.
     """
 
     node.info.NEXTTIME = shared_state.TIME + delay
     sortin(shared_state, node)
+
+def holdc(shared_state: SharedState, node: ElevatorNode, delay: int, next_inst):
+    """
+    hold, and set NEXTINST as well
+
+    MIX takes no argument for next_inst: HOLDC stores rJ, the return address,
+    so the node resumes at whatever instruction follows the call -- which is
+    why U4 sits directly after U4A's "LDA GIVEUPTIME / JMP HOLDC". Python has
+    no return address to capture, so the step gets named instead.
+    """
+
+    node.info.NEXTINST = next_inst
+    hold(shared_state, node, delay)
 
 def decision(elevator):
     pass

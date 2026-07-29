@@ -1,5 +1,5 @@
 from settings import Values, UserInfo, WaitInfo, ElevatorNode
-from settings import hold, immed, deletew, decision
+from settings import hold, holdc, immed, deletew, decision
 from settings import CALLUP, CALLDOWN, CALLCAR
 
 
@@ -118,9 +118,8 @@ class Users:
     # [Wait GIVEUPTIME units]
     def U4A(self, user):
         # LDA GIVEUPTIME
-        # HOLDC
-        user.info.NEXTINST = self.U4
-        hold(self.shared_state, node=user, delay=user.info.GIVEUPTIME)
+        # JMP HOLDC
+        holdc(self.shared_state, node=user, delay=user.info.GIVEUPTIME, next_inst=self.U4)
 
     # [Give up]
     def U4(self):
