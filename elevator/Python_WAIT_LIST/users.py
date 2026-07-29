@@ -115,16 +115,21 @@ class Users:
         self.shared_state.QUEUE[user.info.IN].insert_node_at_rear(user)
         self.U4A(user)
 
+    # [Wait GIVEUPTIME units]
     def U4A(self, user):
         # LDA GIVEUPTIME
         # HOLDC
-        pass
+        user.info.NEXTINST = self.U4
+        hold(self.shared_state, node=user, delay=user.info.GIVEUPTIME)
 
+    # [Give up]
     def U4(self):
         pass
 
+    # [Get in]
     def U5(self):
         pass
 
+    # [Get out]
     def U6(self):
         pass
