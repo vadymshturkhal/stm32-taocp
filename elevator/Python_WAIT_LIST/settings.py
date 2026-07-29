@@ -67,11 +67,23 @@ class ElevatorDoublyLinkedList:
         node.left1.right1 = node.right1
         node.right1.left1 = node.left1
 
-    def delete(self, node):
+    def delete_node(self, node):
         """
         Delete node from its list
         """
-        pass
+        if node is None:
+            raise Exception("ElevatorDoublyLinkedList delete_nodew method: trying to delete None node")
+        
+        if node == self.head:
+            raise Exception("ElevatorDoublyLinkedList delete_nodew method: trying to delete Head node")
+
+        # Decrement size
+        self.size -= 1
+
+        P = node.left2
+        Q = node.right2
+        Q.left2 = P
+        P.right2 = Q
 
 class WaitInfo:
     def __init__(self, NEXTTIME=None, NEXTINST=None, INTERTIME=None):
@@ -150,6 +162,12 @@ def deletew(shared_state: SharedState, wait_node: ElevatorNode):
     """
 
     shared_state.WAIT_LIST.delete_nodew(wait_node)
+
+def delete(shared_state: SharedState, user: ElevatorNode):
+    """
+    Delete User from QUEUE
+    """
+    shared_state.QUEUE[user.info.IN].delete_node(user)
 
 def sortin(shared_state: SharedState, C: ElevatorNode):
     """
