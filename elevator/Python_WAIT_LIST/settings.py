@@ -21,53 +21,57 @@ class ElevatorNode:
 class ElevatorDoublyLinkedList:
     def __init__(self):
         self.head = ElevatorNode()
-        self.head.left = self.head
-        self.head.right = self.head
+        self.head.left1 = self.head
+        self.head.right1 = self.head
+        self.head.left2 = self.head
+        self.head.right2 = self.head
         self.size = 0
 
-    def insert_node_at_front(self, node: ElevatorNode):
+    def insert_node_at_frontw(self, node: ElevatorNode):
+        """
+        Insert node into WAIT list using LLINK1 and RLINK1
+        """
         # Increment size
         self.size += 1
         
         # Insert P at Front
         X = self.head
-        node.left = X
-        node.right = X.right
-        X.right.left = node
-        X.right = node
+        node.left1 = X
+        node.right1 = X.right1
+        X.right1.left1 = node
+        X.right1 = node
 
     def insert_node_at_rear(self, node: ElevatorNode):
         # Increment size
         self.size += 1
 
-        Q = self.head.left
-        node.left = Q
-        self.head.left = node
-        Q.right = node
-        node.right = self.head
+        Q = self.head.left2
+        node.left2 = Q
+        self.head.left2 = node
+        Q.right2 = node
+        node.right2 = self.head
 
-    def delete_node(self, node):
+    def delete_nodew(self, node):
+        """
+        Delete node from WAIT list
+        """
         if node is None:
-            raise Exception("Doubly Linked List delete_node method: trying to delete None node")
+            raise Exception("ElevatorDoublyLinkedList delete_nodew method: trying to delete None node")
         
         if node == self.head:
-            raise Exception("Doubly Linked List delete_node method: trying to delete Head node")
+            raise Exception("ElevatorDoublyLinkedList delete_nodew method: trying to delete Head node")
 
         # Decrement size
         self.size -= 1
 
-        node.left.right = node.right
-        node.right.left = node.left
+        node.left1.right1 = node.right1
+        node.right1.left1 = node.left1
 
-    def insert(self, node, temp_node):
+    def delete(self, node):
         """
-        Insert node to the left of temp_node
+        Delete node from its list
         """
-        Q = temp_node.left
-        node.left = Q
-        temp_node.left = node
-        Q.right = node
-        node.right = temp_node
+        pass
 
 class WaitInfo:
     def __init__(self, NEXTTIME=None, NEXTINST=None, INTERTIME=None):
@@ -75,7 +79,7 @@ class WaitInfo:
         self.NEXTINST = NEXTINST
         self.INTERTIME = INTERTIME
 
-class UserInfo:
+class UserInfo(WaitInfo):
     def __init__(self, SHARED_STATE, IN, OUT, GIVEUPTIME, NAME, **kwargs):
         super().__init__(**kwargs)
         self.SHARED_STATE = SHARED_STATE
@@ -131,7 +135,7 @@ def immed(shared_state: SharedState, wait_node: ElevatorNode):
     wait_node.info.NEXTTIME = shared_state.TIME
 
     # 2 Insert wait_node
-    shared_state.WAIT_LIST.insert_node_at_front(wait_node)
+    shared_state.WAIT_LIST.insert_node_at_frontw(wait_node)
 
 def deletew(shared_state: SharedState, wait_node: ElevatorNode):
     """
@@ -145,38 +149,37 @@ def deletew(shared_state: SharedState, wait_node: ElevatorNode):
     NEXTINST intact, ready to be repositioned and reinserted by immed or hold.
     """
 
-    shared_state.WAIT_LIST.delete_node(wait_node)
+    shared_state.WAIT_LIST.delete_nodew(wait_node)
 
 def sortin(shared_state: SharedState, C: ElevatorNode):
     """
-    Sort node C into WAIT list
-    Thee cases: insert C at Front, at Middle, at the Rear
-
-    C is a node the caller owns, not one created here: the elevator's ELEV1,
-    ELEV2 and ELEV3 are fixed records that get inserted and removed over and
-    over, so deletew has to be able to find the same object it scheduled.
+    Sort node C into WAIT list using LLINK1 and RLINK1
     """
 
     wait_list = shared_state.WAIT_LIST
     P = wait_list.head
-    P = P.left  # last node
+    P = P.left1  # last node
 
     # Compare NEXTTIME fields right to left
     while C.info.NEXTTIME < P.info.NEXTTIME:
-        P = P.left
+        P = P.left1
 
     # insert to WAIT list
-    Q = P.right
-    C.right = Q
-    C.left = P
-    P.right = C
-    Q.left = C
+    Q = P.right1
+    C.right1 = Q
+    C.left1 = P
+    P.right1 = C
+    Q.left1 = C
 
     wait_list.size += 1
 
-def hold(shared_state: SharedState, C: ElevatorNode):
-    C.info.NEXTTIME = shared_state.TIME + C.info.INTERTIME
-    return sortin(shared_state, C)
+def hold(shared_state: SharedState, node: ElevatorNode, delay: int):
+    """
+    Schedule node to run delay units from now
+    """
+
+    node.info.NEXTTIME = shared_state.TIME + delay
+    sortin(shared_state, node)
 
 def decision(elevator):
     pass
