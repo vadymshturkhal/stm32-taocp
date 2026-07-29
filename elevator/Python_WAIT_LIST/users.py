@@ -1,6 +1,7 @@
 from settings import Values, UserInfo, WaitInfo, ElevatorNode
-from settings import hold, holdc, immed, deletew, delete, decision
+from settings import hold, holdc, immed, insert, deletew, delete, decision
 from settings import CALLUP, CALLDOWN, CALLCAR
+from settings import UNIT
 
 
 class Users:
@@ -138,7 +139,33 @@ class Users:
 
     # [Get in]
     def U5(self, user):
-        pass
+        elevator = self.shared_state.elevator
+
+        # 1
+        # This user now leaves QUEUE and enters ELEVATOR
+
+        # Delete User from QUEUE[IN]
+        delete(self.shared_state, user)
+
+        # Insert it at right of ELEVATOR
+        insert(self.shared_state.ELEVATOR_LIST, user)
+
+        # 2 Set CALLCAR[OUT] = 1
+        self.shared_state.CALLS[user.info.OUT] |= CALLCAR
+
+        # 3
+        # if STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
+        # Knuth's style
+        if elevator.STATE == 0:
+            elevator.STATE = user.info.OUT - elevator.FLOOR
+
+        # 4
+        # Set elevator's activity E5 to be executed after 25 units of time
+        # Remove action E5 from WAIT list
+        deletew(self.shared_state, elevator.ELEV2)
+
+        # Restart E5 after 25 units
+        elevator.E5A(delay=UNIT * 25)
 
     # [Get out]
     def U6(self, user):

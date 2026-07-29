@@ -1,5 +1,5 @@
 from settings import INITIAL_FLOOR, ElevatorNode, WaitInfo
-
+from settings import holdc
 
 class Elevator:
     def __init__(self, shared_state):
@@ -37,6 +37,10 @@ class Elevator:
     # [Let people out, in]
     def E4(self):
         pass
+
+    def E5A(self, delay):
+        # JMP HOLDC
+        holdc(self.shared_state, node=self.ELEV2, delay=delay, next_inst=self.E5)
 
     # [Close door]
     def E5(self):
