@@ -215,6 +215,14 @@ def holdc(shared_state: SharedState, node: ElevatorNode, delay: int, next_inst):
     node.info.NEXTINST = next_inst
     hold(shared_state, node, delay)
 
+def cycle(shared_state: SharedState):
+    # FIXME: add User count to stop
+    while shared_state.WAIT_LIST.size:
+            C = shared_state.WAIT_LIST.head.right1
+            shared_state.TIME = C.info.NEXTTIME
+            deletew(shared_state, C)
+            C.info.NEXTINST(C)
+
 def decision(elevator):
     pass
     

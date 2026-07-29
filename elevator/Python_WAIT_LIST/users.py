@@ -144,5 +144,3 @@ class Users:
     def U6(self, user):
         # JMP DELETE
         delete(self.shared_state, user)
-
-        # JMP CYCLE
