@@ -1,12 +1,22 @@
 import random
 
 
+FLOORS = 5
+INITIAL_FLOOR = 2
+UNIT = 1  # tenths of seconds
+
+# Masks
+CALLUP = 0b100
+CALLDOWN = 0b010
+CALLCAR = 0b001
+
 class ElevatorNode:
-        def __init__(self, info=None, left=None, right=None, link=None):
+        def __init__(self, info=None, left1=None, right1=None, left2=None, right2=None):
             self.info = info
-            self.left = left
-            self.right = right
-            self.link = link
+            self.left1 = left1
+            self.right1 = right1
+            self.left2 = left2
+            self.right2 = right2
 
 class ElevatorDoublyLinkedList:
     def __init__(self):
@@ -26,6 +36,16 @@ class ElevatorDoublyLinkedList:
         X.right.left = node
         X.right = node
 
+    def insert_node_at_rear(self, node: ElevatorNode):
+        # Increment size
+        self.size += 1
+
+        Q = self.head.left
+        node.left = Q
+        self.head.left = node
+        Q.right = node
+        node.right = self.head
+
     def delete_node(self, node):
         if node is None:
             raise Exception("Doubly Linked List delete_node method: trying to delete None node")
@@ -39,18 +59,25 @@ class ElevatorDoublyLinkedList:
         node.left.right = node.right
         node.right.left = node.left
 
+    def insert(self, node, temp_node):
+        """
+        Insert node to the left of temp_node
+        """
+        Q = temp_node.left
+        node.left = Q
+        temp_node.left = node
+        Q.right = node
+        node.right = temp_node
 
-FLOORS = 5
-INITIAL_FLOOR = 2
-UNIT = 1  # tenths of seconds
-
-# Masks
-CALLUP = 0b100
-CALLDOWN = 0b010
-CALLCAR = 0b001
+class WaitInfo:
+    def __init__(self, NEXTTIME=None, NEXTINST=None, INTERTIME=None):
+        self.NEXTTIME = NEXTTIME
+        self.NEXTINST = NEXTINST
+        self.INTERTIME = INTERTIME
 
 class UserInfo:
-    def __init__(self, SHARED_STATE, IN, OUT, GIVEUPTIME, NAME):
+    def __init__(self, SHARED_STATE, IN, OUT, GIVEUPTIME, NAME, **kwargs):
+        super().__init__(**kwargs)
         self.SHARED_STATE = SHARED_STATE
         self.IN = IN
         self.OUT = OUT
@@ -60,12 +87,6 @@ class UserInfo:
     def __str__(self):
         return (f"\nUserInfo: \n NAME={self.NAME} \n IN={self.IN} \n OUT={self.OUT} \n "
                 f"GIVEUPTIME={self.GIVEUPTIME} \n ")
-
-class WaitInfo:
-    def __init__(self, NEXTTIME=None, NEXTINST=None, INTERTIME=None):
-        self.NEXTTIME = NEXTTIME
-        self.NEXTINST = NEXTINST
-        self.INTERTIME = INTERTIME
 
 class SharedState:
     def __init__(self):
