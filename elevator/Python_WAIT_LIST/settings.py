@@ -166,11 +166,11 @@ def deletew(shared_state: SharedState, wait_node: ElevatorNode):
 
     shared_state.WAIT_LIST.delete_nodew(wait_node)
 
-def delete(shared_state: SharedState, user: ElevatorNode):
+def delete(list: ElevatorDoublyLinkedList, user: ElevatorNode):
     """
     Delete User from QUEUE
     """
-    shared_state.QUEUE[user.info.IN].delete_node(user)
+    list.delete_node(user)
 
 def sortin(shared_state: SharedState, C: ElevatorNode):
     """

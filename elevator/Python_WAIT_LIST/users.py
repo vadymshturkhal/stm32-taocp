@@ -53,7 +53,6 @@ class Users:
             # and if the elevator's next action is step E6 
             # (if the elevator doors are now closing)
 
-            # NOTE : Knuth is using Node ELEV1 and replaced only NEXTINST field
             if elevator.ELEV1.info.NEXTINST == elevator.E6:
                 # reposition it at E3
                 elevator.ELEV1.info.NEXTINST = elevator.E3
@@ -112,8 +111,7 @@ class Users:
         Insert node at right end of QUEUE[IN]
         """
 
-        # Instead of self.shared_state.QUEUE[user.info.IN].insert(user, QUEUE[IN].head)
-        self.shared_state.QUEUE[user.info.IN].insert_node_at_rear(user)
+        insert(self.shared_state.QUEUE[user.info.IN], user)
         self.U4A(user)
 
     # [Wait GIVEUPTIME units]
@@ -145,7 +143,7 @@ class Users:
         # This user now leaves QUEUE and enters ELEVATOR
 
         # Delete User from QUEUE[IN]
-        delete(self.shared_state, user)
+        delete(self.shared_state.QUEUE[user.info.IN], user)
 
         # Insert it at right of ELEVATOR
         insert(self.shared_state.ELEVATOR_LIST, user)
@@ -170,4 +168,4 @@ class Users:
     # [Get out]
     def U6(self, user):
         # JMP DELETE
-        delete(self.shared_state, user)
+        delete(self.shared_state.QUEUE[user.info.IN], user)
