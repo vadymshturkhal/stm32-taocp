@@ -1,5 +1,5 @@
 from settings import Values, UserInfo, WaitInfo, ElevatorNode
-from settings import hold, holdc, immed, deletew, decision
+from settings import hold, holdc, immed, deletew, delete, decision
 from settings import CALLUP, CALLDOWN, CALLCAR
 
 
@@ -122,13 +122,27 @@ class Users:
         holdc(self.shared_state, node=user, delay=user.info.GIVEUPTIME, next_inst=self.U4)
 
     # [Give up]
-    def U4(self):
-        pass
+    def U4(self, user):
+        elevator = self.shared_state.elevator
+
+        if user.info.IN - elevator.FLOOR != 0:
+            self.U6(user)
+            return
+
+        if elevator.D1 != 0:
+            # JANZ U4A
+            self.U4A(user)
+            return
+
+        self.U6(user)
 
     # [Get in]
-    def U5(self):
+    def U5(self, user):
         pass
 
     # [Get out]
-    def U6(self):
-        pass
+    def U6(self, user):
+        # JMP DELETE
+        delete(self.shared_state, user)
+
+        # JMP CYCLE
