@@ -1,4 +1,4 @@
-from settings import Values, UserInfo, ElevatorNode, WaitInfo
+from settings import Values, UserInfo, WaitInfo, ElevatorNode
 from settings import hold, immed, deletew, decision
 from settings import CALLUP, CALLDOWN, CALLCAR
 
@@ -8,21 +8,37 @@ class Users:
         self.shared_state = shared_state
         self.user_id = 0  # not in Coroutine U
 
+        # USER1 is to the users what ELEV1/ELEV2/ELEV3 are to the elevator: a
+        # fixed node standing for one activity, here U1. It re-holds itself on
+        # every U1, so once started it keeps the arrivals coming.
+        self.USER1 = ElevatorNode(info=WaitInfo(NEXTINST=self.U1))
+
+    def start(self):
+        """
+        USER1 node represents action U1 and it is initially the sole entry in the WAIT list
+        """
+        immed(self.shared_state, self.USER1)
+
     # [Enter, prepare for successor]
-    def U1(self):
-        # 1 compute VALUES
+    def U1(self, C: ElevatorNode):
+        # 1 JMP VALUES
         values = Values()
-        user_info = UserInfo(self.shared_state, values.IN, values.OUT, values.GIVEUPTIME, NAME=f"User {self.user_id}")
+
+        # 2 
+        # LDA INTERTIME
+        # JMP HOLD
+        # Put node in WAIT, delay INTERTIME
+        hold(self.shared_state, node=C, delay=values.INTERTIME)
+
+        # 3 Create User
+        user_info = UserInfo(self.shared_state, values.IN, values.OUT, values.GIVEUPTIME,
+                             NAME=f"User {self.user_id}")
         user = ElevatorNode(info=user_info)
 
-        # 2 put node in WAIT list with INTERTIME delay
-        wait_info = WaitInfo(NEXTINST=self.U1, INTERTIME=values.INTERTIME)
-        hold(self.shared_state, ElevatorNode(info=wait_info))
-
-        # increment user_id 
+        # 4 increment user_id (not in Coroutine U)
         self.user_id += 1
 
-        # to U2
+        # 5 to U2, with C now the new node
         self.U2(user)
 
     # [Signal and wait]
@@ -91,6 +107,17 @@ class Users:
 
     # [Enter queue]
     def U3(self, user: ElevatorNode):
+        """
+        Insert node at right end of QUEUE[IN]
+        """
+
+        # Instead of self.shared_state.QUEUE[user.info.IN].insert(user, QUEUE[IN].head)
+        self.shared_state.QUEUE[user.info.IN].insert_node_at_rear(user)
+        self.U4A(user)
+
+    def U4A(self, user):
+        # LDA GIVEUPTIME
+        # HOLDC
         pass
 
     def U4(self):
