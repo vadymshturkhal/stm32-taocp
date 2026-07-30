@@ -1,5 +1,6 @@
-from settings import INITIAL_FLOOR, ElevatorNode, WaitInfo
-from settings import holdc
+from settings import ElevatorNode, WaitInfo
+from settings import holdc, cycle1, deletew
+from settings import INITIAL_FLOOR, FLOORS, CALLUP, CALLDOWN, CALLCAR
 
 class Elevator:
     def __init__(self, shared_state):
@@ -16,13 +17,61 @@ class Elevator:
         self.ELEV2 = ElevatorNode(info=WaitInfo(NEXTINST=self.E5))  # Represents the independent elevator action at E5
         self.ELEV3 = ElevatorNode(info=WaitInfo(NEXTINST=self.E9))  # Represents the independent elevator action at E9
 
+    def E1A(self):
+        """
+        Set NEXTINST = E1 and go to CYCLE
+        """
+        # JMP CYCLE1
+        cycle1(self.ELEV1, self.E1)
+
     # [Wait for call]
-    def E1(self):
+    def E1(self, node):
         pass
+
+    def E2A(self, node, delay):
+        # JMP HOLDC
+        holdc(self.shared_state, node, delay, self.E2)
 
     # [Change of state?]
     def E2(self):
-        pass
+        # 1 STATE is GOINGUP
+        if self.STATE > 0:
+            # Are there calls for higher floors?
+            if any(self.shared_state.CALLS[j] != 0 for j in range(self.FLOOR + 1, FLOORS)):
+                    # if yes, go to E3
+                    self.E3()
+                    return
+
+            # Have passengers in the elevator called for lower floors?
+            if any(self.shared_state.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR)):
+                # reverse direction of STATE
+                self.STATE = -self.STATE
+            else:
+                self.STATE = 0
+
+        # 2 STATE is GOINGDOWN
+        elif self.STATE < 0:
+            # Are there calls for lower floors?
+            if any(self.shared_state.CALLS[j] != 0 for j in range(self.FLOOR)):
+                   # if yes, go to E3
+                    self.E3()
+                    return
+
+            # Have passengers in the elevator called for higher floors?
+            if any(self.shared_state.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR + 1, FLOORS)):
+                # reverse direction of STATE
+                self.STATE = -self.STATE
+            else:
+                self.STATE = 0
+
+        else:  # STATE == NEUTRAL
+            raise Exception("Elevator.E2: Trying to change NEUTRAL state")
+    
+        # Set all CALL variables for the current FLOOR to zero
+        self.shared_state.CALLS[self.FLOOR] = 0b000
+
+        # jump to E3
+        self.E3()
 
     # [Open door]
     def E3(self):
@@ -43,6 +92,13 @@ class Elevator:
     # [Prepare to move]
     def E6(self):
         pass
+
+    def E6B(self):
+        if self.STATE == 0:
+            # go to E1 and wait
+            # NOTE: can skip elf.E1A()
+            self.E1A()
+            return
 
     # [Go up a floor]
     def E7(self):
