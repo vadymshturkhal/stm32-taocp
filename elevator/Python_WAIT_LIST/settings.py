@@ -25,15 +25,11 @@ class ElevatorDoublyLinkedList:
         self.head.right1 = self.head
         self.head.left2 = self.head
         self.head.right2 = self.head
-        self.size = 0
 
     def insert_node_at_frontw(self, node: ElevatorNode):
         """
         Insert node into WAIT list using LLINK1 and RLINK1
-        """
-        # Increment size
-        self.size += 1
-        
+        """   
         # Insert P at Front
         X = self.head
         node.left1 = X
@@ -42,9 +38,6 @@ class ElevatorDoublyLinkedList:
         X.right1 = node
 
     def insert_node_at_rear(self, node: ElevatorNode):
-        # Increment size
-        self.size += 1
-
         Q = self.head.left2
         node.left2 = Q
         self.head.left2 = node
@@ -61,9 +54,6 @@ class ElevatorDoublyLinkedList:
         if node == self.head:
             raise Exception("ElevatorDoublyLinkedList delete_nodew method: trying to delete Head node")
 
-        # Decrement size
-        self.size -= 1
-
         node.left1.right1 = node.right1
         node.right1.left1 = node.left1
 
@@ -76,9 +66,6 @@ class ElevatorDoublyLinkedList:
         
         if node == self.head:
             raise Exception("ElevatorDoublyLinkedList delete_nodew method: trying to delete Head node")
-
-        # Decrement size
-        self.size -= 1
 
         P = node.left2
         Q = node.right2
@@ -166,11 +153,15 @@ def deletew(shared_state: SharedState, wait_node: ElevatorNode):
 
     shared_state.WAIT_LIST.delete_nodew(wait_node)
 
-def delete(list: ElevatorDoublyLinkedList, user: ElevatorNode):
+def delete(C: ElevatorNode):
     """
-    Delete User from QUEUE
+    Delete node C from its list
     """
-    list.delete_node(user)
+
+    P = C.left2
+    Q = C.right2
+    Q.left2 = P
+    P.right2 = Q
 
 def sortin(shared_state: SharedState, C: ElevatorNode):
     """
@@ -191,8 +182,6 @@ def sortin(shared_state: SharedState, C: ElevatorNode):
     C.left1 = P
     P.right1 = C
     Q.left1 = C
-
-    wait_list.size += 1
 
 def hold(shared_state: SharedState, node: ElevatorNode, delay: int):
     """
@@ -220,7 +209,7 @@ def holdc(shared_state: SharedState, node: ElevatorNode, delay: int, next_inst):
 
 def cycle(shared_state: SharedState):
     # FIXME: add User count to stop
-    while shared_state.WAIT_LIST.size:
+    while True:
             C = shared_state.WAIT_LIST.head.right1
             shared_state.TIME = C.info.NEXTTIME
             deletew(shared_state, C)

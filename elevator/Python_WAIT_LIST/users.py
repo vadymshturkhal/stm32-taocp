@@ -143,7 +143,7 @@ class Users:
         # This user now leaves QUEUE and enters ELEVATOR
 
         # Delete User from QUEUE[IN]
-        delete(self.shared_state.QUEUE[user.info.IN], user)
+        delete(user)
 
         # Insert it at right of ELEVATOR
         insert(self.shared_state.ELEVATOR_LIST, user)
@@ -168,4 +168,4 @@ class Users:
     # [Get out]
     def U6(self, user):
         # JMP DELETE
-        delete(self.shared_state.QUEUE[user.info.IN], user)
+        delete(user)
