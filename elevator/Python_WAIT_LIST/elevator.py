@@ -1,5 +1,5 @@
 from settings import ElevatorNode, WaitInfo
-from settings import holdc, cycle1, deletew
+from settings import holdc, hold, cycle1, deletew
 from settings import INITIAL_FLOOR, FLOORS, CALLUP, CALLDOWN, CALLCAR
 
 class Elevator:
@@ -75,7 +75,31 @@ class Elevator:
 
     # [Open door]
     def E3(self):
-        pass
+        # if activity already scheduled: remove it from WAIT list
+        # NOTE: always True
+        if self.ELEV3.info.NEXTINST is not None:
+            deletew(self.shared_state, self.ELEV3)
+
+        # schedule activity E9 after 300 units
+        delay = 300
+        hold(self.shared_state, self.ELEV3, delay)
+
+        # schedule activity E5 after 76 units
+        delay = 76
+        hold(self.shared_state, self.ELEV2, delay)
+
+        # set D2 to nonzero
+        self.D2 = 1
+
+        # set D1 to nonzero
+        self.D1 = 1
+
+        delay = 20
+        self.E4A(self.ELEV1, delay)
+
+    def E4A(self, node, delay):
+        # JMP HOLDC
+        holdc(self.shared_state, node, delay, self.E4)
 
     # [Let people out, in]
     def E4(self):
