@@ -1,5 +1,5 @@
 from settings import ElevatorNode, WaitInfo
-from settings import holdc, hold, cycle1, deletew
+from settings import holdc, hold, cycle1, deletew, immed
 from settings import INITIAL_FLOOR, FLOORS, CALLUP, CALLDOWN, CALLCAR
 
 class Elevator:
@@ -25,7 +25,7 @@ class Elevator:
         cycle1(self.ELEV1, self.E1)
 
     # [Wait for call]
-    def E1(self, node):
+    def E1(self, contract_node=None):
         pass
 
     def E2A(self, node, delay):
@@ -33,7 +33,7 @@ class Elevator:
         holdc(self.shared_state, node, delay, self.E2)
 
     # [Change of state?]
-    def E2(self):
+    def E2(self, contract_node=None):
         # 1 STATE is GOINGUP
         if self.STATE > 0:
             # Are there calls for higher floors?
@@ -74,7 +74,7 @@ class Elevator:
         self.E3()
 
     # [Open door]
-    def E3(self):
+    def E3(self, contract_node=None):
         # if activity already scheduled: remove it from WAIT list
         # NOTE: always True
         if self.ELEV3.info.NEXTINST is not None:
@@ -95,26 +95,85 @@ class Elevator:
         self.D1 = 1
 
         delay = 20
-        self.E4A(self.ELEV1, delay)
+        self.E4A(delay)
 
-    def E4A(self, node, delay):
+    def E4A(self, delay):
         # JMP HOLDC
-        holdc(self.shared_state, node, delay, self.E4)
+        holdc(self.shared_state, self.ELEV1, delay, self.E4)
 
     # [Let people out, in]
-    def E4(self):
-        pass
+    def E4(self, contract_node=None):
+        # C = LOC(ELEVATOR)
+        C = self.shared_state.ELEVATOR_LIST.head
+        C = C.left2
+
+        # Search ELEVATOR list from left to right
+        while C != self.shared_state.ELEVATOR_LIST.head:
+            # Compare OUT(C) with FLOOR
+
+            # If not equal: continue
+            if C.info.OUT != self.FLOOR:
+                C = C.left2
+                continue
+
+            # Otherwise prepare to send User to U6:
+            # Set NEXTINST(C)
+            C.info.NEXTINST = self.shared_state.users.U6
+
+            # Put user at front of the WAIT list
+            immed(self.shared_state, C)
+
+            # Wait 25 units and repeat E4A
+            delay = 25
+            self.E4A(delay)
+    
+            # Return to simulate other events
+            return
+
+        # If C == ELEVATOR_LIST.head: search is complete
+        C = self.shared_state.QUEUE[self.FLOOR].head
+        C = C.right2
+
+        if C != self.shared_state.QUEUE[self.FLOOR].head:
+            # Cancel action U4 for this User
+            deletew(self.shared_state, C)
+
+            # Prepare to replace U4 by U5
+            nextinst = self.shared_state.users.U5
+
+            # Set NEXTINST(C)
+            C.info.NEXTINST = nextinst
+
+            # Put User at front of the WAIT list
+            immed(self.shared_state, C)
+
+            # Wait 25 units and repeat E4
+            delay = 25
+            self.E4A(delay)
+
+            # Return to simulate other events
+            return
+
+        # if C == self.shared_state.QUEUE[self.FLOOR].head: QUEUE is empty
+
+        # Set D1 = 0
+        self.D1 = 0
+
+        # Set D3 nonzero
+        self.D3 = 1
+            
+        # Search is complete
 
     def E5A(self, delay):
         # JMP HOLDC
         holdc(self.shared_state, node=self.ELEV2, delay=delay, next_inst=self.E5)
 
     # [Close door]
-    def E5(self):
+    def E5(self, contract_node=None):
         pass
 
     # [Prepare to move]
-    def E6(self):
+    def E6(self, contract_node=None):
         pass
 
     def E6B(self):
@@ -125,13 +184,13 @@ class Elevator:
             return
 
     # [Go up a floor]
-    def E7(self):
+    def E7(self, contract_node=None):
         pass
 
     # [Go down a floor]
-    def E8(self):
+    def E8(self, contract_node=None):
         pass
 
     # [Set inaction indicator]
-    def E9(self):
+    def E9(self, contract_node=None):
         pass
