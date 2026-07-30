@@ -12,15 +12,9 @@ class Elevator:
         self.D3 = 0  # a variable that is zero except when the doors are open but nobody is getting in or out of the elevator
         self.home_floor = INITIAL_FLOOR
 
-        # The elevator needs three WAIT list nodes because it can have three
-        # activities pending at once: the main step sequence plus the E5 and E9
-        # timers that E3 starts up independently. One node carries a single
-        # NEXTTIME/NEXTINST pair, so it could never represent all three.
-        # A node sitting outside the WAIT list means that activity isn't
-        # scheduled -- which is how "cancel activity E9" is expressed.
-        self.ELEV1 = ElevatorNode(info=WaitInfo(NEXTINST=self.E1))  # main sequence, starts dormant
-        self.ELEV2 = ElevatorNode(info=WaitInfo(NEXTINST=self.E5))  # close-door timer
-        self.ELEV3 = ElevatorNode(info=WaitInfo(NEXTINST=self.E9))  # inaction indicator timer
+        self.ELEV1 = ElevatorNode(info=WaitInfo(NEXTINST=self.E1))  # This node represents the elevator actions, except for E5 and E9
+        self.ELEV2 = ElevatorNode(info=WaitInfo(NEXTINST=self.E5))  # Represents the independent elevator action at E5
+        self.ELEV3 = ElevatorNode(info=WaitInfo(NEXTINST=self.E9))  # Represents the independent elevator action at E9
 
     # [Wait for call]
     def E1(self):
