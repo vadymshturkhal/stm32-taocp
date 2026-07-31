@@ -1,5 +1,5 @@
 from settings import ElevatorNode, WaitInfo
-from settings import holdc, hold, cycle1, deletew, immed
+from settings import holdc, hold, cycle1, deletew, immed, decision
 from settings import INITIAL_FLOOR, FLOORS, CALLUP, CALLDOWN, CALLCAR
 
 class Elevator:
@@ -77,7 +77,7 @@ class Elevator:
     def E3(self, contract_node=None):
         # if activity already scheduled: remove it from WAIT list
         # FIXME: always True?
-        if self.ELEV3.left is not None:
+        if self.ELEV3.left1 is not None:
             deletew(self.shared_state, self.ELEV3)
 
         # schedule activity E9 after 300 units
@@ -188,14 +188,25 @@ class Elevator:
 
     # [Prepare to move]
     def E6(self, contract_node=None):
-        pass
+        # If STATE != GOINGDOWN: CALLUP and CALLCAR on this floor are reset
+        # J5N *+2 / STZ CALL,4(1:3)
+        if self.STATE >= 0:
+            self.shared_state.CALLS[self.FLOOR] &= ~(CALLUP | CALLCAR)
+
+        # If STATE != GOINGUP: reset CALLCAR and CALLDOWN
+        # J5P *+2 / STZ CALL,4(3:5)
+        if self.STATE <= 0:
+            self.shared_state.CALLS[self.FLOOR] &= ~(CALLCAR | CALLDOWN)
+            
+        # Perform DECISIONS subroutine
+        # J5Z DECISION
+        if self.STATE == 0:
+            decision(self.shared_state, self, self.E6)
+
+        self.E6B()
 
     def E6B(self):
-        if self.STATE == 0:
-            # go to E1 and wait
-            # NOTE: can skip elf.E1A()
-            self.E1A()
-            return
+        pass
 
     # [Go up a floor]
     def E7(self, contract_node=None):
