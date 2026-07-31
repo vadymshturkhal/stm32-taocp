@@ -99,6 +99,7 @@ class SharedState:
         self.QUEUE = [ElevatorDoublyLinkedList() for _ in range(FLOORS)]  # Users waiting at each floor
         self.WAIT_LIST = ElevatorDoublyLinkedList()
         self.elevator = None
+        self.users = None
 
         # set NEXTTIME of head node to 0
         self.WAIT_LIST.head.info = WaitInfo(NEXTTIME=0)
@@ -215,9 +216,71 @@ def cycle(shared_state: SharedState):
             deletew(shared_state, C)
             C.info.NEXTINST(C)
 
-def decision(elevator):
-    pass
+def cycle1(node: ElevatorNode, nextinst):
+    """
+    Set NEXTINST of node
+    """
+    if not callable(nextinst):
+        raise Exception("cycle1: nextinst must be a step, not a node")
     
+    node.info.NEXTINST = nextinst
+    # JMP CYCLE
+
+def decision(shared_state: SharedState, elevator, caller):
+    # D1. Decision necessary?
+    if elevator.STATE != 0:
+        return
+
+    # D2. Should door open?
+    if elevator.ELEV1.info.NEXTINST == elevator.E1 and shared_state.CALLS[INITIAL_FLOOR] != 0:
+        # Wait 20 units of time
+        delay = 20
+
+        # Schedule E3
+        elevator.ELEV1.info.NEXTINST = elevator.E3
+        hold(shared_state, elevator.ELEV1, delay)
+        return
+
+    # D3. Any calls
+    # Search for a nonzero call variable
+    j = -1
+    for i in range(FLOORS):
+        if i == elevator.FLOOR:
+            continue
+
+        if elevator.shared_state.CALLS[i] == 0:
+            continue
+
+        j = i
+        break
+
+    # All CALL[j], j != FLOOR, are zero
+    if j == -1:
+        # Is caller E6B?
+        if caller == elevator.E6B:
+            # If yes: set j = 2
+            j = INITIAL_FLOOR
+        else:
+            return
+
+    # D4. Set STATE
+    # STATE = j - FLOOR
+    elevator.STATE = j - elevator.FLOOR
+
+    # JANZ 1B (j = FLOOR not allowed ingeneral): continue in the upper range loop
+
+    # D5. Elevator dormant?
+    # Jump if not at E1 or j == 2
+    if elevator.ELEV1.info.NEXTINST != elevator.E1 or elevator.STATE == 0:
+        return
+
+    # Otherwise schedule E6
+    # Wait 20 units of time (same as in D2)
+    delay = 20
+    elevator.ELEV1.info.NEXTINST = elevator.E6
+    hold(shared_state, elevator.ELEV1, delay)
+
+
 if __name__ == "__main__":
     max_users = 4
     shared_state = SharedState()
