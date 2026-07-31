@@ -206,8 +206,26 @@ class Elevator:
         self.E6B()
 
     def E6B(self):
-        pass
+        # If STATE == NEUTRAL: go to E1 and wait
+        if self.STATE == 0:
+            self.E1A()  # NOTE: can skip this line
+            return
 
+        if self.D2 != 0:
+            # Cancel activity E9
+            deletew(self.shared_state, self.ELEV3)
+
+        # Wait 15 units of time
+        delay = 15
+
+        # If STATE == GOINGDOWN, to to E8
+        if self.STATE < 0:
+            holdc(self.shared_state, self.ELEV1, delay, self.E8)
+            return
+
+        # Else go to E7
+        holdc(self.shared_state, self.ELEV1, delay, self.E7)
+        
     # [Go up a floor]
     def E7(self, contract_node=None):
         pass
@@ -218,4 +236,5 @@ class Elevator:
 
     # [Set inaction indicator]
     def E9(self, contract_node=None):
-        pass
+        # Set D2 = 0
+        self.D2 = 0

@@ -57,6 +57,9 @@ class ElevatorDoublyLinkedList:
         node.left1.right1 = node.right1
         node.right1.left1 = node.left1
 
+        # NOTE: Clear links (not in MIX)
+        node.left1 = node.right1 = None
+
     def delete_node(self, node):
         """
         Delete node from its list
