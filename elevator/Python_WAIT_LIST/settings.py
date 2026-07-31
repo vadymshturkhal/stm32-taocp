@@ -257,7 +257,8 @@ def decision(shared_state: SharedState, elevator, caller):
     # All CALL[j], j != FLOOR, are zero
     if j == -1:
         # Is caller E6B?
-        if caller == elevator.E6B:
+        # NOTE: I decided to use E6 as caller is E6, and MIX version uses E6B
+        if caller == elevator.E6:
             # If yes: set j = 2
             j = INITIAL_FLOOR
         else:
