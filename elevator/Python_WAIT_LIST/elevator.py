@@ -76,8 +76,8 @@ class Elevator:
     # [Open door]
     def E3(self, contract_node=None):
         # if activity already scheduled: remove it from WAIT list
-        # NOTE: always True
-        if self.ELEV3.info.NEXTINST is not None:
+        # FIXME: always True?
+        if self.ELEV3.left is not None:
             deletew(self.shared_state, self.ELEV3)
 
         # schedule activity E9 after 300 units
@@ -170,7 +170,21 @@ class Elevator:
 
     # [Close door]
     def E5(self, contract_node=None):
-        pass
+        # Is D1 == 0?
+
+        # If not, people are getting in or out
+        if self.D1 != 0:
+            # Wait 40 units, repeat E5
+            delay = 40
+            self.E5A(delay)
+            return
+
+        # If D1 == 0: set D3 = 0
+        self.D3 = 0
+
+        # Wait 20 units, then go to E6
+        delay = 20
+        holdc(self.shared_state, self.ELEV1, delay, self.E6)
 
     # [Prepare to move]
     def E6(self, contract_node=None):
