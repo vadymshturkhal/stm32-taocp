@@ -9,6 +9,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from doubly_linked_list import DoublyLinkedList, DoublyNode
 from storage_pool import STORAGE_POOL
 
+# Running this file directly (rather than `python -m elevator_async.main`)
+# only puts this file's own directory on sys.path, not its parent -- so the
+# package-qualified imports in __main__ below (elevator_async.users, etc.)
+# can't resolve without this.
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+
 
 """
 User
@@ -184,8 +190,8 @@ def instrument(shared_state, elevator, obj, names, delayed_names=()):
 
 
 if __name__ == "__main__":
-    from users import Users
-    from elevator import Elevator
+    from elevator_async.users import Users
+    from elevator_async.elevator import Elevator
 
     MAX_USERS = 4
     shared_state = SharedState(MAX_USERS)
@@ -201,10 +207,10 @@ if __name__ == "__main__":
     instrument(shared_state, elevator, users, ["U2", "U3", "U4", "U5", "U6"])
 
     async def run_simulation(elevator, users):
-        elevator.tasks[elevator.E1] = asyncio.create_task(elevator.E1())
+        elevator.ELEV1.start(elevator.E1(), elevator.E1)
         await users.U1()
 
-        while not (elevator.is_running(elevator.E1)
+        while not (elevator.at(elevator.E1)
                 and elevator.SHARED_STATE.ELEVATOR.size == 0
                 and all(q.size == 0 for q in elevator.SHARED_STATE.QUEUE)):
             await asyncio.sleep(UNIT)

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from elevator import Elevator
+    from elevator_async.elevator import Elevator
 
-from main import FLOORS, INITIAL_FLOOR, UNIT
+from elevator_async.main import FLOORS, INITIAL_FLOOR, UNIT
 
 
 def decision(elevator: Elevator, caller=None):
@@ -14,12 +13,10 @@ def decision(elevator: Elevator, caller=None):
         return
 
     # D2 [Should door open?]
-    if elevator.is_running(elevator.E1) and elevator.SHARED_STATE.CALLS[INITIAL_FLOOR] != 0:
+    if elevator.at(elevator.E1) and elevator.SHARED_STATE.CALLS[INITIAL_FLOOR] != 0:
         # if elevator positioned at E1: after 20 units of time start E3 and exit
-        elevator.cancel(elevator.E1)
-        elevator.cancel(elevator.E3)
-        task = asyncio.create_task(elevator.E3(UNIT * 20))
-        elevator.tasks[elevator.E3] = task
+        # start() supersedes the dormant E1 activity on the same node
+        elevator.ELEV1.start(elevator.E3(UNIT * 20), elevator.E3)
         return
 
     # D3 [Any calls?]
@@ -51,9 +48,6 @@ def decision(elevator: Elevator, caller=None):
     elevator.STATE = j - elevator.FLOOR
 
     # D5 [Elevator dormant]
-    if elevator.is_running(elevator.E1) and elevator.STATE != 0:
+    if elevator.at(elevator.E1) and elevator.STATE != 0:
         # Prepare to move
-        elevator.cancel(elevator.E1)
-        elevator.cancel(elevator.E6)
-        task = asyncio.create_task(elevator.E6(UNIT * 20))
-        elevator.tasks[elevator.E6] = task
+        elevator.ELEV1.start(elevator.E6(UNIT * 20), elevator.E6)

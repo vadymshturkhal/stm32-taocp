@@ -3,11 +3,11 @@ import asyncio
 import random
 from typing import TYPE_CHECKING
 
-from main import User, UNIT, CALLUP, CALLDOWN, CALLCAR
-from decision import decision
+from elevator_async.main import User, UNIT, CALLUP, CALLDOWN, CALLCAR
+from elevator_async.decision import decision
 
 if TYPE_CHECKING:
-    from elevator import Elevator
+    from elevator_async.elevator import Elevator
 
 # U1
 # IN
@@ -54,13 +54,14 @@ class Users:
             # 2 
             # and if the elevator's next action is step E6 
             # (if the elevator doors are now closing): 
-            if elevator.is_running(elevator.E6):
+            if elevator.at(elevator.E6):
                 # send the elevator immediately to E3 and cancel its activity E6
                 # (this means that the doors will open again before the elevator moves)
-                elevator.cancel(elevator.E6)
-                elevator.cancel(elevator.E3)
-                task = asyncio.create_task(elevator.E3())
-                elevator.tasks[elevator.E3] = task
+                elevator.ELEV1.start(elevator.E3(), elevator.E3)
+
+                # the special cases skip steps 4 and 5, not U3 -- reopening the
+                # doors is pointless unless this user is in QUEUE[IN] for E4 to find
+                user.task = asyncio.create_task(self.U3(user))
                 return
 
             # 3 
@@ -70,9 +71,9 @@ class Users:
                 elevator.D3 = 0
                 elevator.D1 = 1
 
-                elevator.cancel(elevator.E4)
-                task = asyncio.create_task(elevator.E4())
-                elevator.tasks[elevator.E4] = task
+                elevator.ELEV1.start(elevator.E4(), elevator.E4)
+
+                user.task = asyncio.create_task(self.U3(user))
                 return
 
         # 4 
@@ -85,7 +86,7 @@ class Users:
 
         # 5 
         # and if D2 == 0 or the elevator in its "dormant" position E1, the DESICION performed
-        if elevator.D2 == 0 or elevator.is_running(elevator.E1):
+        if elevator.D2 == 0 or elevator.at(elevator.E1):
             decision(elevator)
 
         user.task = asyncio.create_task(self.U3(user))
@@ -146,9 +147,8 @@ class Users:
         
         # 4
         # and set elevator's activity E5 to be executed after 25 units of time
-        elevator.cancel(elevator.E5)
-        task = asyncio.create_task(elevator.E5(UNIT * 25))
-        elevator.tasks[elevator.E5] = task
+        # (E5 lives on ELEV2, the door-close timer, not on the main sequence)
+        elevator.ELEV2.start(elevator.E5(UNIT * 25), elevator.E5)
 
         # now user waits until being sent to U6 by E4 when the elevator has reached the desired floor
 
