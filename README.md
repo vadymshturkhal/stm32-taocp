@@ -17,7 +17,7 @@
 - Algorithm A (Addition of polynomials)
 - Algorithm M (Multiplication of polynomials)
 - Doubly Linked List
-- Elevator discrete simulation program (Python async)
+- Elevator discrete simulation program (Python async, Python WAIT list)
 
 ## Setup:
 - Hardware: STM32G431RB (ARM Cortex-M4)
