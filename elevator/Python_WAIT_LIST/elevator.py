@@ -29,6 +29,7 @@ class Elevator:
         pass
 
     def E2A(self, node, delay):
+        # FIXME: noode parameter is redundant as all methods are using ELEV1 node
         # JMP HOLDC
         holdc(self.shared_state, node, delay, self.E2)
 
@@ -225,16 +226,84 @@ class Elevator:
 
         # Else go to E7
         holdc(self.shared_state, self.ELEV1, delay, self.E7)
-        
+
     # [Go up a floor]
     def E7(self, contract_node=None):
-        pass
+        # INC4 1
+        self.FLOOR += 1
+
+        # Wait 51 units
+        delay = 51
+        holdc(self.shared_state, self.ELEV1, delay, next_inst=self.E7_continue)
+
+    # Not in MIX
+    def E7_continue(self, contract_node=None):
+        # Is CALLCAR[FLOOR] or CALLUP[FLOOR] != 0
+        is_callcar_or_callup = self.shared_state.CALLS[self.FLOOR] & (CALLCAR | CALLUP)
+
+        # If yes: it is time to stop elevator
+        if is_callcar_or_callup:
+            # Wait 14 units and go to E2
+            delay = 14
+            self.E2A(self.ELEV1, delay)
+            return
+
+        # If not
+        # Is FLOOR == 2 or CALLDOWN[FLOOR] != 0?
+        if self.FLOOR == self.home_floor or self.shared_state.CALLS[self.FLOOR] & CALLDOWN:
+            # Are there calls for higher floors?
+            if any(self.shared_state.CALLS[j] != 0 for j in range(self.FLOOR + 1, FLOORS)):
+                # If yes: repeat E7
+                self.E7()
+                return
+        else:
+            # repeat E7
+            self.E7()
+            return
+
+        # It's time to stop elevator
+        delay = 14
+        self.E2A(self.ELEV1, delay)        
 
     # [Go down a floor]
     def E8(self, contract_node=None):
-        pass
+        self.FLOOR -= 1
+
+        # Wait 61 units
+        delay = 61
+        holdc(self.shared_state, self.ELEV1, delay, next_inst=self.E8_continue)
+
+    # Not in MIX
+    def E8_continue(self, contract_node=None):
+        # Is CALLCAR[FLOOR] or CALLDOWN[FLOOR] != 0
+        is_callcar_or_calldown = self.shared_state.CALLS[self.FLOOR] & (CALLCAR | CALLDOWN)
+
+        # If yes: it is time to stop elevator
+        if is_callcar_or_calldown:
+            # Wait 23 units and go to E2
+            delay = 23
+            self.E2A(self.ELEV1, delay)
+            return
+
+        # If not
+        # Is FLOOR == 2 or CALLUP[FLOOR] != 0?
+        if self.FLOOR == self.home_floor or self.shared_state.CALLS[self.FLOOR] & CALLUP:
+            # Are there calls for lower floors?
+            if any(self.shared_state.CALLS[j] != 0 for j in range(self.FLOOR)):
+                # If yes: repeat E8
+                self.E8()
+                return
+        else:
+            # repeat E8
+            self.E8()
+            return
+
+        # It's time to stop elevator
+        delay = 23
+        self.E2A(self.ELEV1, delay)      
 
     # [Set inaction indicator]
     def E9(self, contract_node=None):
         # Set D2 = 0
         self.D2 = 0
+        decision(self.shared_state, self, self.E9)
