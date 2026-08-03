@@ -7,6 +7,7 @@ from settings import UNIT
 class Users:
     def __init__(self, shared_state):
         self.shared_state = shared_state
+        shared_state.users = self
         self.user_id = 0  # not in Coroutine U
 
         # USER1 is to the users what ELEV1/ELEV2/ELEV3 are to the elevator: a
@@ -101,7 +102,7 @@ class Users:
         # 5 
         # and if D2 == 0 or the elevator in its "dormant" position E1, the DESICION performed
         if elevator.D2 == 0 or elevator.ELEV1.info.NEXTINST == elevator.E1:
-            decision(elevator)
+            decision(self.shared_state, elevator, caller=self.U2)
 
         self.U3(user)
 
