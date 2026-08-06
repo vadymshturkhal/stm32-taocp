@@ -47,7 +47,7 @@ class Users:
         state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
         row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
                f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U1 ")
-        action = f"{user.info.NAME} arrives at floor {user.info.IN}, destination is {user.info.OUT}"
+        action = f"{user.info.NAME} arrives at floor {user.info.IN}, destination is {user.info.OUT}, give up {self.shared_state.TIME + user.info.GIVEUPTIME}"
         print(row + action)
 
         # 5 to U2, with C now the new node
@@ -130,11 +130,11 @@ class Users:
             elevator = self.shared_state.elevator
             state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
             row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
-                f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U4 ")
+                f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U6 ")
             action = f"{user.info.NAME} decides to give up, leaves the system"
             print(row + action)
 
-            self.U6(user)
+            self.U6(user, is_print=False)
             return
 
         if elevator.D1 != 0:
@@ -142,7 +142,13 @@ class Users:
             self.U4A(user)
             return
 
-        self.U6(user)
+        elevator = self.shared_state.elevator
+        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+            f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U4 ")
+        action = f"{user.info.NAME} decides to give up, leaves the system"
+        print(row + action)
+        self.U6(user, is_print=False)
 
     # [Get in]
     def U5(self, user):
@@ -182,13 +188,14 @@ class Users:
         elevator.E5A(delay=UNIT * 25)
 
     # [Get out]
-    def U6(self, user):
-        elevator = self.shared_state.elevator
-        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
-        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
-            f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U6 ")
-        action = f"{user.info.NAME} gets out, leaves the system"
-        print(row + action)
-    
+    def U6(self, user, is_print=True):
+        if is_print:
+            elevator = self.shared_state.elevator
+            state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+            row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+                f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U6 ")
+            action = f"{user.info.NAME} gets out, leaves the system"
+            print(row + action)
+
         # JMP DELETE
         delete(user)

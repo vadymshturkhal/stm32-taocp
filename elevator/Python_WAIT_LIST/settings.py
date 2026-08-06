@@ -111,12 +111,19 @@ class Values:
     def __init__(self):
         self.IN = random.randint(0, FLOORS - 1)
         self.OUT = random.choice([floor for floor in range(FLOORS) if floor != self.IN])
-        self.GIVEUPTIME = random.randint(200, 800) * UNIT
-        self.INTERTIME = random.randint(100, 1600) * UNIT
+        self.GIVEUPTIME = random.randint(100, 200) * UNIT
+        self.INTERTIME = random.randint(100, 400) * UNIT
 
     def __str__(self):
         return (f"\nValues: \n IN={self.IN} \n OUT={self.OUT} \n GIVEUPTIME={self.GIVEUPTIME} \n "
                 f"INTERTIME={self.INTERTIME} \n ")
+
+def values() -> Values:
+    """
+    JMP VALUES -- the subroutine U1 calls to fabricate one arriving user's
+    IN, OUT, GIVEUPTIME, INTERTIME.
+    """
+    return Values()
 
 def generate_users(shared_state: SharedState, max_users: int) -> list:
     users = []

@@ -35,6 +35,13 @@ class Elevator:
 
     # [Change of state?]
     def E2(self, contract_node=None):
+        elevator = self
+        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+               f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E2 ")
+        action = "Elevator stops"
+        print(row + action)
+    
         # 1 STATE is GOINGUP
         if self.STATE > 0:
             # Are there calls for higher floors?
@@ -76,8 +83,14 @@ class Elevator:
 
     # [Open door]
     def E3(self, contract_node=None):
+        elevator = self
+        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+               f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E3 ")
+        action = "Elevator doors start to open"
+        print(row + action)
+    
         # if activity already scheduled: remove it from WAIT list
-        # FIXME: always True?
         if self.ELEV3.left1 is not None:
             deletew(self.shared_state, self.ELEV3)
 
@@ -164,6 +177,16 @@ class Elevator:
         self.D3 = 1
             
         # Search is complete
+        # FIXME: incorrect place
+        floor_list = self.shared_state.QUEUE[self.FLOOR]
+        elevator_list = self.shared_state.ELEVATOR_LIST
+        if floor_list.head == floor_list.head.left2 and elevator_list.head == elevator_list.head.left2:
+            elevator = self
+            state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+            row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+                f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E4 ")
+            action = "Doors open, nobody is there"
+            print(row + action)
 
     def E5A(self, delay):
         # JMP HOLDC
@@ -171,6 +194,13 @@ class Elevator:
 
     # [Close door]
     def E5(self, contract_node=None):
+        elevator = self
+        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+               f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E5 ")
+        action = "Elevator doors start to close"
+        print(row + action)
+    
         # Is D1 == 0?
 
         # If not, people are getting in or out
@@ -219,7 +249,7 @@ class Elevator:
         # Wait 15 units of time
         delay = 15
 
-        # If STATE == GOINGDOWN, to to E8
+        # If STATE == GOINGDOWN, go to E8
         if self.STATE < 0:
             holdc(self.shared_state, self.ELEV1, delay, self.E8)
             return
@@ -229,6 +259,13 @@ class Elevator:
 
     # [Go up a floor]
     def E7(self, contract_node=None):
+        elevator = self
+        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+               f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E7 ")
+        action = "Elevator moving up"
+        print(row + action)
+    
         # INC4 1
         self.FLOOR += 1
 
@@ -267,6 +304,13 @@ class Elevator:
 
     # [Go down a floor]
     def E8(self, contract_node=None):
+        elevator = self
+        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+               f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E8 ")
+        action = "Elevator moving down"
+        print(row + action)
+
         self.FLOOR -= 1
 
         # Wait 61 units
