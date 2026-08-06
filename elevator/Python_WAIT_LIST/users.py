@@ -127,7 +127,13 @@ class Users:
         elevator = self.shared_state.elevator
 
         if user.info.IN - elevator.FLOOR != 0:
-            # print(f"{self.shared_state.TIME} {user.info.NAME} decides to give up, leaves the system")
+            elevator = self.shared_state.elevator
+            state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+            row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+                f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U4 ")
+            action = f"{user.info.NAME} decides to give up, leaves the system"
+            print(row + action)
+
             self.U6(user)
             return
 
@@ -141,6 +147,13 @@ class Users:
     # [Get in]
     def U5(self, user):
         elevator = self.shared_state.elevator
+
+        elevator = self.shared_state.elevator
+        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+            f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U5 ")
+        action = f"{user.info.NAME} gets in"
+        print(row + action)
 
         # 1
         # This user now leaves QUEUE and enters ELEVATOR
@@ -170,5 +183,12 @@ class Users:
 
     # [Get out]
     def U6(self, user):
+        elevator = self.shared_state.elevator
+        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+            f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U6 ")
+        action = f"{user.info.NAME} gets out, leaves the system"
+        print(row + action)
+    
         # JMP DELETE
         delete(user)
