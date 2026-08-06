@@ -49,7 +49,6 @@ if __name__ == "__main__":
     shared_state = SharedState()
     users_quantity = 4
     users_list = create_users(shared_state, users_quantity)
-    # print(users)
     users = Users(shared_state, users_list)
     elevator = Elevator(shared_state)
     users.start()
@@ -61,4 +60,3 @@ if __name__ == "__main__":
         shared_state.TIME = C.info.NEXTTIME
         deletew(shared_state, C)
         C.info.NEXTINST(C)
-

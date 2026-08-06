@@ -111,8 +111,8 @@ class Values:
     def __init__(self):
         self.IN = random.randint(0, FLOORS - 1)
         self.OUT = random.choice([floor for floor in range(FLOORS) if floor != self.IN])
-        self.GIVEUPTIME = random.randint(100, 200) * UNIT
-        self.INTERTIME = random.randint(100, 400) * UNIT
+        self.GIVEUPTIME = random.randint(100, 400) * UNIT
+        self.INTERTIME = random.randint(100, 200) * UNIT
 
     def __str__(self):
         return (f"\nValues: \n IN={self.IN} \n OUT={self.OUT} \n GIVEUPTIME={self.GIVEUPTIME} \n "

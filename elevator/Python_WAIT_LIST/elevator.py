@@ -177,7 +177,7 @@ class Elevator:
         self.D3 = 1
             
         # Search is complete
-        # FIXME: incorrect place
+        # FIXME: try all get out and nobody at the floor case
         floor_list = self.shared_state.QUEUE[self.FLOOR]
         elevator_list = self.shared_state.ELEVATOR_LIST
         if floor_list.head == floor_list.head.left2 and elevator_list.head == elevator_list.head.left2:
