@@ -1,19 +1,16 @@
-from settings import Values, UserInfo, WaitInfo, ElevatorNode
-from settings import hold, holdc, immed, insert, deletew, delete, decision
+from settings import UserInfo, WaitInfo, ElevatorNode
+from settings import hold, holdc, immed, insert, deletew, delete, decision, values
 from settings import CALLUP, CALLDOWN, CALLCAR
 from settings import UNIT
 
 
 class Users:
-    def __init__(self, shared_state):
+    def __init__(self, shared_state, users:list=None):
         self.shared_state = shared_state
         shared_state.users = self
         self.user_id = 0  # not in Coroutine U
-
-        # USER1 is to the users what ELEV1/ELEV2/ELEV3 are to the elevator: a
-        # fixed node standing for one activity, here U1. It re-holds itself on
-        # every U1, so once started it keeps the arrivals coming.
-        self.USER1 = ElevatorNode(info=WaitInfo(NEXTINST=self.U1))
+        self.USER1 = ElevatorNode(info=WaitInfo(NEXTINST=self.U1))  # FIXME: if users is None only
+        self.users = users
 
     def start(self):
         """
@@ -23,22 +20,35 @@ class Users:
 
     # [Enter, prepare for successor]
     def U1(self, C: ElevatorNode):
+        """User fabric"""
         # 1 JMP VALUES
-        values = Values()
+        user_values = values()
 
-        # 2 
-        # LDA INTERTIME
+        # 2
+        # LDA INTERTIME (The amount of time before another user will enter the system)
         # JMP HOLD
-        # Put node in WAIT, delay INTERTIME
-        hold(self.shared_state, node=C, delay=values.INTERTIME)
+        if self.users:
+            user = self.users.pop(0)
+            hold(self.shared_state, node=C, delay=user_values.INTERTIME)
+        elif self.users is None:
+            # 3 Create User
+            user_info = UserInfo(self.shared_state, user_values.IN, user_values.OUT, user_values.GIVEUPTIME,
+                                NAME=f"User {self.user_id}")
+            user = ElevatorNode(info=user_info)
 
-        # 3 Create User
-        user_info = UserInfo(self.shared_state, values.IN, values.OUT, values.GIVEUPTIME,
-                             NAME=f"User {self.user_id}")
-        user = ElevatorNode(info=user_info)
+            # 4 increment user_id (not in Coroutine U)
+            self.user_id += 1
 
-        # 4 increment user_id (not in Coroutine U)
-        self.user_id += 1
+            hold(self.shared_state, node=C, delay=user_values.INTERTIME)
+        else:
+            return
+
+        elevator = self.shared_state.elevator
+        state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+        row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+               f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U1 ")
+        action = f"{user.info.NAME} arrives at floor {user.info.IN}, destination is {user.info.OUT}"
+        print(row + action)
 
         # 5 to U2, with C now the new node
         self.U2(user)
@@ -75,15 +85,6 @@ class Users:
                 elevator.D1 = 1
                 elevator.D3 = 0
 
-                # NOTE: no NEXTINST store and no DELETEW here -- both rely on
-                # the state E4 leaves behind when it finds nobody waiting: it
-                # sets D1 <- 0, D3 <- nonzero and returns WITHOUT rescheduling,
-                # so ELEV1 is out of the WAIT list with NEXTINST still E4.
-                # MIX 127-131 leans on exactly the same thing. Should E4 ever
-                # return leaving some other NEXTINST, this silently restarts
-                # the wrong step; should it return still scheduled, immed
-                # double-inserts ELEV1 and corrupts the list. Neither fails
-                # loudly, and the damage shows up here rather than in E4.
                 # JMP IMMED
                 immed(self.shared_state, elevator.ELEV1)
 
@@ -126,6 +127,7 @@ class Users:
         elevator = self.shared_state.elevator
 
         if user.info.IN - elevator.FLOOR != 0:
+            # print(f"{self.shared_state.TIME} {user.info.NAME} decides to give up, leaves the system")
             self.U6(user)
             return
 
