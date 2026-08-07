@@ -1,7 +1,6 @@
 from settings import UserInfo, WaitInfo, ElevatorNode
 from settings import hold, holdc, immed, insert, deletew, delete, decision, values
 from settings import CALLUP, CALLDOWN, CALLCAR
-from settings import UNIT
 
 
 class Users:
@@ -182,7 +181,7 @@ class Users:
         deletew(self.shared_state, elevator.ELEV2)
 
         # Restart E5 after 25 units
-        elevator.E5A(delay=UNIT * 25)
+        elevator.E5A(delay=25)
 
     # [Get out]
     def U6(self, user, is_print=True):
