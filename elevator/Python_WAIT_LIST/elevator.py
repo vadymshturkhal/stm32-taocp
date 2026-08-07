@@ -194,21 +194,29 @@ class Elevator:
 
     # [Close door]
     def E5(self, contract_node=None):
+
+    
+        # Is D1 == 0?
+
+        # If not, people are getting in or out
+        if self.D1 != 0:
+            elevator = self
+            state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
+            row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
+                f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E5 ")
+            action = "Elevator doors flutter"
+            print(row + action)
+            # Wait 40 units, repeat E5
+            delay = 40
+            self.E5A(delay)
+            return
+
         elevator = self
         state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
         row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
                f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E5 ")
         action = "Elevator doors start to close"
         print(row + action)
-    
-        # Is D1 == 0?
-
-        # If not, people are getting in or out
-        if self.D1 != 0:
-            # Wait 40 units, repeat E5
-            delay = 40
-            self.E5A(delay)
-            return
 
         # If D1 == 0: set D3 = 0
         self.D3 = 0
