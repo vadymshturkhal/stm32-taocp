@@ -289,13 +289,3 @@ def decision(shared_state: SharedState, elevator, caller):
     delay = 20
     elevator.ELEV1.info.NEXTINST = elevator.E6
     hold(shared_state, elevator.ELEV1, delay)
-
-
-if __name__ == "__main__":
-    max_users = 4
-    shared_state = SharedState()
-    users_list = generate_users(shared_state, max_users)
-    print(type(users_list[0]), users_list[0].info, users_list[1].info)
-
-    v = Values()
-    print(v)
