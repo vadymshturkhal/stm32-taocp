@@ -1,6 +1,6 @@
 """
 Elevator WAIT list discrete simulation program.
-This version based on subroutines instead of coroutines and works without any 'yield' or 'async'.
+This version based on subroutines instead of coroutines and works without any 'yield' or 'async' keywords.
 
 Run: python3 main.py
 Edit users_quantity below to change the number of arrivals, 
