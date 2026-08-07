@@ -2,6 +2,7 @@
 Elevator WAIT list discrete simulation program.
 This version based on subroutines instead of coroutines and works without any 'yield' or 'async'.
 """
+import random
 
 from settings import SharedState, deletew, create_users
 from elevator import Elevator
@@ -9,6 +10,8 @@ from users import Users
 
 
 if __name__ == "__main__":
+    random.seed(1)  # comment this line for a different run each time
+
     shared_state = SharedState()
     users_quantity = 4
     users_list = create_users(shared_state, users_quantity)
