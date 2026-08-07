@@ -1,48 +1,11 @@
 """
-Run the elevator simulation.
-
-    python3 main.py                 400 events, traced
-    python3 main.py 5000            5000 events, traced
-    python3 main.py 40000 quiet     summary only
-
-The dispatcher is Knuth's CYCLE: take the earliest node off the WAIT list,
-advance TIME to its NEXTTIME, unlink it, and call NEXTINST. Everything else
-is the steps rescheduling themselves.
+Elevator WAIT list discrete simulation program.
+This version based on subroutines instead of coroutines and works without any 'yield' or 'async'.
 """
-import random
 
-from settings import ElevatorNode, SharedState, UserInfo, deletew, values
+from settings import SharedState, deletew, create_users
 from elevator import Elevator
 from users import Users
-
-
-ACTIONS = {
-    "E1": "Elevator dormant",
-    "E2": "Elevator stops",
-    "E3": "Elevator doors start to open",
-    "E4": "Elevator lets people in/out",
-    "E5": "Elevator doors start to close",
-    "E6": "Elevator prepares to move",
-    "E7": "Elevator moving up",
-    "E8": "Elevator moving down",
-    "E9": "Elevator sets inaction indicator",
-    "U2": "User signals and waits",
-    "U3": "User enters queue",
-    "U4": "User checks give-up",
-    "U5": "User gets in",
-    "U6": "User gets out",
-}
-
-def create_users(shared_state, quantity: int) -> list:
-    users = []
-    for id in range(quantity):
-        user_values = values()
-        user_info = UserInfo(shared_state, user_values.IN, user_values.OUT, user_values.GIVEUPTIME,
-                            NAME=f"User {id}")
-        user = ElevatorNode(info=user_info)
-        users.append(user)
-
-    return users
 
 
 if __name__ == "__main__":

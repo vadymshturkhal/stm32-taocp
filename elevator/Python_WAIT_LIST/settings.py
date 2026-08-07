@@ -125,15 +125,15 @@ def values() -> Values:
     """
     return Values()
 
-def generate_users(shared_state: SharedState, max_users: int) -> list:
+def create_users(shared_state, quantity: int) -> list:
     users = []
-    for i in range(max_users):
-        IN = random.randint(0, FLOORS - 1)
-        OUT = random.choice([floor for floor in range(FLOORS) if floor != IN])
-        GIVEUPTIME = random.randint(200, 800) * UNIT
-        NAME = f"User {i}"
-        user = ElevatorNode(UserInfo(shared_state, IN, OUT, GIVEUPTIME, NAME))
+    for id in range(quantity):
+        user_values = values()
+        user_info = UserInfo(shared_state, user_values.IN, user_values.OUT, user_values.GIVEUPTIME,
+                            NAME=f"User {id}")
+        user = ElevatorNode(info=user_info)
         users.append(user)
+
     return users
 
 def immed(shared_state: SharedState, wait_node: ElevatorNode):
