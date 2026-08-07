@@ -39,6 +39,7 @@ if __name__ == "__main__":
 
     print("TIME STATE FLOOR D1 D2 D3 step action")
 
+    # CYCLE control routine
     while shared_state.WAIT_LIST.head.right1 is not shared_state.WAIT_LIST.head:
         C = shared_state.WAIT_LIST.head.right1
         shared_state.TIME = C.info.NEXTTIME
