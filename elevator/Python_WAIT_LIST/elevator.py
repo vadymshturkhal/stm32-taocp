@@ -17,6 +17,9 @@ class Elevator:
         self.ELEV2 = ElevatorNode(info=WaitInfo(NEXTINST=self.E5))  # Represents the independent elevator action at E5
         self.ELEV3 = ElevatorNode(info=WaitInfo(NEXTINST=self.E9))  # Represents the independent elevator action at E9
 
+        # Look at E3-E4
+        self.first_search = True
+
     def E1A(self):
         """
         Set NEXTINST = E1 and go to CYCLE
@@ -108,6 +111,8 @@ class Elevator:
         # set D1 to nonzero
         self.D1 = 1
 
+        self.first_search = True
+
         delay = 20
         self.E4A(delay)
 
@@ -117,6 +122,9 @@ class Elevator:
 
     # [Let people out, in]
     def E4(self, contract_node=None):
+        first_search = self.first_search
+        self.first_search = False
+
         # C = LOC(ELEVATOR)
         C = self.shared_state.ELEVATOR_LIST.head
         C = C.left2
@@ -176,15 +184,11 @@ class Elevator:
         # Set D3 nonzero
         self.D3 = 1
             
-        # Search is complete
-        # FIXME: try all get out and nobody at the floor case
-        floor_list = self.shared_state.QUEUE[self.FLOOR]
-        elevator_list = self.shared_state.ELEVATOR_LIST
-        if floor_list.head == floor_list.head.left2 and elevator_list.head == elevator_list.head.left2:
+        if first_search:
             elevator = self
             state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
             row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
-                f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E4 ")
+                   f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E4 ")
             action = "Doors open, nobody is there"
             print(row + action)
 
@@ -194,10 +198,7 @@ class Elevator:
 
     # [Close door]
     def E5(self, contract_node=None):
-
-    
         # Is D1 == 0?
-
         # If not, people are getting in or out
         if self.D1 != 0:
             elevator = self
@@ -206,6 +207,7 @@ class Elevator:
                 f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  E5 ")
             action = "Elevator doors flutter"
             print(row + action)
+            
             # Wait 40 units, repeat E5
             delay = 40
             self.E5A(delay)
