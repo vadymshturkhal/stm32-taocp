@@ -142,7 +142,6 @@ class Users:
             self.U4A(user)
             return
 
-        elevator = self.shared_state.elevator
         state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
         row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
             f"{elevator.D1:<2} {elevator.D2:<2} {elevator.D3:<2}  U4 ")
@@ -152,8 +151,6 @@ class Users:
 
     # [Get in]
     def U5(self, user):
-        elevator = self.shared_state.elevator
-
         elevator = self.shared_state.elevator
         state = "U" if elevator.STATE > 0 else "D" if elevator.STATE < 0 else "N"
         row = (f"{self.shared_state.TIME:04}   {state:<5} {elevator.FLOOR:<4} "
