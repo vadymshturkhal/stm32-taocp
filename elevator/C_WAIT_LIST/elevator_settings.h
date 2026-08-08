@@ -20,11 +20,13 @@ typedef struct ElevatorNode {
     struct ElevatorNode* right1;
     struct ElevatorNode* left2;  // QUEUE, ELEVATOR_LIST
     struct ElevatorNode* right2;
-    uint32_t nexttime;
-    NextInst nextinst;
-    uint32_t in;                 // User
-    uint32_t out;                // User
-    uint32_t giveuptime;         // User
+
+    uint32_t NEXTTIME;
+    NextInst NEXTINST;
+
+    uint32_t IN;                 // User
+    uint32_t OUT;                // User
+    uint32_t GIVEUPTIME;         // User
 } ElevatorNode;
 
 typedef struct {
@@ -33,13 +35,17 @@ typedef struct {
 	uint32_t size;
 } ElevatorList;
 
-// NOTE: Add Elevator and Users
+// Forward declaration only, this avoids elevator_settings.h <-> elevator.h including each other
+typedef struct Elevator Elevator;
+
+// NOTE: Add Users
 typedef struct {
     uint32_t time;
     uint32_t calls[FLOORS];
     ElevatorList elevator_list;
     ElevatorList queue[FLOORS];
     ElevatorList wait_list;
+    Elevator* elevator;
 } SharedState;
 
 uint32_t elevator_list_init(ElevatorList* elevator_list, Storage_Pool* storage_pool);
