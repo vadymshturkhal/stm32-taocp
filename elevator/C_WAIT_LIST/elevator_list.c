@@ -29,3 +29,11 @@ void insert_node_at_frontw(ElevatorList* elevator_list, ElevatorNode* node) {
     X->right1->left1 = node;
     X->right1 = node;
 }
+
+void insert_node_at_rear(ElevatorList* elevator_list, ElevatorNode* node) {
+	ElevatorNode* Q = elevator_list->head->left2;
+	node->left2 = Q;
+	elevator_list->head->left2 = node;
+	Q->right2 = node;
+	node->right2 = elevator_list->head;
+}
