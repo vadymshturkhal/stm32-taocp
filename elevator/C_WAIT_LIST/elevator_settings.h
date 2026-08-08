@@ -12,6 +12,8 @@
 #define CALLDOWN 0b010
 #define CALLCAR  0b001
 
+struct ElevatorNode;  // forward declaration so NextInst's tag has file scope
+
 typedef void (*NextInst)(struct ElevatorNode*);
 
 // NOTE: Without INTERTIME and USER_NAME
@@ -36,15 +38,16 @@ typedef struct {
 
 // Forward declaration only, this avoids elevator_settings.h <-> elevator.h including each other
 typedef struct Elevator Elevator;
+typedef struct Users Users;
 
-// NOTE: Add Users
 typedef struct {
     uint32_t TIME;
     uint32_t CALLS[FLOORS];
     ElevatorList ELEVATOR_LIST;   // Users currently riding the car
     ElevatorList QUEUE[FLOORS];   // Users waiting at each floor
     ElevatorList WAIT_LIST;
-    Elevator* elevator;           // not in MIX -- back-pointer, added post-init
+    Elevator* elevator;
+    Users* users;
 } SharedState;
 
 uint32_t elevator_list_init(ElevatorList* elevator_list, Storage_Pool* storage_pool);
