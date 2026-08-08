@@ -19,3 +19,13 @@ uint32_t elevator_list_init(ElevatorList* elevator_list, Storage_Pool* storage_p
 	elevator_list->storage_pool = storage_pool;
 	return 0;
 }
+
+void insert_node_at_frontw(ElevatorList* elevator_list, ElevatorNode* node) {
+    // Insert node into WAIT list using LLINK1 and RLINK1
+
+    ElevatorNode* X = elevator_list->head;
+    node->left1 = X;
+    node->right1 = X->right1;
+    X->right1->left1 = node;
+    X->right1 = node;
+}

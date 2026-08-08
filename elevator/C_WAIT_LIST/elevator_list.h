@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#include "storage_pool.h"
+
+struct ElevatorNode;  // forward declaration so NextInst's tag has file scope
+
 typedef void (*NextInst)(struct ElevatorNode*);
 
 // FIXME: ADD INTERTIME and USER_NAME
@@ -26,7 +30,7 @@ typedef struct {
 } ElevatorList;
 
 uint32_t elevator_list_init(ElevatorList* elevator_list, Storage_Pool* storage_pool);
-//void insert_node_at_frontw(ElevatorList* elevator_list, ElevatorNode* node);
+void insert_node_at_frontw(ElevatorList* elevator_list, ElevatorNode* node);
 //void insert_node_at_rear(ElevatorList* elevator_list, ElevatorNode* node);
 //void delete_nodew(ElevatorList* elevator_list, ElevatorNode* node);
 //void delete_node(ElevatorList* elevator_list, ElevatorNode* node);
