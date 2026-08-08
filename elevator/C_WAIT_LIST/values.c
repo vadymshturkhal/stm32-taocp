@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #include "values.h"
 #include "elevator_settings.h"
 
