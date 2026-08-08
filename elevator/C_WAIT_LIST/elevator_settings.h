@@ -51,6 +51,23 @@ typedef struct {
 } SharedState;
 
 uint32_t elevator_list_init(ElevatorList* elevator_list, Storage_Pool* storage_pool);
+//insert_node_at_frontw
+//insert_node_at_rear
+//delete_nodew
+//delete_node
+
 uint32_t shared_state_init(SharedState* shared_state, Storage_Pool* storage_pool);
+
+//values
+//immed
+//insert
+//deletew
+//delete
+//sortin
+//hold
+//holdc
+//cycle1
+//cycle
+//decision
 
 #endif
