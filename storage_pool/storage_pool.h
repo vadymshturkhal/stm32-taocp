@@ -2,6 +2,7 @@
 #define STORAGE_POOL_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct {
     void* avail;
