@@ -6,6 +6,7 @@
 #include "storage_pool.h"
 
 #define FLOORS 5
+#define HOME_FLOOR 2
 
 #define CALLUP   0b100
 #define CALLDOWN 0b010
