@@ -32,7 +32,6 @@ typedef struct ElevatorNode {
 typedef struct {
 	ElevatorNode* head;
 	Storage_Pool* storage_pool;
-	uint32_t size;
 } ElevatorList;
 
 // Forward declaration only, this avoids elevator_settings.h <-> elevator.h including each other
