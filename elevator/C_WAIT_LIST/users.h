@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "storage_pool.h"
+#include "elevator_list.h"
 #include "elevator_settings.h"
 
 typedef struct Users {

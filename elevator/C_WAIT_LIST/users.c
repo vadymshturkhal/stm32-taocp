@@ -1,9 +1,10 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "storage_pool.h"
+#include "elevator_settings.h"
 #include "users.h"
-#include "main.h"
 
 uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool) {
 	if (users == NULL || shared_state == NULL || storage_pool == NULL) return 1;
