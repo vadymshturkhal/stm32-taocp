@@ -61,3 +61,18 @@ void sortin(SharedState* shared_state, ElevatorNode* C) {
 	P->right1 = C;
 	Q->left1 = C;
 }
+
+void hold(SharedState* shared_state, ElevatorNode* node, uint32_t delay) {
+    // Schedule node to run delay units from now, leaving NEXTINST alone
+    // U1 needs this variant: USER1 must keep resuming at U1 forever, so its
+    // NEXTINST has to survive being rescheduled.
+
+	node->NEXTTIME = shared_state->TIME + delay;
+	sortin(shared_state, node);
+}
+
+void holdc(SharedState* shared_state, ElevatorNode* node, uint32_t delay, NextInst next_inst) {
+	// Set NEXTINST and hold
+	node->NEXTINST = next_inst;
+	hold(shared_state, node, delay);
+}
