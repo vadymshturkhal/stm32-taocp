@@ -42,3 +42,22 @@ void immed(SharedState* shared_state, ElevatorNode* wait_node) {
 	// 2 Insert wait_node
 	elevator_list_insert_node_at_frontw(&shared_state->WAIT_LIST, wait_node);
 }
+
+void sortin(SharedState* shared_state, ElevatorNode* C) {
+    // Sort node into WAIT list using LLINK1 and RLINK1
+
+	ElevatorList* wait_list = &shared_state->WAIT_LIST;
+	ElevatorNode* P = wait_list->head->left1;  // Last node
+
+	// Compare NEXTTIME fields right to left
+	while (C->NEXTTIME < P->NEXTTIME) {
+		P = P->left1;
+	}
+
+	// Insert to WAIT list
+	ElevatorNode* Q = P->right1;
+	C->right1 = Q;
+	C->left1 = P;
+	P->right1 = C;
+	Q->left1 = C;
+}

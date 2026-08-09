@@ -31,11 +31,11 @@ typedef struct {
 
 uint32_t shared_state_init(SharedState* shared_state, Storage_Pool* storage_pool);
 void immed(SharedState* shared_state, ElevatorNode* wait_node);
+void sortin(SharedState* shared_state, ElevatorNode* C);
 //insert = elevator_list_insert_node_at_rear
 //deletew = elevator_list_delete_nodew
 //delete = elevator_list_delete_node
 
-//sortin
 //hold
 //holdc
 //cycle1
