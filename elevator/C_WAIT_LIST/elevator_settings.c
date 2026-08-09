@@ -42,7 +42,3 @@ void immed(SharedState* shared_state, ElevatorNode* wait_node) {
 	// 2 Insert wait_node
 	elevator_list_insert_node_at_frontw(&shared_state->WAIT_LIST, wait_node);
 }
-
-void insert(ElevatorList* elevator_list, ElevatorNode* node) {
-	elevator_list_insert_node_at_rear(elevator_list, node);
-}
