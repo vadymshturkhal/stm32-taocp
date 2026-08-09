@@ -20,7 +20,7 @@ uint32_t elevator_list_init(ElevatorList* elevator_list, Storage_Pool* storage_p
 	return 0;
 }
 
-void insert_node_at_frontw(ElevatorList* elevator_list, ElevatorNode* node) {
+void elevator_list_insert_node_at_frontw(ElevatorList* elevator_list, ElevatorNode* node) {
     // Insert node into WAIT list using LLINK1 and RLINK1
 
     ElevatorNode* X = elevator_list->head;
@@ -30,7 +30,7 @@ void insert_node_at_frontw(ElevatorList* elevator_list, ElevatorNode* node) {
     X->right1 = node;
 }
 
-void insert_node_at_rear(ElevatorList* elevator_list, ElevatorNode* node) {
+void elevator_list_insert_node_at_rear(ElevatorList* elevator_list, ElevatorNode* node) {
 	ElevatorNode* Q = elevator_list->head->left2;
 	node->left2 = Q;
 	elevator_list->head->left2 = node;
