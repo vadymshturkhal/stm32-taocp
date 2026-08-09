@@ -30,9 +30,9 @@ typedef struct {
 } SharedState;
 
 uint32_t shared_state_init(SharedState* shared_state, Storage_Pool* storage_pool);
+void immed(SharedState* shared_state, ElevatorNode* wait_node);
+void insert(ElevatorList* elevator_list, ElevatorNode* node);
 
-//immed
-//insert
 //deletew
 //delete
 //sortin
