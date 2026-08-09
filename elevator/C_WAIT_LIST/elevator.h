@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "storage_pool.h"
 #include "elevator_settings.h"
 
 typedef struct Elevator {

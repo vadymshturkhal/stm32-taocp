@@ -1,9 +1,10 @@
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "storage_pool.h"
+#include "elevator_settings.h"
 #include "elevator.h"
-#include "main.h"
 
 uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool) {
 	if (elevator == NULL || shared_state == NULL || storage_pool == NULL) return 1;
