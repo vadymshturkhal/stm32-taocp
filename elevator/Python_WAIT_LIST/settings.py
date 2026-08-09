@@ -153,13 +153,6 @@ def insert(list: ElevatorDoublyLinkedList, node: ElevatorNode):
 def deletew(shared_state: SharedState, wait_node: ElevatorNode):
     """
     Delete wait_node from the WAIT list
-
-    This is how a scheduled activity is cancelled. One node stands for one
-    activity, not one entity -- the elevator keeps three (ELEV1, ELEV2, ELEV3)
-    because E3 starts the E5 and E9 timers up independently of the main step
-    sequence, so all three can be pending at once. Removing a node means that
-    one activity is no longer scheduled; the node itself survives with
-    NEXTINST intact, ready to be repositioned and reinserted by immed or hold.
     """
 
     shared_state.WAIT_LIST.delete_nodew(wait_node)
