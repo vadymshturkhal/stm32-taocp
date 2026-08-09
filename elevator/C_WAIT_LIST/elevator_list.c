@@ -38,13 +38,13 @@ void elevator_list_insert_node_at_rear(ElevatorList* elevator_list, ElevatorNode
 	node->right2 = elevator_list->head;
 }
 
-void elevator_list_delete_nodew(ElevatorList* elevator_list, ElevatorNode* node) {
+void elevator_list_delete_nodew(ElevatorNode* node) {
 	// Delete node from WAIT list
 	node->left1->right1 = node->right1;
 	node->right1->left1 = node->left1;
 }
 
-void elevator_list_delete_node(ElevatorList* elevator_list, ElevatorNode* node) {
+void elevator_list_delete_node(ElevatorNode* node) {
 	node->left2->right2 = node->right2;
 	node->right2->left2 = node->left2;
 }

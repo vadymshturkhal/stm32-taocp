@@ -32,7 +32,7 @@ typedef struct {
 uint32_t elevator_list_init(ElevatorList* elevator_list, Storage_Pool* storage_pool);
 void elevator_list_insert_node_at_frontw(ElevatorList* elevator_list, ElevatorNode* node);
 void elevator_list_insert_node_at_rear(ElevatorList* elevator_list, ElevatorNode* node);
-void elevator_list_delete_nodew(ElevatorList* elevator_list, ElevatorNode* node);
-void elevator_list_delete_node(ElevatorList* elevator_list, ElevatorNode* node);
+void elevator_list_delete_nodew(ElevatorNode* node);
+void elevator_list_delete_node(ElevatorNode* node);
 
 #endif
