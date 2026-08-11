@@ -22,6 +22,7 @@ uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Po
 	if (elevator->ELEV3 == NULL) return 2;
 
 	elevator->STATE = 0;  // Neutral
+	elevator->FLOOR = HOME_FLOOR;
 
 	elevator->D1 = 0;
 	elevator->D2 = 0;
