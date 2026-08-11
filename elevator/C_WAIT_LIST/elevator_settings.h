@@ -34,11 +34,11 @@ void immed(SharedState* shared_state, ElevatorNode* wait_node);
 void sortin(SharedState* shared_state, ElevatorNode* C);
 void hold(SharedState* shared_state, ElevatorNode* node, uint32_t delay);
 void holdc(SharedState* shared_state, ElevatorNode* node, uint32_t delay, NextInst next_inst);
+void cycle1(ElevatorNode* node, NextInst next_inst);
 //insert = elevator_list_insert_node_at_rear
 //deletew = elevator_list_delete_nodew
 //delete = elevator_list_delete_node
 
-//cycle1
 //cycle
 //decision
 

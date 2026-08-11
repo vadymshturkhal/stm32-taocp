@@ -76,3 +76,8 @@ void holdc(SharedState* shared_state, ElevatorNode* node, uint32_t delay, NextIn
 	node->NEXTINST = next_inst;
 	hold(shared_state, node, delay);
 }
+
+void cycle1(ElevatorNode* node, NextInst next_inst) {
+	// Set NEXTINST of node
+	node->NEXTINST = next_inst;
+}
