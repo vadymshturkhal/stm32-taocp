@@ -4,6 +4,7 @@
 #include "storage_pool.h"
 #include "elevator_list.h"
 #include "elevator_settings.h"
+#include "elevator.h"
 
 uint32_t shared_state_init(SharedState* shared_state, Storage_Pool* storage_pool) {
 	if (shared_state == NULL || storage_pool == NULL) return 1;
@@ -80,4 +81,56 @@ void holdc(SharedState* shared_state, ElevatorNode* node, uint32_t delay, NextIn
 void cycle1(ElevatorNode* node, NextInst next_inst) {
 	// Set NEXTINST of node
 	node->NEXTINST = next_inst;
+}
+
+void decision(SharedState* shared_state, NextInst caller) {
+	Elevator* elevator = shared_state->elevator;
+
+	// D1. Decision necessary?
+    if (elevator->STATE != 0) return;
+
+    // D2. Should door open?
+    if (elevator->ELEV1->NEXTINST == E1 && shared_state->CALLS[HOME_FLOOR] != 0) {
+    	// Wait 20 units of time
+    	uint32_t delay = 20;
+
+    	// Schedule E3
+    	elevator->ELEV1->NEXTINST = E3;
+    	hold(shared_state, elevator->ELEV1, delay);
+    	return;
+    }
+
+    // D3. Any calls?
+    int32_t j = -1;
+    for (uint32_t i = 0; i < FLOORS; i++) {
+    	if (i == elevator->FLOOR) continue;
+    	if (shared_state->CALLS[i] == 0) continue;
+    	j = i;
+    	break;
+    }
+
+    // All CALL[j], j != FLOOR, are zero
+    if (j == -1) {
+    	// Is caller E6B?
+    	// NOTE: I decided to use E6 as caller is E6, and MIX version uses E6B
+        if (caller == E6){
+			// If yes: set j = 2
+            j = HOME_FLOOR;
+        }
+        else return;
+    }
+
+    // D4. Set STATE
+    // STATE = j - FLOOR
+    elevator->STATE = j - elevator->FLOOR;
+
+    // D5. Elevator dormant?
+	// Jump if not at E1 or j == 2
+	if (elevator->ELEV1->NEXTINST != E1 || elevator->STATE == 0) return;
+
+	// Otherwise schedule E6
+	//Wait 20 units of time (same as in D2)
+	uint32_t delay = 20;
+	elevator->ELEV1->NEXTINST = E6;
+	hold(shared_state, elevator->ELEV1, delay);
 }
