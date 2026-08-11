@@ -31,3 +31,15 @@ uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Po
 
 	return 0;
 }
+
+void E1() {
+
+}
+
+void E2() {
+
+}
+
+void E6() {
+
+}
