@@ -35,5 +35,6 @@ void E5(SharedState* shared_state, ElevatorNode* C);
 void E6(SharedState* shared_state, ElevatorNode* C);
 void E7(SharedState* shared_state, ElevatorNode* C);
 void E8(SharedState* shared_state, ElevatorNode* C);
+void E9(SharedState* shared_state, ElevatorNode* C);
 
 #endif

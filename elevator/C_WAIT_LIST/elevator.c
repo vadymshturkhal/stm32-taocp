@@ -339,6 +339,14 @@ void E7(SharedState* shared_state, ElevatorNode* C) {
 
 }
 
+// [Go down a floor]
 void E8(SharedState* shared_state, ElevatorNode* C) {
 
+}
+
+// [Set inaction indicator]
+void E9(SharedState* shared_state, ElevatorNode* C) {
+	// Set D2 = 0
+	shared_state->elevator->D2 = 0;
+	decision(shared_state, E9);
 }
