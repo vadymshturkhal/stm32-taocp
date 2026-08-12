@@ -159,8 +159,34 @@ void U4(SharedState* shared_state, ElevatorNode* user) {
 }
 
 // [Get in]
-void U5(SharedState* shared_state, ElevatorNode* C) {
+void U5(SharedState* shared_state, ElevatorNode* user) {
+	Elevator* elevator = shared_state->elevator;
 
+	// TODO: trace print (Table 1 style) -- "... gets in"
+
+	// 1. This user now leaves QUEUE and enters ELEVATOR
+
+	// Delete User from QUEUE[IN]
+	elevator_list_delete_node(user);
+
+	// Insert it at right of ELEVATOR
+	elevator_list_insert_node_at_rear(&shared_state->ELEVATOR_LIST, user);
+
+	// 2. Set CALLCAR[OUT] = 1
+	shared_state->CALLS[user->OUT] |= CALLCAR;
+
+	// 3. If STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
+	// Knuth's style
+	if (elevator->STATE == 0) {
+		elevator->STATE = user->OUT - elevator->FLOOR;
+	}
+
+	// 4. Remove action E5 from WAIT list
+	elevator_list_delete_nodew(elevator->ELEV2);
+
+	// Restart E5 after 25 units
+	uint32_t delay = 25;
+	E5A(shared_state, delay);
 }
 
 // [Get out]
