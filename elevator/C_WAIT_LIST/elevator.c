@@ -5,6 +5,7 @@
 #include "storage_pool.h"
 #include "elevator_settings.h"
 #include "elevator.h"
+#include "users.h"
 
 uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool) {
 	if (elevator == NULL || shared_state == NULL || storage_pool == NULL) return 1;
@@ -165,7 +166,7 @@ void E3(SharedState* shared_state, ElevatorNode* C) {
 	elevator->D1 = 1;
 
 	// Printing
-	elevator->first_search = true;
+//	elevator->first_search = true;
 
 	delay = 20;
 	E4A(shared_state, delay);
@@ -173,7 +174,78 @@ void E3(SharedState* shared_state, ElevatorNode* C) {
 
 // [Let people out, in]
 void E4(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
 
+	// Printing
+//	bool first_search = elevator->first_search;
+//	elevator->first_search = false;
+
+	// node = LOC(ELEVATOR)
+	ElevatorNode* node = shared_state->ELEVATOR_LIST.head;
+	node = node->left2;
+
+	// Search ELEVATOR list from left to right
+	while (node != shared_state->ELEVATOR_LIST.head) {
+		// Compare OUT(node) with FLOOR
+
+		// If not equal: continue
+		if (node->OUT != elevator->FLOOR) {
+			node = node->left2;
+			continue;
+		}
+
+		// Otherwise prepare to send User to U6:
+		// Set NEXTINST(node)
+		node->NEXTINST = U6;
+
+		// Put user at front of the WAIT list
+		immed(shared_state, node);
+
+		// Wait 25 units and repeat E4A
+		uint32_t delay = 25;
+		E4A(shared_state, delay);
+
+		// Return to simulate other events
+		return;
+	}
+
+	// If node == ELEVATOR_LIST.head: search is complete
+
+	node = shared_state->QUEUE[elevator->FLOOR].head;
+	node = node->right2;
+
+	if (node != shared_state->QUEUE[elevator->FLOOR].head) {
+		// Cancel action U4 for this User
+		// DELETEW
+		elevator_list_delete_nodew(node);
+
+		// Prepare to replace U4 by U5
+		// Set NEXTINST(node)
+		node->NEXTINST = U5;
+
+		// Put User at front of the WAIT list
+		immed(shared_state, node);
+
+		// Wait 25 units and repeat E4
+		uint32_t delay = 25;
+		E4A(shared_state, delay);
+
+		// Return to simulate other events
+		return;
+	}
+
+	// If node == QUEUE[FLOOR].head: QUEUE is empty
+
+	// Set D1 = 0
+	elevator->D1 = 0;
+
+	// Set D3 nonzero
+	elevator->D3 = 1;
+
+	// TODO: trace print (Table 1 style) -- no logging yet
+//	if (first_search) {
+//
+//	}
 }
 
 void E4A(SharedState* shared_state, uint32_t delay) {
