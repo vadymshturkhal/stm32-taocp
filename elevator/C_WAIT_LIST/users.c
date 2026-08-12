@@ -15,7 +15,7 @@ static void U3(SharedState* shared_state, ElevatorNode* user);
 static void U4(SharedState* shared_state, ElevatorNode* user);
 static void U4A(SharedState* shared_state, ElevatorNode* user);
 
-uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool) {
+uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool, uint32_t users_quantity) {
 	if (users == NULL || shared_state == NULL || storage_pool == NULL) return 1;
 
 	users->shared_state = shared_state;
@@ -29,6 +29,7 @@ uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* stora
 	users->USER1->NEXTINST = U1;  // Set NEXTINST
 
 	users->user_id = 0;
+	users->users_quantity = users_quantity;
 
 	return 0;
 }
@@ -43,6 +44,10 @@ static void U1(SharedState* shared_state, ElevatorNode* C) {
 	// User fabric
 
 	Users* users = shared_state->users;
+
+	// Not in MIX -- Python stops once its fixed user list is exhausted;
+	// this port stops once users_quantity users have been generated
+	if (users->user_id >= users->users_quantity) return;
 
 	// 1 JMP VALUES
 	Values user_values = values();
