@@ -30,6 +30,8 @@ void E2A(SharedState* shared_state, ElevatorNode* C, uint32_t delay);
 void E3(SharedState* shared_state, ElevatorNode* C);
 void E4A(SharedState* shared_state, uint32_t delay);
 void E4(SharedState* shared_state, ElevatorNode* C);
+void E5A(SharedState* shared_state, uint32_t delay);
+void E5(SharedState* shared_state, ElevatorNode* C);
 void E6(SharedState* shared_state, ElevatorNode* C);
 
 #endif

@@ -253,6 +253,36 @@ void E4A(SharedState* shared_state, uint32_t delay) {
 	holdc(shared_state, shared_state->elevator->ELEV1, delay, E4);
 }
 
+void E5A(SharedState* shared_state, uint32_t delay) {
+	// JMP HOLDC
+	holdc(shared_state, shared_state->elevator->ELEV2, delay, E5);
+}
+
+// [Close door]
+void E5(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
+
+	// Is D1 == 0?
+	// If not, people are getting in or out
+	if (elevator->D1 != 0) {
+		// TODO: trace print (Table 1 style) -- "Elevator doors flutter"
+
+		// Wait 40 units, repeat E5
+		uint32_t delay = 40;
+		E5A(shared_state, delay);
+		return;
+	}
+
+	// TODO: trace print (Table 1 style) -- "Elevator doors start to close"
+
+	// If D1 == 0: set D3 = 0
+	elevator->D3 = 0;
+
+	// Wait 20 units, then go to E6
+	uint32_t delay = 20;
+	holdc(shared_state, elevator->ELEV1, delay, E6);
+}
+
 void E6(SharedState* shared_state, ElevatorNode* C) {
 
 }
