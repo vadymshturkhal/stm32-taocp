@@ -25,7 +25,10 @@ typedef struct Elevator {
 uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool);
 void E1A(Elevator* elevator);
 void E1(Elevator* elevator, ElevatorNode* C);
+void E2A(Elevator* elevator, ElevatorNode* C, uint32_t delay);
 void E3(Elevator* elevator, ElevatorNode* C);
+void E4A(uint32_t delay);
+void E4(Elevator* elevator, ElevatorNode* C);
 void E6(Elevator* elevator, ElevatorNode* C);
 
 #endif
