@@ -458,7 +458,7 @@ static void E8_continue(SharedState* shared_state, ElevatorNode* C) {
 void E9(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
-	// STZ 0,6 -- mark ELEV3 as no longer scheduled (checked by E3)
+	// STZ 0,6: mark ELEV3 as no longer scheduled (checked by E3)
 	elevator->ELEV3->left1 = NULL;
 
 	// Set D2 = 0
