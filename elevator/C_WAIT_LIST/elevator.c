@@ -8,9 +8,18 @@
 #include "users.h"
 
 // Private functions
+static void E1A(Elevator* elevator);
+static void E2(SharedState* shared_state, ElevatorNode* C);
+static void E2A(SharedState* shared_state, ElevatorNode* C, uint32_t delay);
+static void E4(SharedState* shared_state, ElevatorNode* C);
+static void E4A(SharedState* shared_state, uint32_t delay);
+static void E5(SharedState* shared_state, ElevatorNode* C);
 static void E6B(Elevator* elevator);
+static void E7(SharedState* shared_state, ElevatorNode* C);
 static void E7_continue(SharedState* shared_state, ElevatorNode* C);
+static void E8(SharedState* shared_state, ElevatorNode* C);
 static void E8_continue(SharedState* shared_state, ElevatorNode* C);
+static void E9(SharedState* shared_state, ElevatorNode* C);
 
 uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool) {
 	if (elevator == NULL || shared_state == NULL || storage_pool == NULL) return 1;
@@ -46,7 +55,7 @@ uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Po
 	return 0;
 }
 
-void E1A(Elevator* elevator) {
+static void E1A(Elevator* elevator) {
 	// Set NEXTINST = E1 and go to CYCLE
     cycle1(elevator->ELEV1, E1);
 }
@@ -57,7 +66,7 @@ void E1(SharedState* shared_state, ElevatorNode* C) {
 }
 
 // [Change of state?]
-void E2(SharedState* shared_state, ElevatorNode* C) {
+static void E2(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
 	// TODO: trace print (Table 1 style) -- no logging yet
@@ -141,7 +150,7 @@ void E2(SharedState* shared_state, ElevatorNode* C) {
 	E3(shared_state, C);
 }
 
-void E2A(SharedState* shared_state, ElevatorNode* C, uint32_t delay) {
+static void E2A(SharedState* shared_state, ElevatorNode* C, uint32_t delay) {
 	// JMP HOLDC
 	holdc(shared_state, C, delay, E2);
 }
@@ -182,7 +191,7 @@ void E3(SharedState* shared_state, ElevatorNode* C) {
 }
 
 // [Let people out, in]
-void E4(SharedState* shared_state, ElevatorNode* C) {
+static void E4(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
 	// Printing
@@ -257,7 +266,7 @@ void E4(SharedState* shared_state, ElevatorNode* C) {
 //	}
 }
 
-void E4A(SharedState* shared_state, uint32_t delay) {
+static void E4A(SharedState* shared_state, uint32_t delay) {
 	// JMP HOLDC
 	holdc(shared_state, shared_state->elevator->ELEV1, delay, E4);
 }
@@ -268,7 +277,7 @@ void E5A(SharedState* shared_state, uint32_t delay) {
 }
 
 // [Close door]
-void E5(SharedState* shared_state, ElevatorNode* C) {
+static void E5(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
 	// Is D1 == 0?
@@ -341,7 +350,7 @@ static void E6B(Elevator* elevator) {
 }
 
 // [Go up a floor]
-void E7(SharedState* shared_state, ElevatorNode* C) {
+static void E7(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
 	// TODO: trace print (Table 1 style) -- "Elevator moving up"
@@ -398,7 +407,7 @@ static void E7_continue(SharedState* shared_state, ElevatorNode* C) {
 }
 
 // [Go down a floor]
-void E8(SharedState* shared_state, ElevatorNode* C) {
+static void E8(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
 	// TODO: trace print (Table 1 style) -- "Elevator moving down"
@@ -455,7 +464,7 @@ static void E8_continue(SharedState* shared_state, ElevatorNode* C) {
 }
 
 // [Set inaction indicator]
-void E9(SharedState* shared_state, ElevatorNode* C) {
+static void E9(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
 	// STZ 0,6: mark ELEV3 as no longer scheduled (checked by E3)

@@ -23,18 +23,9 @@ typedef struct Elevator {
 } Elevator;
 
 uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool);
-void E1A(Elevator* elevator);
 void E1(SharedState* shared_state, ElevatorNode* C);
-void E2(SharedState* shared_state, ElevatorNode* C);
-void E2A(SharedState* shared_state, ElevatorNode* C, uint32_t delay);
 void E3(SharedState* shared_state, ElevatorNode* C);
-void E4A(SharedState* shared_state, uint32_t delay);
-void E4(SharedState* shared_state, ElevatorNode* C);
 void E5A(SharedState* shared_state, uint32_t delay);
-void E5(SharedState* shared_state, ElevatorNode* C);
 void E6(SharedState* shared_state, ElevatorNode* C);
-void E7(SharedState* shared_state, ElevatorNode* C);
-void E8(SharedState* shared_state, ElevatorNode* C);
-void E9(SharedState* shared_state, ElevatorNode* C);
 
 #endif

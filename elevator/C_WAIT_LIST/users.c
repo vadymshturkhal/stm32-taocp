@@ -8,10 +8,11 @@
 #include "users.h"
 #include "values.h"
 
-void U3(SharedState* shared_state, ElevatorNode* user);
-void U4(SharedState* shared_state, ElevatorNode* user);
-
-// Private function
+// Private functions
+static void U1(SharedState* shared_state, ElevatorNode* C);
+static void U2(SharedState* shared_state, ElevatorNode* user);
+static void U3(SharedState* shared_state, ElevatorNode* user);
+static void U4(SharedState* shared_state, ElevatorNode* user);
 static void U4A(SharedState* shared_state, ElevatorNode* user);
 
 uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool) {
@@ -38,7 +39,7 @@ void users_start(SharedState* shared_state) {
 }
 
 // [Enter, prepare for successor]
-void U1(SharedState* shared_state, ElevatorNode* C) {
+static void U1(SharedState* shared_state, ElevatorNode* C) {
 	// User fabric
 
 	Users* users = shared_state->users;
@@ -67,7 +68,7 @@ void U1(SharedState* shared_state, ElevatorNode* C) {
 }
 
 // [Signal and wait]
-void U2(SharedState* shared_state, ElevatorNode* user) {
+static void U2(SharedState* shared_state, ElevatorNode* user) {
 	Elevator* elevator = shared_state->elevator;
 
 	// 1. If FLOOR == IN
@@ -122,7 +123,7 @@ void U2(SharedState* shared_state, ElevatorNode* user) {
 }
 
 // [Enter queue]
-void U3(SharedState* shared_state, ElevatorNode* user) {
+static void U3(SharedState* shared_state, ElevatorNode* user) {
 	// Insert node at right end of QUEUE[IN]
 	elevator_list_insert_node_at_rear(&shared_state->QUEUE[user->IN], user);
 
@@ -138,7 +139,7 @@ static void U4A(SharedState* shared_state, ElevatorNode* user) {
 }
 
 // [Give up]
-void U4(SharedState* shared_state, ElevatorNode* user) {
+static void U4(SharedState* shared_state, ElevatorNode* user) {
 	Elevator* elevator = shared_state->elevator;
 
 	// If the user's IN floor differs from the elevator's current FLOOR: give up
