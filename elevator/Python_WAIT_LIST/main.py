@@ -20,15 +20,13 @@ Trace columns:
     D3      nonzero while the doors are open but nobody is getting in or out
     step    the Knuth step (U1-U6, E1-E9) that produced this row
 """
-import random
-
-from settings import SharedState, deletew, create_users
+from settings import SharedState, deletew, create_users, values_seed
 from elevator import Elevator
 from users import Users
 
 
 if __name__ == "__main__":
-    random.seed(1)  # comment this line for a different run each time
+    values_seed(1)  # matches the C port's values_seed(1): same xorshift32 sequence
 
     shared_state = SharedState()
     users_quantity = 4
