@@ -14,5 +14,8 @@ typedef struct Users {
 } Users;
 
 uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool);
+void U1(SharedState* shared_state, ElevatorNode* C);
+void U5(SharedState* shared_state, ElevatorNode* C);
+void U6(SharedState* shared_state, ElevatorNode* C);
 
 #endif
