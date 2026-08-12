@@ -139,7 +139,23 @@ static void U4A(SharedState* shared_state, ElevatorNode* user) {
 
 // [Give up]
 void U4(SharedState* shared_state, ElevatorNode* user) {
+	Elevator* elevator = shared_state->elevator;
 
+	// If the user's IN floor differs from the elevator's current FLOOR: give up
+	if (user->IN != elevator->FLOOR) {
+		// TODO: trace print (Table 1 style) -- "... decides to give up, leaves the system"
+		U6(shared_state, user);
+		return;
+	}
+
+	// JANZ U4A: doors still busy: reschedule U4
+	if (elevator->D1 != 0) {
+		U4A(shared_state, user);
+		return;
+	}
+
+	// TODO: trace print (Table 1 style) -- "... decides to give up, leaves the system"
+	U6(shared_state, user);
 }
 
 // [Get in]
