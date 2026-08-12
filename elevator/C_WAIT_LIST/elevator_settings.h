@@ -36,10 +36,9 @@ void hold(SharedState* shared_state, ElevatorNode* node, uint32_t delay);
 void holdc(SharedState* shared_state, ElevatorNode* node, uint32_t delay, NextInst next_inst);
 void cycle1(ElevatorNode* node, NextInst next_inst);
 void decision(SharedState* shared_state, NextInst caller);
+void cycle(SharedState* shared_state);
 //insert = elevator_list_insert_node_at_rear
 //deletew = elevator_list_delete_nodew
 //delete = elevator_list_delete_node
-
-//cycle
 
 #endif

@@ -134,3 +134,20 @@ void decision(SharedState* shared_state, NextInst caller) {
 	elevator->ELEV1->NEXTINST = E6;
 	hold(shared_state, elevator->ELEV1, delay);
 }
+
+void cycle(SharedState* shared_state) {
+	// While the WAIT list is not empty
+	while (shared_state->WAIT_LIST.head->right1 != shared_state->WAIT_LIST.head) {
+		// Take the earliest node off the WAIT list
+		ElevatorNode* C = shared_state->WAIT_LIST.head->right1;
+
+		// Advance TIME to its NEXTTIME
+		shared_state->TIME = C->NEXTTIME;
+
+		// Unlink it
+		elevator_list_delete_nodew(C);
+
+		// Call NEXTINST
+		C->NEXTINST(shared_state, C);
+	}
+}
