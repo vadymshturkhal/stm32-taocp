@@ -6,8 +6,9 @@
 #include "storage_pool.h"
 
 struct ElevatorNode;  // forward declaration so NextInst's tag has file scope
+struct Elevator;      // forward declaration so NextInst's tag has file scope
 
-typedef void (*NextInst)(struct ElevatorNode*);
+typedef void (*NextInst)(struct Elevator*, struct ElevatorNode*);
 
 // FIXME: ADD INTERTIME and USER_NAME
 typedef struct ElevatorNode {

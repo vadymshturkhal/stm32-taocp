@@ -33,14 +33,19 @@ uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Po
 	return 0;
 }
 
-void E1() {
+void E1A(Elevator* elevator) {
+	// Set NEXTINST = E1 and go to CYCLE
+    cycle1(elevator->ELEV1, E1);
+}
+
+void E1(Elevator* elevator, ElevatorNode* C) {
 
 }
 
-void E2() {
+void E2(Elevator* elevator, ElevatorNode* C) {
 
 }
 
-void E6() {
+void E6(Elevator* elevator, ElevatorNode* C) {
 
 }
