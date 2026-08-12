@@ -9,6 +9,7 @@
 
 // Private function
 static void E6B(Elevator* elevator);
+static void E7_continue(SharedState* shared_state, ElevatorNode* C);
 
 uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool) {
 	if (elevator == NULL || shared_state == NULL || storage_pool == NULL) return 1;
@@ -24,6 +25,10 @@ uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Po
 
 	elevator->ELEV3 = storage_pool_pop(storage_pool);
 	if (elevator->ELEV3 == NULL) return 2;
+
+	elevator->ELEV1->NEXTINST = E1;
+	elevator->ELEV2->NEXTINST = E5;
+	elevator->ELEV3->NEXTINST = E9;
 
 	elevator->STATE = 0;  // Neutral
 	elevator->FLOOR = HOME_FLOOR;
@@ -336,7 +341,59 @@ static void E6B(Elevator* elevator) {
 
 // [Go up a floor]
 void E7(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
 
+	// TODO: trace print (Table 1 style) -- "Elevator moving up"
+
+	// INC4 1
+	elevator->FLOOR += 1;
+
+	// Wait 51 units
+	uint32_t delay = 51;
+	holdc(shared_state, elevator->ELEV1, delay, E7_continue);
+}
+
+// Not in MIX
+static void E7_continue(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
+
+	// Is CALLCAR[FLOOR] or CALLUP[FLOOR] != 0?
+	bool is_callcar_or_callup = shared_state->CALLS[elevator->FLOOR] & (CALLCAR | CALLUP);
+
+	// If yes: it is time to stop elevator
+	if (is_callcar_or_callup) {
+		// Wait 14 units and go to E2
+		uint32_t delay = 14;
+		E2A(shared_state, elevator->ELEV1, delay);
+		return;
+	}
+
+	// If not
+	// Is FLOOR == HOME_FLOOR or CALLDOWN[FLOOR] != 0?
+	if (elevator->FLOOR == HOME_FLOOR || (shared_state->CALLS[elevator->FLOOR] & CALLDOWN)) {
+		// Are there calls for higher floors?
+		bool has_higher_call = false;
+		for (uint32_t j = elevator->FLOOR + 1; j < FLOORS; j++) {
+			if (shared_state->CALLS[j] != 0) {
+				has_higher_call = true;
+				break;
+			}
+		}
+
+		// If yes: repeat E7
+		if (has_higher_call) {
+			E7(shared_state, C);
+			return;
+		}
+	} else {
+		// repeat E7
+		E7(shared_state, C);
+		return;
+	}
+
+	// It's time to stop elevator
+	uint32_t delay = 14;
+	E2A(shared_state, elevator->ELEV1, delay);
 }
 
 // [Go down a floor]
