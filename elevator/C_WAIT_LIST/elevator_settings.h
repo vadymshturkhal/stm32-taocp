@@ -19,7 +19,7 @@ struct ElevatorNode;  // forward declaration so NextInst's tag has file scope
 typedef struct Elevator Elevator;
 typedef struct Users Users;
 
-typedef struct {
+typedef struct SharedState {
     uint32_t TIME;
     uint32_t CALLS[FLOORS];
     ElevatorList ELEVATOR_LIST;   // Users currently riding the car

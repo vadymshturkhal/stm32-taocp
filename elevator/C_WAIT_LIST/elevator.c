@@ -42,12 +42,14 @@ void E1A(Elevator* elevator) {
 }
 
 // [Wait for call]
-void E1(Elevator* elevator, ElevatorNode* C) {
+void E1(SharedState* shared_state, ElevatorNode* C) {
 
 }
 
 // [Change of state?]
-void E2(Elevator* elevator, ElevatorNode* C) {
+void E2(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
+
 	// TODO: trace print (Table 1 style) -- no logging yet
 
 	// 1 STATE is GOINGUP
@@ -55,7 +57,7 @@ void E2(Elevator* elevator, ElevatorNode* C) {
 		// Are there calls for higher floors?
 		bool has_higher_call = false;
 		for (uint32_t j = elevator->FLOOR + 1; j < FLOORS; j++) {
-			if (elevator->shared_state->CALLS[j] != 0) {
+			if (shared_state->CALLS[j] != 0) {
 				has_higher_call = true;
 				break;
 			}
@@ -63,14 +65,14 @@ void E2(Elevator* elevator, ElevatorNode* C) {
 
 		// If yes, go to E3
 		if (has_higher_call) {
-			E3(elevator, C);
+			E3(shared_state, C);
 			return;
 		}
 
 		// Have passengers in the elevator called for lower floors?
 		bool has_lower_callcar = false;
 		for (uint32_t j = 0; j < elevator->FLOOR; j++) {
-			if (elevator->shared_state->CALLS[j] & CALLCAR) {
+			if (shared_state->CALLS[j] & CALLCAR) {
 				has_lower_callcar = true;
 				break;
 			}
@@ -89,7 +91,7 @@ void E2(Elevator* elevator, ElevatorNode* C) {
 		// Are there calls for lower floors?
 		bool has_lower_call = false;
 		for (uint32_t j = 0; j < elevator->FLOOR; j++) {
-			if (elevator->shared_state->CALLS[j] != 0) {
+			if (shared_state->CALLS[j] != 0) {
 				has_lower_call = true;
 				break;
 			}
@@ -97,14 +99,14 @@ void E2(Elevator* elevator, ElevatorNode* C) {
 
 		// If yes, go to E3
 		if (has_lower_call) {
-			E3(elevator, C);
+			E3(shared_state, C);
 			return;
 		}
 
 		// Have passengers in the elevator called for higher floors?
 		bool has_higher_callcar = false;
 		for (uint32_t j = elevator->FLOOR + 1; j < FLOORS; j++) {
-			if (elevator->shared_state->CALLS[j] & CALLCAR) {
+			if (shared_state->CALLS[j] & CALLCAR) {
 				has_higher_callcar = true;
 				break;
 			}
@@ -123,19 +125,21 @@ void E2(Elevator* elevator, ElevatorNode* C) {
 	}
 
 	// Set all CALL variables for the current FLOOR to zero
-	elevator->shared_state->CALLS[elevator->FLOOR] = 0;
+	shared_state->CALLS[elevator->FLOOR] = 0;
 
 	// Jump to E3
-	E3(elevator, C);
+	E3(shared_state, C);
 }
 
-void E2A(Elevator* elevator, ElevatorNode* C, uint32_t delay) {
+void E2A(SharedState* shared_state, ElevatorNode* C, uint32_t delay) {
 	// JMP HOLDC
-	holdc(elevator->shared_state, C, delay, E2);
+	holdc(shared_state, C, delay, E2);
 }
 
 // [Open door]
-void E3(Elevator* elevator, ElevatorNode* C) {
+void E3(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
+
 	// TODO: trace print (Table 1 style) -- no logging yet
 
 	// If activity already scheduled: remove it from WAIT list
@@ -148,11 +152,11 @@ void E3(Elevator* elevator, ElevatorNode* C) {
 
 	// Schedule activity E9 after 300 units
 	uint32_t delay = 300;
-	hold(elevator->shared_state, elevator->ELEV3, delay);
+	hold(shared_state, elevator->ELEV3, delay);
 
 	// Schedule activity E5 after 76 units
 	delay = 76;
-	hold(elevator->shared_state, elevator->ELEV2, delay);
+	hold(shared_state, elevator->ELEV2, delay);
 
 	// Set D2 to nonzero
 	elevator->D2 = 1;
@@ -160,22 +164,23 @@ void E3(Elevator* elevator, ElevatorNode* C) {
 	// Set D1 to nonzero
 	elevator->D1 = 1;
 
+	// Printing
 	elevator->first_search = true;
 
 	delay = 20;
-	E4A(elevator, delay);
+	E4A(shared_state, delay);
 }
 
 // [Let people out, in]
-void E4(Elevator* elevator, ElevatorNode* C) {
+void E4(SharedState* shared_state, ElevatorNode* C) {
 
 }
 
-void E4A(Elevator* elevator, uint32_t delay) {
+void E4A(SharedState* shared_state, uint32_t delay) {
 	// JMP HOLDC
-	holdc(elevator->shared_state, elevator->ELEV1, delay, E4);
+	holdc(shared_state, shared_state->elevator->ELEV1, delay, E4);
 }
 
-void E6(Elevator* elevator, ElevatorNode* C) {
+void E6(SharedState* shared_state, ElevatorNode* C) {
 
 }
