@@ -11,6 +11,9 @@
 void U3(SharedState* shared_state, ElevatorNode* user);
 void U4(SharedState* shared_state, ElevatorNode* user);
 
+// Private function
+static void U4A(SharedState* shared_state, ElevatorNode* user);
+
 uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool) {
 	if (users == NULL || shared_state == NULL || storage_pool == NULL) return 1;
 
@@ -120,7 +123,10 @@ void U2(SharedState* shared_state, ElevatorNode* user) {
 
 // [Enter queue]
 void U3(SharedState* shared_state, ElevatorNode* user) {
+	// Insert node at right end of QUEUE[IN]
+	elevator_list_insert_node_at_rear(&shared_state->QUEUE[user->IN], user);
 
+	U4A(shared_state, user);
 }
 
 // [Wait GIVEUPTIME units]
