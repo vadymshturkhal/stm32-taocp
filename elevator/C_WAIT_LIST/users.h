@@ -9,12 +9,14 @@
 
 typedef struct Users {
     SharedState* shared_state;
+    Storage_Pool* storage_pool;   // used by U1 to allocate arriving users' nodes
     ElevatorNode* USER1;
     uint32_t user_id;
 } Users;
 
 uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool);
 void U1(SharedState* shared_state, ElevatorNode* C);
+void U2(SharedState* shared_state, ElevatorNode* user);
 void U5(SharedState* shared_state, ElevatorNode* C);
 void U6(SharedState* shared_state, ElevatorNode* C);
 
