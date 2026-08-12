@@ -190,6 +190,13 @@ void U5(SharedState* shared_state, ElevatorNode* user) {
 }
 
 // [Get out]
-void U6(SharedState* shared_state, ElevatorNode* C) {
+void U6(SharedState* shared_state, ElevatorNode* user) {
+	// TODO: trace print (Table 1 style) -- "... gets out, leaves the system"
 
+	// JMP DELETE
+	elevator_list_delete_node(user);
+
+	// Not in MIX -- Python relies on garbage collection here; C manages the
+	// storage pool manually, so the node must be returned once the user leaves
+	storage_pool_push(shared_state->users->storage_pool, user);
 }
