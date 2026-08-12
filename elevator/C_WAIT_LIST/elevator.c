@@ -30,6 +30,9 @@ uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Po
 
 	elevator->first_search = false;
 
+	// Matches MIX memory starting zero (LLINK of ELEV3, checked in E3, zeroed by E9)
+	elevator->ELEV3->left1 = NULL;
+
 	return 0;
 }
 
@@ -133,7 +136,34 @@ void E2A(Elevator* elevator, ElevatorNode* C, uint32_t delay) {
 
 // [Open door]
 void E3(Elevator* elevator, ElevatorNode* C) {
+	// TODO: trace print (Table 1 style) -- no logging yet
 
+	// If activity already scheduled: remove it from WAIT list
+	// (Knuth: LDA 0,6 / JANZ DELETEW -- ELEV3->left1 is that same cell,
+	// zeroed by E9 when it fires uncancelled, and zeroed once at elevator_init)
+	if (elevator->ELEV3->left1 != NULL) {
+		// DELETEW
+		elevator_list_delete_nodew(elevator->ELEV3);
+	}
+
+	// Schedule activity E9 after 300 units
+	uint32_t delay = 300;
+	hold(elevator->shared_state, elevator->ELEV3, delay);
+
+	// Schedule activity E5 after 76 units
+	delay = 76;
+	hold(elevator->shared_state, elevator->ELEV2, delay);
+
+	// Set D2 to nonzero
+	elevator->D2 = 1;
+
+	// Set D1 to nonzero
+	elevator->D1 = 1;
+
+	elevator->first_search = true;
+
+	delay = 20;
+	E4A(elevator, delay);
 }
 
 // [Let people out, in]
@@ -141,8 +171,9 @@ void E4(Elevator* elevator, ElevatorNode* C) {
 
 }
 
-void E4A(uint32_t delay) {
-
+void E4A(Elevator* elevator, uint32_t delay) {
+	// JMP HOLDC
+	holdc(elevator->shared_state, elevator->ELEV1, delay, E4);
 }
 
 void E6(Elevator* elevator, ElevatorNode* C) {
