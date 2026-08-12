@@ -7,6 +7,9 @@
 #include "elevator.h"
 #include "users.h"
 
+// Private function
+static void E6B(Elevator* elevator);
+
 uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool) {
 	if (elevator == NULL || shared_state == NULL || storage_pool == NULL) return 1;
 
@@ -283,6 +286,59 @@ void E5(SharedState* shared_state, ElevatorNode* C) {
 	holdc(shared_state, elevator->ELEV1, delay, E6);
 }
 
+// [Prepare to move]
 void E6(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
+
+	// If STATE != GOINGDOWN: CALLUP and CALLCAR on this floor are reset
+	if (elevator->STATE >= 0) {
+		shared_state->CALLS[elevator->FLOOR] &= ~(CALLUP | CALLCAR);
+	}
+
+	// If STATE != GOINGUP: reset CALLCAR and CALLDOWN
+	if (elevator->STATE <= 0) {
+		shared_state->CALLS[elevator->FLOOR] &= ~(CALLCAR | CALLDOWN);
+	}
+
+	// Perform DECISION subroutine
+	if (elevator->STATE == 0) {
+		// J5Z DECISION
+		decision(shared_state, E6);
+	}
+
+	E6B(elevator);
+}
+
+static void E6B(Elevator* elevator) {
+	// If STATE == NEUTRAL: go to E1 and wait
+	if (elevator->STATE == 0) {
+		E1A(elevator);  // NOTE: can skip this line
+		return;
+	}
+
+	if (elevator->D2 != 0) {
+		// Cancel activity E9
+		elevator_list_delete_nodew(elevator->ELEV3);
+	}
+
+	// Wait 15 units of time
+	uint32_t delay = 15;
+
+	// If STATE == GOINGDOWN, go to E8
+	if (elevator->STATE < 0) {
+		holdc(elevator->shared_state, elevator->ELEV1, delay, E8);
+		return;
+	}
+
+	// Else go to E7
+	holdc(elevator->shared_state, elevator->ELEV1, delay, E7);
+}
+
+// [Go up a floor]
+void E7(SharedState* shared_state, ElevatorNode* C) {
+
+}
+
+void E8(SharedState* shared_state, ElevatorNode* C) {
 
 }
