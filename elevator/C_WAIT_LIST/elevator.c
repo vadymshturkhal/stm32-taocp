@@ -7,9 +7,10 @@
 #include "elevator.h"
 #include "users.h"
 
-// Private function
+// Private functions
 static void E6B(Elevator* elevator);
 static void E7_continue(SharedState* shared_state, ElevatorNode* C);
+static void E8_continue(SharedState* shared_state, ElevatorNode* C);
 
 uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool) {
 	if (elevator == NULL || shared_state == NULL || storage_pool == NULL) return 1;
@@ -398,12 +399,69 @@ static void E7_continue(SharedState* shared_state, ElevatorNode* C) {
 
 // [Go down a floor]
 void E8(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
 
+	// TODO: trace print (Table 1 style) -- "Elevator moving down"
+
+	// DEC4 1
+	elevator->FLOOR -= 1;
+
+	// Wait 61 units
+	uint32_t delay = 61;
+	holdc(shared_state, elevator->ELEV1, delay, E8_continue);
+}
+
+// Not in MIX
+static void E8_continue(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
+
+	// Is CALLCAR[FLOOR] or CALLDOWN[FLOOR] != 0
+	bool is_callcar_or_calldown = shared_state->CALLS[elevator->FLOOR] & (CALLCAR | CALLDOWN);
+
+	// If yes: it is time to stop elevator
+	if (is_callcar_or_calldown) {
+		// Wait 23 units and go to E2
+		uint32_t delay = 23;
+		E2A(shared_state, elevator->ELEV1, delay);
+		return;
+	}
+
+	// If not
+	// Is FLOOR == HOME_FLOOR or CALLUP[FLOOR] != 0?
+	if (elevator->FLOOR == HOME_FLOOR || (shared_state->CALLS[elevator->FLOOR] & CALLUP)) {
+		// Are there calls for lower floors?
+		bool has_lower_call = false;
+		for (uint32_t j = 0; j < elevator->FLOOR; j++) {
+			if (shared_state->CALLS[j] != 0) {
+				has_lower_call = true;
+				break;
+			}
+		}
+
+		// If yes: repeat E8
+		if (has_lower_call) {
+			E8(shared_state, C);
+			return;
+		}
+	} else {
+		// repeat E8
+		E8(shared_state, C);
+		return;
+	}
+
+	// It's time to stop elevator
+	uint32_t delay = 23;
+	E2A(shared_state, elevator->ELEV1, delay);
 }
 
 // [Set inaction indicator]
 void E9(SharedState* shared_state, ElevatorNode* C) {
+	Elevator* elevator = shared_state->elevator;
+
+	// STZ 0,6 -- mark ELEV3 as no longer scheduled (checked by E3)
+	elevator->ELEV3->left1 = NULL;
+
 	// Set D2 = 0
-	shared_state->elevator->D2 = 0;
+	elevator->D2 = 0;
 	decision(shared_state, E9);
 }
