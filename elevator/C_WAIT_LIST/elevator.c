@@ -334,6 +334,9 @@ static void E6B(Elevator* elevator) {
 	if (elevator->D2 != 0) {
 		// Cancel activity E9
 		elevator_list_delete_nodew(elevator->ELEV3);
+
+		// STZ 0,6
+		elevator->ELEV3->left1 = NULL;
 	}
 
 	// Wait 15 units of time
