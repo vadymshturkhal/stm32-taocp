@@ -107,12 +107,47 @@ class SharedState:
         # set NEXTTIME of head node to 0
         self.WAIT_LIST.head.info = WaitInfo(NEXTTIME=0)
 
+_xorshift_state = 1
+_use_xorshift32 = False
+
+def values_seed(seed: int):
+    """
+    Not in MIX -- seeds the same xorshift32 PRNG the C port uses (values.c),
+    and switches Values() to draw from it instead of Python's random module,
+    so the two ports can produce a diffable trace.
+    """
+    global _xorshift_state, _use_xorshift32
+    _xorshift_state = seed if seed != 0 else 1
+    _use_xorshift32 = True
+
+def _xorshift32() -> int:
+    global _xorshift_state
+    x = _xorshift_state
+    x ^= (x << 13) & 0xFFFFFFFF
+    x ^= x >> 17
+    x ^= (x << 5) & 0xFFFFFFFF
+    _xorshift_state = x
+    return x
+
+def _rand_range(lo: int, hi: int) -> int:
+    # Inclusive range [lo, hi], matches values.c's rand_range
+    return lo + (_xorshift32() % (hi - lo + 1))
+
 class Values:
     def __init__(self):
-        self.IN = random.randint(0, FLOORS - 1)
-        self.OUT = random.choice([floor for floor in range(FLOORS) if floor != self.IN])
-        self.GIVEUPTIME = random.randint(100, 400) * UNIT
-        self.INTERTIME = random.randint(100, 200) * UNIT
+        if _use_xorshift32:
+            self.IN = _rand_range(0, FLOORS - 1)
+            out = _rand_range(0, FLOORS - 1)
+            while out == self.IN:
+                out = _rand_range(0, FLOORS - 1)
+            self.OUT = out
+            self.GIVEUPTIME = _rand_range(100, 400) * UNIT
+            self.INTERTIME = _rand_range(100, 200) * UNIT
+        else:
+            self.IN = random.randint(0, FLOORS - 1)
+            self.OUT = random.choice([floor for floor in range(FLOORS) if floor != self.IN])
+            self.GIVEUPTIME = random.randint(100, 400) * UNIT
+            self.INTERTIME = random.randint(100, 200) * UNIT
 
     def __str__(self):
         return (f"\nValues: \n IN={self.IN} \n OUT={self.OUT} \n GIVEUPTIME={self.GIVEUPTIME} \n "
@@ -243,7 +278,7 @@ def decision(shared_state: SharedState, elevator, caller):
         hold(shared_state, elevator.ELEV1, delay)
         return
 
-    # D3. Any calls
+    # D3. Any calls?
     # Search for a nonzero call variable
     j = -1
     for i in range(FLOORS):

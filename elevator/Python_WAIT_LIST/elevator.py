@@ -32,7 +32,7 @@ class Elevator:
         pass
 
     def E2A(self, node, delay):
-        # FIXME: noode parameter is redundant as all methods are using ELEV1 node
+        # FIXME: node parameter is redundant as all methods are using ELEV1 node
         # JMP HOLDC
         holdc(self.shared_state, node, delay, self.E2)
 
@@ -49,13 +49,13 @@ class Elevator:
         if self.STATE > 0:
             # Are there calls for higher floors?
             if any(self.shared_state.CALLS[j] != 0 for j in range(self.FLOOR + 1, FLOORS)):
-                    # if yes, go to E3
+                    # If yes, go to E3
                     self.E3()
                     return
 
             # Have passengers in the elevator called for lower floors?
             if any(self.shared_state.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR)):
-                # reverse direction of STATE
+                # Reverse direction of STATE
                 self.STATE = -self.STATE
             else:
                 self.STATE = 0
@@ -64,13 +64,13 @@ class Elevator:
         elif self.STATE < 0:
             # Are there calls for lower floors?
             if any(self.shared_state.CALLS[j] != 0 for j in range(self.FLOOR)):
-                   # if yes, go to E3
+                   # If yes, go to E3
                     self.E3()
                     return
 
             # Have passengers in the elevator called for higher floors?
             if any(self.shared_state.CALLS[j] & CALLCAR != 0 for j in range(self.FLOOR + 1, FLOORS)):
-                # reverse direction of STATE
+                # Reverse direction of STATE
                 self.STATE = -self.STATE
             else:
                 self.STATE = 0
@@ -81,7 +81,7 @@ class Elevator:
         # Set all CALL variables for the current FLOOR to zero
         self.shared_state.CALLS[self.FLOOR] = 0b000
 
-        # jump to E3
+        # Jump to E3
         self.E3()
 
     # [Open door]
@@ -93,22 +93,22 @@ class Elevator:
         action = "Elevator doors start to open"
         print(row + action)
     
-        # if activity already scheduled: remove it from WAIT list
+        # If activity already scheduled: remove it from WAIT list
         if self.ELEV3.left1 is not None:
             deletew(self.shared_state, self.ELEV3)
 
-        # schedule activity E9 after 300 units
+        # Schedule activity E9 after 300 units
         delay = 300
         hold(self.shared_state, self.ELEV3, delay)
 
-        # schedule activity E5 after 76 units
+        # Schedule activity E5 after 76 units
         delay = 76
         hold(self.shared_state, self.ELEV2, delay)
 
-        # set D2 to nonzero
+        # Set D2 to nonzero
         self.D2 = 1
 
-        # set D1 to nonzero
+        # Set D1 to nonzero
         self.D1 = 1
 
         self.first_search = True
@@ -153,6 +153,7 @@ class Elevator:
             return
 
         # If C == ELEVATOR_LIST.head: search is complete
+
         C = self.shared_state.QUEUE[self.FLOOR].head
         C = C.right2
 
@@ -176,7 +177,7 @@ class Elevator:
             # Return to simulate other events
             return
 
-        # if C == self.shared_state.QUEUE[self.FLOOR].head: QUEUE is empty
+        # If C == self.shared_state.QUEUE[self.FLOOR].head: QUEUE is empty
 
         # Set D1 = 0
         self.D1 = 0
@@ -255,7 +256,8 @@ class Elevator:
         if self.D2 != 0:
             # Cancel activity E9
             deletew(self.shared_state, self.ELEV3)
-
+            self.ELEV3.left1 = None
+            
         # Wait 15 units of time
         delay = 15
 
@@ -285,7 +287,7 @@ class Elevator:
 
     # Not in MIX
     def E7_continue(self, contract_node=None):
-        # Is CALLCAR[FLOOR] or CALLUP[FLOOR] != 0
+        # Is CALLCAR[FLOOR] or CALLUP[FLOOR] != 0?
         is_callcar_or_callup = self.shared_state.CALLS[self.FLOOR] & (CALLCAR | CALLUP)
 
         # If yes: it is time to stop elevator
@@ -358,6 +360,7 @@ class Elevator:
 
     # [Set inaction indicator]
     def E9(self, contract_node=None):
+        self.ELEV3.left1 = None
         # Set D2 = 0
         self.D2 = 0
         decision(self.shared_state, self, self.E9)

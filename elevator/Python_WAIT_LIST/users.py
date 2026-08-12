@@ -4,10 +4,11 @@ from settings import CALLUP, CALLDOWN, CALLCAR
 
 
 class Users:
-    def __init__(self, shared_state, users:list=None):
+    def __init__(self, shared_state, users:list=None, users_quantity=None):
         self.shared_state = shared_state
         shared_state.users = self
         self.user_id = 0  # not in Coroutine U
+        self.users_quantity = users_quantity  # not in MIX -- caps generation when users is None, mirrors the C port
         self.USER1 = ElevatorNode(info=WaitInfo(NEXTINST=self.U1))  # FIXME: if users is None only
         self.users = users
 
@@ -20,6 +21,11 @@ class Users:
     # [Enter, prepare for successor]
     def U1(self, C: ElevatorNode):
         """User fabric"""
+        # Not in MIX -- stops generation once users_quantity users have been
+        # made (only relevant when users is None); mirrors the C port's cap
+        if self.users is None and self.users_quantity is not None and self.user_id >= self.users_quantity:
+            return
+
         # 1 JMP VALUES
         user_values = values()
 
@@ -64,7 +70,7 @@ class Users:
             # (if the elevator doors are now closing)
 
             if elevator.ELEV1.info.NEXTINST == elevator.E6:
-                # reposition it at E3
+                # Reposition it at E3
                 elevator.ELEV1.info.NEXTINST = elevator.E3
 
                 # JMP DELETEW
@@ -80,7 +86,8 @@ class Users:
             # 3 
             # if D3 != 0
             if elevator.D3 != 0:
-                # set D3 = 0, D1 to a nonzero value and start up the elevator's activity E4 again
+                # Set D3 = 0, D1 to a nonzero value and start up the elevator's activity E4 again
+                
                 elevator.D1 = 1
                 elevator.D3 = 0
 
