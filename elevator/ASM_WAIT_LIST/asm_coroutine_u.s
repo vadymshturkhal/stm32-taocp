@@ -148,6 +148,7 @@ ASM_USERS_START:
 @ R10 Elevator* elevator, already
 @ R9 Users* users, already
 @ R8 ElevatorNode* C
+@ R7 ElevatorNode* user
 ASM_U1:
 	@ User fabric
 	@ Not in MIX
@@ -196,21 +197,21 @@ ASM_U1:
 	@ At the end of ASM_U1 restore Stack Pointer
 	ADD SP, SP, #16
 
-	@ User R7 goes to ASM_U2
+	@ User R8 goes to ASM_U2
+	MOVS R8, R7				@ Replace C with user
 
 @ [Signal and wait]
 @ Input: from ASM_U1
 @ R11 SharedState* shared_state, already
 @ R10 Elevator* elevator, already
 @ R9 Users* users, already
-@ R8 ElevatorNode* C FIXME: can replace?
-@ R7 User
+@ R8 ElevatorNode* user
 
 @ Runtime:
 @ R4 ELEV1
 ASM_U2:
 	LDR R1, [R10, #FLOOR]	@ FIXME
-	LDR R2, [R7, #IN]		@ FIXME
+	LDR R2, [R8, #IN]		@ FIXME
 	SUBS R1, R1, R2
 	CBNZ R1, ASM_U2_2H		@ If (elevator->FLOOR != user->IN)
 
@@ -253,8 +254,8 @@ ASM_U2_4H:
 
 ASM_U2_2H:
 	ADD R3, R11, #CALLS			@ R3 = &shared_state->CALLS[0]
-	LDR R1, [R7, #IN]			@ R1 = user->IN
-	LDR R2, [R7, #OUT]			@ R2 = user->OUT
+	LDR R1, [R8, #IN]			@ R1 = user->IN
+	LDR R2, [R8, #OUT]			@ R2 = user->OUT
 	LDR R4, [R3, R1, LSL #2]	@ R4 = shared_state->CALLS[IN]
 	SUBS R2, R2, R1
 	BGT ASM_U2_2H_SET_CALLUP	@ J2P *+3
@@ -293,20 +294,19 @@ ASM_U2_2H_DECISION:
 @ R11 SharedState* shared_state, already
 @ R10 Elevator* elevator, already
 @ R9 Users* users, already
-@ R8 ElevatorNode* C FIXME: can replace?
-@ R7 User
+@ R8 ElevatorNode* user
 ASM_U3:
 	@ elevator_list_insert_node_at_rear(&shared_state->QUEUE[user->IN], user);
 	@ &shared_state->QUEUE[user->IN], user = shared_state + #QUEUE + IN*8
 
 	@ Insert node at right end of QUEUE[IN]
-	LDR R1, [R7, #IN]						@ R1 = user->IN
+	LDR R1, [R8, #IN]						@ R1 = user->IN
 	ADD R2, R11, #QUEUE						@ R2 = shared_state + #QUEUE
 	LSLS R1, R1, #3							@ R1 = IN * sizeof(ElevatorList)
 	ADD R0, R1, R2							@ R0 = &shared_state->QUEUE[IN] = shared_state + #QUEUE + IN*8
 	
 	@ R0 = &shared_state->QUEUE[IN]
-	MOVS R1, R7								@ R1 = user
+	MOVS R1, R8								@ R1 = user
 	BL elevator_list_insert_node_at_rear	@ elevator_list_insert_node_at_rear(&QUEUE[IN], user);
 
 @ [Wait GIVEUPTIME units]
@@ -314,14 +314,37 @@ ASM_U4A:
 	@ LDA GIVEUPTIME
 	@ JMP HOLDC
 
-	LDR R2, [R7, #GIVEUPTIME]
+	LDR R2, [R8, #GIVEUPTIME]
 	LDR R3, =ASM_U4
 	MOV R0, R11
-	MOVS R1, R7
+	MOVS R1, R8
 	BL holdc 								@ holdc(shared_state, user, delay, U4);
 
+@ [Give up]
+@ [Enter queue]
+@ Input: from ASM_U1
+@ R11 SharedState* shared_state, already
+@ R10 Elevator* elevator, already
+@ R9 Users* users, already
+@ R8 ElevatorNode* user, called from ASM_CYCLE
 ASM_U4:
-	@FIXME
+	@ If the user's IN floor differs from the elevator's current FLOOR: give up
+	LDR R0, [R8, #IN]					@ user->IN
+	LDR R1, [R10, #FLOOR]				@ elevator->FLOOR
+	SUBS R0, R0, R1						@ IN(C) - FLOOR
+	CBNZ R0, ASM_U6						@ user->IN != elevator->FLOOR -> give up
+
+	@ JANZ U4A: doors still busy: reschedule U4
+	LDR R1, [R10, #D1]					@ R1 = D1
+	CMP R1, #0
+	BNE ASM_U4A							@ JANZ U4A
+
+ASM_U6:
+
+
+ASM_U5:
+
+
 
 DONE:
 	B ASM_CYCLE
