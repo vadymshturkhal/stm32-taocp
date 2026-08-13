@@ -138,16 +138,12 @@ ASM_USERS_START:
 
 @ [Enter, prepare for successor]
 @ Input:
-@ R11 SharedState* shared_state, already
-@ R10 Elevator* elevator, already
-@ R9 Users* users, already
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
 @ R8 ElevatorNode* C
 
 @ Runtime:
-@ R11 SharedState* shared_state, already
-@ R10 Elevator* elevator, already
-@ R9 Users* users, already
-@ R8 ElevatorNode* C
 @ R7 ElevatorNode* user
 ASM_U1:
 	@ User fabric
@@ -201,10 +197,10 @@ ASM_U1:
 	MOVS R8, R7				@ Replace C with user
 
 @ [Signal and wait]
-@ Input: from ASM_U1
-@ R11 SharedState* shared_state, already
-@ R10 Elevator* elevator, already
-@ R9 Users* users, already
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
 @ R8 ElevatorNode* user
 
 @ Runtime:
@@ -290,10 +286,10 @@ ASM_U2_2H_DECISION:
 	BL decision					@ decision(shared_state, caller=U2);
 
 @ [Enter queue]
-@ Input: from ASM_U1
-@ R11 SharedState* shared_state, already
-@ R10 Elevator* elevator, already
-@ R9 Users* users, already
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
 @ R8 ElevatorNode* user
 ASM_U3:
 	@ elevator_list_insert_node_at_rear(&shared_state->QUEUE[user->IN], user);
@@ -321,26 +317,38 @@ ASM_U4A:
 	BL holdc 								@ holdc(shared_state, user, delay, U4);
 
 @ [Give up]
-@ [Enter queue]
-@ Input: from ASM_U1
-@ R11 SharedState* shared_state, already
-@ R10 Elevator* elevator, already
-@ R9 Users* users, already
-@ R8 ElevatorNode* user, called from ASM_CYCLE
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* user, also if called from ASM_CYCLE
 ASM_U4:
 	@ If the user's IN floor differs from the elevator's current FLOOR: give up
 	LDR R0, [R8, #IN]					@ user->IN
 	LDR R1, [R10, #FLOOR]				@ elevator->FLOOR
 	SUBS R0, R0, R1						@ IN(C) - FLOOR
-	CBNZ R0, ASM_U6						@ user->IN != elevator->FLOOR -> give up
+	CBNZ R0, ASM_U6						@ JANZ *+3
 
 	@ JANZ U4A: doors still busy: reschedule U4
 	LDR R1, [R10, #D1]					@ R1 = D1
 	CMP R1, #0
 	BNE ASM_U4A							@ JANZ U4A
 
+@ [Get out]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* user, also if called from ASM_CYCLE
 ASM_U6:
+	MOVS R0, R8
+	BL elevator_list_delete_node		@ elevator_list_delete_node(user);
 
+	LDR R0, [R9, #STORAGE_POOL]			@ R0 = shared_state->users->storage_pool
+	MOVS R1, R8							@ R1 = user
+	BL storage_pool_push				@ storage_pool_push(storage_pool, user);
+
+	B ASM_CYCLE
 
 ASM_U5:
 
