@@ -177,10 +177,13 @@ class Users:
         self.shared_state.CALLS[user.info.OUT] |= CALLCAR
 
         # 3
-        # if STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
-        # Knuth's style
-        if elevator.STATE == 0:
-            elevator.STATE = user.info.OUT - elevator.FLOOR
+        # Jump if STATE != NEUTRAL
+        if elevator.STATE != 0:
+            # J5NZ CYCLE
+            return
+
+        # Knuth's style: set STATE = GOINGUP or GOINGDOWN as appropriate
+        elevator.STATE = user.info.OUT - elevator.FLOOR
 
         # 4
         # Set elevator's activity E5 to be executed after 25 units of time
