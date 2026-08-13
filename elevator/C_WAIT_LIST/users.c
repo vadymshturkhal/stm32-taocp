@@ -181,11 +181,14 @@ void U5(SharedState* shared_state, ElevatorNode* user) {
 	// 2. Set CALLCAR[OUT] = 1
 	shared_state->CALLS[user->OUT] |= CALLCAR;
 
-	// 3. If STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
-	// Knuth's style
-	if (elevator->STATE == 0) {
-		elevator->STATE = user->OUT - elevator->FLOOR;
+	// 3. Jump if STATE != NEUTRAL,
+	if (elevator->STATE != 0) {
+		// J5NZ CYCLE
+		return;
 	}
+
+	// Knuth's style: set STATE = GOINGUP or GOINGDOWN as appropriate
+	elevator->STATE = user->OUT - elevator->FLOOR;
 
 	// 4. Remove action E5 from WAIT list
 	elevator_list_delete_nodew(elevator->ELEV2);
