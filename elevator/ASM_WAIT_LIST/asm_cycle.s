@@ -8,7 +8,11 @@
     .global ASM_CYCLE
 	.type ASM_CYCLE, %function
 
+    .global ASM_CYCLE_DONE
+	.type ASM_CYCLE_DONE, %function
+
 @ NOTE: R8-R11 are global registers which contain global state and don't need to PUSH them every step
+@ NOTE: Using C NextInst with global parameters permanently stored in R8-R11 Registers
 
 @ SharedState fields definition
 .equ TIME, 				0
