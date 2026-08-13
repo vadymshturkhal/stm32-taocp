@@ -57,6 +57,10 @@
 .equ VALUES_GIVEUPTIME, 8
 .equ VALUES_INTERTIME,	12
 
+@ CALLS bit flags (elevator_settings.h)
+.equ CALLUP,			0b100
+.equ CALLDOWN,			0b010
+
 
 @ Input:
 @ R0 Users* users
@@ -163,7 +167,10 @@ ASM_U1:
 	@ 3. Create User
 	LDR R0, [R9, #STORAGE_POOL]
 	BL storage_pool_pop		@ ElevatorNode* user = storage_pool_pop(users->storage_pool);
-	CBZ R0, DONE_SP			@ if (user == NULL) return;
+	CMP R0, #0
+	BEQ DONE_SP				@ if (user == NULL) return;
+	
+	MOVS R7, R0				@ Save user
 
 	@ Unpack Values
 	LDR R1, [SP, #VALUES_IN]
@@ -184,10 +191,98 @@ ASM_U1:
 	@ At the end of ASM_U1 restore Stack Pointer
 	ADD SP, SP, #16
 
-	@ User R0 goes to ASM_U2
+	@ User R7 goes to ASM_U2
 
+@ [Signal and wait]
+@ Input: from ASM_U1
+@ R11 SharedState* shared_state, already
+@ R10 Elevator* elevator, already
+@ R9 Users* users, already
+@ R8 ElevatorNode* C FIXME: can replace?
+@ R7 User
+@ R4 ELEV1
 ASM_U2:
+	LDR R1, [R10, #FLOOR]		
+	LDR R2, [R7, #IN]
+	SUBS R1, R1, R2
+	CBNZ R1, ASM_U2_2H		@ If (elevator->FLOOR != user->IN)
 
+	@ Is elevator positioned at E6?
+	LDR R0, [R10, #ELEV1]	@ R0 = ELEV1
+	LDR R1, [R0, #NEXTINST]	@ R1 = ELEV1->NEXTINST
+	LDR R2, =ASM_E6
+	MOVS R4, R0				@ Save ELEV1
+	CMP R1, R2
+	BNE ASM_U2_3H
+
+	@ If so, reposition it at E3
+	LDR R2, =ASM_E3
+	STR R2, [R0, #NEXTINST]
+
+	@ Remove it from WAIT list 
+	@ ELEV1 is already at R0
+	BL elevator_list_delete_nodew	@ elevator_list_delete_nodew(elevator->ELEV1);
+
+	@ And reinsert it at front of WAIT
+	B ASM_U2_4H
+
+ASM_U2_3H:
+	@ Jump if D3 == 0
+	LDR R0, [R10, #D3]				@ LDA D3
+	CBZ R0, ASM_U2_2H				@ JAZ 2F
+
+	@ Otherwise make D1 nonzero and set D3 = 0
+	MOVS R1, #1
+	MOVS R3, #0
+	STR R1, [R10, #D1]
+	STR R3, [R10, #D3]
+
+ASM_U2_4H:
+	@ void immed(SharedState* shared_state, ElevatorNode* wait_node)
+	MOV R0, R11
+	MOV R1, R4
+	BL immed
+	B ASM_U3
+
+ASM_U2_2H:
+	ADD R3, R11, #CALLS			@ R3 = &shared_state->CALLS[0]
+	LDR R1, [R7, #IN]			@ R1 = user->IN
+	LDR R2, [R7, #OUT]			@ R2 = user->OUT
+	LDR R4, [R3, R1, LSL #2]	@ R4 = shared_state->CALLS[IN]
+	SUBS R2, R2, R1
+	BGT ASM_U2_2H_SET_CALLUP	@ J2P *+3
+
+	@ Set CALLDOWN[IN] = 1
+	ORRS R4, R4, #CALLDOWN
+	STR R4, [R3, R1, LSL #2]	@ shared_state->CALLS[IN] = ...
+	@ J2P *+2
+	B ASM_U2_2H_CONTINUE
+
+@ Set CALLUP[IN] = 1
+ASM_U2_2H_SET_CALLUP:
+	ORRS R4, R4, #CALLUP
+	STR R4, [R3, R1, LSL #2]	@ shared_state->CALLS[IN] = ...
+
+@ 5. If D2 == 0 or the elevator in its "dormant" position E1, DECISION is performed
+ASM_U2_2H_CONTINUE:
+	LDR R0, [R10, #D2]
+	CBZ R0, ASM_U2_2H_DECISION	@ JAZ *+3
+
+	LDR R0, [R10, #ELEV1]
+	LDR R2, =E1
+	LDR R1, [R0, #NEXTINST]
+	SUBS R0, R1, R2
+	CBZ R0, ASM_U2_2H_DECISION	@ JAZ DECISION
+
+	B ASM_U3
+
+ASM_U2_2H_DECISION:
+	MOV R0, R11
+	LDR R1, =ASM_U2
+	BL decision					@ decision(shared_state, caller=U2);
+
+ASM_U3:
+	@ FIXME
 
 DONE:
 	B ASM_CYCLE
