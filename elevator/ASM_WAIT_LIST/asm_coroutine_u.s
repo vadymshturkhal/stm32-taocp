@@ -12,6 +12,12 @@
     .global ASM_U1
 	.type ASM_U1, %function
 
+    .global ASM_U2
+	.type ASM_U2, %function
+
+	.global ASM_U4
+	.type ASM_U4, %function
+
 
 @ SharedState fields definition
 .equ TIME, 				0
@@ -303,8 +309,19 @@ ASM_U3:
 	MOVS R1, R7								@ R1 = user
 	BL elevator_list_insert_node_at_rear	@ elevator_list_insert_node_at_rear(&QUEUE[IN], user);
 
+@ [Wait GIVEUPTIME units]
 ASM_U4A:
-	@ FIXME
+	@ LDA GIVEUPTIME
+	@ JMP HOLDC
+
+	LDR R2, [R7, #GIVEUPTIME]
+	LDR R3, =ASM_U4
+	MOV R0, R11
+	MOVS R1, R7
+	BL holdc 								@ holdc(shared_state, user, delay, U4);
+
+ASM_U4:
+	@FIXME
 
 DONE:
 	B ASM_CYCLE
