@@ -141,14 +141,19 @@ ELEVATOR_INIT_ERR2:
 	MOVS R0, #2
 	POP {R4-R6, PC}
 
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
 ASM_E1A:
-	@ FIXME
-	@ JMP CYCLE1
+	LDR R0, [R10, #ELEV1]
+	LDR R1, =ASM_E1
+	BL cycle1						@ JMP CYCLE1
 
-
+@ [Wait for call]
 ASM_E1:
-	@ MOVS R0, #3
-	BL ASM_CYCLE_DONE
+	B ASM_CYCLE
 
 ASM_E3:
 	MOVS R0, #3
