@@ -12,9 +12,6 @@
     .global ASM_U1
 	.type ASM_U1, %function
 
-    .global ASM_U2
-	.type ASM_U2, %function
-
 
 @ SharedState fields definition
 .equ TIME, 				0
@@ -202,6 +199,8 @@ ASM_U1:
 @ R9 Users* users, already
 @ R8 ElevatorNode* C FIXME: can replace?
 @ R7 User
+
+@ Runtime:
 @ R4 ELEV1
 ASM_U2:
 	LDR R1, [R10, #FLOOR]	@ FIXME
@@ -283,7 +282,28 @@ ASM_U2_2H_DECISION:
 	LDR R1, =ASM_U2
 	BL decision					@ decision(shared_state, caller=U2);
 
+@ [Enter queue]
+@ Input: from ASM_U1
+@ R11 SharedState* shared_state, already
+@ R10 Elevator* elevator, already
+@ R9 Users* users, already
+@ R8 ElevatorNode* C FIXME: can replace?
+@ R7 User
 ASM_U3:
+	@ elevator_list_insert_node_at_rear(&shared_state->QUEUE[user->IN], user);
+	@ &shared_state->QUEUE[user->IN], user = shared_state + #QUEUE + IN*8
+
+	@ Insert node at right end of QUEUE[IN]
+	LDR R1, [R7, #IN]						@ R1 = user->IN
+	ADD R2, R11, #QUEUE						@ R2 = shared_state + #QUEUE
+	LSLS R1, R1, #3							@ R1 = IN * sizeof(ElevatorList)
+	ADD R0, R1, R2							@ R0 = &shared_state->QUEUE[IN] = shared_state + #QUEUE + IN*8
+	
+	@ R0 = &shared_state->QUEUE[IN]
+	MOVS R1, R7								@ R1 = user
+	BL elevator_list_insert_node_at_rear	@ elevator_list_insert_node_at_rear(&QUEUE[IN], user);
+
+ASM_U4A:
 	@ FIXME
 
 DONE:
