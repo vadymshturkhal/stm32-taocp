@@ -4,10 +4,9 @@
     .section .text
     .global ASM_CYCLE_START
 	.type ASM_CYCLE_START, %function
+
     .global ASM_CYCLE
 	.type ASM_CYCLE, %function
-    .global ASM_CYCLE_DONE
-	.type ASM_CYCLE_DONE, %function
 
 @ NOTE: R8-R11 are global registers which contain global state and don't need to PUSH them every step
 
@@ -82,8 +81,8 @@ ASM_CYCLE:
 
 	@ Call NEXTINST(shared_state, C): handler branches back to ASM_CYCLE when done
 	LDR R2, [R8, #NEXTINST]
-	MOV R0, R11							@ R0 = shared_state
-	MOV R1, R8							@ R1 = C
+	@ MOV R0, R11							@ R0 = shared_state
+	@ MOV R1, R8							@ R1 = C
 	BX R2
 
 ASM_CYCLE_DONE:

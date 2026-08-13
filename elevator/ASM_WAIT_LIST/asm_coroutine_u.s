@@ -9,8 +9,11 @@
     .global ASM_USERS_START
 	.type ASM_USERS_START, %function
 
-    .global ASM_COROUTINE_U
-	.type ASM_COROUTINE_U, %function
+    .global ASM_U1
+	.type ASM_U1, %function
+
+    .global ASM_U2
+	.type ASM_U2, %function
 
 
 @ SharedState fields definition
@@ -96,7 +99,7 @@ ASM_USERS_INIT:
 	MOVS R4, R0						@ save users
 
 	MOVS R0, R2
-	BL storage_pool_pop				
+	BL storage_pool_pop
 	CBZ R0, USERS_INIT_ERR2			@ if (users->USER1 == NULL) return 2;
 	STR R0, [R4, #USER1]			@ users->USER1 = storage_pool_pop(storage_pool);
 
@@ -144,7 +147,6 @@ ASM_USERS_START:
 @ R8 ElevatorNode* C
 ASM_U1:
 	@ User fabric
-
 	@ Not in MIX
 	@ if (users->user_id >= users->users_quantity) return;
 	LDR R0, [R9, #USER_ID]
@@ -169,7 +171,7 @@ ASM_U1:
 	BL storage_pool_pop		@ ElevatorNode* user = storage_pool_pop(users->storage_pool);
 	CMP R0, #0
 	BEQ DONE_SP				@ if (user == NULL) return;
-	
+
 	MOVS R7, R0				@ Save user
 
 	@ Unpack Values
@@ -202,8 +204,8 @@ ASM_U1:
 @ R7 User
 @ R4 ELEV1
 ASM_U2:
-	LDR R1, [R10, #FLOOR]		
-	LDR R2, [R7, #IN]
+	LDR R1, [R10, #FLOOR]	@ FIXME
+	LDR R2, [R7, #IN]		@ FIXME
 	SUBS R1, R1, R2
 	CBNZ R1, ASM_U2_2H		@ If (elevator->FLOOR != user->IN)
 
@@ -219,7 +221,7 @@ ASM_U2:
 	LDR R2, =ASM_E3
 	STR R2, [R0, #NEXTINST]
 
-	@ Remove it from WAIT list 
+	@ Remove it from WAIT list
 	@ ELEV1 is already at R0
 	BL elevator_list_delete_nodew	@ elevator_list_delete_nodew(elevator->ELEV1);
 
@@ -269,7 +271,7 @@ ASM_U2_2H_CONTINUE:
 	CBZ R0, ASM_U2_2H_DECISION	@ JAZ *+3
 
 	LDR R0, [R10, #ELEV1]
-	LDR R2, =E1
+	LDR R2, =ASM_E1
 	LDR R1, [R0, #NEXTINST]
 	SUBS R0, R1, R2
 	CBZ R0, ASM_U2_2H_DECISION	@ JAZ DECISION
