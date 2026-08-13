@@ -12,6 +12,7 @@
     .global ASM_COROUTINE_U
 	.type ASM_COROUTINE_U, %function
 
+
 @ SharedState fields definition
 .equ TIME, 				0
 .equ CALLS,				4
@@ -57,7 +58,6 @@
 .equ VALUES_INTERTIME,	12
 
 
-@ users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool, uint32_t users_quantity)
 @ Input:
 @ R0 Users* users
 @ R1 SharedState* shared_state
@@ -113,6 +113,7 @@ USERS_INIT_ERR2:
 	MOVS R0, #2
 	POP {R4, PC}
 
+@ Input:
 @ R0 SharedState* shared_state
 ASM_USERS_START:
 	PUSH {LR}						@ non-leaf: must preserve caller's return address across the BL below
@@ -127,37 +128,33 @@ ASM_USERS_START:
 
 @ [Enter, prepare for successor]
 @ Input:
-@ R0 SharedState* shared_state
-@ R1 ElevatorNode* C
+@ R11 SharedState* shared_state, already
+@ R10 Elevator* elevator, already
+@ R9 Users* users, already
+@ R8 ElevatorNode* C
 
 @ Runtime:
 @ R11 SharedState* shared_state, already
 @ R10 Elevator* elevator, already
 @ R9 Users* users, already
+@ R8 ElevatorNode* C
 ASM_U1:
-	PUSH {R4-R6, LR}
-	// User fabric
+	@ User fabric
 
-	@ Users* users = shared_state->users;
-
-	// Not in MIX -- Python stops once its fixed user list is exhausted;
-	// this port stops once users_quantity users have been generated
+	@ Not in MIX
 	@ if (users->user_id >= users->users_quantity) return;
 	LDR R0, [R9, #USER_ID]
-	LDR R2, [R9, #USERS_QUANTITY]
-	CMP R0, R2
+	LDR R1, [R9, #USERS_QUANTITY]
+	CMP R0, R1
 	BHS DONE				@ Exit point
 
-	// 4. increment user_id (not in Coroutine U)
+	@ 4. increment user_id (not in Coroutine U)
 	ADDS R0, R0, #1
 	STR R0, [R9, #USER_ID]
 
-	MOVS R4, R1				@ Save node C
-
+	@ 1. JMP VALUES
 	SUB SP, SP, #16			@ Sub 16 bytes from SP for Values
 	MOV R0, SP
-
-	@ 1. JMP VALUES
 	BL values
 
 	@ R0 is user_values now
@@ -168,31 +165,32 @@ ASM_U1:
 	BL storage_pool_pop		@ ElevatorNode* user = storage_pool_pop(users->storage_pool);
 	CBZ R0, DONE_SP			@ if (user == NULL) return;
 
-	MOVS R6, R0				@ Save user
-
-	LDR R0, [SP, #VALUES_IN]
-	LDR R1, [SP, #VALUES_OUT]
+	@ Unpack Values
+	LDR R1, [SP, #VALUES_IN]
+	LDR R4, [SP, #VALUES_OUT]
 	LDR R3, [SP, #VALUES_GIVEUPTIME]
 	LDR R2, [SP, #VALUES_INTERTIME]
 
-	STR R0, [R6, #IN]
-	STR R1, [R6, #OUT]
-	STR R3, [R6, #GIVEUPTIME]
+	STR R1, [R0, #IN]
+	STR R4, [R0, #OUT]
+	STR R3, [R0, #GIVEUPTIME]
 
 	@ 2. LDA INTERTIME (time before another user enters) / JMP HOLD
-	MOV R0, R11
-	MOVS R1, R4
+	MOV R0, R11				@ Move shared_state to R0
+	MOVS R1, R8				@ Move node C to R1
 	@ MOVS R2, R3			@ R2 is already INTERTIME
 	BL hold					@ hold(shared_state, C, user_values.INTERTIME);
 
 	@ At the end of ASM_U1 restore Stack Pointer
-	ADDS SP, SP, #16
+	ADD SP, SP, #16
+
+	@ User R0 goes to ASM_U2
 
 ASM_U2:
 
 
 DONE:
-	POP {R4-R6, PC}
+	B ASM_CYCLE
 
 DONE_SP:
 	ADDS SP, SP, #16
