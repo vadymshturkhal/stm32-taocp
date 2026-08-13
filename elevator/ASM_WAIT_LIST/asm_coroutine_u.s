@@ -66,6 +66,7 @@
 @ CALLS bit flags (elevator_settings.h)
 .equ CALLUP,			0b100
 .equ CALLDOWN,			0b010
+.equ CALLCAR,			0b001
 
 
 @ Input:
@@ -350,9 +351,50 @@ ASM_U6:
 
 	B ASM_CYCLE
 
+@ [Get in]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* user, also if called from ASM_CYCLE
 ASM_U5:
+	@ 1. This user now leaves QUEUE and enters ELEVATOR
+	
+	@ Delete User from QUEUE[IN]
+	MOVS R0, R8
+	BL elevator_list_delete_node			@ elevator_list_delete_node(user);
 
+	@ Insert it at right of ELEVATOR
+	ADD R0, R11, #ELEVATOR_LIST				@ R0 = &shared_state->ELEVATOR_LIST
+	MOVS R1, R8
+	BL elevator_list_insert_node_at_rear	@ elevator_list_insert_node_at_rear(&shared_state->ELEVATOR_LIST, user);
 
+	@ 2. Set CALLCAR[OUT] = 1
+	LDR R0, [R8, #OUT]						@ R0 = user->OUT
+	ADD R1, R11, #CALLS						@ R1 = &shared_state->CALLS[0]
+	LDR R2, [R1, R0, LSL #2]				@ R2 = shared_state->CALLS[OUT]
+	ORRS R2, R2, #CALLCAR
+	STR R2, [R1, R0, LSL #2]
+
+	@ 3. If STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
+	LDR R0, [R10, #STATE]
+	CMP R0, #0
+	BNE ASM_CYCLE
+
+	LDR R0, [R10, #ELEV2]					@ R0 = elevator->ELEV2
+
+	LDR R2, [R8, #OUT]						@ R2 = user->OUT
+	LDR R1, [R10, #FLOOR]					@ R1 = elevator->FLOOR
+	SUBS R2, R2, R1							@ R2 = OUT - FLOOR
+	STR R2, [R10, #STATE]					@ elevator->STATE = OUT - FLOOR
+
+	@ 4. Remove action E5 from WAIT list
+	BL elevator_list_delete_nodew			@ elevator_list_delete_nodew(elevator->ELEV2);
+
+	@ Restart E5 after 25 units
+	MOV R0, R11
+	MOVS R1, #25
+	BL E5A									@ E5A(shared_state, 25);
 
 DONE:
 	B ASM_CYCLE
