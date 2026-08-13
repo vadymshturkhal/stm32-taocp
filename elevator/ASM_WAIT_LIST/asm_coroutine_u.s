@@ -3,6 +3,9 @@
     .cpu cortex-m4
     .section .text
 
+    .global ASM_USERS_INIT
+	.type ASM_USERS_INIT, %function
+
     .global ASM_USERS_START
 	.type ASM_USERS_START, %function
 
@@ -53,6 +56,62 @@
 .equ VALUES_GIVEUPTIME, 8
 .equ VALUES_INTERTIME,	12
 
+
+@ users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool, uint32_t users_quantity)
+@ Input:
+@ R0 Users* users
+@ R1 SharedState* shared_state
+@ R2 Storage_Pool* storage_pool
+@ R3 uint32_t users_quantity
+
+@ Runtime:
+@ R0 Users* users, ElevatorNode* USER1
+@ R1 SharedState* shared_state
+@ R2 Storage_Pool* storage_pool
+@ R3 uint32_t users_quantity
+@ R4 Users* users
+
+@ Output:
+@ R0 uint32_t status (0 = OK, 1 = NULL arg, 2 = pool empty)
+ASM_USERS_INIT:
+	PUSH {R4, LR}
+
+	@ if (users == NULL || shared_state == NULL || storage_pool == NULL) return 1;
+	CMP R0, #0
+	BEQ USERS_INIT_ERR1
+	CMP R1, #0
+	BEQ USERS_INIT_ERR1
+	CMP R2, #0
+	BEQ USERS_INIT_ERR1
+
+	STR R3, [R0, #USERS_QUANTITY]	@ users->users_quantity = users_quantity;
+	STR R1, [R0, #SHARED_STATE]		@ users->shared_state = shared_state;
+	STR R2, [R0, #STORAGE_POOL]		@ users->storage_pool = storage_pool;
+	STR R0, [R1, #USERS]			@ shared_state->users = users;
+
+	MOVS R4, R0						@ save users
+
+	MOVS R0, R2
+	BL storage_pool_pop				
+	CBZ R0, USERS_INIT_ERR2			@ if (users->USER1 == NULL) return 2;
+	STR R0, [R4, #USER1]			@ users->USER1 = storage_pool_pop(storage_pool);
+
+	LDR R1, =ASM_U1
+	STR R1, [R0, #NEXTINST]			@ users->USER1->NEXTINST = ASM_U1;
+
+	MOVS R2, #0
+	STR R2, [R4, #USER_ID]			@ users->user_id = 0;
+
+	MOVS R0, #0				@ return 0
+	POP {R4, PC}
+
+USERS_INIT_ERR1:
+	MOVS R0, #1
+	POP {R4, PC}
+
+USERS_INIT_ERR2:
+	MOVS R0, #2
+	POP {R4, PC}
 
 @ R0 SharedState* shared_state
 ASM_USERS_START:
