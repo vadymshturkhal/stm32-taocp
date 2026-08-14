@@ -18,6 +18,12 @@
 	.global ASM_E3
 	.type ASM_E3, %function
 
+	.global ASM_E4A
+	.type ASM_E4A, %function
+
+	.global ASM_E4
+	.type ASM_E4, %function
+
 	.global ASM_E5A
 	.type ASM_E5A, %function
 
@@ -305,9 +311,62 @@ ASM_E2_2H:
 
 	@ Otherwise set STATE to NEUTRAL
 	STR R2, [R10, #STATE]
-	
+
+@ [Open door]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+
+@ Runtime:
+@ R4 = elevator->ELEV3
+@ R7 uint32_t delay
 ASM_E3:
-	MOVS R0, #3
+	LDR R4, [R10, #ELEV3]					@ R4 = elevator->ELEV3
+
+	@ if (elevator->ELEV3->left1 != NULL) elevator_list_delete_nodew(elevator->ELEV3);
+	LDR R0, [R4, #LEFT1]
+	CBZ R0, ASM_E3_SCHEDULE_E9
+
+	MOVS R0, R4
+	BL elevator_list_delete_nodew
+
+@ Schedule activity E9 after 300 units
+ASM_E3_SCHEDULE_E9:
+	MOV R0, R11
+	MOVS R1, R4
+	MOV R2, #300
+	BL hold									@ hold(shared_state, elevator->ELEV3, 300)
+
+	MOV R0, R11
+	LDR R1, [R10, #ELEV2]
+	MOV R2, #76
+	BL hold									@ hold(shared_state, elevator->ELEV2, 76);
+
+	MOVS R0, #1
+	STR R0, [R10, #D2]						@ elevator->D2 = 1;
+	STR R0, [R10, #D1]						@ elevator->D1 = 1;
+
+	MOV R7, #20								@ delay = 20
+
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+@ R7 uint32_t delay
+ASM_E4A:
+	LDR R3, =ASM_E4
+	MOV R0, R11
+	LDR R1, [R10, #ELEV1]
+	MOV R2, R7
+	BL holdc								@ holdc(shared_state, elevator->ELEV1, delay, ASM_E4)
+	B ASM_CYCLE
+
+@ [Let people out, in]
+ASM_E4:
+	MOVS R0, #3								@ TODO: port E4
 
 ASM_E5A:
 	MOVS R0, #3
