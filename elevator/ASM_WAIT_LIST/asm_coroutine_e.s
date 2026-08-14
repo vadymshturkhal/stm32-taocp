@@ -210,18 +210,18 @@ ASM_E2_HIGHER_CALLS:
 	MOVS R0, #0							@ R0 = rA = Accumulator
 
 	CMP R4, R3
-	BLE ASM_E2_HIGHER_DONE
+	BLE ASM_E2_ELEVATOR_LOWER_FLOORS
 
+@ FIXME: Hoist
 ASM_E2_HIGHER_LOOP:
-	LDR R2, [R4], #-4					@ sizeof CALLS is uint32_t
-	ADDS R0, R0, R2						@ Add CALLS[j] value
+	LDR R0, [R4], #-4					@ sizeof CALLS is uint32_t
+
+	@ So long distance for CBNZ 
+	CMP R0, #0
+	BGT ASM_E3							@ Early jump to ASM_E3 if found higher call
+
 	CMP R4, R3
 	BNE ASM_E2_HIGHER_LOOP
-
-@ If yes, go to ASM_E3
-ASM_E2_HIGHER_DONE:
-	CMP R0, #0
-	BGT ASM_E3							@ JAP E3
 
 @ Have passengers in the elevator called for lower floors?
 @ Runtime:
@@ -234,9 +234,11 @@ ASM_E2_ELEVATOR_LOWER_FLOORS:
 	BGE ASM_E2_LOWER_DONE				@ FLOOR == 0: no lower floors exist
 
 ASM_E2_LOWER_LOOP:
-	LDR R2, [R5], #4					@ sizeof CALLS is uint32_t
-	ANDS R2, R2, #CALLCAR
-	ORRS R0, R0, R2						@ rA |= CALLS[j] & CALLCAR
+	LDR R0, [R5], #4					@ sizeof CALLS is uint32_t
+	ANDS R0, R0, #CALLCAR
+
+	CBNZ R0, ASM_E2_2H					@ Early jump to ASM_E2_2H if found lower call
+
 	CMP R5, R3
 	BNE ASM_E2_LOWER_LOOP
 
@@ -263,7 +265,9 @@ ASM_E2_1H:
 ASM_E2_LOWER_CALLCAR_LOOP:
 	LDR R2, [R5], #4					@ sizeof CALLS is uint32_t
 	ADDS R0, R0, R2						@ Add CALLS[j] value
-	CBNZ R0, ASM_E3						@ Jump to ASM_E3 if found lower call
+	
+	CBNZ R0, ASM_E3						@ Early jump to ASM_E3 if found lower call
+	
 	CMP R5, R3
 	BNE ASM_E2_LOWER_CALLCAR_LOOP
 
@@ -279,10 +283,11 @@ ASM_E2_ELEVATOR_HIGHER_FLOORS:
 	BLE ASM_E2_2H
 
 ASM_E2_HIGHER_CALLCAR_LOOP:
-	LDR R2, [R4], #-4					@ sizeof CALLS is uint32_t
-	ANDS R2, R2, #CALLCAR
-	ORRS R0, R0, R2						@ rA |= CALLS[j] & CALLCAR
-	CBNZ R0, ASM_E2_2H					@ Jump to ASM_E2_2H if found higher call
+	LDR R0, [R4], #-4					@ sizeof CALLS is uint32_t
+	ANDS R0, R0, #CALLCAR
+
+	CBNZ R0, ASM_E2_2H					@ Early jump to ASM_E2_2H if found higher call
+	
 	CMP R4, R3
 	BNE ASM_E2_HIGHER_CALLCAR_LOOP
 
@@ -306,8 +311,7 @@ ASM_E2_2H:
 	STR R2, [R3]						@ shared_state->CALLS[elevator->FLOOR] = 0;
 
 	@ If called to the opposite direction: jump to E3
-	CMP R0, #0
-	BNE ASM_E3
+	CBNZ R0, ASM_E3
 
 	@ Otherwise set STATE to NEUTRAL
 	STR R2, [R10, #STATE]
