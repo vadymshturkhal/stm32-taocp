@@ -369,8 +369,67 @@ ASM_E4A:
 	B ASM_CYCLE
 
 @ [Let people out, in]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+
+@ Runtime:
+@ R4 = ELEVATOR_LIST.head (search sentinel), later &QUEUE[FLOOR] / QUEUE[FLOOR].head
+@ R5 = node (current search pointer)
+@ R6 = elevator->FLOOR
 ASM_E4:
-	MOVS R0, #3								@ TODO: port E4
+	LDR R4, [R11, #ELEVATOR_LIST]			@ R4 = shared_state->ELEVATOR_LIST.head
+	MOVS R5, R4
+	LDR R6, [R10, #FLOOR]					@ R6 = elevator->FLOOR
+
+@ [Search ELEVATOR list, right to left]
+ASM_E4_ELEVATOR_LOOP:
+	LDR R5, [R5, #LEFT2]					@ R5 = node = head->left2
+	CMP R5, R4
+	BEQ ASM_E4_1H							@ node == head: search complete
+
+	@ Compare user->OUT with FLOOR
+	LDR R0, [R5, #OUT]
+	CMP R0, R6
+	BNE ASM_E4_ELEVATOR_LOOP				@ If not equal: continue searching			
+
+	LDR R1, =ASM_U6							@ Otherwise prepare to send user to U6
+	B ASM_E4_2H
+
+ASM_E4_1H:
+	ADD R4, R11, #QUEUE						@ R4 = &QUEUE[0]
+	ADD R4, R4, R6, LSL #3					@ R4 = &QUEUE[FLOOR] (sizeof(ElevatorList) == 8)
+	LDR R4, [R4]							@ R4 = QUEUE[FLOOR].head
+	LDR R5, [R4, #RIGHT2]					@ R5 = node = QUEUE[FLOOR].head->right2
+
+	CMP R5, R4
+	BEQ ASM_E4_1H_QUEUE_EMPTY					@ node == head: QUEUE is empty
+
+	MOVS R0, R5								@ If not, cancel action U4 for this user
+	BL elevator_list_delete_nodew			@ elevator_list_delete_nodew(node)
+
+	LDR R1, =ASM_U5							@ Prepare to replace U4 by U5
+
+ASM_E4_2H:
+	STR R1, [R5, #NEXTINST]					@ node->NEXTINST = ASM_U5
+
+	MOVS R0, R11
+	MOVS R1, R5
+	BL immed								@ immed(shared_state, node)
+
+	MOV R7, #25								@ delay = 25
+	B ASM_E4A								@ E4A(shared_state, delay)
+
+ASM_E4_1H_QUEUE_EMPTY:
+	MOVS R0, #0
+	STR R0, [R10, #D1]						@ elevator->D1 = 0
+
+	MOVS R0, #1
+	STR R0, [R10, #D3]						@ elevator->D3 = 1
+
+	B ASM_CYCLE
 
 ASM_E5A:
 	MOVS R0, #3
