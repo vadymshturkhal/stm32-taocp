@@ -13,6 +13,8 @@
 
 @ NOTE: R8-R11 are global registers which contain global state and don't need to PUSH them every step
 @ NOTE: Using C NextInst with global parameters permanently stored in R8-R11 Registers
+@ NOTE: Helper subroutines (e.g. HOLDC) is written in C
+@ FIXME: Rewrite DECISION to use LR as a caller
 
 @ SharedState fields definition
 .equ TIME, 				0
@@ -85,6 +87,8 @@ ASM_CYCLE:
 
 	@ Call NEXTINST(shared_state, C): handler branches back to ASM_CYCLE when done
 	LDR R2, [R8, #NEXTINST]
+	
+	@ FIXME: remove comments
 	@ MOV R0, R11							@ R0 = shared_state
 	@ MOV R1, R8							@ R1 = C
 	BX R2
