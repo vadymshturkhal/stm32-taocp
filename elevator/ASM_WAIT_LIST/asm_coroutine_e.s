@@ -431,11 +431,43 @@ ASM_E4_1H_QUEUE_EMPTY:
 
 	B ASM_CYCLE
 
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+@ R7 uint32_t delay
 ASM_E5A:
-	MOVS R0, #3
+	LDR R3, =ASM_E5
+	MOV R0, R11
+	LDR R1, [R10, #ELEV2]
+	MOV R2, R7
+	BL holdc							@ holdc(shared_state, elevator->ELEV2, delay, E5);
+	B ASM_CYCLE
 
+@ [Close door]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
 ASM_E5:
-	MOVS R0, #3
+	LDR R0, [R10, #D1]
+	CBZ R0, ASM_E5_CLOSE				@ D1 == 0: proceed to close
+
+	MOV R7, #40							@ delay = 40
+	B ASM_E5A							@ Elevator doors flutter
+
+ASM_E5_CLOSE:
+	MOVS R0, #0
+	STR R0, [R10, #D3]					@ elevator->D3 = 0;
+
+	LDR R3, =ASM_E6
+	LDR R1, [R10, #ELEV1]
+	MOV R0, R11
+	MOVS R2, #20
+	BL holdc							@ holdc(shared_state, elevator->ELEV1, 20, E6);
+	B ASM_CYCLE
 
 ASM_E6:
 	MOVS R0, #3
