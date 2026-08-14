@@ -202,7 +202,7 @@ static void E4(SharedState* shared_state, ElevatorNode* C) {
 	ElevatorNode* node = shared_state->ELEVATOR_LIST.head;
 	node = node->left2;
 
-	// Search ELEVATOR list from left to right
+	// Search ELEVATOR list from right to left
 	while (node != shared_state->ELEVATOR_LIST.head) {
 		// Compare OUT(node) with FLOOR
 

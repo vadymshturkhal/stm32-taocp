@@ -129,7 +129,7 @@ class Elevator:
         C = self.shared_state.ELEVATOR_LIST.head
         C = C.left2
 
-        # Search ELEVATOR list from left to right
+        # Search ELEVATOR list from right to left
         while C != self.shared_state.ELEVATOR_LIST.head:
             # Compare OUT(C) with FLOOR
 
