@@ -12,6 +12,9 @@
     .global ASM_E1
 	.type ASM_E1, %function
 
+	.global ASM_E2
+	.type ASM_E2, %function
+	
 	.global ASM_E3
 	.type ASM_E3, %function
 
@@ -155,6 +158,154 @@ ASM_E1A:
 ASM_E1:
 	B ASM_CYCLE
 
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+@ R7 uint32_t delay					@ FIXME: guarantee
+ASM_E2A:
+	LDR R3, =ASM_E2
+	MOV R0, R11
+	MOV R1, R8
+	MOV R2, R7
+	BL holdc						@ JMP HOLDC
+	B ASM_CYCLE
+	@ holdc(shared_state, C, delay, E2);
+
+@ [Change of state?]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+@ Can use R7
+
+@ Runtime:
+@ R0 Accumulator after ASM_E2
+ASM_E2:
+	LDR R0, [R10, #STATE]
+	CMP R0, #0
+	BLT ASM_E2_1H					@ STATE is GOINGDOWN
+
+@ [STATE is GOINGUP]
+@ Are there calls for higher floors?
+@ Runtime:
+@ R3 &CALLS[FLOOR]
+@ R4 &CALLS[j], from FLOORS to FLOOR
+@ R5 &CALLS[0]
+ASM_E2_HIGHER_CALLS:
+	LDR R1, [R10, #FLOOR]
+	
+	ADD R5, R11, #CALLS							@ R5 = &CALLS[0]
+	ADD R3, R5, R1, LSL #2						@ R3 = &CALLS[FLOOR] = Current floor CALLS
+	ADD R4, R11, #(CALLS + (FLOORS - 1) * 4)	@ R4 = &CALLS[FLOORS - 1] = Higher floor CALLS
+
+	MOVS R0, #0							@ R0 = rA = Accumulator
+
+	CMP R4, R3
+	BLE ASM_E2_HIGHER_DONE
+
+ASM_E2_HIGHER_LOOP:
+	LDR R2, [R4], #-4					@ sizeof CALLS is uint32_t
+	ADDS R0, R0, R2						@ Add CALLS[j] value
+	CMP R4, R3
+	BNE ASM_E2_HIGHER_LOOP
+
+@ If yes, go to ASM_E3
+ASM_E2_HIGHER_DONE:
+	CMP R0, #0
+	BGT ASM_E3							@ JAP E3
+
+@ Have passengers in the elevator called for lower floors?
+@ Runtime:
+@ R3 = &CALLS[FLOOR]
+@ R5 = &CALLS[0]
+ASM_E2_ELEVATOR_LOWER_FLOORS:
+	MOVS R0, #0							@ R0 = rA = Accumulator
+
+	CMP R5, R3
+	BGE ASM_E2_LOWER_DONE				@ FLOOR == 0: no lower floors exist
+
+ASM_E2_LOWER_LOOP:
+	LDR R2, [R5], #4					@ sizeof CALLS is uint32_t
+	ANDS R2, R2, #CALLCAR
+	ORRS R0, R0, R2						@ rA |= CALLS[j] & CALLCAR
+	CMP R5, R3
+	BNE ASM_E2_LOWER_LOOP
+
+@ If yes, reverse STATE; else set STATE to NEUTRAL
+ASM_E2_LOWER_DONE:
+	B ASM_E2_2H							@ JMP 2F
+
+@ [STATE is GOINGDOWN]
+@ Are there calls for lower floors?
+@ Runtime:
+@ R3 &CALLS[FLOOR]
+@ R5 &CALLS[j], from 0 to FLOOR
+ASM_E2_1H:
+	LDR R1, [R10, #FLOOR]
+
+	ADD R5, R11, #CALLS					@ R5 = &CALLS[0]
+	ADD R3, R5, R1, LSL #2				@ R3 = &CALLS[FLOOR] = Current floor CALLS
+
+	MOVS R0, #0							@ R0 = rA = Accumulator
+
+	CMP R5, R3
+	BGE ASM_E2_ELEVATOR_HIGHER_FLOORS				@ FLOOR == 0: no lower floors exist
+
+ASM_E2_LOWER_CALLCAR_LOOP:
+	LDR R2, [R5], #4					@ sizeof CALLS is uint32_t
+	ADDS R0, R0, R2						@ Add CALLS[j] value
+	CBNZ R0, ASM_E3						@ Jump to ASM_E3 if found lower call
+	CMP R5, R3
+	BNE ASM_E2_LOWER_CALLCAR_LOOP
+
+@ Have passengers in the elevator called for higher floors?
+@ Runtime:
+@ R3 &CALLS[FLOOR] = Current floor CALLS
+@ R4 &CALLS[FLOORS - 1]
+ASM_E2_ELEVATOR_HIGHER_FLOORS:
+	ADD R4, R11, #(CALLS + (FLOORS - 1) * 4)	@ R4 = &CALLS[FLOORS - 1] = Higher floor CALLS
+	MOVS R0, #0							@ R0 = rA = Accumulator
+
+	CMP R4, R3
+	BLE ASM_E2_2H
+
+ASM_E2_HIGHER_CALLCAR_LOOP:
+	LDR R2, [R4], #-4					@ sizeof CALLS is uint32_t
+	ANDS R2, R2, #CALLCAR
+	ORRS R0, R0, R2						@ rA |= CALLS[j] & CALLCAR
+	CBNZ R0, ASM_E2_2H					@ Jump to ASM_E2_2H if found higher call
+	CMP R4, R3
+	BNE ASM_E2_HIGHER_CALLCAR_LOOP
+
+@ [Reverse direction of STATE]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+
+@ Runtime:
+@ R0 CALLS
+@ R3 &CALLS[FLOOR] = Current floor CALLS
+ASM_E2_2H:
+	LDR R1, [R10, #STATE]
+	RSBS R1, R1, #0						@ Reverse direction of STATE
+	STR R1, [R10, #STATE]
+
+	@ Set all CALL variables for the current FLOOR to zero
+	MOVS R2, #0
+	STR R2, [R3]						@ shared_state->CALLS[elevator->FLOOR] = 0;
+
+	@ If called to the opposite direction: jump to E3
+	CMP R0, #0
+	BNE ASM_E3
+
+	@ Otherwise set STATE to NEUTRAL
+	STR R2, [R10, #STATE]
+	
 ASM_E3:
 	MOVS R0, #3
 
