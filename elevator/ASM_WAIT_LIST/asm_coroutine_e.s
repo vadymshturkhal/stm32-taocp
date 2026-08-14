@@ -33,8 +33,17 @@
 	.global ASM_E6
 	.type ASM_E6, %function
 
+	.global ASM_E7
+	.type ASM_E7, %function
+
+	.global ASM_E8
+	.type ASM_E8, %function
+
 	.global ASM_E9
 	.type ASM_E9, %function
+
+	.global ASM_DECISION
+	.type ASM_DECISION, %function
 
 @ ElevatorNode fields definition
 .equ LEFT1, 			0
@@ -69,6 +78,11 @@
 .equ WAIT_LIST,	 		72
 .equ ELEVATOR,			80
 .equ USERS,				84
+
+@ CALLS bit flags (elevator_settings.h)
+.equ CALLUP,			0b100
+.equ CALLDOWN,			0b010
+.equ CALLCAR,			0b001
 
 @ uint32_t elevator_init(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool)
 @ Input:
@@ -469,8 +483,107 @@ ASM_E5_CLOSE:
 	BL holdc							@ holdc(shared_state, elevator->ELEV1, 20, E6);
 	B ASM_CYCLE
 
+@ [Prepare to move]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
 ASM_E6:
-	MOVS R0, #3
+	@ If STATE != GOINGDOWN: CALLUP and CALLCAR on this floor are reset
+	LDR R0, [R10, #STATE]
+	CMP R0, #0
+	BLT ASM_E6_SKIP_UP_RESET
+
+	LDR R1, [R10, #FLOOR]
+	ADD R2, R11, #CALLS
+	LDR R3, [R2, R1, LSL #2]
+	BIC R3, R3, #(CALLUP | CALLCAR)
+	STR R3, [R2, R1, LSL #2]
+
+ASM_E6_SKIP_UP_RESET:
+	@ If STATE != GOINGUP: reset CALLCAR and CALLDOWN
+	@ LDR R0, [R10, #STATE]
+	@ CMP R0, #0
+	BGT ASM_E6_SKIP_DOWN_RESET				@ flag preserved from ASM_E6
+
+	LDR R1, [R10, #FLOOR]
+	ADD R2, R11, #CALLS
+	LDR R3, [R2, R1, LSL #2]
+	BIC R3, R3, #(CALLCAR | CALLDOWN)
+	STR R3, [R2, R1, LSL #2]
+
+ASM_E6_SKIP_DOWN_RESET:
+	@ LDR R0, [R10, #STATE]
+	@ CMP R0, #0
+	@ BNE ASM_E6B
+	CBNZ R0, ASM_E6B						@ flag preserved from ASM_E6
+
+	@ Perform DECISION subroutine if STATE == NEUTRAL
+	MOV R0, R11
+	LDR R1, =E6
+	BL decision	
+
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+
+@ Runtime:
+@ R4 STATE
+ASM_E6B:
+	LDR R4, [R10, #STATE]
+	CBNZ R4, ASM_E6B_D2_CHECK
+
+	B ASM_E1A							@ If STATE == NEUTRAL, go to E1 and wait
+
+ASM_E6B_D2_CHECK:
+	LDR R0, [R10, #D2]
+	CBZ R0, ASM_E6B_SCHEDULE
+
+	LDR R0, [R10, #ELEV3]
+	BL elevator_list_delete_nodew		@ Cancel activity E9
+
+	LDR R0, [R10, #ELEV3]
+	MOVS R1, #0
+	STR R1, [R0, #LEFT1]				@ elevator->ELEV3->left1 = NULL;
+
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+@ R4 STATE
+ASM_E6B_SCHEDULE:
+	LDR R3, =ASM_E7
+	LDR R1, [R10, #ELEV1]
+	MOV R0, R11
+	MOVS R2, #15
+
+	CMP R4, #0
+	BGE ASM_E7A							@ STATE >= 0: go to E7 (already loaded)
+
+	LDR R3, =ASM_E8
+	B ASM_E8A							@ STATE == GOINGDOWN: go to E8
+
+ASM_E7A:
+	BL holdc							@ holdc(shared_state, elevator->ELEV1, 15, E7/E8);
+	B ASM_CYCLE
+
+ASM_E7:
+	MOVS R0, #3							@ TODO: port E7 / E7_continue
+
+ASM_E8A:
+	BL holdc							@ holdc(shared_state, elevator->ELEV1, 15, E7/E8);
+	B ASM_CYCLE
+
+ASM_E8:
+	MOVS R0, #3							@ TODO: port E8 / E8_continue
 
 ASM_E9:
 	MOVS R0, #3
+
+ASM_DECISION:
+	MOVS R0, #3							@ TODO: port DECISION (identify E6 caller via LR == ASM_E6_RETURN)
+	BX LR
