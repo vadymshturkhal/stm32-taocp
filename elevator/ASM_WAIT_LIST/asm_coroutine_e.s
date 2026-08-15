@@ -42,6 +42,9 @@
 	.global ASM_E8
 	.type ASM_E8, %function
 
+	.global ASM_E8_CONTINUE
+	.type ASM_E8_CONTINUE, %function
+
 	.global ASM_E9
 	.type ASM_E9, %function
 
@@ -602,7 +605,7 @@ ASM_E7:
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 ElevatorNode* C
-@
+
 @ Runtime:
 @ R1 = elevator->FLOOR
 @ R0 = CALLS[FLOOR]
@@ -646,17 +649,88 @@ ASM_E7_2H_CONTINUE_HIGHER_LOOP:
 
 	@ No higher call found
 
+@ Runtime:
+@ R7 uint32_t delay
 ASM_E7_1H:
 	MOV R7, #14
 	B ASM_E2A								@ It's time to stop elevator: E2A(shared_state, elevator->ELEV1, 14);
 
 @ [Go down a floor]
 ASM_E8A:
-	BL holdc							@ holdc(shared_state, elevator->ELEV1, 15, E7/E8);
+	BL holdc								@ holdc(shared_state, elevator->ELEV1, 15, E7/E8);
 	B ASM_CYCLE
 
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
 ASM_E8:
-	MOVS R0, #3							@ TODO: port E8 / E8_continue
+	LDR R0, [R10, #FLOOR]
+	SUBS R0, R0, #1
+	STR R0, [R10, #FLOOR]					@ elevator->FLOOR -= 1;
+
+	LDR R3, =ASM_E8_CONTINUE
+	MOV R0, R11
+	LDR R1, [R10, #ELEV1]
+	MOVS R2, #61
+	BL holdc								@ holdc(shared_state, elevator->ELEV1, 61, E8_continue);
+	B ASM_CYCLE
+
+@ FIXME: Not in MIX, rewrite holdc
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+
+@ Runtime:
+@ R1 = elevator->FLOOR
+@ R0 = CALLS[FLOOR] (until clobbered by the search loop)
+@ R2 = &CALLS[0]
+ASM_E8_CONTINUE:
+	@ Is CALLCAR[FLOOR] or CALLDOWN[FLOOR] != 0?
+	LDR R1, [R10, #FLOOR]
+	ADD R2, R11, #CALLS
+	LDR R0, [R2, R1, LSL #2]				@ R0 = CALLS[FLOOR]
+	TST R0, #(CALLCAR | CALLDOWN)
+	BNE ASM_E8_1H							@ If yes: it is time to stop elevator
+
+	@ If not, is FLOOR == HOME_FLOOR?
+	CMP R1, #HOME_FLOOR
+	BEQ ASM_E8_2H_LOWER_LOOP
+
+	@ If not, is CALLUP[FLOOR] != 0
+	TST R0, #CALLUP
+	BEQ ASM_E8								@ If not, repeat step E8
+
+@ Runtime:
+@ R3 = &CALLS[FLOOR]
+@ R4 = &CALLS[j], from 0 to FLOOR
+
+@ NOTE: magic 4 is sizeof CALLS, which is uint32_t
+ASM_E8_2H_LOWER_LOOP:
+	ADD R3, R2, R1, LSL #2					@ R3 = &CALLS[FLOOR]
+	MOVS R4, R2								@ R4 = &CALLS[0]
+
+	CMP R4, R3
+	BGE ASM_E8_1H							@ No lower calls
+
+ASM_E8_2H_CONTINUE_LOWER_LOOP:
+	LDR R0, [R4], #4					@ sizeof CALLS is uint32_t
+	CMP R0, #0
+	BGT ASM_E8								@ found lower call: repeat E8; return;
+
+	CMP R4, R3
+	BNE ASM_E8_2H_CONTINUE_LOWER_LOOP
+
+	@ No lower call found
+
+@ Runtime:
+@ R7 uint32_t delay
+ASM_E8_1H:
+	MOV R7, #23
+	B ASM_E2A								@ It's time to stop elevator: E2A(shared_state, elevator->ELEV1, 23);
 
 @ [Set inaction indicator]
 @ Input:
