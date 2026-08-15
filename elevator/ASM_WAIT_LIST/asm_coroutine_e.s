@@ -650,6 +650,7 @@ ASM_E7_1H:
 	MOV R7, #14
 	B ASM_E2A								@ It's time to stop elevator: E2A(shared_state, elevator->ELEV1, 14);
 
+@ [Go down a floor]
 ASM_E8A:
 	BL holdc							@ holdc(shared_state, elevator->ELEV1, 15, E7/E8);
 	B ASM_CYCLE
@@ -657,5 +658,19 @@ ASM_E8A:
 ASM_E8:
 	MOVS R0, #3							@ TODO: port E8 / E8_continue
 
+@ [Set inaction indicator]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
 ASM_E9:
-	MOVS R0, #3
+	LDR R0, [R10, #ELEV3]
+	MOVS R1, #0
+	STR R1, [R0, #LEFT1]					@ elevator->ELEV3->left1 = NULL; STZ 0,6
+	STR R1, [R10, #D2]						@ elevator->D2 = 0;	STZ D2
+
+	MOV R0, R11
+	LDR R1, =E9
+	BL decision								@ decision(shared_state, E9);
+	B ASM_CYCLE
