@@ -61,7 +61,7 @@
 @ R9 Users* users
 @ R8 ElevatorNode* C
 ASM_CYCLE_START:
-	PUSH {R4-R11, LR}			@ Save all Registers
+	PUSH {R3-R11, LR}			@ Save all Registers and use R3 for 8-byte alignment
 	MOVS R11, R0				@ R11 = shared_state
 	LDR R10, [R0, #ELEVATOR]	@ R10 = elevator
 	LDR R9, [R0, #USERS]		@ R9 = users
@@ -88,10 +88,7 @@ ASM_CYCLE:
 	@ Call NEXTINST(shared_state, C): handler branches back to ASM_CYCLE when done
 	LDR R2, [R8, #NEXTINST]
 	
-	@ FIXME: remove comments
-	@ MOV R0, R11							@ R0 = shared_state
-	@ MOV R1, R8							@ R1 = C
 	BX R2
 
 ASM_CYCLE_DONE:
-	POP {R4-R11, PC}
+	POP {R3-R11, PC}
