@@ -18,6 +18,12 @@
 	.global ASM_U4
 	.type ASM_U4, %function
 
+	.global ASM_U5
+	.type ASM_U5, %function
+
+	.global ASM_U6
+	.type ASM_U6, %function
+
 
 @ SharedState fields definition
 .equ TIME, 				0
@@ -316,6 +322,7 @@ ASM_U4A:
 	MOV R0, R11
 	MOVS R1, R8
 	BL holdc 								@ holdc(shared_state, user, delay, U4);
+	B ASM_CYCLE
 
 @ [Give up]
 @ Input:
@@ -328,7 +335,15 @@ ASM_U4:
 	LDR R0, [R8, #IN]					@ user->IN
 	LDR R1, [R10, #FLOOR]				@ elevator->FLOOR
 	SUBS R0, R0, R1						@ IN(C) - FLOOR
-	CBNZ R0, ASM_U6						@ JANZ *+3
+
+	@ NOTE: not CBNZ. Its range check breaks whenever the target's body
+	@ eventually branches to a symbol from another file (ASM_U6 ends in
+	@ B ASM_CYCLE, defined in asm_cycle.s), happens even at trivial
+	@ distance, unrelated to the 126-byte limit
+	@ CBNZ R0, ASM_U6
+
+	CMP R0, #0
+	BNE ASM_U6								@ JANZ *+3
 
 	@ JANZ U4A: doors still busy: reschedule U4
 	LDR R1, [R10, #D1]					@ R1 = D1
