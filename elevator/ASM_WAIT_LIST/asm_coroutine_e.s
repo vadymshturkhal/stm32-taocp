@@ -45,8 +45,6 @@
 	.global ASM_E9
 	.type ASM_E9, %function
 
-	.global ASM_DECISION
-	.type ASM_DECISION, %function
 
 @ ElevatorNode fields definition
 .equ LEFT1, 			0
@@ -661,7 +659,3 @@ ASM_E8:
 
 ASM_E9:
 	MOVS R0, #3
-
-ASM_DECISION:
-	MOVS R0, #3							@ TODO: port DECISION (identify E6 caller via LR == ASM_E6_RETURN)
-	BX LR
