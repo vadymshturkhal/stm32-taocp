@@ -23,6 +23,7 @@ typedef struct ElevatorNode {
     uint32_t IN;                 // User
     uint32_t OUT;                // User
     uint32_t GIVEUPTIME;         // User
+    uint32_t id;                 // For trace printing
 } ElevatorNode;
 
 typedef struct {
