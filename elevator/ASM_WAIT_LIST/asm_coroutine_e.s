@@ -752,6 +752,6 @@ ASM_E9:
 	STR R1, [R10, #D2]						@ elevator->D2 = 0;	STZ D2
 
 	MOV R0, R11
-	LDR R1, =E9
+	LDR R1, =ASM_E9
 	BL decision								@ decision(shared_state, E9);
 	B ASM_CYCLE
