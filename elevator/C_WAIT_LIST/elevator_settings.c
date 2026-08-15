@@ -129,7 +129,7 @@ void decision(SharedState* shared_state, NextInst caller) {
 	if (elevator->ELEV1->NEXTINST != E1 || elevator->STATE == 0) return;
 
 	// Otherwise schedule E6
-	//Wait 20 units of time (same as in D2)
+	// Wait 20 units of time (same as in D2)
 	uint32_t delay = 20;
 	elevator->ELEV1->NEXTINST = E6;
 	hold(shared_state, elevator->ELEV1, delay);
