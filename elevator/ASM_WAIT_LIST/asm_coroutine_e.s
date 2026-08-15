@@ -36,6 +36,9 @@
 	.global ASM_E7
 	.type ASM_E7, %function
 
+	.global ASM_E7_CONTINUE
+	.type ASM_E7_CONTINUE, %function
+
 	.global ASM_E8
 	.type ASM_E8, %function
 
@@ -571,8 +574,76 @@ ASM_E7A:
 	BL holdc							@ holdc(shared_state, elevator->ELEV1, 15, E7/E8);
 	B ASM_CYCLE
 
+@ [Go up a floor]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
 ASM_E7:
-	MOVS R0, #3							@ TODO: port E7 / E7_continue
+	LDR R0, [R10, #FLOOR]
+	ADDS R0, R0, #1
+	STR R0, [R10, #FLOOR]					@ elevator->FLOOR += 1;
+
+	LDR R3, =ASM_E7_CONTINUE
+	MOV R0, R11
+	LDR R1, [R10, #ELEV1]
+	MOVS R2, #51
+	BL holdc								@ holdc(shared_state, elevator->ELEV1, 51, E7_continue);
+	B ASM_CYCLE
+
+@ FIXME: Not in MIX, rewrite holdc
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+@
+@ Runtime:
+@ R1 = elevator->FLOOR
+@ R0 = CALLS[FLOOR]
+@ R2 = &CALLS[0]
+ASM_E7_CONTINUE:
+	@ Is CALLCAR[FLOOR] or CALLUP[FLOOR] != 0?
+	LDR R1, [R10, #FLOOR]
+	ADD R2, R11, #CALLS
+	LDR R0, [R2, R1, LSL #2]				@ R0 = CALLS[FLOOR]
+	TST R0, #(CALLCAR | CALLUP)
+	BNE ASM_E7_1H							@ If yes: it is time to stop elevator
+
+    @ If not, is FLOOR == 2?
+	CMP R1, #HOME_FLOOR
+	BEQ ASM_E7_2H_HIGHER_LOOP
+
+	@ If not, is CALLDOWN[FLOOR] != 0
+	TST R0, #CALLDOWN						
+	BEQ ASM_E7								@ If not, repeat step E7							
+
+@ Runtime:
+@ R3 = &CALLS[FLOOR]
+@ R4 = &CALLS[FLOORS - 1]
+
+@ NOTE: magic 4 is sizeof CALLS, which is uint32_t
+ASM_E7_2H_HIGHER_LOOP:
+	ADD R3, R2, R1, LSL #2						@ R3 = &CALLS[FLOOR]
+	ADD R4, R11, #(CALLS + (FLOORS - 1) * 4)	@ R4 = &CALLS[FLOORS - 1]
+
+	CMP R4, R3
+	BLE ASM_E7_1H								@ No higher calls
+
+ASM_E7_2H_CONTINUE_HIGHER_LOOP:
+	LDR R0, [R4], #-4						
+	CMP R0, #0
+	BGT ASM_E7								@ found higher call: repeat E7; return;
+
+	CMP R4, R3
+	BNE ASM_E7_2H_CONTINUE_HIGHER_LOOP
+
+	@ No higher call found
+
+ASM_E7_1H:
+	MOV R7, #14
+	B ASM_E2A								@ It's time to stop elevator: E2A(shared_state, elevator->ELEV1, 14);
 
 ASM_E8A:
 	BL holdc							@ holdc(shared_state, elevator->ELEV1, 15, E7/E8);
