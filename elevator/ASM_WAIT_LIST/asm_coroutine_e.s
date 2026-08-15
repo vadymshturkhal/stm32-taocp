@@ -14,7 +14,7 @@
 
 	.global ASM_E2
 	.type ASM_E2, %function
-	
+
 	.global ASM_E3
 	.type ASM_E3, %function
 
@@ -72,8 +72,6 @@
 .equ ELEV3,				32
 .equ FIRST_SEARCH,		36
 
-.equ HOME_FLOOR,		2
-
 @ SharedState fields definition
 .equ TIME, 				0
 .equ CALLS,				4
@@ -82,6 +80,10 @@
 .equ WAIT_LIST,	 		72
 .equ ELEVATOR,			80
 .equ USERS,				84
+
+@ FLOORS
+.equ HOME_FLOOR,		2
+.equ FLOORS,			5
 
 @ CALLS bit flags (elevator_settings.h)
 .equ CALLUP,			0b100
@@ -222,7 +224,7 @@ ASM_E2:
 @ NOTE: magic 4 is sizeof CALLS, which is uint32_t
 ASM_E2_HIGHER_CALLS:
 	LDR R1, [R10, #FLOOR]
-	
+
 	ADD R5, R11, #CALLS							@ R5 = &CALLS[0]
 	ADD R3, R5, R1, LSL #2						@ R3 = &CALLS[FLOOR] = Current floor CALLS
 	ADD R4, R11, #(CALLS + (FLOORS - 1) * 4)	@ R4 = &CALLS[FLOORS - 1] = Higher floor CALLS
@@ -237,7 +239,7 @@ ASM_E2_HIGHER_CALLS:
 ASM_E2_HIGHER_LOOP:
 	LDR R0, [R4], #-4					@ sizeof CALLS is uint32_t
 
-	@ So long distance for CBNZ 
+	@ So long distance for CBNZ
 	CMP R0, #0
 	BGT ASM_E3							@ Early jump to ASM_E3 if found higher call
 
@@ -286,9 +288,12 @@ ASM_E2_1H:
 ASM_E2_LOWER_CALLCAR_LOOP:
 	LDR R2, [R5], #4					@ sizeof CALLS is uint32_t
 	ADDS R0, R0, R2						@ Add CALLS[j] value
-	
-	CBNZ R0, ASM_E3						@ Early jump to ASM_E3 if found lower call
-	
+
+	@ CBNZ R0, ASM_E3						@ Early jump to ASM_E3 if found lower call
+	CMP R0, #0
+	BNE ASM_E3
+
+
 	CMP R5, R3
 	BNE ASM_E2_LOWER_CALLCAR_LOOP
 
@@ -310,7 +315,7 @@ ASM_E2_HIGHER_CALLCAR_LOOP:
 	ANDS R0, R0, #CALLCAR
 
 	CBNZ R0, ASM_E2_2H					@ Early jump to ASM_E2_2H if found higher call
-	
+
 	CMP R4, R3
 	BNE ASM_E2_HIGHER_CALLCAR_LOOP
 
@@ -334,7 +339,9 @@ ASM_E2_2H:
 	STR R2, [R3]						@ shared_state->CALLS[elevator->FLOOR] = 0;
 
 	@ If called to the opposite direction: jump to E3
-	CBNZ R0, ASM_E3
+	@ CBNZ R0, ASM_E3
+	CMP R0, #0
+	BNE ASM_E3
 
 	@ Otherwise set STATE to NEUTRAL
 	STR R2, [R10, #STATE]
@@ -417,7 +424,7 @@ ASM_E4_ELEVATOR_LOOP:
 	@ Compare user->OUT with FLOOR
 	LDR R0, [R5, #OUT]
 	CMP R0, R6
-	BNE ASM_E4_ELEVATOR_LOOP				@ If not equal: continue searching			
+	BNE ASM_E4_ELEVATOR_LOOP				@ If not equal: continue searching
 
 	LDR R1, =ASM_U6							@ Otherwise prepare to send user to U6
 	B ASM_E4_2H
@@ -532,7 +539,7 @@ ASM_E6_SKIP_DOWN_RESET:
 	@ Perform DECISION subroutine if STATE == NEUTRAL
 	MOV R0, R11
 	LDR R1, =E6
-	BL decision	
+	BL decision
 
 @ Input:
 @ R11 SharedState* shared_state
@@ -623,8 +630,8 @@ ASM_E7_CONTINUE:
 	BEQ ASM_E7_2H_HIGHER_LOOP
 
 	@ If not, is CALLDOWN[FLOOR] != 0
-	TST R0, #CALLDOWN						
-	BEQ ASM_E7								@ If not, repeat step E7							
+	TST R0, #CALLDOWN
+	BEQ ASM_E7								@ If not, repeat step E7
 
 @ Runtime:
 @ R3 = &CALLS[FLOOR]
@@ -640,7 +647,7 @@ ASM_E7_2H_HIGHER_LOOP:
 
 @ NOTE: MIX has 4 additional "paddings" for simply adding calls, without any loop
 ASM_E7_2H_CONTINUE_HIGHER_LOOP:
-	LDR R0, [R4], #-4						
+	LDR R0, [R4], #-4
 	CMP R0, #0
 	BGT ASM_E7								@ found higher call: repeat E7; return;
 
