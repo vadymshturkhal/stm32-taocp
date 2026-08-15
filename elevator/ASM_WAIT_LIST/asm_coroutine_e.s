@@ -217,6 +217,8 @@ ASM_E2:
 @ R3 &CALLS[FLOOR]
 @ R4 &CALLS[j], from FLOORS to FLOOR
 @ R5 &CALLS[0]
+
+@ NOTE: magic 4 is sizeof CALLS, which is uint32_t
 ASM_E2_HIGHER_CALLS:
 	LDR R1, [R10, #FLOOR]
 	
@@ -230,6 +232,7 @@ ASM_E2_HIGHER_CALLS:
 	BLE ASM_E2_ELEVATOR_LOWER_FLOORS
 
 @ FIXME: Hoist
+@ NOTE: MIX has 4 additional "paddings" for simply adding calls, without any loop
 ASM_E2_HIGHER_LOOP:
 	LDR R0, [R4], #-4					@ sizeof CALLS is uint32_t
 
@@ -292,9 +295,11 @@ ASM_E2_LOWER_CALLCAR_LOOP:
 @ Runtime:
 @ R3 &CALLS[FLOOR] = Current floor CALLS
 @ R4 &CALLS[FLOORS - 1]
+
+@ NOTE: magic 4 is sizeof CALLS, which is uint32_t
 ASM_E2_ELEVATOR_HIGHER_FLOORS:
 	ADD R4, R11, #(CALLS + (FLOORS - 1) * 4)	@ R4 = &CALLS[FLOORS - 1] = Higher floor CALLS
-	MOVS R0, #0							@ R0 = rA = Accumulator
+	MOVS R0, #0									@ R0 = rA = Accumulator
 
 	CMP R4, R3
 	BLE ASM_E2_2H
@@ -402,6 +407,7 @@ ASM_E4:
 	LDR R6, [R10, #FLOOR]					@ R6 = elevator->FLOOR
 
 @ [Search ELEVATOR list, right to left]
+@ NOTE: MIX has 4 additional "paddings" for simply adding calls, without any loop
 ASM_E4_ELEVATOR_LOOP:
 	LDR R5, [R5, #LEFT2]					@ R5 = node = head->left2
 	CMP R5, R4
@@ -631,6 +637,7 @@ ASM_E7_2H_HIGHER_LOOP:
 	CMP R4, R3
 	BLE ASM_E7_1H								@ No higher calls
 
+@ NOTE: MIX has 4 additional "paddings" for simply adding calls, without any loop
 ASM_E7_2H_CONTINUE_HIGHER_LOOP:
 	LDR R0, [R4], #-4						
 	CMP R0, #0
