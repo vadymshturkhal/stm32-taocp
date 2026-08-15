@@ -33,6 +33,9 @@
 	.global ASM_E6
 	.type ASM_E6, %function
 
+	.global ASM_E6B
+	.type ASM_E6B, %function
+
 	.global ASM_E7
 	.type ASM_E7, %function
 
@@ -436,7 +439,7 @@ ASM_E4_1H:
 	LDR R5, [R4, #RIGHT2]					@ R5 = node = QUEUE[FLOOR].head->right2
 
 	CMP R5, R4
-	BEQ ASM_E4_1H_QUEUE_EMPTY					@ node == head: QUEUE is empty
+	BEQ ASM_E4_1H_QUEUE_EMPTY				@ node == head: QUEUE is empty
 
 	MOVS R0, R5								@ If not, cancel action U4 for this user
 	BL elevator_list_delete_nodew			@ elevator_list_delete_nodew(node)
@@ -532,14 +535,16 @@ ASM_E6_SKIP_UP_RESET:
 
 ASM_E6_SKIP_DOWN_RESET:
 	@ LDR R0, [R10, #STATE]
-	@ CMP R0, #0
-	@ BNE ASM_E6B
-	CBNZ R0, ASM_E6B						@ flag preserved from ASM_E6
+	CMP R0, #0
+	BNE ASM_E6B
+	@ CBNZ R0, ASM_E6B						@ flag preserved from ASM_E6
 
+	@ FIXME
 	@ Perform DECISION subroutine if STATE == NEUTRAL
-	MOV R0, R11
-	LDR R1, =E6
-	BL decision
+	@ MOV R0, R11
+	@ LDR R1, =E6
+	@ BL decision
+	BL ASM_DECISION
 
 @ Input:
 @ R11 SharedState* shared_state
@@ -751,7 +756,10 @@ ASM_E9:
 	STR R1, [R0, #LEFT1]					@ elevator->ELEV3->left1 = NULL; STZ 0,6
 	STR R1, [R10, #D2]						@ elevator->D2 = 0;	STZ D2
 
-	MOV R0, R11
-	LDR R1, =ASM_E9
-	BL decision								@ decision(shared_state, E9);
+	@ FIXME
+	@ MOV R0, R11
+	@ LDR R1, =ASM_E9
+	@ BL decision								@ decision(shared_state, E9);
+	BL ASM_DECISION
+
 	B ASM_CYCLE

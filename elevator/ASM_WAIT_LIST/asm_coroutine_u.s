@@ -288,9 +288,11 @@ ASM_U2_2H_CONTINUE:
 	B ASM_U3
 
 ASM_U2_2H_DECISION:
-	MOV R0, R11
-	LDR R1, =ASM_U2
-	BL decision					@ decision(shared_state, caller=U2);
+	@ FIXME remove comments
+	@ MOV R0, R11
+	@ LDR R1, =ASM_U2
+	@ BL decision					@ decision(shared_state, caller=U2);
+	BL ASM_DECISION
 
 @ [Enter queue]
 @ Input:
@@ -409,7 +411,7 @@ ASM_U5:
 	@ Restart E5 after 25 units
 	MOV R0, R11
 	MOVS R1, #25
-	BL E5A									@ E5A(shared_state, 25);
+	BL ASM_E5A
 
 DONE:
 	B ASM_CYCLE
