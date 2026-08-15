@@ -19,9 +19,6 @@ extern void asm_balloc_free(void* memory_pointer);
 uint32_t start_elevator_simulation(uint32_t max_users) {
 	values_seed(1);  // fixed seed: reproducible runs, matches Python's random.seed(1)
 
-//	printf("max_users = %lu\r\n", (unsigned long)max_users);
-//	fflush(stdout);
-
 	uint32_t num_lists = FLOORS + 2;  // ELEVATOR_LIST, QUEUE[0..FLOORS-1], WAIT_LIST -- each pops a head node from the pool
 	uint32_t max_nodes = num_lists + 4 + max_users;  // list heads, ELEV1, ELEV2, ELEV3, USER1, and max_users
 

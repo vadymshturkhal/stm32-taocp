@@ -14,7 +14,7 @@ uint32_t measure_elevator_performance() {
 	end = DWT->CYCCNT;
 	overhead = end - start;
 
-	const uint32_t max_users = 66;
+	const uint32_t max_users = 4;
 
 	// 4 users
 	// GCC -O3 9453
@@ -31,8 +31,9 @@ uint32_t measure_elevator_performance() {
 	// GCC -O3 -flto 142515
 	// ASM: 44950
 
+	printf("TIME STATE FLOOR D1 D2 D3 step action\r\n");
 	// 66 users
-	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 90209-90294 | warm cycles = 90280-90340
+	// GCC -O3 -mcpu=cortex-m4 -mthumb: cold cycles = 90322 | warm cycles = 90379
 	// Flash size = ?
 	start = DWT->CYCCNT;
 	uint32_t gcc_elevator_status = start_elevator_simulation(max_users);
@@ -40,26 +41,27 @@ uint32_t measure_elevator_performance() {
 	end = DWT->CYCCNT;
 	volatile uint32_t gcc_elevator_cycles_cold = (end - start) - overhead;
 
-	start = DWT->CYCCNT;
-	gcc_elevator_status = start_elevator_simulation(max_users);
-	if (gcc_elevator_status != 0) return gcc_elevator_status;
-	end = DWT->CYCCNT;
-	volatile uint32_t gcc_elevator_cycles_warm = (end - start) - overhead;
+//	start = DWT->CYCCNT;
+//	gcc_elevator_status = start_elevator_simulation(max_users);
+//	if (gcc_elevator_status != 0) return gcc_elevator_status;
+//	end = DWT->CYCCNT;
+//	volatile uint32_t gcc_elevator_cycles_warm = (end - start) - overhead;
 
+//	printf("TIME STATE FLOOR D1 D2 D3 step action\n");
 	// 66 users
-	// ASM: cold cycles = 23979-23985 | warm cycles = 23912-23913
-	start = DWT->CYCCNT;
-	uint32_t asm_elevator_status = start_asm_elevator_simulation(max_users);
-	if (asm_elevator_status != 0) return asm_elevator_status;
-	end = DWT->CYCCNT;
-	volatile uint32_t asm_elevator_cycles_cold = (end - start) - overhead;
+	// ASM: cold cycles = 23979-23985 | warm cycles = 23912-23914
+//	start = DWT->CYCCNT;
+//	uint32_t asm_elevator_status = start_asm_elevator_simulation(max_users);
+//	if (asm_elevator_status != 0) return asm_elevator_status;
+//	end = DWT->CYCCNT;
+//	volatile uint32_t asm_elevator_cycles_cold = (end - start) - overhead;
 
-	start = DWT->CYCCNT;
-	asm_elevator_status = start_asm_elevator_simulation(max_users);
-	if (asm_elevator_status != 0) return asm_elevator_status;
-	end = DWT->CYCCNT;
-	volatile uint32_t asm_elevator_cycles_warm = (end - start) - overhead;
-
+//	start = DWT->CYCCNT;
+//	asm_elevator_status = start_asm_elevator_simulation(max_users);
+//	if (asm_elevator_status != 0) return asm_elevator_status;
+//	end = DWT->CYCCNT;
+//	volatile uint32_t asm_elevator_cycles_warm = (end - start) - overhead;
+//
 
 
 

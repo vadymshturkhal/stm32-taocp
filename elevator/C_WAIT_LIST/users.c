@@ -14,6 +14,9 @@ static void U2(SharedState* shared_state, ElevatorNode* user);
 static void U3(SharedState* shared_state, ElevatorNode* user);
 static void U4(SharedState* shared_state, ElevatorNode* user);
 static void U4A(SharedState* shared_state, ElevatorNode* user);
+static void U6_impl(SharedState* shared_state, ElevatorNode* user, bool is_print);
+
+void trace(SharedState* shared_state, const char* step, const char* fmt, ...);
 
 uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool, uint32_t users_quantity) {
 	if (users == NULL || shared_state == NULL || storage_pool == NULL) return 1;
@@ -59,6 +62,7 @@ static void U1(SharedState* shared_state, ElevatorNode* C) {
 	user->IN = user_values.IN;
 	user->OUT = user_values.OUT;
 	user->GIVEUPTIME = user_values.GIVEUPTIME;
+	user->id = users->user_id;
 
 	// 4 increment user_id (not in Coroutine U)
 	users->user_id += 1;
@@ -66,7 +70,9 @@ static void U1(SharedState* shared_state, ElevatorNode* C) {
 	// 2 LDA INTERTIME (time before another user enters) / JMP HOLD
 	hold(shared_state, C, user_values.INTERTIME);
 
-	// TODO: trace print (Table 1 style) -- no logging yet
+	// Print
+	trace(shared_state, "U1", "User %u arrives at floor %u, destination is %u, give up %u",
+	      user->id, user->IN, user->OUT, shared_state->TIME + user->GIVEUPTIME);
 
 	// 5 to U2, with C now the new node
 	U2(shared_state, user);
@@ -149,8 +155,9 @@ static void U4(SharedState* shared_state, ElevatorNode* user) {
 
 	// If the user's IN floor differs from the elevator's current FLOOR: give up
 	if (user->IN != elevator->FLOOR) {
-		// TODO: trace print (Table 1 style) -- "... decides to give up, leaves the system"
-		U6(shared_state, user);
+		// Print
+		trace(shared_state, "U4", "User %u decides to give up, leaves the system", user->id);
+		U6_impl(shared_state, user, false);
 		return;
 	}
 
@@ -160,15 +167,17 @@ static void U4(SharedState* shared_state, ElevatorNode* user) {
 		return;
 	}
 
-	// TODO: trace print (Table 1 style) -- "... decides to give up, leaves the system"
-	U6(shared_state, user);
+	// Print
+	trace(shared_state, "U4", "User %u decides to give up, leaves the system", user->id);
+	U6_impl(shared_state, user, false);
 }
 
 // [Get in]
 void U5(SharedState* shared_state, ElevatorNode* user) {
 	Elevator* elevator = shared_state->elevator;
 
-	// TODO: trace print (Table 1 style) -- "... gets in"
+	// Print
+	trace(shared_state, "U5", "User %u gets in", user->id);
 
 	// 1. This user now leaves QUEUE and enters ELEVATOR
 
@@ -200,7 +209,13 @@ void U5(SharedState* shared_state, ElevatorNode* user) {
 
 // [Get out]
 void U6(SharedState* shared_state, ElevatorNode* user) {
-	// TODO: trace print (Table 1 style) -- "... gets out, leaves the system"
+	U6_impl(shared_state, user, true);
+}
+
+static void U6_impl(SharedState* shared_state, ElevatorNode* user, bool is_print) {
+	if (is_print) {
+		trace(shared_state, "U6", "User %u gets out, leaves the system", user->id);
+	}
 
 	// JMP DELETE
 	elevator_list_delete_node(user);
