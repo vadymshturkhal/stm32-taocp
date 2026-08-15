@@ -30,8 +30,8 @@ if __name__ == "__main__":
 
     shared_state = SharedState()
     users_quantity = 4
-    users_list = create_users(shared_state, users_quantity)
-    users = Users(shared_state, users_list)
+    # users_list = create_users(shared_state, users_quantity)
+    users = Users(shared_state, users=None, users_quantity=users_quantity)
     elevator = Elevator(shared_state)
     users.start()
 
