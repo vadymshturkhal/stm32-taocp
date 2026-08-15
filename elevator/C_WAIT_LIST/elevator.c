@@ -6,6 +6,7 @@
 #include "elevator_settings.h"
 #include "elevator.h"
 #include "users.h"
+#include "trace.h"
 
 // Private functions
 static void E1A(Elevator* elevator);
@@ -69,7 +70,8 @@ void E1(SharedState* shared_state, ElevatorNode* C) {
 static void E2(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
-	// TODO: trace print (Table 1 style) -- no logging yet
+	// Print
+	trace(shared_state, "E2", "Elevator stops");
 
 	// 1 STATE is GOINGUP
 	if (elevator->STATE > 0) {
@@ -159,7 +161,8 @@ static void E2A(SharedState* shared_state, ElevatorNode* C, uint32_t delay) {
 void E3(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
-	// TODO: trace print (Table 1 style) -- no logging yet
+	// Print
+	trace(shared_state, "E3", "Elevator doors start to open");
 
 	// If activity already scheduled: remove it from WAIT list
 	// (Knuth: LDA 0,6 / JANZ DELETEW -- ELEV3->left1 is that same cell,
@@ -184,7 +187,7 @@ void E3(SharedState* shared_state, ElevatorNode* C) {
 	elevator->D1 = 1;
 
 	// Printing
-//	elevator->first_search = true;
+	elevator->first_search = true;
 
 	delay = 20;
 	E4A(shared_state, delay);
@@ -195,8 +198,8 @@ static void E4(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
 	// Printing
-//	bool first_search = elevator->first_search;
-//	elevator->first_search = false;
+	bool first_search = elevator->first_search;
+	elevator->first_search = false;
 
 	// node = LOC(ELEVATOR)
 	ElevatorNode* node = shared_state->ELEVATOR_LIST.head;
@@ -260,10 +263,10 @@ static void E4(SharedState* shared_state, ElevatorNode* C) {
 	// Set D3 nonzero
 	elevator->D3 = 1;
 
-	// TODO: trace print (Table 1 style) -- no logging yet
-//	if (first_search) {
-//
-//	}
+	// Print
+	if (first_search) {
+		trace(shared_state, "E4", "Doors open, nobody is there");
+	}
 }
 
 static void E4A(SharedState* shared_state, uint32_t delay) {
@@ -283,7 +286,8 @@ static void E5(SharedState* shared_state, ElevatorNode* C) {
 	// Is D1 == 0?
 	// If not, people are getting in or out
 	if (elevator->D1 != 0) {
-		// TODO: trace print (Table 1 style) -- "Elevator doors flutter"
+		// Print
+		trace(shared_state, "E5", "Elevator doors flutter");
 
 		// Wait 40 units, repeat E5
 		uint32_t delay = 40;
@@ -291,7 +295,8 @@ static void E5(SharedState* shared_state, ElevatorNode* C) {
 		return;
 	}
 
-	// TODO: trace print (Table 1 style) -- "Elevator doors start to close"
+	// Print
+	trace(shared_state, "E5", "Elevator doors start to close");
 
 	// If D1 == 0: set D3 = 0
 	elevator->D3 = 0;
@@ -356,7 +361,8 @@ static void E6B(Elevator* elevator) {
 static void E7(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
-	// TODO: trace print (Table 1 style) -- "Elevator moving up"
+	// Print
+	trace(shared_state, "E7", "Elevator moving up");
 
 	// INC4 1
 	elevator->FLOOR += 1;
@@ -413,7 +419,8 @@ static void E7_continue(SharedState* shared_state, ElevatorNode* C) {
 static void E8(SharedState* shared_state, ElevatorNode* C) {
 	Elevator* elevator = shared_state->elevator;
 
-	// TODO: trace print (Table 1 style) -- "Elevator moving down"
+	// Print
+	trace(shared_state, "E8", "Elevator moving down");
 
 	// DEC4 1
 	elevator->FLOOR -= 1;
