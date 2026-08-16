@@ -243,20 +243,31 @@ ASM_HOLD:
 @ R0 node C
 @ R1 = P (search pointer, starts at the tail)
 @ R2 = C->NEXTTIME
+@ R3 = P->NEXTTIME
 ASM_SORTIN:
 	LDR R1, [R11, #WAIT_LIST]		@ R1 = shared_state->WAIT_LIST.head
-	LDR R1, [R1, #LEFT1]			@ R1 = P = head->left1 (last node)
 	LDR R2, [R0, #NEXTTIME]			@ R2 = C->NEXTTIME
+
+	LDR R1, [R1, #LEFT1]			@ R1 = P = head->left1 (last node)
 	LDR R3, [R1, #NEXTTIME]			@ R3 = P->NEXTTIME
 	CMP R2, R3
-	BHS ASM_SORTIN_DONE				@ unsigned: C->NEXTTIME >= P->NEXTTIME -> stop
+	BHS ASM_SORTIN_DONE
+
+	LDR R4, [R1, #LEFT1]			@ P = P->left1
 
 .balign 4
 ASM_SORTIN_LOOP:
-	LDR R1, [R1, #LEFT1]			@ P = P->left1
+	@ LDR R4, [R1, #LEFT1]			@ P = P->left1
+	LDR R5, [R4, #NEXTTIME]			@ R3 = P->NEXTTIME
+	LDR R1, [R4, #LEFT1]			@ P = P->left1
+	CMP R2, R5
+	BHS ASM_SORTIN_DONE1
+
+	@ LDR R1, [R4, #LEFT1]			@ P = P->left1
+	LDR R4, [R1, #LEFT1]			@ P = P->left1
 	LDR R3, [R1, #NEXTTIME]			@ R3 = P->NEXTTIME
 	CMP R2, R3
-	BLO ASM_SORTIN_LOOP				@ unsigned: C->NEXTTIME >= P->NEXTTIME -> stop
+	BLO ASM_SORTIN_LOOP
 
 ASM_SORTIN_DONE:
 	LDR R3, [R1, #RIGHT1]			@ R3 = Q = P->right1
@@ -264,6 +275,14 @@ ASM_SORTIN_DONE:
 	STR R1, [R0, #LEFT1]			@ C->left1 = P
 	STR R0, [R1, #RIGHT1]			@ P->right1 = C
 	STR R0, [R3, #LEFT1]			@ Q->left1 = C
+	BX LR
+
+ASM_SORTIN_DONE1:
+	LDR R5, [R4, #RIGHT1]			@ R3 = Q = P->right1
+	STR R5, [R0, #RIGHT1]			@ C->right1 = Q
+	STR R4, [R0, #LEFT1]			@ C->left1 = P
+	STR R0, [R4, #RIGHT1]			@ P->right1 = C
+	STR R0, [R5, #LEFT1]			@ Q->left1 = C
 	BX LR
 
 @ Input:

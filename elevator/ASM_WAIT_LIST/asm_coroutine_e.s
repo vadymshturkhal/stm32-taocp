@@ -229,13 +229,11 @@ ASM_E2_HIGHER_CALLS:
 	ADD R3, R5, R1, LSL #2						@ R3 = &CALLS[FLOOR] = Current floor CALLS
 	ADD R4, R11, #(CALLS + (FLOORS - 1) * 4)	@ R4 = &CALLS[FLOORS - 1] = Higher floor CALLS
 
-	MOVS R0, #0							@ R0 = rA = Accumulator
-
 	CMP R4, R3
 	BLE ASM_E2_ELEVATOR_LOWER_FLOORS
 
-@ FIXME: Hoist
 @ NOTE: MIX has 4 additional "paddings" for simply adding calls, without any loop
+.balign 4
 ASM_E2_HIGHER_LOOP:
 	LDR R0, [R4], #-4					@ sizeof CALLS is uint32_t
 
@@ -251,8 +249,6 @@ ASM_E2_HIGHER_LOOP:
 @ R3 = &CALLS[FLOOR]
 @ R5 = &CALLS[0]
 ASM_E2_ELEVATOR_LOWER_FLOORS:
-	MOVS R0, #0							@ R0 = rA = Accumulator
-
 	CMP R5, R3
 	BGE ASM_E2_LOWER_DONE				@ FLOOR == 0: no lower floors exist
 
@@ -292,7 +288,6 @@ ASM_E2_LOWER_CALLCAR_LOOP:
 	@ CBNZ R0, ASM_E3						@ Early jump to ASM_E3 if found lower call
 	CMP R0, #0
 	BNE ASM_E3
-
 
 	CMP R5, R3
 	BNE ASM_E2_LOWER_CALLCAR_LOOP
@@ -704,7 +699,7 @@ ASM_E8_2H_LOWER_LOOP:
 	BGE ASM_E8_1H							@ No lower calls
 
 ASM_E8_2H_CONTINUE_LOWER_LOOP:
-	LDR R0, [R4], #4					@ sizeof CALLS is uint32_t
+	LDR R0, [R4], #4						@ sizeof CALLS is uint32_t
 	CMP R0, #0
 	BGT ASM_E8								@ found lower call: repeat E8; return;
 
