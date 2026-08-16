@@ -247,13 +247,16 @@ ASM_SORTIN:
 	LDR R1, [R11, #WAIT_LIST]		@ R1 = shared_state->WAIT_LIST.head
 	LDR R1, [R1, #LEFT1]			@ R1 = P = head->left1 (last node)
 	LDR R2, [R0, #NEXTTIME]			@ R2 = C->NEXTTIME
-
-ASM_SORTIN_LOOP:
 	LDR R3, [R1, #NEXTTIME]			@ R3 = P->NEXTTIME
 	CMP R2, R3
 	BHS ASM_SORTIN_DONE				@ unsigned: C->NEXTTIME >= P->NEXTTIME -> stop
+
+.balign 4
+ASM_SORTIN_LOOP:
 	LDR R1, [R1, #LEFT1]			@ P = P->left1
-	B ASM_SORTIN_LOOP
+	LDR R3, [R1, #NEXTTIME]			@ R3 = P->NEXTTIME
+	CMP R2, R3
+	BLO ASM_SORTIN_LOOP				@ unsigned: C->NEXTTIME >= P->NEXTTIME -> stop
 
 ASM_SORTIN_DONE:
 	LDR R3, [R1, #RIGHT1]			@ R3 = Q = P->right1
