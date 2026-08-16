@@ -2,6 +2,15 @@
     .thumb
     .cpu cortex-m4
     .section .text
+    .global ASM_CYCLE_START
+	.type ASM_CYCLE_START, %function
+
+    .global ASM_CYCLE
+	.type ASM_CYCLE, %function
+
+    .global ASM_CYCLE_DONE
+	.type ASM_CYCLE_DONE, %function
+
     .global ASM_DECISION
 	.type ASM_DECISION, %function
 
@@ -14,7 +23,8 @@
     .global ASM_HOLDC
 	.type ASM_HOLDC, %function
 
-@ FIXME look at GCC -O3 decisions
+@ NOTE: R8-R11 are global registers which contain global state and don't need to PUSH them every step
+@ NOTE: Using C NextInst with global parameters permanently stored in R8-R11 Registers
 
 @ SharedState fields definition
 .equ TIME, 				0
@@ -36,6 +46,10 @@
 .equ OUT,				28
 .equ GIVEUPTIME,		32
 
+@ ElevatorList fields definition
+@ .equ ELEVATOR_LIST_HEAD, 0
+@ .equ ELEVATOR_LIST_STORAGE_POOL,4
+
 @ Elevator fields definition
 .equ SHARED_STATE, 		0
 .equ STATE,				4
@@ -50,17 +64,28 @@
 .equ HOME_FLOOR,		2
 .equ FLOORS,			5
 
+@ Runtime: Set global variables
+@ R0-R3 scratch
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
+ASM_CYCLE_START:
+	PUSH {R3-R11, LR}			@ Save all Registers and use R3 for 8-byte alignment
+	MOVS R11, R0				@ R11 = shared_state
+	LDR R10, [R0, #ELEVATOR]	@ R10 = elevator
+	LDR R9, [R0, #USERS]		@ R9 = users
+	B ASM_CYCLE
+
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 user
-
 @ Runtime
 @ Save
 @ R7 elevator->ELEV1
 @ R6 ASM_E3 or ASM_E6
-
 @ Scratch
 @ R0 STATE, shared_state->CALLS[HOME_FLOOR]
 @ R1 elevator->ELEV1->NEXTINST
@@ -241,3 +266,29 @@ ASM_SORTIN_DONE:
 	STR R7, [R2, #RIGHT1]			@ P->right1 = C
 	STR R7, [R3, #LEFT1]			@ Q->left1 = C
 	BX LR
+
+ASM_CYCLE:
+	LDR R1, [R11, #WAIT_LIST]			@ R1 = shared_state->WAIT_LIST.head
+	LDR R8, [R1, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
+
+	CMP R8, R1
+	BEQ ASM_CYCLE_DONE
+
+	@ Take the earliest node off the WAIT list
+	@ ElevatorNode* C = shared_state->WAIT_LIST.head->right1;	(now in R8)
+
+	@ Advance TIME to its NEXTTIME
+	LDR R0, [R8, #NEXTTIME]
+	STR R0, [R11, #TIME]				@ shared_state->TIME = C->NEXTTIME;
+
+	@ Unlink it
+	MOV R0, R8
+	BL elevator_list_delete_nodew		@ elevator_list_delete_nodew(C);
+
+	@ Call NEXTINST(shared_state, C): handler branches back to ASM_CYCLE when done
+	LDR R2, [R8, #NEXTINST]
+
+	BX R2
+
+ASM_CYCLE_DONE:
+	POP {R3-R11, PC}
