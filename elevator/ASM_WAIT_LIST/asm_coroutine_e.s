@@ -281,13 +281,12 @@ ASM_E2_1H:
 	CMP R5, R3
 	BGE ASM_E2_ELEVATOR_HIGHER_FLOORS				@ FLOOR == 0: no lower floors exist
 
+@ FIXME maybe use .balign 4
 ASM_E2_LOWER_CALLCAR_LOOP:
 	LDR R2, [R5], #4					@ sizeof CALLS is uint32_t
 	ADDS R0, R0, R2						@ Add CALLS[j] value
 
-	@ CBNZ R0, ASM_E3						@ Early jump to ASM_E3 if found lower call
-	CMP R0, #0
-	BNE ASM_E3
+	CBNZ R0, ASM_E3_BEFORE				@ Early jump to ASM_E3 if found lower call
 
 	CMP R5, R3
 	BNE ASM_E2_LOWER_CALLCAR_LOOP
@@ -334,9 +333,7 @@ ASM_E2_2H:
 	STR R2, [R3]						@ shared_state->CALLS[elevator->FLOOR] = 0;
 
 	@ If called to the opposite direction: jump to E3
-	@ CBNZ R0, ASM_E3
-	CMP R0, #0
-	BNE ASM_E3
+	CBNZ R0, ASM_E3_BEFORE
 
 	@ Otherwise set STATE to NEUTRAL
 	STR R2, [R10, #STATE]
@@ -351,6 +348,7 @@ ASM_E2_2H:
 @ Runtime:
 @ R4 = elevator->ELEV3
 @ R7 uint32_t delay
+ASM_E3_BEFORE:
 ASM_E3:
 	LDR R4, [R10, #ELEV3]					@ R4 = elevator->ELEV3
 
@@ -359,7 +357,7 @@ ASM_E3:
 	CBZ R0, ASM_E3_SCHEDULE_E9
 
 	MOVS R0, R4
-	BL elevator_list_delete_nodew
+	BL ASM_DELETEW
 
 @ Schedule activity E9 after 300 units
 ASM_E3_SCHEDULE_E9:
@@ -430,7 +428,7 @@ ASM_E4_1H:
 	BEQ ASM_E4_1H_QUEUE_EMPTY				@ node == head: QUEUE is empty
 
 	MOVS R0, R5								@ If not, cancel action U4 for this user
-	BL elevator_list_delete_nodew			@ elevator_list_delete_nodew(node)
+	BL ASM_DELETEW
 
 	LDR R1, =ASM_U5							@ Prepare to replace U4 by U5
 
@@ -544,7 +542,7 @@ ASM_E6B_D2_CHECK:
 	CBZ R0, ASM_E6B_SCHEDULE
 
 	LDR R0, [R10, #ELEV3]
-	BL elevator_list_delete_nodew		@ Cancel activity E9
+	BL ASM_DELETEW						@ Cancel activity E9
 
 	LDR R0, [R10, #ELEV3]
 	MOVS R1, #0
@@ -577,11 +575,12 @@ ASM_E7A:
 @ R9 Users* users
 @ R8 ElevatorNode* C
 ASM_E7:
-	LDR R0, [R10, #FLOOR]
-	ADDS R0, R0, #1
-	STR R0, [R10, #FLOOR]					@ elevator->FLOOR += 1;
+	LDR R1, [R10, #FLOOR]
+	LDR R2, =ASM_E7_CONTINUE				@ Latency hiding
 
-	LDR R2, =ASM_E7_CONTINUE
+	ADDS R1, R1, #1
+	STR R1, [R10, #FLOOR]					@ elevator->FLOOR += 1;
+
 	LDR R0, [R10, #ELEV1]
 	MOVS R1, #51
 	B ASM_HOLDC

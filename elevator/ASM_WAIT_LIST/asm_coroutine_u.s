@@ -239,7 +239,7 @@ ASM_U2:
 
 	@ Remove it from WAIT list
 	@ ELEV1 is already at R0
-	BL elevator_list_delete_nodew	@ elevator_list_delete_nodew(elevator->ELEV1);
+	BL ASM_DELETEW
 
 	@ And reinsert it at front of WAIT
 	B ASM_U2_4H
@@ -343,9 +343,10 @@ ASM_U4:
 	@ B ASM_CYCLE, defined in asm_cycle.s), happens even at trivial
 	@ distance, unrelated to the 126-byte limit
 	@ CBNZ R0, ASM_U6
+	CBNZ R0, ASM_U6_BEFORE
 
-	CMP R0, #0
-	BNE ASM_U6								@ JANZ *+3
+	@ CMP R0, #0
+	@ BNE ASM_U6								@ JANZ *+3
 
 	@ JANZ U4A: doors still busy: reschedule U4
 	LDR R1, [R10, #D1]					@ R1 = D1
@@ -358,9 +359,10 @@ ASM_U4:
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 ElevatorNode* user, also if called from ASM_CYCLE
+ASM_U6_BEFORE:
 ASM_U6:
 	MOVS R0, R8
-	BL elevator_list_delete_node		@ elevator_list_delete_node(user);
+	BL ASM_DELETE
 
 	LDR R0, [R9, #STORAGE_POOL]			@ R0 = shared_state->users->storage_pool
 	MOVS R1, R8							@ R1 = user
@@ -381,7 +383,7 @@ ASM_U5:
 	
 	@ Delete User from QUEUE[IN]
 	MOVS R0, R8
-	BL elevator_list_delete_node			@ elevator_list_delete_node(user);
+	BL ASM_DELETE
 
 	@ Insert it at right of ELEVATOR
 	ADD R0, R11, #ELEVATOR_LIST				@ R0 = &shared_state->ELEVATOR_LIST
@@ -408,7 +410,7 @@ ASM_U5:
 	STR R2, [R10, #STATE]					@ elevator->STATE = OUT - FLOOR
 
 	@ 4. Remove action E5 from WAIT list
-	BL elevator_list_delete_nodew			@ elevator_list_delete_nodew(elevator->ELEV2);
+	BL ASM_DELETEW
 
 	@ Restart E5 after 25 units
 	MOVS R7, #25

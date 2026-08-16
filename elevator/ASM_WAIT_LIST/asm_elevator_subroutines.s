@@ -23,6 +23,13 @@
     .global ASM_HOLDC
 	.type ASM_HOLDC, %function
 
+    .global ASM_DELETEW
+	.type ASM_DELETEW, %function
+
+    .global ASM_DELETE
+	.type ASM_DELETE, %function
+
+
 @ NOTE: R7-R11 are global registers which contain global state and don't need to PUSH them every step
 @ NOTE: Using C NextInst with global parameters permanently stored in R8-R11 Registers
 
@@ -218,6 +225,40 @@ ASM_DECISION_8H:
 ASM_DECISION_9H:
     BX LR
 
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 node C global
+@ R0 ElevatorNode* node
+ASM_DELETEW:
+	@ Delete node from WAIT list
+	@ node->left1->right1 = node->right1;
+	@ node->right1->left1 = node->left1;
+	LDR R1, [R0, #LEFT1]			@ R1 = L = node->left1
+	LDR R2, [R0, #RIGHT1]			@ R2 = R = node->right1
+
+	STR R2, [R1, #RIGHT1]			@ L->right1 = R
+	STR R1, [R2, #LEFT1]			@ R->left1 = L
+
+	BX LR
+
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 node C global
+@ R0 ElevatorNode* node
+ASM_DELETE:
+	@ Delete node from WAIT list
+	@ node->left1->right1 = node->right1;
+	@ node->right1->left1 = node->left1;
+	LDR R1, [R0, #LEFT2]			@ R1 = L = node->left1
+	LDR R2, [R0, #RIGHT2]			@ R2 = R = node->right1
+
+	STR R2, [R1, #RIGHT2]			@ L->right1 = R
+	STR R1, [R2, #LEFT2]			@ R->left1 = L
+
+	BX LR
+
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
@@ -314,7 +355,7 @@ ASM_CYCLE:
 
 	@ Unlink it
 	MOV R0, R8
-	BL elevator_list_delete_nodew		@ elevator_list_delete_nodew(C);
+	BL ASM_DELETEW
 
 	@ Call NEXTINST(shared_state, C): handler branches back to ASM_CYCLE when done
 	LDR R2, [R8, #NEXTINST]
