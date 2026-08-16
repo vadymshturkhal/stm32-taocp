@@ -153,6 +153,7 @@ ASM_USERS_START:
 @ Runtime:
 @ R7 ElevatorNode* user
 ASM_U1:
+	PUSH {R7}
 	@ User fabric
 	@ Not in MIX
 	@ if (users->user_id >= users->users_quantity) return;
@@ -192,16 +193,22 @@ ASM_U1:
 	STR R3, [R0, #GIVEUPTIME]
 
 	@ 2. LDA INTERTIME (time before another user enters) / JMP HOLD
-	MOV R0, R11				@ Move shared_state to R0
-	MOVS R1, R8				@ Move node C to R1
-	@ MOVS R2, R3			@ R2 is already INTERTIME
-	BL hold					@ hold(shared_state, C, user_values.INTERTIME);
+	@ MOV R0, R11				@ Move shared_state to R0
+	@ MOVS R1, R8				@ Move node C to R1
+	@ @ MOVS R2, R3			@ R2 is already INTERTIME
+	@ BL hold					@ hold(shared_state, C, user_values.INTERTIME);
+
+	MOVS R0, R8				@ R0 node
+	MOVS R1, R2				@ R1 delay = INTERTIME
+	BL ASM_HOLD
 
 	@ At the end of ASM_U1 restore Stack Pointer
 	ADD SP, SP, #16
 
 	@ User R8 goes to ASM_U2
 	MOVS R8, R7				@ Replace C with user
+
+	POP {R7}
 
 @ [Signal and wait]
 @ Input:
@@ -288,10 +295,6 @@ ASM_U2_2H_CONTINUE:
 	B ASM_U3
 
 ASM_U2_2H_DECISION:
-	@ FIXME remove comments
-	@ MOV R0, R11
-	@ LDR R1, =ASM_U2
-	@ BL decision					@ decision(shared_state, caller=U2);
 	BL ASM_DECISION
 
 @ [Enter queue]
@@ -318,13 +321,10 @@ ASM_U3:
 ASM_U4A:
 	@ LDA GIVEUPTIME
 	@ JMP HOLDC
-
-	LDR R2, [R8, #GIVEUPTIME]
-	LDR R3, =ASM_U4
-	MOV R0, R11
-	MOVS R1, R8
-	BL holdc 								@ holdc(shared_state, user, delay, U4);
-	B ASM_CYCLE
+	LDR R1, [R8, #GIVEUPTIME]
+	LDR R2, =ASM_U4
+	MOVS R0, R8
+	B ASM_HOLDC
 
 @ [Give up]
 @ Input:
@@ -374,6 +374,8 @@ ASM_U6:
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 ElevatorNode* user, also if called from ASM_CYCLE
+@ Runtime:
+@ R7 uint32_t delay
 ASM_U5:
 	@ 1. This user now leaves QUEUE and enters ELEVATOR
 	
@@ -409,11 +411,11 @@ ASM_U5:
 	BL elevator_list_delete_nodew			@ elevator_list_delete_nodew(elevator->ELEV2);
 
 	@ Restart E5 after 25 units
-	MOV R0, R11
-	MOVS R1, #25
+	MOVS R7, #25
 	BL ASM_E5A
 
 DONE:
+	POP {R7}
 	B ASM_CYCLE
 
 DONE_SP:

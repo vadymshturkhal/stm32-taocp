@@ -194,13 +194,10 @@ ASM_E1:
 @ R8 ElevatorNode* C
 @ R7 uint32_t delay					@ FIXME: guarantee
 ASM_E2A:
-	LDR R3, =ASM_E2
-	MOV R0, R11
-	MOV R1, R8
-	MOV R2, R7
-	BL holdc						@ JMP HOLDC
-	B ASM_CYCLE
-	@ holdc(shared_state, C, delay, E2);
+	MOVS R0, R8					@ R0 node C
+	MOVS R1, R7					@ R1 delay
+	LDR R2, =ASM_E2				@ R2 next_inst
+	B ASM_HOLDC					@ ASM_CYCLE is automatically invoked after ASM_HOLDC
 
 @ [Change of state?]
 @ Input:
@@ -371,21 +368,19 @@ ASM_E3:
 
 @ Schedule activity E9 after 300 units
 ASM_E3_SCHEDULE_E9:
-	MOV R0, R11
-	MOVS R1, R4
-	MOV R2, #300
-	BL hold									@ hold(shared_state, elevator->ELEV3, 300)
+	MOVS R0, R4				@ R0 node
+	MOV R1, #300			@ R1 delay
+	BL ASM_HOLD
 
-	MOV R0, R11
-	LDR R1, [R10, #ELEV2]
-	MOV R2, #76
-	BL hold									@ hold(shared_state, elevator->ELEV2, 76);
+	LDR R0, [R10, #ELEV2]	@ R0 node
+	MOV R1, #76				@ R1 delay
+	BL ASM_HOLD
 
 	MOVS R0, #1
-	STR R0, [R10, #D2]						@ elevator->D2 = 1;
-	STR R0, [R10, #D1]						@ elevator->D1 = 1;
+	STR R0, [R10, #D2]		@ elevator->D2 = 1;
+	STR R0, [R10, #D1]		@ elevator->D1 = 1;
 
-	MOV R7, #20								@ delay = 20
+	MOV R7, #20				@ delay = 20
 
 @ Input:
 @ R11 SharedState* shared_state
@@ -394,12 +389,10 @@ ASM_E3_SCHEDULE_E9:
 @ R8 ElevatorNode* C
 @ R7 uint32_t delay
 ASM_E4A:
-	LDR R3, =ASM_E4
-	MOV R0, R11
-	LDR R1, [R10, #ELEV1]
-	MOV R2, R7
-	BL holdc								@ holdc(shared_state, elevator->ELEV1, delay, ASM_E4)
-	B ASM_CYCLE
+	LDR R2, =ASM_E4
+	LDR R0, [R10, #ELEV1]
+	MOV R1, R7
+	B ASM_HOLDC
 
 @ [Let people out, in]
 @ Input:
@@ -472,12 +465,10 @@ ASM_E4_1H_QUEUE_EMPTY:
 @ R8 ElevatorNode* C
 @ R7 uint32_t delay
 ASM_E5A:
-	LDR R3, =ASM_E5
-	MOV R0, R11
-	LDR R1, [R10, #ELEV2]
-	MOV R2, R7
-	BL holdc							@ holdc(shared_state, elevator->ELEV2, delay, E5);
-	B ASM_CYCLE
+	LDR R2, =ASM_E5
+	LDR R0, [R10, #ELEV2]
+	MOV R1, R7
+	B ASM_HOLDC
 
 @ [Close door]
 @ Input:
@@ -496,12 +487,10 @@ ASM_E5_CLOSE:
 	MOVS R0, #0
 	STR R0, [R10, #D3]					@ elevator->D3 = 0;
 
-	LDR R3, =ASM_E6
-	LDR R1, [R10, #ELEV1]
-	MOV R0, R11
-	MOVS R2, #20
-	BL holdc							@ holdc(shared_state, elevator->ELEV1, 20, E6);
-	B ASM_CYCLE
+	LDR R2, =ASM_E6
+	LDR R0, [R10, #ELEV1]
+	MOVS R1, #20
+	B ASM_HOLDC
 
 @ [Prepare to move]
 @ Input:
@@ -539,11 +528,6 @@ ASM_E6_SKIP_DOWN_RESET:
 	BNE ASM_E6B
 	@ CBNZ R0, ASM_E6B						@ flag preserved from ASM_E6
 
-	@ FIXME
-	@ Perform DECISION subroutine if STATE == NEUTRAL
-	@ MOV R0, R11
-	@ LDR R1, =E6
-	@ BL decision
 	BL ASM_DECISION
 
 @ Input:
@@ -578,20 +562,18 @@ ASM_E6B_D2_CHECK:
 @ R8 ElevatorNode* C
 @ R4 STATE
 ASM_E6B_SCHEDULE:
-	LDR R3, =ASM_E7
-	LDR R1, [R10, #ELEV1]
-	MOV R0, R11
-	MOVS R2, #15
+	LDR R2, =ASM_E7
+	LDR R0, [R10, #ELEV1]
+	MOVS R1, #15
 
 	CMP R4, #0
 	BGE ASM_E7A							@ STATE >= 0: go to E7 (already loaded)
 
-	LDR R3, =ASM_E8
+	LDR R2, =ASM_E8
 	B ASM_E8A							@ STATE == GOINGDOWN: go to E8
 
 ASM_E7A:
-	BL holdc							@ holdc(shared_state, elevator->ELEV1, 15, E7/E8);
-	B ASM_CYCLE
+	B ASM_HOLDC
 
 @ [Go up a floor]
 @ Input:
@@ -604,14 +586,11 @@ ASM_E7:
 	ADDS R0, R0, #1
 	STR R0, [R10, #FLOOR]					@ elevator->FLOOR += 1;
 
-	LDR R3, =ASM_E7_CONTINUE
-	MOV R0, R11
-	LDR R1, [R10, #ELEV1]
-	MOVS R2, #51
-	BL holdc								@ holdc(shared_state, elevator->ELEV1, 51, E7_continue);
-	B ASM_CYCLE
+	LDR R2, =ASM_E7_CONTINUE
+	LDR R0, [R10, #ELEV1]
+	MOVS R1, #51
+	B ASM_HOLDC
 
-@ FIXME: Not in MIX, rewrite holdc
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
@@ -669,8 +648,7 @@ ASM_E7_1H:
 
 @ [Go down a floor]
 ASM_E8A:
-	BL holdc								@ holdc(shared_state, elevator->ELEV1, 15, E7/E8);
-	B ASM_CYCLE
+	B ASM_HOLDC
 
 @ Input:
 @ R11 SharedState* shared_state
@@ -682,14 +660,11 @@ ASM_E8:
 	SUBS R0, R0, #1
 	STR R0, [R10, #FLOOR]					@ elevator->FLOOR -= 1;
 
-	LDR R3, =ASM_E8_CONTINUE
-	MOV R0, R11
-	LDR R1, [R10, #ELEV1]
-	MOVS R2, #61
-	BL holdc								@ holdc(shared_state, elevator->ELEV1, 61, E8_continue);
-	B ASM_CYCLE
+	LDR R2, =ASM_E8_CONTINUE
+	LDR R0, [R10, #ELEV1]
+	MOVS R1, #61
+	B ASM_HOLDC
 
-@ FIXME: Not in MIX, rewrite holdc
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
@@ -756,10 +731,5 @@ ASM_E9:
 	STR R1, [R0, #LEFT1]					@ elevator->ELEV3->left1 = NULL; STZ 0,6
 	STR R1, [R10, #D2]						@ elevator->D2 = 0;	STZ D2
 
-	@ FIXME
-	@ MOV R0, R11
-	@ LDR R1, =ASM_E9
-	@ BL decision								@ decision(shared_state, E9);
 	BL ASM_DECISION
-
 	B ASM_CYCLE

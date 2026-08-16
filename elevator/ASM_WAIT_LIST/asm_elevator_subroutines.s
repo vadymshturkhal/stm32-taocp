@@ -23,7 +23,7 @@
     .global ASM_HOLDC
 	.type ASM_HOLDC, %function
 
-@ NOTE: R8-R11 are global registers which contain global state and don't need to PUSH them every step
+@ NOTE: R7-R11 are global registers which contain global state and don't need to PUSH them every step
 @ NOTE: Using C NextInst with global parameters permanently stored in R8-R11 Registers
 
 @ SharedState fields definition
@@ -81,8 +81,9 @@ ASM_CYCLE_START:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
-@ R8 user
-@ Runtime
+@ R8 node C global
+
+@ Runtime:
 @ Save
 @ R7 elevator->ELEV1
 @ R6 ASM_E3 or ASM_E6
@@ -209,8 +210,10 @@ ASM_DECISION_2H:
 @ R6 delay
 ASM_DECISION_8H:
 	STR R6, [R7, #NEXTINST]			@ ELEV1->NEXTINST = ASM_E3 or ASM_E6
-	MOVS R6, #20					@ delay = 20
-	B ASM_HOLD						@ Has its own return
+
+	MOVS R0, R7						@ R0 = node
+	MOVS R1, #20					@ R1 = delay = 20
+	B ASM_HOLD
 
 ASM_DECISION_9H:
     BX LR
@@ -219,53 +222,59 @@ ASM_DECISION_9H:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
-@ R8 user
-@ R7 node C
-@ R6 delay
-@ R5 next_inst
-ASM_HOLDC:
-	STR R5, [R7, #NEXTINST]			@ node->NEXTINST = next_inst
+@ R8 node C global
 
-@ Input:
-@ R11 SharedState* shared_state
-@ R10 Elevator* elevator
-@ R9 Users* users
-@ R8 user
-@ R7 node C
-@ R6 delay
+@ R0 node
+@ R1 delay
 ASM_HOLD:
-	LDR R3, [R11, #TIME]
-	ADDS R3, R3, R6
-	STR R3, [R7, #NEXTTIME]			@ node->NEXTTIME = shared_state->TIME + delay
+	LDR R2, [R11, #TIME]
+	ADDS R2, R2, R1
+	STR R2, [R0, #NEXTTIME]			@ node->NEXTTIME = shared_state->TIME + delay
 
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
-@ R8 user
-@ R7 node C
+@ R8 node C global
+
+@ R0 node C
+
 @ Runtime:
-@ R0 = C->NEXTTIME 
-@ R2 = P (search pointer, starts at the tail)
+@ R0 node C
+@ R1 = P (search pointer, starts at the tail)
+@ R2 = C->NEXTTIME
 ASM_SORTIN:
-	LDR R2, [R11, #WAIT_LIST]		@ R2 = shared_state->WAIT_LIST.head
-	LDR R2, [R2, #LEFT1]			@ R2 = P = head->left1 (last node)
-	LDR R0, [R7, #NEXTTIME]			@ R0 = C->NEXTTIME
+	LDR R1, [R11, #WAIT_LIST]		@ R1 = shared_state->WAIT_LIST.head
+	LDR R1, [R1, #LEFT1]			@ R1 = P = head->left1 (last node)
+	LDR R2, [R0, #NEXTTIME]			@ R2 = C->NEXTTIME
 
 ASM_SORTIN_LOOP:
-	LDR R3, [R2, #NEXTTIME]			@ R3 = P->NEXTTIME
-	CMP R0, R3
+	LDR R3, [R1, #NEXTTIME]			@ R3 = P->NEXTTIME
+	CMP R2, R3
 	BHS ASM_SORTIN_DONE				@ unsigned: C->NEXTTIME >= P->NEXTTIME -> stop
-	LDR R2, [R2, #LEFT1]			@ P = P->left1
+	LDR R1, [R1, #LEFT1]			@ P = P->left1
 	B ASM_SORTIN_LOOP
 
 ASM_SORTIN_DONE:
-	LDR R3, [R2, #RIGHT1]			@ R3 = Q = P->right1
-	STR R3, [R7, #RIGHT1]			@ C->right1 = Q
-	STR R2, [R7, #LEFT1]			@ C->left1 = P
-	STR R7, [R2, #RIGHT1]			@ P->right1 = C
-	STR R7, [R3, #LEFT1]			@ Q->left1 = C
+	LDR R3, [R1, #RIGHT1]			@ R3 = Q = P->right1
+	STR R3, [R0, #RIGHT1]			@ C->right1 = Q
+	STR R1, [R0, #LEFT1]			@ C->left1 = P
+	STR R0, [R1, #RIGHT1]			@ P->right1 = C
+	STR R0, [R3, #LEFT1]			@ Q->left1 = C
 	BX LR
+
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 user
+
+@ R0 node C
+@ R1 delay
+@ R2 next_inst
+ASM_HOLDC:
+	STR R2, [R0, #NEXTINST]				@ node->NEXTINST = next_inst
+	BL ASM_HOLD
 
 ASM_CYCLE:
 	LDR R1, [R11, #WAIT_LIST]			@ R1 = shared_state->WAIT_LIST.head
