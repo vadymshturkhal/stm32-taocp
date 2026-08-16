@@ -5,6 +5,17 @@
     .global ASM_DECISION
 	.type ASM_DECISION, %function
 
+    .global ASM_SORTIN
+	.type ASM_SORTIN, %function
+
+    .global ASM_HOLD
+	.type ASM_HOLD, %function
+
+    .global ASM_HOLDC
+	.type ASM_HOLDC, %function
+
+@ FIXME look at GCC -O3 decisions
+
 @ SharedState fields definition
 .equ TIME, 				0
 .equ CALLS,				4
@@ -43,27 +54,32 @@
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
+@ R8 user
 
 @ Runtime
-@ R8 elevator->ELEV1
-@ R7 ASM_E3 or ASM_E6
-ASM_DECISION:
-    PUSH {R8, LR}                       @ Pushed R8 for 8-byte alignment
+@ Save
+@ R7 elevator->ELEV1
+@ R6 ASM_E3 or ASM_E6
 
+@ Scratch
+@ R0 STATE, shared_state->CALLS[HOME_FLOOR]
+@ R1 elevator->ELEV1->NEXTINST
+@ R2 ASM_E1
+ASM_DECISION:
 	@ D1. Decision necessary?
 	LDR R0, [R10, #STATE]
 	CMP R0, #0
 	BNE ASM_DECISION_9H			        @ if (elevator->STATE != 0) return;
 
 	@ D2. Should door open?
-	LDR R8, [R10, #ELEV1]				@ R0 = ELEV1
-	LDR R1, [R8, #NEXTINST]
+	LDR R7, [R10, #ELEV1]				@ R7 = ELEV1
+	LDR R1, [R7, #NEXTINST]
 	LDR R2, =ASM_E1
 	CMP R1, R2
 	BNE ASM_DECISION_1H				    @ ELEV1->NEXTINST != ASM_E1: skip
 
     @ Prepare to schedule ASM_E3
-    LDR R7, =ASM_E3
+    LDR R6, =ASM_E3
 
     @ Magic 4 is uint_32
 	LDR R1, [R11, #(CALLS + HOME_FLOOR * 4)]	@ R1 = shared_state->CALLS[HOME_FLOOR]
@@ -75,48 +91,50 @@ ASM_DECISION:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
-@ R8 elevator->ELEV1
-@ R7 ASM_E3 or ASM_E6
+@ R8 user
+@ R7 elevator->ELEV1
+@ R6 ASM_E3 or ASM_E6
 
 @ Runtime:
-@ R6 j
-@ R5 elevator->FLOOR
-@ R4 = &shared_state->CALLS[0]
-@ R3 i
+@ R5 j
+@ R4 elevator->FLOOR
+@ R3 = &shared_state->CALLS[0]
+@ R2 i
+@ R1 shared_state->CALLS[0]
 ASM_DECISION_1H:
-	MOVS R6, #-1						@ R6 = j = -1
-	LDR R5, [R10, #FLOOR]				@ R5 = elevator->FLOOR
-	ADD R4, R11, #CALLS					@ R4 = &shared_state->CALLS[0]
-	MOVS R3, #0							@ i = 0
+	MOVS R5, #-1						@ R5 = j = -1
+	LDR R4, [R10, #FLOOR]				@ R4 = elevator->FLOOR
+	ADD R3, R11, #CALLS					@ R3 = &shared_state->CALLS[0]
+	MOVS R2, #0							@ R2 = i = 0
 
 .balign 4
 ASM_DECISION_1H_LOOP:
     @ if (i == elevator->FLOOR) continue;
-	CMP R3, R5
+	CMP R2, R4
     BEQ ASM_DECISION_1H_CONTINUE_LOOP
 
     @ if (shared_state->CALLS[i] == 0) continue;
-	LDR R2, [R4, R3, LSL #2]			@ R2 = shared_state->CALLS[0]
-	CMP R2, #0
+	LDR R1, [R3, R2, LSL #2]			@ R1 = shared_state->CALLS[0]
+	CMP R1, #0
 	BEQ ASM_DECISION_1H_CONTINUE_LOOP
 
     @ j = i;
-    MOVS R6, R3
+    MOVS R5, R2
     B ASM_DECISION_D3_DONE              @ break
 
 ASM_DECISION_1H_CONTINUE_LOOP:
     @ Increment i
-    ADDS R3, R3, #1
+    ADDS R2, R2, #1
 
     @ Continue if i < FLOORS
-    CMP R3, #FLOORS
+    CMP R2, #FLOORS
     BNE ASM_DECISION_1H_LOOP
 
 @ All CALLS[i], i != FLOOR, are zero
 @ Input:
-@ R6 j
+@ R5 j
 ASM_DECISION_D3_DONE:
-	CMP R6, #-1
+	CMP R5, #-1
 	BNE ASM_DECISION_2H				@ j != -1: skip
 
     @ All CALL[j], j != elevator->FLOOR, are zero
@@ -125,24 +143,25 @@ ASM_DECISION_D3_DONE:
 	CMP LR, R0                      @ Compare with Link Register
 	BNE ASM_DECISION_9H			    @ caller != ASM_E6: return
 
-	MOVS R6, #HOME_FLOOR			@ j = HOME_FLOOR
+	MOVS R5, #HOME_FLOOR			@ j = HOME_FLOOR
 
 @ D4. Set STATE
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
-@ R8 elevator->ELEV1
-@ R7 ASM_E3 or ASM_E6
-@ R6 j
-@ R5 elevator->FLOOR
+@ R8 user
+@ R7 elevator->ELEV1
+@ R6 ASM_E3 or ASM_E6
+@ R5 j
+@ R4 elevator->FLOOR
 ASM_DECISION_2H:
     @ D4. Set STATE
-	SUBS R0, R6, R5					@ R0 = j - FLOOR
+	SUBS R0, R5, R4					@ R0 = j - FLOOR
     STR R0, [R10, #STATE]			@ elevator->STATE = j - FLOOR
 
 	@ D5. Elevator dormant?
-	LDR R1, [R8, #NEXTINST]
+	LDR R1, [R7, #NEXTINST]
 	LDR R2, =ASM_E1
 	CMP R1, R2
 	BNE ASM_DECISION_9H			    @ ELEV1->NEXTINST != ASM_E1: return
@@ -151,23 +170,74 @@ ASM_DECISION_2H:
 	BEQ ASM_DECISION_9H			    @ STATE == 0: return
 
 	@ Otherwise schedule E6
-	LDR R7, =ASM_E6
+	LDR R6, =ASM_E6
 
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
-@ R8 elevator->ELEV1
-@ R7 ASM_E3 or ASM_E6
-@ R6 j
-@ R5 elevator->FLOOR
-ASM_DECISION_8H:
-	STR R7, [R8, #NEXTINST]			@ ELEV1->NEXTINST = ASM_E6
+@ R8 user
+@ R7 elevator->ELEV1
+@ R6 ASM_E3 or ASM_E6
 
-	MOVS R0, R11					@ R0 = shared_state
-	MOVS R1, R8						@ R1 = ELEV1
-	MOVS R2, #20					@ delay = 20
-	BL hold							@ hold(shared_state, ELEV1, 20);
+@ Runtime:
+@ R6 delay
+ASM_DECISION_8H:
+	STR R6, [R7, #NEXTINST]			@ ELEV1->NEXTINST = ASM_E3 or ASM_E6
+	MOVS R6, #20					@ delay = 20
+	B ASM_HOLD						@ Has its own return
 
 ASM_DECISION_9H:
-    POP {R8, PC}
+    BX LR
+
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 user
+@ R7 node C
+@ R6 delay
+@ R5 next_inst
+ASM_HOLDC:
+	STR R5, [R7, #NEXTINST]			@ node->NEXTINST = next_inst
+
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 user
+@ R7 node C
+@ R6 delay
+ASM_HOLD:
+	LDR R3, [R11, #TIME]
+	ADDS R3, R3, R6
+	STR R3, [R7, #NEXTTIME]			@ node->NEXTTIME = shared_state->TIME + delay
+
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 user
+@ R7 node C
+@ Runtime:
+@ R0 = C->NEXTTIME 
+@ R2 = P (search pointer, starts at the tail)
+ASM_SORTIN:
+	LDR R2, [R11, #WAIT_LIST]		@ R2 = shared_state->WAIT_LIST.head
+	LDR R2, [R2, #LEFT1]			@ R2 = P = head->left1 (last node)
+	LDR R0, [R7, #NEXTTIME]			@ R0 = C->NEXTTIME
+
+ASM_SORTIN_LOOP:
+	LDR R3, [R2, #NEXTTIME]			@ R3 = P->NEXTTIME
+	CMP R0, R3
+	BHS ASM_SORTIN_DONE				@ unsigned: C->NEXTTIME >= P->NEXTTIME -> stop
+	LDR R2, [R2, #LEFT1]			@ P = P->left1
+	B ASM_SORTIN_LOOP
+
+ASM_SORTIN_DONE:
+	LDR R3, [R2, #RIGHT1]			@ R3 = Q = P->right1
+	STR R3, [R7, #RIGHT1]			@ C->right1 = Q
+	STR R2, [R7, #LEFT1]			@ C->left1 = P
+	STR R7, [R2, #RIGHT1]			@ P->right1 = C
+	STR R7, [R3, #LEFT1]			@ Q->left1 = C
+	BX LR
