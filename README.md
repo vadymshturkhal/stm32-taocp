@@ -12,7 +12,7 @@
 - Algorithm M (Multiplication of polynomials)
 - Elevator discrete simulation program (Python, C, ARM Assembly, Python (async))
 
-# Bonus Algorithm from Concrete Mathematics:
+## Bonus Algorithm from Concrete Mathematics:
 - Josephus Problem (Generalized)
 
 # Implemented Data Structures:
