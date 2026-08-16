@@ -435,9 +435,8 @@ ASM_E4_1H:
 ASM_E4_2H:
 	STR R1, [R5, #NEXTINST]					@ node->NEXTINST = ASM_U5
 
-	MOVS R0, R11
-	MOVS R1, R5
-	BL immed								@ immed(shared_state, node)
+	MOVS R0, R5
+	BL ASM_IMMED							@ immed(shared_state, node)
 
 	MOV R7, #25								@ delay = 25
 	B ASM_E4A								@ E4A(shared_state, delay)
@@ -727,3 +726,4 @@ ASM_E9:
 
 	BL ASM_DECISION
 	B ASM_CYCLE
+	

@@ -269,9 +269,8 @@ ASM_U2_3H:
 
 ASM_U2_4H:
 	@ void immed(SharedState* shared_state, ElevatorNode* wait_node)
-	MOV R0, R11
-	MOV R1, R4
-	BL immed
+	MOV R0, R4
+	BL ASM_IMMED
 	B ASM_U3
 
 ASM_U2_2H:
@@ -377,7 +376,7 @@ ASM_U6:
 	BL ASM_DELETE
 
 	@ AVAIL PUSH
-	LDR R0, [R9, #STORAGE_POOL]			@ R0 = shared_state->users->storage_pool
+	LDR R0, [R9, #STORAGE_POOL]				@ R0 = shared_state->users->storage_pool
 	LDR R2, [R0, #AVAIL]					@ R2 = storage_pool->avail
 	STR R2, [R8]							@ *(void**)user = storage_pool->avail (node's own link field)
 	STR R8, [R0, #AVAIL]					@ storage_pool->avail = user

@@ -32,6 +32,9 @@
     .global ASM_INSERT
 	.type ASM_INSERT, %function
 
+    .global ASM_IMMED
+	.type ASM_IMMED, %function
+
 
 @ NOTE: R7-R11 are global registers which contain global state and don't need to PUSH them every step
 @ NOTE: Using C NextInst with global parameters permanently stored in R8-R11 Registers
@@ -276,12 +279,29 @@ ASM_INSERT:
 	STR R2, [R1, #RIGHT2] 				@ node->right2 = elevator_list->head;
 	BX LR
 
+@ [Insert node first in WAIT list]
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 node C global
+@ R0 ElevatorNode* node
+ASM_IMMED:
+	LDR R1, [R11, #TIME]
+	STR R1, [R0, #NEXTTIME]				@ node->NEXTTIME = shared_state->TIME
+
+	LDR R2, [R11, #WAIT_LIST]			@ R2 = X = WAIT_LIST.head
+	STR R2, [R0, #LEFT1]				@ node->left1 = X
+	LDR R3, [R2, #RIGHT1]				@ R3 = X->right1
+	STR R3, [R0, #RIGHT1]				@ node->right1 = X->right1
+	STR R0, [R3, #LEFT1]				@ X->right1->left1 = node
+	STR R0, [R2, #RIGHT1]				@ X->right1 = node
+	BX LR
+
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 node C global
-
 @ R0 node
 @ R1 delay
 ASM_HOLD:
