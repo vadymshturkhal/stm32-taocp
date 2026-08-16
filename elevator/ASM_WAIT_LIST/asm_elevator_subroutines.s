@@ -29,6 +29,9 @@
     .global ASM_DELETE
 	.type ASM_DELETE, %function
 
+    .global ASM_INSERT
+	.type ASM_INSERT, %function
+
 
 @ NOTE: R7-R11 are global registers which contain global state and don't need to PUSH them every step
 @ NOTE: Using C NextInst with global parameters permanently stored in R8-R11 Registers
@@ -54,8 +57,8 @@
 .equ GIVEUPTIME,		32
 
 @ ElevatorList fields definition
-@ .equ ELEVATOR_LIST_HEAD, 0
-@ .equ ELEVATOR_LIST_STORAGE_POOL,4
+.equ ELEVATOR_LIST_HEAD, 0
+.equ ELEVATOR_LIST_STORAGE_POOL,4
 
 @ Elevator fields definition
 .equ SHARED_STATE, 		0
@@ -239,7 +242,6 @@ ASM_DELETEW:
 
 	STR R2, [R1, #RIGHT1]			@ L->right1 = R
 	STR R1, [R2, #LEFT1]			@ R->left1 = L
-
 	BX LR
 
 @ R11 SharedState* shared_state
@@ -256,7 +258,22 @@ ASM_DELETE:
 
 	STR R2, [R1, #RIGHT2]			@ L->right1 = R
 	STR R1, [R2, #LEFT2]			@ R->left1 = L
+	BX LR
 
+@ [Insert node at right end of list]
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 node C global
+@ R0 ElevatorList* list
+@ R1 ElevatorNode* node
+ASM_INSERT:
+	LDR R2, [R0, #ELEVATOR_LIST_HEAD]
+	LDR R3, [R2, #LEFT2]				@ ElevatorNode* Q = elevator_list->head->left2;
+	STR R3, [R1, #LEFT2]				@ node->left2 = Q;
+	STR R1, [R2, #LEFT2]				@ elevator_list->head->left2 = node;
+	STR R1, [R3, #RIGHT2]				@ Q->right2 = node;
+	STR R2, [R1, #RIGHT2] 				@ node->right2 = elevator_list->head;
 	BX LR
 
 @ Input:

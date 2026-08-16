@@ -74,6 +74,11 @@
 .equ CALLDOWN,			0b010
 .equ CALLCAR,			0b001
 
+@ Storage_Pool fields definition
+.equ AVAIL,				0
+.equ NODE_SIZE,			4
+.equ POOL_SIZE,			8
+
 
 @ Input:
 @ R0 Users* users
@@ -175,10 +180,17 @@ ASM_U1:
 	MOVS R5, R0				@ Save user_values
 
 	@ 3. Create User
-	LDR R0, [R9, #STORAGE_POOL]
-	BL storage_pool_pop		@ ElevatorNode* user = storage_pool_pop(users->storage_pool);
+	LDR R6, [R9, #STORAGE_POOL]		@ R6 = storage_pool
+	LDR R0, [R6, #AVAIL]				@ R0 = user = storage_pool->avail
 	CMP R0, #0
 	BEQ DONE_SP				@ if (user == NULL) return;
+
+	@ AVAIL POP
+	LDR R1, [R0]						@ R1 = *(void**)user (node's own link field)
+	STR R1, [R6, #AVAIL]				@ storage_pool->avail = R1
+	@ LDR R1, [R6, #POOL_SIZE]
+	@ SUBS R1, R1, #1
+	@ STR R1, [R6, #POOL_SIZE]			@ storage_pool->size -= 1
 
 	MOVS R7, R0				@ Save user
 
@@ -315,7 +327,7 @@ ASM_U3:
 	
 	@ R0 = &shared_state->QUEUE[IN]
 	MOVS R1, R8								@ R1 = user
-	BL elevator_list_insert_node_at_rear	@ elevator_list_insert_node_at_rear(&QUEUE[IN], user);
+	BL ASM_INSERT
 
 @ [Wait GIVEUPTIME units]
 ASM_U4A:
@@ -364,9 +376,14 @@ ASM_U6:
 	MOVS R0, R8
 	BL ASM_DELETE
 
+	@ AVAIL PUSH
 	LDR R0, [R9, #STORAGE_POOL]			@ R0 = shared_state->users->storage_pool
-	MOVS R1, R8							@ R1 = user
-	BL storage_pool_push				@ storage_pool_push(storage_pool, user);
+	LDR R2, [R0, #AVAIL]					@ R2 = storage_pool->avail
+	STR R2, [R8]							@ *(void**)user = storage_pool->avail (node's own link field)
+	STR R8, [R0, #AVAIL]					@ storage_pool->avail = user
+	@ LDR R2, [R0, #POOL_SIZE]
+	@ ADDS R2, R2, #1
+	@ STR R2, [R0, #POOL_SIZE]				@ storage_pool->size += 1
 
 	B ASM_CYCLE
 
@@ -388,7 +405,7 @@ ASM_U5:
 	@ Insert it at right of ELEVATOR
 	ADD R0, R11, #ELEVATOR_LIST				@ R0 = &shared_state->ELEVATOR_LIST
 	MOVS R1, R8
-	BL elevator_list_insert_node_at_rear	@ elevator_list_insert_node_at_rear(&shared_state->ELEVATOR_LIST, user);
+	BL ASM_INSERT
 
 	@ 2. Set CALLCAR[OUT] = 1
 	LDR R0, [R8, #OUT]						@ R0 = user->OUT
