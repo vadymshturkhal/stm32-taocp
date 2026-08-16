@@ -7,7 +7,7 @@
 - Algorithm B (Multiply permutations in cycle form)
 - Algorithm I (Inverse permutation in place)
 - Algorithm J (Inverse permutation in place)
-- Algorithm T(Topological Sort)
+- Algorithm T (Topological Sort)
 - Algorithm A (Addition of polynomials)
 - Algorithm M (Multiplication of polynomials)
 - Elevator discrete simulation program (Python, C, ARM Assembly, Python (async))
