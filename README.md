@@ -10,7 +10,7 @@
 - Algorithm T (Topological Sort)
 - Algorithm A (Addition of polynomials)
 - Algorithm M (Multiplication of polynomials)
-- Elevator discrete simulation program (Python, C, ARM Assembly, Python (async))
+- Elevator: discrete simulation program (Python, C, ARM Assembly, Python (async))
 
 ## Bonus Algorithm from Concrete Mathematics:
 - Josephus Problem (Generalized)
