@@ -182,9 +182,14 @@ ASM_E1A:
 	LDR R0, [R10, #ELEV1]
 	LDR R1, =ASM_E1
 	BL cycle1						@ JMP CYCLE1
+	@ Replacing with:
+	@ STR R1, [R0, #NEXTINST]
+	@ Can cause HardFault
 
 @ [Wait for call]
 ASM_E1:
+	@ FIXME
+	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 @ Input:
@@ -448,6 +453,8 @@ ASM_E4_1H_QUEUE_EMPTY:
 	MOVS R0, #1
 	STR R0, [R10, #D3]						@ elevator->D3 = 1
 
+	@ FIXME
+	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 @ Input:
@@ -725,5 +732,6 @@ ASM_E9:
 	STR R1, [R10, #D2]						@ elevator->D2 = 0;	STZ D2
 
 	BL ASM_DECISION
+	@ FIXME
+	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
-	

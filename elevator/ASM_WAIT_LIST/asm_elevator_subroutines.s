@@ -84,11 +84,12 @@
 @ R9 Users* users
 @ R8 ElevatorNode* C
 ASM_CYCLE_START:
-	PUSH {R3-R11, LR}			@ Save all Registers and use R3 for 8-byte alignment
+	PUSH {R4-R12, LR}			@ Save all Registers and use R3 for 8-byte alignment
 	MOVS R11, R0				@ R11 = shared_state
 	LDR R10, [R0, #ELEVATOR]	@ R10 = elevator
 	LDR R9, [R0, #USERS]		@ R9 = users
 	LDR R12, [R11, #WAIT_LIST]			@ R12 = shared_state->WAIT_LIST.head
+	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 @ Input:
@@ -365,36 +366,28 @@ ASM_SORTIN_DONE1:
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 user
-
 @ R0 node C
 @ R1 delay
 @ R2 next_inst
 ASM_HOLDC:
 	STR R2, [R0, #NEXTINST]				@ node->NEXTINST = next_inst
 	BL ASM_HOLD
-
-ASM_CYCLE:
-	@ LDR R1, [R11, #WAIT_LIST]			@ R1 = shared_state->WAIT_LIST.head
 	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 
+ASM_CYCLE:
+	@ R8 must be already updated by the caller, R12 contains WAIT_LIST.head from the ASM_INIT
 	CMP R8, R12
 	BEQ ASM_CYCLE_DONE
 
-	@ Take the earliest node off the WAIT list
-	@ ElevatorNode* C = shared_state->WAIT_LIST.head->right1;	(now in R8)
-
-	@ Advance TIME to its NEXTTIME
-	LDR R0, [R8, #NEXTTIME]
+	LDR R0, [R8, #NEXTTIME]				@ R0 = C->NEXTTIME
+	LDR R7, [R8, #NEXTINST]				@ R7 = C->NEXTINST
 	STR R0, [R11, #TIME]				@ shared_state->TIME = C->NEXTTIME;
 
-	@ Unlink it
+	@ Unlink C
 	MOV R0, R8
 	BL ASM_DELETEW
 
-	@ Call NEXTINST(shared_state, C): handler branches back to ASM_CYCLE when done
-	LDR R2, [R8, #NEXTINST]
-
-	BX R2
+	BX R7								@ Branch to C->NEXTINST
 
 ASM_CYCLE_DONE:
-	POP {R3-R11, PC}
+	POP {R4-R12, PC}

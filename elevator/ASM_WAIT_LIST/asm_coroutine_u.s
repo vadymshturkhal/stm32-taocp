@@ -158,7 +158,6 @@ ASM_USERS_START:
 @ Runtime:
 @ R7 ElevatorNode* user
 ASM_U1:
-	PUSH {R7}
 	@ User fabric
 	@ Not in MIX
 	@ if (users->user_id >= users->users_quantity) return;
@@ -220,8 +219,6 @@ ASM_U1:
 	@ User R8 goes to ASM_U2
 	MOVS R8, R7				@ Replace C with user
 
-	POP {R7}
-
 @ [Signal and wait]
 @ Input:
 @ R11 SharedState* shared_state
@@ -269,8 +266,9 @@ ASM_U2_3H:
 
 ASM_U2_4H:
 	@ void immed(SharedState* shared_state, ElevatorNode* wait_node)
-	MOV R0, R4
-	BL ASM_IMMED
+	MOV R0, R11
+	MOV R1, R4
+	BL immed
 	B ASM_U3
 
 ASM_U2_2H:
@@ -349,10 +347,7 @@ ASM_U4:
 	LDR R1, [R10, #FLOOR]				@ elevator->FLOOR
 	SUBS R0, R0, R1						@ IN(C) - FLOOR
 
-	@ NOTE: not CBNZ. Its range check breaks whenever the target's body
-	@ eventually branches to a symbol from another file (ASM_U6 ends in
-	@ B ASM_CYCLE, defined in asm_cycle.s), happens even at trivial
-	@ distance, unrelated to the 126-byte limit
+	@ NOTE: CBNZ can't be used with .global identifier
 	@ CBNZ R0, ASM_U6
 	CBNZ R0, ASM_U6_BEFORE
 
@@ -376,7 +371,7 @@ ASM_U6:
 	BL ASM_DELETE
 
 	@ AVAIL PUSH
-	LDR R0, [R9, #STORAGE_POOL]				@ R0 = shared_state->users->storage_pool
+	LDR R0, [R9, #STORAGE_POOL]			@ R0 = shared_state->users->storage_pool
 	LDR R2, [R0, #AVAIL]					@ R2 = storage_pool->avail
 	STR R2, [R8]							@ *(void**)user = storage_pool->avail (node's own link field)
 	STR R8, [R0, #AVAIL]					@ storage_pool->avail = user
@@ -384,6 +379,8 @@ ASM_U6:
 	@ ADDS R2, R2, #1
 	@ STR R2, [R0, #POOL_SIZE]				@ storage_pool->size += 1
 
+	@ FIXME
+	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 @ [Get in]
@@ -416,6 +413,8 @@ ASM_U5:
 	@ 3. If STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
 	LDR R0, [R10, #STATE]
 	CMP R0, #0
+	IT NE
+	LDRNE R8, [R12, #RIGHT1]			@ R8 = shared_state->WAIT_LIST.head->right1 (only if leaving via ASM_CYCLE)
 	BNE ASM_CYCLE
 
 	LDR R0, [R10, #ELEV2]					@ R0 = elevator->ELEV2
@@ -433,7 +432,8 @@ ASM_U5:
 	BL ASM_E5A
 
 DONE:
-	POP {R7}
+	@ FIXME
+	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 DONE_SP:
