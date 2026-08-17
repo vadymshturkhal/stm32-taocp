@@ -4,6 +4,7 @@
 #include "trace.h"
 #include "elevator.h"
 
+#ifdef TRACE
 void trace(SharedState* shared_state, const char* step, const char* fmt, ...) {
 	Elevator* elevator = shared_state->elevator;
 	const char* state = elevator->STATE > 0 ? "U" : elevator->STATE < 0 ? "D" : "N";
@@ -19,3 +20,4 @@ void trace(SharedState* shared_state, const char* step, const char* fmt, ...) {
 
 	printf("\r\n");
 }
+#endif

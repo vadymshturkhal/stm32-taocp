@@ -7,6 +7,7 @@
 #include "elevator.h"
 #include "users.h"
 #include "values.h"
+#include "trace.h"
 
 // Private functions
 static void U1(SharedState* shared_state, ElevatorNode* C);
@@ -15,8 +16,6 @@ static void U3(SharedState* shared_state, ElevatorNode* user);
 static void U4(SharedState* shared_state, ElevatorNode* user);
 static void U4A(SharedState* shared_state, ElevatorNode* user);
 static void U6_impl(SharedState* shared_state, ElevatorNode* user, bool is_print);
-
-void trace(SharedState* shared_state, const char* step, const char* fmt, ...);
 
 uint32_t users_init(Users* users, SharedState* shared_state, Storage_Pool* storage_pool, uint32_t users_quantity) {
 	if (users == NULL || shared_state == NULL || storage_pool == NULL) return 1;
