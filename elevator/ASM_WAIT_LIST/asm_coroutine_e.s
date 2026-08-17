@@ -57,6 +57,18 @@
 	.section .rodata
 ASM_E4_TRACE_STEP: .asciz "E4"
 ASM_E4_TRACE_FMT:  .asciz "Doors open, nobody is there"
+ASM_E2_TRACE_STEP: .asciz "E2"
+ASM_E2_TRACE_FMT:  .asciz "Elevator stops"
+ASM_E3_TRACE_STEP: .asciz "E3"
+ASM_E3_TRACE_FMT:  .asciz "Elevator doors start to open"
+ASM_E5_FLUTTER_TRACE_STEP: .asciz "E5"
+ASM_E5_FLUTTER_TRACE_FMT:  .asciz "Elevator doors flutter"
+ASM_E5_CLOSE_TRACE_STEP:   .asciz "E5"
+ASM_E5_CLOSE_TRACE_FMT:    .asciz "Elevator doors start to close"
+ASM_E7_TRACE_STEP: .asciz "E7"
+ASM_E7_TRACE_FMT:  .asciz "Elevator moving up"
+ASM_E8_TRACE_STEP: .asciz "E8"
+ASM_E8_TRACE_FMT:  .asciz "Elevator moving down"
 	.section .text
 #endif
 
@@ -223,6 +235,15 @@ ASM_E2A:
 @ Runtime:
 @ R0 Accumulator after ASM_E2
 ASM_E2:
+#ifdef TRACE
+	MOVS R0, R11
+	LDR R1, =ASM_E2_TRACE_STEP
+	LDR R2, =ASM_E2_TRACE_FMT
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+#endif
+
 	LDR R0, [R10, #STATE]
 	CMP R0, #0
 	BLT ASM_E2_1H					@ STATE is GOINGDOWN
@@ -363,6 +384,15 @@ ASM_E2_2H:
 @ R7 uint32_t delay
 ASM_E3_BEFORE:
 ASM_E3:
+#ifdef TRACE
+	MOVS R0, R11
+	LDR R1, =ASM_E3_TRACE_STEP
+	LDR R2, =ASM_E3_TRACE_FMT
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+#endif
+
 	LDR R4, [R10, #ELEV3]					@ R4 = elevator->ELEV3
 
 	@ if (elevator->ELEV3->left1 != NULL) elevator_list_delete_nodew(elevator->ELEV3);
@@ -511,10 +541,28 @@ ASM_E5:
 	LDR R0, [R10, #D1]
 	CBZ R0, ASM_E5_CLOSE				@ D1 == 0: proceed to close
 
+#ifdef TRACE
+	MOVS R0, R11
+	LDR R1, =ASM_E5_FLUTTER_TRACE_STEP
+	LDR R2, =ASM_E5_FLUTTER_TRACE_FMT
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+#endif
+
 	MOV R7, #40							@ delay = 40
 	B ASM_E5A							@ Elevator doors flutter
 
 ASM_E5_CLOSE:
+#ifdef TRACE
+	MOVS R0, R11
+	LDR R1, =ASM_E5_CLOSE_TRACE_STEP
+	LDR R2, =ASM_E5_CLOSE_TRACE_FMT
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+#endif
+
 	MOVS R0, #0
 	STR R0, [R10, #D3]					@ elevator->D3 = 0;
 
@@ -613,6 +661,15 @@ ASM_E7A:
 @ R9 Users* users
 @ R8 ElevatorNode* C
 ASM_E7:
+#ifdef TRACE
+	MOVS R0, R11
+	LDR R1, =ASM_E7_TRACE_STEP
+	LDR R2, =ASM_E7_TRACE_FMT
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+#endif
+
 	LDR R1, [R10, #FLOOR]
 	LDR R2, =ASM_E7_CONTINUE				@ Latency hiding
 
@@ -688,6 +745,15 @@ ASM_E8A:
 @ R9 Users* users
 @ R8 ElevatorNode* C
 ASM_E8:
+#ifdef TRACE
+	MOVS R0, R11
+	LDR R1, =ASM_E8_TRACE_STEP
+	LDR R2, =ASM_E8_TRACE_FMT
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+#endif
+
 	LDR R0, [R10, #FLOOR]
 	SUBS R0, R0, #1
 	STR R0, [R10, #FLOOR]					@ elevator->FLOOR -= 1;
