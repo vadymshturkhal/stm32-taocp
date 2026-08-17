@@ -88,6 +88,7 @@ ASM_CYCLE_START:
 	MOVS R11, R0				@ R11 = shared_state
 	LDR R10, [R0, #ELEVATOR]	@ R10 = elevator
 	LDR R9, [R0, #USERS]		@ R9 = users
+	LDR R12, [R11, #WAIT_LIST]			@ R12 = shared_state->WAIT_LIST.head
 	B ASM_CYCLE
 
 @ Input:
@@ -286,12 +287,11 @@ ASM_INSERT:
 @ R8 node C global
 @ R0 ElevatorNode* node
 ASM_IMMED:
-	LDR R1, [R11, #TIME]
-	STR R1, [R0, #NEXTTIME]				@ node->NEXTTIME = shared_state->TIME
-
 	LDR R2, [R11, #WAIT_LIST]			@ R2 = X = WAIT_LIST.head
+	LDR R1, [R11, #TIME]
 	STR R2, [R0, #LEFT1]				@ node->left1 = X
 	LDR R3, [R2, #RIGHT1]				@ R3 = X->right1
+	STR R1, [R0, #NEXTTIME]				@ node->NEXTTIME = shared_state->TIME
 	STR R3, [R0, #RIGHT1]				@ node->right1 = X->right1
 	STR R0, [R3, #LEFT1]				@ X->right1->left1 = node
 	STR R0, [R2, #RIGHT1]				@ X->right1 = node
@@ -306,15 +306,12 @@ ASM_IMMED:
 @ R1 delay
 ASM_HOLD:
 	LDR R2, [R11, #TIME]
-	ADDS R2, R2, R1
-	STR R2, [R0, #NEXTTIME]			@ node->NEXTTIME = shared_state->TIME + delay
 
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 node C global
-
 @ R0 node C
 
 @ Runtime:
@@ -323,10 +320,10 @@ ASM_HOLD:
 @ R2 = C->NEXTTIME
 @ R3 = P->NEXTTIME
 ASM_SORTIN:
-	LDR R1, [R11, #WAIT_LIST]		@ R1 = shared_state->WAIT_LIST.head
-	LDR R2, [R0, #NEXTTIME]			@ R2 = C->NEXTTIME
-
-	LDR R1, [R1, #LEFT1]			@ R1 = P = head->left1 (last node)
+	LDR R3, [R11, #WAIT_LIST]		@ R1 = shared_state->WAIT_LIST.head
+	ADDS R2, R2, R1					@ ASM_HOLD: node->NEXTTIME
+	LDR R1, [R3, #LEFT1]			@ R1 = P = head->left1 (last node)
+	STR R2, [R0, #NEXTTIME]			@ ASM_HOLD: node->NEXTTIME = shared_state->TIME + delay
 	LDR R3, [R1, #NEXTTIME]			@ R3 = P->NEXTTIME
 	CMP R2, R3
 	BHS ASM_SORTIN_DONE
@@ -349,16 +346,16 @@ ASM_SORTIN_LOOP:
 
 ASM_SORTIN_DONE:
 	LDR R3, [R1, #RIGHT1]			@ R3 = Q = P->right1
-	STR R3, [R0, #RIGHT1]			@ C->right1 = Q
 	STR R1, [R0, #LEFT1]			@ C->left1 = P
+	STR R3, [R0, #RIGHT1]			@ C->right1 = Q
 	STR R0, [R1, #RIGHT1]			@ P->right1 = C
 	STR R0, [R3, #LEFT1]			@ Q->left1 = C
 	BX LR
 
 ASM_SORTIN_DONE1:
 	LDR R5, [R4, #RIGHT1]			@ R3 = Q = P->right1
-	STR R5, [R0, #RIGHT1]			@ C->right1 = Q
 	STR R4, [R0, #LEFT1]			@ C->left1 = P
+	STR R5, [R0, #RIGHT1]			@ C->right1 = Q
 	STR R0, [R4, #RIGHT1]			@ P->right1 = C
 	STR R0, [R5, #LEFT1]			@ Q->left1 = C
 	BX LR
@@ -377,10 +374,10 @@ ASM_HOLDC:
 	BL ASM_HOLD
 
 ASM_CYCLE:
-	LDR R1, [R11, #WAIT_LIST]			@ R1 = shared_state->WAIT_LIST.head
-	LDR R8, [R1, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
+	@ LDR R1, [R11, #WAIT_LIST]			@ R1 = shared_state->WAIT_LIST.head
+	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 
-	CMP R8, R1
+	CMP R8, R12
 	BEQ ASM_CYCLE_DONE
 
 	@ Take the earliest node off the WAIT list
