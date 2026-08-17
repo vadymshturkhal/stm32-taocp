@@ -36,8 +36,8 @@
 	.type ASM_IMMED, %function
 
 
-@ NOTE: R7-R11 are global registers which contain global state and don't need to PUSH them every step
-@ NOTE: Using C NextInst with global parameters permanently stored in R8-R11 Registers
+@ NOTE: R7-R12 are global registers which contain global state and don't need to PUSH them every step
+@ NOTE: Using C NextInst with global parameters permanently stored in R8-R12 Registers
 
 @ SharedState fields definition
 .equ TIME, 				0

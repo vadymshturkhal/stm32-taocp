@@ -51,6 +51,15 @@
 	.global ASM_E9
 	.type ASM_E9, %function
 
+#ifdef TRACE
+	.extern trace
+
+	.section .rodata
+ASM_E4_TRACE_STEP: .asciz "E4"
+ASM_E4_TRACE_FMT:  .asciz "Doors open, nobody is there"
+	.section .text
+#endif
+
 
 @ ElevatorNode fields definition
 .equ LEFT1, 			0
@@ -188,7 +197,6 @@ ASM_E1A:
 
 @ [Wait for call]
 ASM_E1:
-	@ FIXME
 	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
@@ -197,7 +205,7 @@ ASM_E1:
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 ElevatorNode* C
-@ R7 uint32_t delay					@ FIXME: guarantee
+@ R7 uint32_t delay
 ASM_E2A:
 	MOVS R0, R8					@ R0 node C
 	MOVS R1, R7					@ R1 delay
@@ -286,7 +294,7 @@ ASM_E2_1H:
 	CMP R5, R3
 	BGE ASM_E2_ELEVATOR_HIGHER_FLOORS				@ FLOOR == 0: no lower floors exist
 
-@ FIXME maybe use .balign 4
+.balign 4
 ASM_E2_LOWER_CALLCAR_LOOP:
 	LDR R2, [R5], #4					@ sizeof CALLS is uint32_t
 	ADDS R0, R0, R2						@ Add CALLS[j] value
@@ -378,6 +386,10 @@ ASM_E3_SCHEDULE_E9:
 	STR R0, [R10, #D2]		@ elevator->D2 = 1;
 	STR R0, [R10, #D1]		@ elevator->D1 = 1;
 
+#ifdef TRACE
+	STRB R0, [R10, #FIRST_SEARCH]	@ elevator->first_search = true;
+#endif
+
 	MOV R7, #20				@ delay = 20
 
 @ Input:
@@ -403,10 +415,19 @@ ASM_E4A:
 @ R4 = ELEVATOR_LIST.head (search sentinel), later &QUEUE[FLOOR] / QUEUE[FLOOR].head
 @ R5 = node (current search pointer)
 @ R6 = elevator->FLOOR
+@ R7 = first_search (bool, kept live until ASM_E4_1H_QUEUE_EMPTY's trace gate;
+@      reused as R12-save scratch after the gate, since it's callee-saved and
+@      its flag value is no longer needed by then)
 ASM_E4:
 	LDR R4, [R11, #ELEVATOR_LIST]			@ R4 = shared_state->ELEVATOR_LIST.head
 	MOVS R5, R4
 	LDR R6, [R10, #FLOOR]					@ R6 = elevator->FLOOR
+
+#ifdef TRACE
+	LDRB R7, [R10, #FIRST_SEARCH]			@ R7 = elevator->first_search
+	MOVS R0, #0
+	STRB R0, [R10, #FIRST_SEARCH]			@ elevator->first_search = false
+#endif
 
 @ [Search ELEVATOR list, right to left]
 @ NOTE: MIX has 4 additional "paddings" for simply adding calls, without any loop
@@ -453,7 +474,18 @@ ASM_E4_1H_QUEUE_EMPTY:
 	MOVS R0, #1
 	STR R0, [R10, #D3]						@ elevator->D3 = 1
 
-	@ FIXME
+@ Saves R12 to R7
+#ifdef TRACE
+	CBZ R7, ASM_E4_NO_TRACE				@ if (!first_search) skip
+	MOVS R0, R11						@ R0 = shared_state
+	LDR R1, =ASM_E4_TRACE_STEP
+	LDR R2, =ASM_E4_TRACE_FMT
+	MOV R7, R12							@ save R12 (caller-saved) in R7 (callee-saved) across the call
+	BL trace
+	MOV R12, R7							@ restore R12 = WAIT_LIST.head
+ASM_E4_NO_TRACE:
+#endif
+
 	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
@@ -732,6 +764,6 @@ ASM_E9:
 	STR R1, [R10, #D2]						@ elevator->D2 = 0;	STZ D2
 
 	BL ASM_DECISION
-	@ FIXME
+
 	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE

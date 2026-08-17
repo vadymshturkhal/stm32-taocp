@@ -24,6 +24,18 @@
 	.global ASM_U6
 	.type ASM_U6, %function
 
+#ifdef TRACE
+	.extern trace
+
+	.section .rodata
+ASM_U1_TRACE_STEP: .asciz "U1"
+ASM_U1_TRACE_FMT:  .asciz "User %u arrives at floor %u, destination is %u, give up %u"
+ASM_U4_TRACE_STEP: .asciz "U4"
+ASM_U4_TRACE_FMT:  .asciz "User %u decides to give up, leaves the system"
+ASM_U6_TRACE_STEP: .asciz "U6"
+ASM_U6_TRACE_FMT:  .asciz "User %u gets out, leaves the system"
+	.section .text
+#endif
 
 @ SharedState fields definition
 .equ TIME, 				0
@@ -44,6 +56,7 @@
 .equ IN,				24
 .equ OUT,				28
 .equ GIVEUPTIME,		32
+.equ ID,				36
 
 @ Elevator fields definition
 .equ SHARED_STATE, 		0
@@ -202,6 +215,11 @@ ASM_U1:
 	STR R1, [R0, #IN]
 	STR R4, [R0, #OUT]
 	STR R3, [R0, #GIVEUPTIME]
+#ifdef TRACE
+	LDR R6, [R9, #USER_ID]			@ R6 = users->user_id (post-increment, already stored back)
+	SUBS R6, R6, #1					@ R6 = id = pre-increment value
+	STR R6, [R0, #ID]				@ user->id = id
+#endif
 
 	@ 2. LDA INTERTIME (time before another user enters) / JMP HOLD
 	@ MOV R0, R11				@ Move shared_state to R0
@@ -212,6 +230,29 @@ ASM_U1:
 	MOVS R0, R8				@ R0 node
 	MOVS R1, R2				@ R1 delay = INTERTIME
 	BL ASM_HOLD
+
+#ifdef TRACE
+	@ R7 still holds user (read-only below); R4/R5/R6 are dead after ASM_HOLD/SORTIN's own internal use.
+	@ Reuse the still-open VALUES frame (SP+0..SP+12) for the 3 stack-spilled varargs -- its own
+	@ contents were fully consumed into registers back at line ~206-209, so it's dead space here.
+	LDR R4, [R7, #IN]
+	STR R4, [SP, #0]					@ stack arg2 = user->IN
+	LDR R4, [R7, #OUT]
+	STR R4, [SP, #4]					@ stack arg3 = user->OUT
+	LDR R4, [R11, #TIME]
+	LDR R5, [R7, #GIVEUPTIME]
+	ADDS R4, R4, R5
+	STR R4, [SP, #8]					@ stack arg4 = shared_state->TIME + user->GIVEUPTIME
+
+	LDR R3, [R7, #ID]					@ R3 = user->id (reg-passed arg1)
+	MOVS R0, R11						@ R0 = shared_state
+	LDR R1, =ASM_U1_TRACE_STEP
+	LDR R2, =ASM_U1_TRACE_FMT
+
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+#endif
 
 	@ At the end of ASM_U1 restore Stack Pointer
 	ADD SP, SP, #16
@@ -359,14 +400,41 @@ ASM_U4:
 	CMP R1, #0
 	BNE ASM_U4A							@ JANZ U4A
 
-@ [Get out]
 @ Input:
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 ElevatorNode* user, also if called from ASM_CYCLE
 ASM_U6_BEFORE:
+#ifdef TRACE
+	MOVS R0, R11
+	LDR R1, =ASM_U4_TRACE_STEP
+	LDR R2, =ASM_U4_TRACE_FMT
+	LDR R3, [R8, #ID]
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+	B ASM_U6_BODY							@ give-up path skips U6's own trace
+#endif
+
+@ [Get out]
+@ Input:
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* user, also if called from ASM_CYCLE
 ASM_U6:
+#ifdef TRACE
+	MOVS R0, R11
+	LDR R1, =ASM_U6_TRACE_STEP
+	LDR R2, =ASM_U6_TRACE_FMT
+	LDR R3, [R8, #ID]
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+#endif
+
+ASM_U6_BODY:
 	MOVS R0, R8
 	BL ASM_DELETE
 
