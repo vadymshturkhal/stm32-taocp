@@ -323,11 +323,11 @@ ASM_U2_2H_SET_CALLUP:
 @ 5. If D2 == 0 or the elevator in its "dormant" position E1, DECISION is performed
 ASM_U2_2H_CONTINUE:
 	LDR R0, [R10, #D2]
+	LDR R3, [R10, #ELEV1]		@ For the next block in section
 	CBZ R0, ASM_U2_2H_DECISION	@ JAZ *+3
 
-	LDR R0, [R10, #ELEV1]
 	LDR R2, =ASM_E1
-	LDR R1, [R0, #NEXTINST]
+	LDR R1, [R3, #NEXTINST]
 	SUBS R0, R1, R2
 	CBZ R0, ASM_U2_2H_DECISION	@ JAZ DECISION
 
@@ -347,9 +347,9 @@ ASM_U3:
 	@ &shared_state->QUEUE[user->IN], user = shared_state + #QUEUE + IN*8
 
 	@ Insert node at right end of QUEUE[IN]
-	LDR R1, [R8, #IN]						@ R1 = user->IN
+	LDR R3, [R8, #IN]						@ R1 = user->IN
 	ADD R2, R11, #QUEUE						@ R2 = shared_state + #QUEUE
-	LSLS R1, R1, #3							@ R1 = IN * sizeof(ElevatorList)
+	LSLS R1, R3, #3							@ R1 = IN * sizeof(ElevatorList)
 	ADD R0, R1, R2							@ R0 = &shared_state->QUEUE[IN] = shared_state + #QUEUE + IN*8
 	
 	@ R0 = &shared_state->QUEUE[IN]
@@ -375,18 +375,16 @@ ASM_U4:
 	@ If the user's IN floor differs from the elevator's current FLOOR: give up
 	LDR R0, [R8, #IN]					@ user->IN
 	LDR R1, [R10, #FLOOR]				@ elevator->FLOOR
+	LDR R2, [R10, #D1]					@ For the next CMP in section R2 = D1
 	SUBS R0, R0, R1						@ IN(C) - FLOOR
 
 	@ NOTE: CBNZ can't be used with .global identifier
 	@ CBNZ R0, ASM_U6
-	CBNZ R0, ASM_U6_BEFORE
-
-	@ CMP R0, #0
-	@ BNE ASM_U6								@ JANZ *+3
+	CBNZ R0, ASM_U6_BEFORE 				@ JANZ *+3
 
 	@ JANZ U4A: doors still busy: reschedule U4
-	LDR R1, [R10, #D1]					@ R1 = D1
-	CMP R1, #0
+	@ LDR R2, [R10, #D1]					@ R2 = D1
+	CMP R2, #0
 	BNE ASM_U4A							@ JANZ U4A
 
 @ Input:
@@ -423,21 +421,25 @@ ASM_U6:
 	MOV R12, R6							@ restore R12 = WAIT_LIST.head
 #endif
 
+.balign 4
 ASM_U6_BODY:
 	MOVS R0, R8
 	BL ASM_DELETE
 
+	MOV R7, R8
+
 	@ AVAIL PUSH
 	LDR R0, [R9, #STORAGE_POOL]			@ R0 = shared_state->users->storage_pool
-	LDR R2, [R0, #AVAIL]					@ R2 = storage_pool->avail
-	STR R2, [R8]							@ *(void**)user = storage_pool->avail (node's own link field)
-	STR R8, [R0, #AVAIL]					@ storage_pool->avail = user
+	LDR R8, [R12, #RIGHT1]				@ For ASM_CYCLE: R8 = shared_state->WAIT_LIST.head->right1
+	LDR R2, [R0, #AVAIL]				@ R2 = storage_pool->avail
+	STR R2, [R7]						@ *(void**)user = storage_pool->avail (node's own link field)
+	STR R7, [R0, #AVAIL]				@ storage_pool->avail = user
+
+	@ Storage Pool size increment
 	@ LDR R2, [R0, #POOL_SIZE]
 	@ ADDS R2, R2, #1
-	@ STR R2, [R0, #POOL_SIZE]				@ storage_pool->size += 1
+	@ STR R2, [R0, #POOL_SIZE]			@ storage_pool->size += 1
 
-	@ FIXME
-	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 @ [Get in]
@@ -474,18 +476,17 @@ ASM_U5:
 	LDR R0, [R8, #OUT]						@ R0 = user->OUT
 	ADD R1, R11, #CALLS						@ R1 = &shared_state->CALLS[0]
 	LDR R2, [R1, R0, LSL #2]				@ R2 = shared_state->CALLS[OUT]
+	LDR R3, [R10, #STATE]					@ For the next CMP: R3 = elevator->STATE
 	ORRS R2, R2, #CALLCAR
 	STR R2, [R1, R0, LSL #2]
 
 	@ 3. If STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
-	LDR R0, [R10, #STATE]
-	CMP R0, #0
+	CMP R3, #0
 	IT NE
-	LDRNE R8, [R12, #RIGHT1]			@ R8 = shared_state->WAIT_LIST.head->right1 (only if leaving via ASM_CYCLE)
+	LDRNE R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1 (only if leaving via ASM_CYCLE)
 	BNE ASM_CYCLE
 
 	LDR R0, [R10, #ELEV2]					@ R0 = elevator->ELEV2
-
 	LDR R2, [R8, #OUT]						@ R2 = user->OUT
 	LDR R1, [R10, #FLOOR]					@ R1 = elevator->FLOOR
 	SUBS R2, R2, R1							@ R2 = OUT - FLOOR
@@ -499,7 +500,6 @@ ASM_U5:
 	BL ASM_E5A
 
 DONE:
-	@ FIXME
 	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
