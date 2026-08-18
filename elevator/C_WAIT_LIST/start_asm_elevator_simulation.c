@@ -17,8 +17,7 @@ extern void* asm_balloc(uint32_t size);
 extern void asm_balloc_free(void* memory_pointer);
 uint32_t ASM_ELEVATOR_INIT(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool);
 uint32_t ASM_USERS_INIT(Users* users, SharedState* shared_state, Storage_Pool* storage_pool, uint32_t users_quantity);
-extern void ASM_USERS_START(SharedState* shared_state);
-extern void ASM_CYCLE_START(SharedState* shared_state);
+extern void ASM_START_SIMULATION(SharedState* shared_state);
 
 uint32_t start_asm_elevator_simulation(uint32_t max_users) {
 	values_seed(1);  // fixed seed: reproducible runs, matches Python's random.seed(1)
@@ -64,8 +63,7 @@ uint32_t start_asm_elevator_simulation(uint32_t max_users) {
 		return status;
 	}
 
-	ASM_USERS_START(shared_state);
-	ASM_CYCLE_START(shared_state);
+	ASM_START_SIMULATION(shared_state);
 
 	asm_balloc_free(master_memory);
 	return 0;
