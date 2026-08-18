@@ -35,9 +35,9 @@
     .global ASM_IMMED
 	.type ASM_IMMED, %function
 
-
 @ NOTE: R7-R12 are global registers which contain global state and don't need to PUSH them every step
 @ NOTE: Using C NextInst with global parameters permanently stored in R8-R12 Registers
+@ NOTE: Doesn't increment or decrement storage pool counter
 
 @ SharedState fields definition
 .equ TIME, 				0
@@ -88,7 +88,7 @@
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 ElevatorNode* C
-.balign 4
+.balign 8
 ASM_START_SIMULATION:
 	PUSH {R4-R12, LR}			@ Save all Registers and use R3 for 8-byte alignment
 	MOVS R11, R0				@ R11 = shared_state
@@ -175,6 +175,7 @@ ASM_DECISION_1H_LOOP:
     MOVS R5, R2
     B ASM_DECISION_D3_DONE              @ break
 
+.balign 4
 ASM_DECISION_1H_CONTINUE_LOOP:
     @ Increment i
     ADDS R2, R2, #1
@@ -393,11 +394,17 @@ ASM_CYCLE:
 
 	LDR R0, [R8, #NEXTTIME]				@ R0 = C->NEXTTIME
 	LDR R7, [R8, #NEXTINST]				@ R7 = C->NEXTINST
-	STR R0, [R11, #TIME]				@ shared_state->TIME = C->NEXTTIME;
 
 	@ Unlink C
-	MOV R0, R8
-	BL ASM_DELETEW
+	@ Inline version of ASM_DELETEW
+	@ Delete node from WAIT list
+	@ node->left1->right1 = node->right1;
+	@ node->right1->left1 = node->left1;
+	LDR R1, [R8, #LEFT1]				@ R1 = L = node->left1
+	LDR R2, [R8, #RIGHT1]				@ R2 = R = node->right1
+	STR R0, [R11, #TIME]				@ shared_state->TIME = C->NEXTTIME;
+	STR R2, [R1, #RIGHT1]				@ L->right1 = R
+	STR R1, [R2, #LEFT1]				@ R->left1 = L
 
 	BX R7								@ Branch to C->NEXTINST
 
