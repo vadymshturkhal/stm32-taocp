@@ -199,13 +199,11 @@ ELEVATOR_INIT_ERR2:
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 ElevatorNode* C
+.balign 4
 ASM_E1A:
 	LDR R0, [R10, #ELEV1]
 	LDR R1, =ASM_E1
-	BL cycle1						@ JMP CYCLE1
-	@ Replacing with:
-	@ STR R1, [R0, #NEXTINST]
-	@ Can cause HardFault
+	STR R1, [R0, #NEXTINST]				@ Caused HardFault
 
 @ [Wait for call]
 ASM_E1:
@@ -219,9 +217,9 @@ ASM_E1:
 @ R8 ElevatorNode* C
 @ R7 uint32_t delay
 ASM_E2A:
+	LDR R2, =ASM_E2				@ R2 next_inst
 	MOVS R0, R8					@ R0 node C
 	MOVS R1, R7					@ R1 delay
-	LDR R2, =ASM_E2				@ R2 next_inst
 	B ASM_HOLDC					@ ASM_CYCLE is automatically invoked after ASM_HOLDC
 
 @ [Change of state?]
@@ -258,7 +256,6 @@ ASM_E2:
 @ NOTE: magic 4 is sizeof CALLS, which is uint32_t
 ASM_E2_HIGHER_CALLS:
 	LDR R1, [R10, #FLOOR]
-
 	ADD R5, R11, #CALLS							@ R5 = &CALLS[0]
 	ADD R3, R5, R1, LSL #2						@ R3 = &CALLS[FLOOR] = Current floor CALLS
 	ADD R4, R11, #(CALLS + (FLOORS - 1) * 4)	@ R4 = &CALLS[FLOORS - 1] = Higher floor CALLS
@@ -286,6 +283,7 @@ ASM_E2_ELEVATOR_LOWER_FLOORS:
 	CMP R5, R3
 	BGE ASM_E2_LOWER_DONE				@ FLOOR == 0: no lower floors exist
 
+.balign 4
 ASM_E2_LOWER_LOOP:
 	LDR R0, [R5], #4					@ sizeof CALLS is uint32_t
 	ANDS R0, R0, #CALLCAR
@@ -306,11 +304,9 @@ ASM_E2_LOWER_DONE:
 @ R5 &CALLS[j], from 0 to FLOOR
 ASM_E2_1H:
 	LDR R1, [R10, #FLOOR]
-
 	ADD R5, R11, #CALLS					@ R5 = &CALLS[0]
-	ADD R3, R5, R1, LSL #2				@ R3 = &CALLS[FLOOR] = Current floor CALLS
-
 	MOVS R0, #0							@ R0 = rA = Accumulator
+	ADD R3, R5, R1, LSL #2				@ R3 = &CALLS[FLOOR] = Current floor CALLS
 
 	CMP R5, R3
 	BGE ASM_E2_ELEVATOR_HIGHER_FLOORS				@ FLOOR == 0: no lower floors exist
@@ -358,13 +354,14 @@ ASM_E2_HIGHER_CALLCAR_LOOP:
 @ R0 CALLS
 @ R3 &CALLS[FLOOR] = Current floor CALLS
 ASM_E2_2H:
-	LDR R1, [R10, #STATE]
-	RSBS R1, R1, #0						@ Reverse direction of STATE
-	STR R1, [R10, #STATE]
+	LDR R1, [R10, #STATE]				@ R1 = elevator->STATE
 
 	@ Set all CALL variables for the current FLOOR to zero
 	MOVS R2, #0
 	STR R2, [R3]						@ shared_state->CALLS[elevator->FLOOR] = 0;
+
+	RSBS R1, R1, #0						@ Reverse direction of STATE
+	STR R1, [R10, #STATE]
 
 	@ If called to the opposite direction: jump to E3
 	CBNZ R0, ASM_E3_BEFORE
@@ -393,7 +390,7 @@ ASM_E3:
 	MOV R12, R6							@ restore R12 = WAIT_LIST.head
 #endif
 
-	LDR R4, [R10, #ELEV3]					@ R4 = elevator->ELEV3
+	LDR R4, [R10, #ELEV3]				@ R4 = elevator->ELEV3
 
 	@ if (elevator->ELEV3->left1 != NULL) elevator_list_delete_nodew(elevator->ELEV3);
 	LDR R0, [R4, #LEFT1]
