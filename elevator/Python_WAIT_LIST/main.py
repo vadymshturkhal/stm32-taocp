@@ -20,16 +20,27 @@ Trace columns:
     D3      nonzero while the doors are open but nobody is getting in or out
     step    the Knuth step (U1-U6, E1-E9) that produced this row
 """
-from settings import SharedState, deletew, create_users, values_seed
+import builtins
+import os
+import sys
+
+from settings import SharedState, deletew, values_seed
 from elevator import Elevator
 from users import Users
+
+# TRACE=0 python3 main.py disables all trace output, matching the C/ASM ports' -DTRACE toggle.
+# NOTE: this only skips the print() call itself -- the f-strings passed to it are still built
+# beforehand (Python has no preprocessor to strip them like #ifdef TRACE does in C).
+TRACE = os.environ.get("TRACE", "1") != "0"
+if not TRACE:
+    builtins.print = lambda *args, **kwargs: None
 
 
 if __name__ == "__main__":
     values_seed(1)  # matches the C port's values_seed(1): same xorshift32 sequence
 
     shared_state = SharedState()
-    users_quantity = 4
+    users_quantity = int(sys.argv[1]) if len(sys.argv) > 1 else 4  # matches elevator_c/main.c's argv[1] convention
     # users_list = create_users(shared_state, users_quantity)
     users = Users(shared_state, users=None, users_quantity=users_quantity)
     elevator = Elevator(shared_state)
