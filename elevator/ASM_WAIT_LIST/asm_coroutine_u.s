@@ -6,9 +6,6 @@
     .global ASM_USERS_INIT
 	.type ASM_USERS_INIT, %function
 
-    .global ASM_USERS_START
-	.type ASM_USERS_START, %function
-
     .global ASM_U1
 	.type ASM_U1, %function
 
@@ -34,6 +31,8 @@ ASM_U4_TRACE_STEP: .asciz "U4"
 ASM_U4_TRACE_FMT:  .asciz "User %u decides to give up, leaves the system"
 ASM_U6_TRACE_STEP: .asciz "U6"
 ASM_U6_TRACE_FMT:  .asciz "User %u gets out, leaves the system"
+ASM_U5_TRACE_STEP: .asciz "U5"
+ASM_U5_TRACE_FMT:  .asciz "User %u gets in"
 	.section .text
 #endif
 
@@ -148,19 +147,6 @@ USERS_INIT_ERR2:
 	MOVS R0, #2
 	POP {R4, PC}
 
-@ Input:
-@ R0 SharedState* shared_state
-ASM_USERS_START:
-	PUSH {LR}						@ non-leaf: must preserve caller's return address across the BL below
-
-	@ USER1 node represents action U1 and it is initially the sole entry in the WAIT list
-	@ immed(shared_state, shared_state->users->USER1);
-	LDR R1, [R0, #USERS]
-	LDR R1, [R1, #USER1]
-	BL immed
-
-	POP {PC}						@ restore original LR
-
 @ [Enter, prepare for successor]
 @ Input:
 @ R11 SharedState* shared_state
@@ -170,6 +156,7 @@ ASM_USERS_START:
 
 @ Runtime:
 @ R7 ElevatorNode* user
+.balign 16
 ASM_U1:
 	@ User fabric
 	@ Not in MIX
@@ -306,10 +293,8 @@ ASM_U2_3H:
 	STR R3, [R10, #D3]
 
 ASM_U2_4H:
-	@ void immed(SharedState* shared_state, ElevatorNode* wait_node)
-	MOV R0, R11
-	MOV R1, R4
-	BL immed
+	MOV R0, R4
+	BL ASM_IMMED
 	B ASM_U3
 
 ASM_U2_2H:
@@ -460,8 +445,18 @@ ASM_U6_BODY:
 @ Runtime:
 @ R7 uint32_t delay
 ASM_U5:
+#ifdef TRACE
+	MOVS R0, R11
+	LDR R1, =ASM_U5_TRACE_STEP
+	LDR R2, =ASM_U5_TRACE_FMT
+	LDR R3, [R8, #ID]
+	MOV R6, R12							@ save R12 (caller-saved) across the call
+	BL trace
+	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+#endif
+
 	@ 1. This user now leaves QUEUE and enters ELEVATOR
-	
+
 	@ Delete User from QUEUE[IN]
 	MOVS R0, R8
 	BL ASM_DELETE

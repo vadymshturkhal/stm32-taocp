@@ -2,8 +2,8 @@
     .thumb
     .cpu cortex-m4
     .section .text
-    .global ASM_CYCLE_START
-	.type ASM_CYCLE_START, %function
+    .global ASM_START_SIMULATION
+	.type ASM_START_SIMULATION, %function
 
     .global ASM_CYCLE
 	.type ASM_CYCLE, %function
@@ -74,20 +74,32 @@
 .equ ELEV2,				28
 .equ ELEV3,				32
 
+@ Users fields definition
+.equ USER1, 			8
+
 .equ HOME_FLOOR,		2
 .equ FLOORS,			5
 
+@ Input:
+@ R0 SharedState* shared_state
 @ Runtime: Set global variables
 @ R0-R3 scratch
 @ R11 SharedState* shared_state
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 ElevatorNode* C
-ASM_CYCLE_START:
+.balign 4
+ASM_START_SIMULATION:
 	PUSH {R4-R12, LR}			@ Save all Registers and use R3 for 8-byte alignment
 	MOVS R11, R0				@ R11 = shared_state
 	LDR R10, [R0, #ELEVATOR]	@ R10 = elevator
 	LDR R9, [R0, #USERS]		@ R9 = users
+
+	@ USER1 node represents action U1 and it is initially the sole entry in the WAIT list
+	LDR R0, [R9, #USER1]		@ R0 = shared_state->users->USER1 (ASM_IMMED's node arg)
+	BL ASM_IMMED
+
+	@ Must come AFTER the insert above: R8 needs to see the just-inserted USER1 node
 	LDR R12, [R11, #WAIT_LIST]			@ R12 = shared_state->WAIT_LIST.head
 	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
