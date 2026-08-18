@@ -223,29 +223,31 @@ ASM_U1:
 	@ Reuse the still-open VALUES frame (SP+0..SP+12) for the 3 stack-spilled varargs -- its own
 	@ contents were fully consumed into registers back at line ~206-209, so it's dead space here.
 	LDR R4, [R7, #IN]
-	STR R4, [SP, #0]					@ stack arg2 = user->IN
+	STR R4, [SP, #0]				@ stack arg2 = user->IN
 	LDR R4, [R7, #OUT]
-	STR R4, [SP, #4]					@ stack arg3 = user->OUT
+	STR R4, [SP, #4]				@ stack arg3 = user->OUT
 	LDR R4, [R11, #TIME]
 	LDR R5, [R7, #GIVEUPTIME]
 	ADDS R4, R4, R5
-	STR R4, [SP, #8]					@ stack arg4 = shared_state->TIME + user->GIVEUPTIME
+	STR R4, [SP, #8]				@ stack arg4 = shared_state->TIME + user->GIVEUPTIME
 
-	LDR R3, [R7, #ID]					@ R3 = user->id (reg-passed arg1)
-	MOVS R0, R11						@ R0 = shared_state
+	LDR R3, [R7, #ID]				@ R3 = user->id (reg-passed arg1)
+	MOVS R0, R11					@ R0 = shared_state
 	LDR R1, =ASM_U1_TRACE_STEP
 	LDR R2, =ASM_U1_TRACE_FMT
 
-	MOV R6, R12							@ save R12 (caller-saved) across the call
+	MOV R6, R12						@ save R12 (caller-saved) across the call
 	BL trace
-	MOV R12, R6							@ restore R12 = WAIT_LIST.head
+	MOV R12, R6						@ restore R12 = WAIT_LIST.head
 #endif
 
-	@ At the end of ASM_U1 restore Stack Pointer
-	ADD SP, SP, #16
+	LDR R1, [R10, #FLOOR]			@ ASM_U2: elevator->FLOOR
+	LDR R2, [R7, #IN]				@ ASM_U2: user->IN
+
+	ADD SP, SP, #16					@ At the end of ASM_U1 restore Stack Pointer
 
 	@ User R8 goes to ASM_U2
-	MOVS R8, R7				@ Replace C with user
+	MOVS R8, R7						@ Replace C with user
 
 @ [Signal and wait]
 @ Input:
@@ -255,23 +257,25 @@ ASM_U1:
 @ R8 ElevatorNode* user
 
 @ Runtime:
+@ R1 elevator->FLOOR
+@ R2 user->IN
 @ R4 ELEV1
 ASM_U2:
-	LDR R1, [R10, #FLOOR]	@ FIXME
-	LDR R2, [R8, #IN]		@ FIXME
 	SUBS R1, R1, R2
 	CBNZ R1, ASM_U2_2H		@ If (elevator->FLOOR != user->IN)
 
 	@ Is elevator positioned at E6?
 	LDR R0, [R10, #ELEV1]	@ R0 = ELEV1
-	LDR R1, [R0, #NEXTINST]	@ R1 = ELEV1->NEXTINST
 	LDR R2, =ASM_E6
+	LDR R3, =ASM_E3
+	LDR R1, [R0, #NEXTINST]	@ R1 = ELEV1->NEXTINST
 	MOVS R4, R0				@ Save ELEV1
 	CMP R1, R2
 	BNE ASM_U2_3H
 
 	@ If so, reposition it at E3
-	LDR R2, =ASM_E3
+	@ LDR R2, =ASM_E3
+	MOVS R2, R3
 	STR R2, [R0, #NEXTINST]
 
 	@ Remove it from WAIT list
