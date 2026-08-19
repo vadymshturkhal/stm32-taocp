@@ -1,0 +1,41 @@
+TIME STATE FLOOR D1 D2 D3 step action
+0000   N     2    0  0  0   U1 User 0 arrives at floor 4, destination is 1, give up 370
+0035   U     2    0  0  0   E7 Elevator moving up
+0086   U     3    0  0  0   E7 Elevator moving up
+0135   U     4    0  0  0   U1 User 1 arrives at floor 4, destination is 2, give up 250
+0151   U     4    0  0  0   E2 Elevator stops
+0151   N     4    0  0  0   E3 Elevator doors start to open
+0171   N     4    1  1  0   U5 User 0 gets in
+0196   D     4    1  1  0   U5 User 1 gets in
+0196   D     4    1  1  0   E5 Elevator doors flutter
+0236   D     4    0  1  1   E5 Elevator doors start to close
+0265   D     4    0  1  0   U1 User 2 arrives at floor 2, destination is 4, give up 378
+0271   D     4    0  1  0   E8 Elevator moving down
+0332   D     3    0  1  0   E8 Elevator moving down
+0378   D     2    0  1  0   U4 User 2 decides to give up, leaves the system
+0416   D     2    0  1  0   E2 Elevator stops
+0416   D     2    0  1  0   E3 Elevator doors start to open
+0435   D     2    1  1  0   U1 User 3 arrives at floor 3, destination is 4, give up 536
+0436   D     2    1  1  0   U6 User 1 gets out, leaves the system
+0492   D     2    0  1  1   E5 Elevator doors start to close
+0527   D     2    0  1  0   E8 Elevator moving down
+0536   D     1    0  1  0   U4 User 3 decides to give up, leaves the system
+0611   D     1    0  1  0   E2 Elevator stops
+0611   N     1    0  1  0   E3 Elevator doors start to open
+0631   N     1    1  1  0   U6 User 0 gets out, leaves the system
+0687   N     1    0  1  1   E5 Elevator doors start to close
+0722   U     1    0  1  0   E7 Elevator moving up
+0787   U     2    0  1  0   E2 Elevator stops
+0787   U     2    0  1  0   E3 Elevator doors start to open
+0807   U     2    0  1  1   E4 Doors open, nobody is there
+0863   U     2    0  1  1   E5 Elevator doors start to close
+0898   U     2    0  1  0   E7 Elevator moving up
+0963   U     3    0  1  0   E2 Elevator stops
+0963   N     3    0  1  0   E3 Elevator doors start to open
+0983   N     3    0  1  1   E4 Doors open, nobody is there
+1039   N     3    0  1  1   E5 Elevator doors start to close
+1074   D     3    0  1  0   E8 Elevator moving down
+1158   D     2    0  1  0   E2 Elevator stops
+1158   N     2    0  1  0   E3 Elevator doors start to open
+1178   N     2    0  1  1   E4 Doors open, nobody is there
+1234   N     2    0  1  1   E5 Elevator doors start to close
