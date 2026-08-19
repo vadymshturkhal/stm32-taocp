@@ -1,0 +1,37 @@
+name: Elevator (Python)
+
+on:
+  push:
+    paths:
+      - 'elevator/Python_WAIT_LIST/**'
+      - 'elevator/Measurements/trace_*.txt'
+      - '.github/workflows/elevator-python.yml'
+  pull_request:
+    paths:
+      - 'elevator/Python_WAIT_LIST/**'
+      - 'elevator/Measurements/trace_*.txt'
+      - '.github/workflows/elevator-python.yml'
+
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Compare against trace output (4 users)
+        env:
+          TRACE: "1"
+        run: |
+          python3 elevator/Python_WAIT_LIST/main.py 4 \
+            | diff - elevator/Measurements/trace_4.txt
+
+      - name: Compare against trace output (26 users)
+        env:
+          TRACE: "1"
+        run: |
+          python3 elevator/Python_WAIT_LIST/main.py 26 \
+            | diff - elevator/Measurements/trace_26.txt
