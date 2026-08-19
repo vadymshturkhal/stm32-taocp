@@ -30,3 +30,17 @@ jobs:
       - name: Compare against trace output (26 users)
         working-directory: elevator/C_Native
         run: ./elevator_sim 26 | diff - ../Measurements/trace_26.txt
+
+      - name: Build elevator_sim_notrace
+        working-directory: elevator/C_Native
+        run: make elevator_sim_notrace
+
+      - name: Smoke test elevator_sim_notrace (must run without crashing, no output expected)
+        working-directory: elevator/C_Native
+        run: |
+          output=$(./elevator_sim_notrace 26)
+          if [ -n "$output" ]; then
+            echo "Expected no output from the notrace build, got:"
+            echo "$output"
+            exit 1
+          fi
