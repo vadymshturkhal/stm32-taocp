@@ -19,7 +19,7 @@
   - [C (native)](elevator/C_Native): standalone laptop build (malloc-based, no STM32 dependencies), used for timing comparisons against Python
   - [ARM Assembly](elevator/ASM_WAIT_LIST): hand-tuned Cortex-M4 Thumb-2 port, paired with the embedded C port above
   - [Python (async)](elevator/Python_async): coroutine-based port using `asyncio`/`await` instead of an explicit WAIT list
-  - [Measurements](elevator/Measurements): scripts comparing timing and trace-output correctness between the C (native) and Python ports
+  - [Measurements](elevator/Measurements): scripts comparing timing and trace-output correctness between the C (native) and Python ports -- see [RESULTS.md](elevator/Measurements/RESULTS.md) for measured numbers (ASM vs GCC on STM32, C vs Python on laptop)
   </details>
 
 ## Algorithm from Concrete Mathematics:
