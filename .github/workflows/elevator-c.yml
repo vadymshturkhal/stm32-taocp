@@ -1,0 +1,32 @@
+name: Elevator (C)
+
+on:
+  push:
+    paths:
+      - 'elevator/C_Native/**'
+      - 'elevator/Measurements/trace_*.txt'
+      - '.github/workflows/elevator-c.yml'
+  pull_request:
+    paths:
+      - 'elevator/C_Native/**'
+      - 'elevator/Measurements/trace_*.txt'
+      - '.github/workflows/elevator-c.yml'
+  workflow_dispatch:
+
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build elevator_sim (traced)
+        working-directory: elevator/C_Native
+        run: make elevator_sim
+
+      - name: Compare against trace output (4 users)
+        working-directory: elevator/C_Native
+        run: ./elevator_sim 4 | diff - ../Measurements/trace_4.txt
+
+      - name: Compare against trace output (26 users)
+        working-directory: elevator/C_Native
+        run: ./elevator_sim 26 | diff - ../Measurements/trace_26.txt

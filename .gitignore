@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+
+elevator/C_Native/elevator_sim
+elevator/C_Native/elevator_sim_notrace
+elevator/C_Native/*.o
