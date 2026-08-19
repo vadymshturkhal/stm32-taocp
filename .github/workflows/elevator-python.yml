@@ -11,6 +11,7 @@ on:
       - 'elevator/Python_WAIT_LIST/**'
       - 'elevator/Measurements/trace_*.txt'
       - '.github/workflows/elevator-python.yml'
+  workflow_dispatch:
 
 jobs:
   correctness:
