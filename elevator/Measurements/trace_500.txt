@@ -1,0 +1,2914 @@
+TIME STATE FLOOR D1 D2 D3 step action
+0000   N     2    0  0  0   U1 User 0 arrives at floor 4, destination is 1, give up 370
+0035   U     2    0  0  0   E7 Elevator moving up
+0086   U     3    0  0  0   E7 Elevator moving up
+0135   U     4    0  0  0   U1 User 1 arrives at floor 4, destination is 2, give up 250
+0151   U     4    0  0  0   E2 Elevator stops
+0151   N     4    0  0  0   E3 Elevator doors start to open
+0171   N     4    1  1  0   U5 User 0 gets in
+0196   D     4    1  1  0   U5 User 1 gets in
+0196   D     4    1  1  0   E5 Elevator doors flutter
+0236   D     4    0  1  1   E5 Elevator doors start to close
+0265   D     4    0  1  0   U1 User 2 arrives at floor 2, destination is 4, give up 378
+0271   D     4    0  1  0   E8 Elevator moving down
+0332   D     3    0  1  0   E8 Elevator moving down
+0378   D     2    0  1  0   U4 User 2 decides to give up, leaves the system
+0416   D     2    0  1  0   E2 Elevator stops
+0416   D     2    0  1  0   E3 Elevator doors start to open
+0435   D     2    1  1  0   U1 User 3 arrives at floor 3, destination is 4, give up 536
+0436   D     2    1  1  0   U6 User 1 gets out, leaves the system
+0492   D     2    0  1  1   E5 Elevator doors start to close
+0527   D     2    0  1  0   E8 Elevator moving down
+0536   D     1    0  1  0   U4 User 3 decides to give up, leaves the system
+0561   D     1    0  1  0   U1 User 4 arrives at floor 4, destination is 2, give up 779
+0611   D     1    0  1  0   E2 Elevator stops
+0611   N     1    0  1  0   E3 Elevator doors start to open
+0631   N     1    1  1  0   U6 User 0 gets out, leaves the system
+0687   N     1    0  1  1   E5 Elevator doors start to close
+0722   U     1    0  1  0   E7 Elevator moving up
+0724   U     2    0  1  0   U1 User 5 arrives at floor 2, destination is 4, give up 1061
+0779   U     2    0  1  0   U4 User 4 decides to give up, leaves the system
+0787   U     2    0  1  0   E2 Elevator stops
+0787   U     2    0  1  0   E3 Elevator doors start to open
+0807   U     2    1  1  0   U5 User 5 gets in
+0863   U     2    0  1  1   E5 Elevator doors start to close
+0866   U     2    0  1  0   U1 User 6 arrives at floor 0, destination is 1, give up 1089
+0898   U     2    0  1  0   E7 Elevator moving up
+0963   U     3    0  1  0   E2 Elevator stops
+0963   U     3    0  1  0   E3 Elevator doors start to open
+0983   U     3    0  1  1   E4 Doors open, nobody is there
+1039   U     3    0  1  1   E5 Elevator doors start to close
+1040   U     3    0  1  0   U1 User 7 arrives at floor 3, destination is 2, give up 1278
+1040   U     3    0  1  0   E3 Elevator doors start to open
+1060   U     3    1  1  0   U5 User 7 gets in
+1089   U     3    0  1  1   U4 User 6 decides to give up, leaves the system
+1116   U     3    0  1  1   E5 Elevator doors start to close
+1151   U     3    0  1  0   E7 Elevator moving up
+1216   U     4    0  1  0   E2 Elevator stops
+1216   D     4    0  1  0   E3 Elevator doors start to open
+1224   D     4    1  1  0   U1 User 8 arrives at floor 0, destination is 4, give up 1504
+1236   D     4    1  1  0   U6 User 5 gets out, leaves the system
+1292   D     4    0  1  1   E5 Elevator doors start to close
+1326   D     4    0  1  0   U1 User 9 arrives at floor 3, destination is 2, give up 1537
+1327   D     4    0  1  0   E8 Elevator moving down
+1411   D     3    0  1  0   E2 Elevator stops
+1411   D     3    0  1  0   E3 Elevator doors start to open
+1431   D     3    1  1  0   U5 User 9 gets in
+1435   D     3    1  1  0   U1 User 10 arrives at floor 3, destination is 0, give up 1622
+1456   D     3    1  1  0   U5 User 10 gets in
+1487   D     3    0  1  1   E5 Elevator doors start to close
+1504   D     3    0  1  0   U4 User 8 decides to give up, leaves the system
+1522   D     3    0  1  0   E8 Elevator moving down
+1565   D     2    0  1  0   U1 User 11 arrives at floor 0, destination is 1, give up 1896
+1606   D     2    0  1  0   E2 Elevator stops
+1606   D     2    0  1  0   E3 Elevator doors start to open
+1626   D     2    1  1  0   U6 User 9 gets out, leaves the system
+1651   D     2    1  1  0   U6 User 7 gets out, leaves the system
+1682   D     2    0  1  1   E5 Elevator doors start to close
+1710   D     2    0  1  0   U1 User 12 arrives at floor 4, destination is 1, give up 1822
+1717   D     2    0  1  0   E8 Elevator moving down
+1778   D     1    0  1  0   E8 Elevator moving down
+1822   D     0    0  1  0   U4 User 12 decides to give up, leaves the system
+1862   D     0    0  1  0   E2 Elevator stops
+1862   N     0    0  1  0   E3 Elevator doors start to open
+1882   N     0    1  1  0   U6 User 10 gets out, leaves the system
+1895   N     0    1  1  0   U1 User 13 arrives at floor 2, destination is 1, give up 2072
+1907   N     0    1  1  0   U5 User 11 gets in
+1932   U     0    0  1  1   E5 Elevator doors start to close
+1967   U     0    0  1  0   E7 Elevator moving up
+2018   U     1    0  1  0   U1 User 14 arrives at floor 3, destination is 0, give up 2310
+2032   U     1    0  1  0   E2 Elevator stops
+2032   U     1    0  1  0   E3 Elevator doors start to open
+2052   U     1    1  1  0   U6 User 11 gets out, leaves the system
+2072   U     1    1  1  0   U4 User 13 decides to give up, leaves the system
+2108   U     1    0  1  1   E5 Elevator doors start to close
+2134   U     1    0  1  0   U1 User 15 arrives at floor 0, destination is 4, give up 2529
+2143   U     1    0  1  0   E7 Elevator moving up
+2194   U     2    0  1  0   E7 Elevator moving up
+2245   U     3    0  1  0   E7 Elevator moving up
+2254   U     4    0  1  0   U1 User 16 arrives at floor 1, destination is 0, give up 2364
+2310   U     4    0  1  0   U4 User 14 decides to give up, leaves the system
+2310   U     4    0  1  0   E2 Elevator stops
+2310   N     4    0  1  0   E3 Elevator doors start to open
+2330   N     4    0  1  1   E4 Doors open, nobody is there
+2364   N     4    0  1  1   U4 User 16 decides to give up, leaves the system
+2386   N     4    0  1  1   E5 Elevator doors start to close
+2396   N     4    0  1  0   U1 User 17 arrives at floor 3, destination is 2, give up 2593
+2421   D     4    0  1  0   E8 Elevator moving down
+2505   D     3    0  1  0   E2 Elevator stops
+2505   D     3    0  1  0   E3 Elevator doors start to open
+2525   D     3    1  1  0   U5 User 17 gets in
+2529   D     3    1  1  0   U4 User 15 decides to give up, leaves the system
+2557   D     3    0  1  1   U1 User 18 arrives at floor 2, destination is 4, give up 2882
+2581   D     3    0  1  1   E5 Elevator doors start to close
+2616   D     3    0  1  0   E8 Elevator moving down
+2700   D     2    0  1  0   E2 Elevator stops
+2700   D     2    0  1  0   E3 Elevator doors start to open
+2708   D     2    1  1  0   U1 User 19 arrives at floor 2, destination is 0, give up 3091
+2720   D     2    1  1  0   U6 User 17 gets out, leaves the system
+2745   D     2    1  1  0   U5 User 18 gets in
+2770   D     2    1  1  0   U5 User 19 gets in
+2776   D     2    1  1  0   E5 Elevator doors flutter
+2816   D     2    0  1  1   E5 Elevator doors start to close
+2840   D     2    0  1  0   U1 User 20 arrives at floor 1, destination is 2, give up 3048
+2851   D     2    0  1  0   E8 Elevator moving down
+2935   D     1    0  1  0   E2 Elevator stops
+2935   D     1    0  1  0   E3 Elevator doors start to open
+2955   D     1    1  1  0   U5 User 20 gets in
+2980   D     1    1  1  0   U1 User 21 arrives at floor 1, destination is 2, give up 3118
+2980   D     1    1  1  0   U5 User 21 gets in
+3011   D     1    0  1  1   E5 Elevator doors start to close
+3046   D     1    0  1  0   E8 Elevator moving down
+3088   D     0    0  1  0   U1 User 22 arrives at floor 0, destination is 4, give up 3229
+3130   D     0    0  1  0   E2 Elevator stops
+3130   U     0    0  1  0   E3 Elevator doors start to open
+3150   U     0    1  1  0   U6 User 19 gets out, leaves the system
+3175   U     0    1  1  0   U5 User 22 gets in
+3206   U     0    0  1  1   E5 Elevator doors start to close
+3227   U     0    0  1  0   U1 User 23 arrives at floor 4, destination is 0, give up 3604
+3241   U     0    0  1  0   E7 Elevator moving up
+3306   U     1    0  1  0   E2 Elevator stops
+3306   U     1    0  1  0   E3 Elevator doors start to open
+3326   U     1    0  1  1   E4 Doors open, nobody is there
+3328   U     1    0  1  1   U1 User 24 arrives at floor 1, destination is 0, give up 3522
+3328   U     1    1  1  0   U5 User 24 gets in
+3382   U     1    0  1  1   E5 Elevator doors start to close
+3417   U     1    0  1  0   E7 Elevator moving up
+3435   U     2    0  1  0   U1 User 25 arrives at floor 1, destination is 2, give up 3753
+3482   U     2    0  1  0   E2 Elevator stops
+3482   U     2    0  1  0   E3 Elevator doors start to open
+3502   U     2    1  1  0   U6 User 21 gets out, leaves the system
+3527   U     2    1  1  0   U6 User 20 gets out, leaves the system
+3558   U     2    0  1  1   E5 Elevator doors start to close
+3582   U     2    0  1  0   U1 User 26 arrives at floor 3, destination is 2, give up 3798
+3593   U     2    0  1  0   E7 Elevator moving up
+3604   U     3    0  1  0   U4 User 23 decides to give up, leaves the system
+3644   U     3    0  1  0   E7 Elevator moving up
+3709   U     4    0  1  0   E2 Elevator stops
+3709   D     4    0  1  0   E3 Elevator doors start to open
+3729   D     4    1  1  0   U6 User 22 gets out, leaves the system
+3732   D     4    1  1  0   U1 User 27 arrives at floor 2, destination is 1, give up 3938
+3753   D     4    1  1  0   U4 User 25 decides to give up, leaves the system
+3754   D     4    1  1  0   U6 User 18 gets out, leaves the system
+3785   D     4    0  1  1   E5 Elevator doors start to close
+3798   D     4    0  1  0   U4 User 26 decides to give up, leaves the system
+3820   D     4    0  1  0   E8 Elevator moving down
+3867   D     3    0  1  0   U1 User 28 arrives at floor 0, destination is 2, give up 4123
+3904   D     3    0  1  0   E2 Elevator stops
+3904   D     3    0  1  0   E3 Elevator doors start to open
+3924   D     3    0  1  1   E4 Doors open, nobody is there
+3938   D     3    0  1  1   U4 User 27 decides to give up, leaves the system
+3980   D     3    0  1  1   E5 Elevator doors start to close
+3981   D     3    0  1  0   U1 User 29 arrives at floor 1, destination is 4, give up 4282
+4015   D     3    0  1  0   E8 Elevator moving down
+4099   D     2    0  1  0   E2 Elevator stops
+4099   D     2    0  1  0   E3 Elevator doors start to open
+4119   D     2    0  1  1   E4 Doors open, nobody is there
+4123   D     2    0  1  1   U4 User 28 decides to give up, leaves the system
+4139   D     2    0  1  1   U1 User 30 arrives at floor 1, destination is 0, give up 4475
+4175   D     2    0  1  1   E5 Elevator doors start to close
+4210   D     2    0  1  0   E8 Elevator moving down
+4239   D     1    0  1  0   U1 User 31 arrives at floor 0, destination is 3, give up 4493
+4282   D     1    0  1  0   U4 User 29 decides to give up, leaves the system
+4294   D     1    0  1  0   E2 Elevator stops
+4294   D     1    0  1  0   E3 Elevator doors start to open
+4314   D     1    1  1  0   U5 User 30 gets in
+4370   D     1    0  1  1   E5 Elevator doors start to close
+4405   D     1    0  1  0   E8 Elevator moving down
+4431   D     0    0  1  0   U1 User 32 arrives at floor 1, destination is 0, give up 4719
+4489   D     0    0  1  0   E2 Elevator stops
+4489   N     0    0  1  0   E3 Elevator doors start to open
+4509   N     0    1  1  0   U6 User 30 gets out, leaves the system
+4534   N     0    1  1  0   U6 User 24 gets out, leaves the system
+4559   N     0    1  1  0   U5 User 31 gets in
+4579   U     0    1  1  0   U1 User 33 arrives at floor 3, destination is 0, give up 4784
+4584   U     0    0  1  1   E5 Elevator doors start to close
+4619   U     0    0  1  0   E7 Elevator moving up
+4684   U     1    0  1  0   E2 Elevator stops
+4684   U     1    0  1  0   E3 Elevator doors start to open
+4701   U     1    1  1  0   U1 User 34 arrives at floor 1, destination is 3, give up 5048
+4704   U     1    1  1  0   U5 User 32 gets in
+4729   U     1    1  1  0   U5 User 34 gets in
+4760   U     1    0  1  1   E5 Elevator doors start to close
+4784   U     1    0  1  0   U4 User 33 decides to give up, leaves the system
+4795   U     1    0  1  0   E7 Elevator moving up
+4846   U     2    0  1  0   E7 Elevator moving up
+4879   U     3    0  1  0   U1 User 35 arrives at floor 0, destination is 4, give up 5073
+4911   U     3    0  1  0   E2 Elevator stops
+4911   D     3    0  1  0   E3 Elevator doors start to open
+4931   D     3    1  1  0   U6 User 34 gets out, leaves the system
+4956   D     3    1  1  0   U6 User 31 gets out, leaves the system
+4987   D     3    0  1  1   E5 Elevator doors start to close
+5022   D     3    0  1  0   E8 Elevator moving down
+5073   D     2    0  1  0   U4 User 35 decides to give up, leaves the system
+5079   D     2    0  1  0   U1 User 36 arrives at floor 0, destination is 3, give up 5250
+5083   D     2    0  1  0   E8 Elevator moving down
+5167   D     1    0  1  0   E2 Elevator stops
+5167   D     1    0  1  0   E3 Elevator doors start to open
+5187   D     1    0  1  1   E4 Doors open, nobody is there
+5221   D     1    0  1  1   U1 User 37 arrives at floor 2, destination is 4, give up 5441
+5243   D     1    0  1  1   E5 Elevator doors start to close
+5250   D     1    0  1  0   U4 User 36 decides to give up, leaves the system
+5278   D     1    0  1  0   E8 Elevator moving down
+5361   D     0    0  1  0   U1 User 38 arrives at floor 1, destination is 3, give up 5620
+5362   D     0    0  1  0   E2 Elevator stops
+5362   N     0    0  1  0   E3 Elevator doors start to open
+5382   N     0    1  1  0   U6 User 32 gets out, leaves the system
+5438   N     0    0  1  1   E5 Elevator doors start to close
+5441   N     0    0  1  0   U4 User 37 decides to give up, leaves the system
+5473   U     0    0  1  0   E7 Elevator moving up
+5491   U     1    0  1  0   U1 User 39 arrives at floor 3, destination is 0, give up 5783
+5538   U     1    0  1  0   E2 Elevator stops
+5538   U     1    0  1  0   E3 Elevator doors start to open
+5558   U     1    1  1  0   U5 User 38 gets in
+5614   U     1    0  1  1   E5 Elevator doors start to close
+5633   U     1    0  1  0   U1 User 40 arrives at floor 4, destination is 1, give up 5847
+5649   U     1    0  1  0   E7 Elevator moving up
+5714   U     2    0  1  0   E2 Elevator stops
+5714   U     2    0  1  0   E3 Elevator doors start to open
+5733   U     2    1  1  0   U1 User 41 arrives at floor 3, destination is 2, give up 6033
+5734   U     2    0  1  1   E4 Doors open, nobody is there
+5783   U     2    0  1  1   U4 User 39 decides to give up, leaves the system
+5790   U     2    0  1  1   E5 Elevator doors start to close
+5825   U     2    0  1  0   E7 Elevator moving up
+5847   U     3    0  1  0   U4 User 40 decides to give up, leaves the system
+5890   U     3    0  1  0   E2 Elevator stops
+5890   U     3    0  1  0   E3 Elevator doors start to open
+5906   U     3    1  1  0   U1 User 42 arrives at floor 0, destination is 3, give up 6305
+5910   U     3    1  1  0   U6 User 38 gets out, leaves the system
+5935   U     3    1  1  0   U5 User 41 gets in
+5966   U     3    0  1  1   E5 Elevator doors start to close
+6001   U     3    0  1  0   E7 Elevator moving up
+6066   U     4    0  1  0   E2 Elevator stops
+6066   D     4    0  1  0   E3 Elevator doors start to open
+6074   D     4    1  1  0   U1 User 43 arrives at floor 4, destination is 3, give up 6446
+6086   D     4    1  1  0   U5 User 43 gets in
+6142   D     4    0  1  1   E5 Elevator doors start to close
+6177   D     4    0  1  0   E8 Elevator moving down
+6184   D     3    0  1  0   U1 User 44 arrives at floor 0, destination is 1, give up 6346
+6261   D     3    0  1  0   E2 Elevator stops
+6261   D     3    0  1  0   E3 Elevator doors start to open
+6281   D     3    1  1  0   U6 User 43 gets out, leaves the system
+6305   D     3    1  1  0   U4 User 42 decides to give up, leaves the system
+6337   D     3    0  1  1   E5 Elevator doors start to close
+6344   D     3    0  1  0   U1 User 45 arrives at floor 3, destination is 4, give up 6541
+6344   D     3    0  1  0   E3 Elevator doors start to open
+6346   D     3    1  1  0   U4 User 44 decides to give up, leaves the system
+6364   D     3    1  1  0   U5 User 45 gets in
+6420   D     3    0  1  1   E5 Elevator doors start to close
+6455   D     3    0  1  0   E8 Elevator moving down
+6498   D     2    0  1  0   U1 User 46 arrives at floor 4, destination is 2, give up 6823
+6539   D     2    0  1  0   E2 Elevator stops
+6539   D     2    0  1  0   E3 Elevator doors start to open
+6559   D     2    1  1  0   U6 User 41 gets out, leaves the system
+6615   D     2    0  1  1   E5 Elevator doors start to close
+6650   D     2    0  1  0   E8 Elevator moving down
+6651   D     1    0  1  0   U1 User 47 arrives at floor 4, destination is 0, give up 7003
+6711   D     1    0  1  0   E8 Elevator moving down
+6756   D     0    0  1  0   U1 User 48 arrives at floor 1, destination is 3, give up 6922
+6795   D     0    0  1  0   E2 Elevator stops
+6795   U     0    0  1  0   E3 Elevator doors start to open
+6815   U     0    0  1  1   E4 Doors open, nobody is there
+6823   U     0    0  1  1   U4 User 46 decides to give up, leaves the system
+6871   U     0    0  1  1   E5 Elevator doors start to close
+6885   U     0    0  1  0   U1 User 49 arrives at floor 0, destination is 1, give up 7235
+6885   U     0    0  1  0   E3 Elevator doors start to open
+6905   U     0    1  1  0   U5 User 49 gets in
+6922   U     0    1  1  0   U4 User 48 decides to give up, leaves the system
+6961   U     0    0  1  1   E5 Elevator doors start to close
+6996   U     0    0  1  0   E7 Elevator moving up
+7003   U     1    0  1  0   U4 User 47 decides to give up, leaves the system
+7053   U     1    0  1  0   U1 User 50 arrives at floor 3, destination is 1, give up 7407
+7061   U     1    0  1  0   E2 Elevator stops
+7061   U     1    0  1  0   E3 Elevator doors start to open
+7081   U     1    1  1  0   U6 User 49 gets out, leaves the system
+7137   U     1    0  1  1   E5 Elevator doors start to close
+7157   U     1    0  1  0   U1 User 51 arrives at floor 4, destination is 1, give up 7473
+7172   U     1    0  1  0   E7 Elevator moving up
+7223   U     2    0  1  0   E7 Elevator moving up
+7274   U     3    0  1  0   E7 Elevator moving up
+7307   U     4    0  1  0   U1 User 52 arrives at floor 0, destination is 3, give up 7441
+7339   U     4    0  1  0   E2 Elevator stops
+7339   N     4    0  1  0   E3 Elevator doors start to open
+7359   N     4    1  1  0   U6 User 45 gets out, leaves the system
+7384   N     4    1  1  0   U5 User 51 gets in
+7407   D     4    1  1  0   U4 User 50 decides to give up, leaves the system
+7409   D     4    0  1  1   E5 Elevator doors start to close
+7441   D     4    0  1  0   U4 User 52 decides to give up, leaves the system
+7444   D     4    0  1  0   E8 Elevator moving down
+7472   D     3    0  1  0   U1 User 53 arrives at floor 2, destination is 4, give up 7691
+7528   D     3    0  1  0   E2 Elevator stops
+7528   D     3    0  1  0   E3 Elevator doors start to open
+7548   D     3    0  1  1   E4 Doors open, nobody is there
+7604   D     3    0  1  1   E5 Elevator doors start to close
+7631   D     3    0  1  0   U1 User 54 arrives at floor 2, destination is 0, give up 7901
+7639   D     3    0  1  0   E8 Elevator moving down
+7691   D     2    0  1  0   U4 User 53 decides to give up, leaves the system
+7723   D     2    0  1  0   E2 Elevator stops
+7723   D     2    0  1  0   E3 Elevator doors start to open
+7743   D     2    1  1  0   U5 User 54 gets in
+7775   D     2    0  1  1   U1 User 55 arrives at floor 1, destination is 4, give up 7890
+7799   D     2    0  1  1   E5 Elevator doors start to close
+7834   D     2    0  1  0   E8 Elevator moving down
+7890   D     1    0  1  0   U4 User 55 decides to give up, leaves the system
+7918   D     1    0  1  0   E2 Elevator stops
+7918   D     1    0  1  0   E3 Elevator doors start to open
+7929   D     1    1  1  0   U1 User 56 arrives at floor 4, destination is 1, give up 8034
+7938   D     1    1  1  0   U6 User 51 gets out, leaves the system
+7994   D     1    0  1  1   E5 Elevator doors start to close
+8029   D     1    0  1  0   E8 Elevator moving down
+8034   D     0    0  1  0   U4 User 56 decides to give up, leaves the system
+8064   D     0    0  1  0   U1 User 57 arrives at floor 1, destination is 0, give up 8385
+8113   D     0    0  1  0   E2 Elevator stops
+8113   N     0    0  1  0   E3 Elevator doors start to open
+8133   N     0    1  1  0   U6 User 54 gets out, leaves the system
+8185   N     0    0  1  1   U1 User 58 arrives at floor 2, destination is 3, give up 8476
+8189   N     0    0  1  1   E5 Elevator doors start to close
+8224   U     0    0  1  0   E7 Elevator moving up
+8289   U     1    0  1  0   E2 Elevator stops
+8289   U     1    0  1  0   E3 Elevator doors start to open
+8308   U     1    1  1  0   U1 User 59 arrives at floor 2, destination is 3, give up 8665
+8309   U     1    1  1  0   U5 User 57 gets in
+8365   U     1    0  1  1   E5 Elevator doors start to close
+8400   U     1    0  1  0   E7 Elevator moving up
+8465   U     2    0  1  0   E2 Elevator stops
+8465   U     2    0  1  0   E3 Elevator doors start to open
+8473   U     2    1  1  0   U1 User 60 arrives at floor 4, destination is 0, give up 8815
+8485   U     2    1  1  0   U5 User 58 gets in
+8510   U     2    1  1  0   U5 User 59 gets in
+8541   U     2    0  1  1   E5 Elevator doors start to close
+8576   U     2    0  1  0   E7 Elevator moving up
+8593   U     3    0  1  0   U1 User 61 arrives at floor 2, destination is 0, give up 8965
+8641   U     3    0  1  0   E2 Elevator stops
+8641   U     3    0  1  0   E3 Elevator doors start to open
+8661   U     3    1  1  0   U6 User 59 gets out, leaves the system
+8686   U     3    1  1  0   U6 User 58 gets out, leaves the system
+8717   U     3    0  1  1   E5 Elevator doors start to close
+8752   U     3    0  1  0   E7 Elevator moving up
+8768   U     4    0  1  0   U1 User 62 arrives at floor 1, destination is 3, give up 8897
+8815   U     4    0  1  0   U4 User 60 decides to give up, leaves the system
+8817   U     4    0  1  0   E2 Elevator stops
+8817   D     4    0  1  0   E3 Elevator doors start to open
+8837   D     4    0  1  1   E4 Doors open, nobody is there
+8869   D     4    0  1  1   U1 User 63 arrives at floor 0, destination is 2, give up 9183
+8893   D     4    0  1  1   E5 Elevator doors start to close
+8897   D     4    0  1  0   U4 User 62 decides to give up, leaves the system
+8928   D     4    0  1  0   E8 Elevator moving down
+8965   D     3    0  1  0   U4 User 61 decides to give up, leaves the system
+8989   D     3    0  1  0   E8 Elevator moving down
+9030   D     2    0  1  0   U1 User 64 arrives at floor 2, destination is 0, give up 9146
+9073   D     2    0  1  0   E2 Elevator stops
+9073   D     2    0  1  0   E3 Elevator doors start to open
+9093   D     2    1  1  0   U5 User 64 gets in
+9142   D     2    0  1  1   U1 User 65 arrives at floor 3, destination is 0, give up 9331
+9149   D     2    0  1  1   E5 Elevator doors start to close
+9183   D     2    0  1  0   U4 User 63 decides to give up, leaves the system
+9184   D     2    0  1  0   E8 Elevator moving down
+9268   D     1    0  1  0   E2 Elevator stops
+9268   D     1    0  1  0   E3 Elevator doors start to open
+9288   D     1    0  1  1   E4 Doors open, nobody is there
+9323   D     1    0  1  1   U1 User 66 arrives at floor 3, destination is 0, give up 9563
+9331   D     1    0  1  1   U4 User 65 decides to give up, leaves the system
+9344   D     1    0  1  1   E5 Elevator doors start to close
+9379   D     1    0  1  0   E8 Elevator moving down
+9463   D     0    0  1  0   E2 Elevator stops
+9463   N     0    0  1  0   E3 Elevator doors start to open
+9483   N     0    1  1  0   U6 User 64 gets out, leaves the system
+9508   N     0    1  1  0   U6 User 57 gets out, leaves the system
+9510   N     0    1  1  0   U1 User 67 arrives at floor 1, destination is 4, give up 9667
+9539   N     0    0  1  1   E5 Elevator doors start to close
+9563   U     0    0  1  0   U4 User 66 decides to give up, leaves the system
+9574   U     0    0  1  0   E7 Elevator moving up
+9639   U     1    0  1  0   E2 Elevator stops
+9639   U     1    0  1  0   E3 Elevator doors start to open
+9659   U     1    1  1  0   U5 User 67 gets in
+9684   U     1    1  1  0   U1 User 68 arrives at floor 3, destination is 2, give up 10012
+9715   U     1    0  1  1   E5 Elevator doors start to close
+9750   U     1    0  1  0   E7 Elevator moving up
+9801   U     2    0  1  0   E7 Elevator moving up
+9812   U     3    0  1  0   U1 User 69 arrives at floor 1, destination is 0, give up 10014
+9852   U     3    0  1  0   E7 Elevator moving up
+9917   U     4    0  1  0   E2 Elevator stops
+9917   N     4    0  1  0   E3 Elevator doors start to open
+9937   N     4    1  1  0   U6 User 67 gets out, leaves the system
+9968   N     4    0  1  1   U1 User 70 arrives at floor 2, destination is 0, give up 10346
+9993   N     4    0  1  1   E5 Elevator doors start to close
+10012   N     4    0  1  0   U4 User 68 decides to give up, leaves the system
+10014   D     4    0  1  0   U4 User 69 decides to give up, leaves the system
+10028   D     4    0  1  0   E8 Elevator moving down
+10112   D     3    0  1  0   E2 Elevator stops
+10112   D     3    0  1  0   E3 Elevator doors start to open
+10132   D     3    0  1  1   E4 Doors open, nobody is there
+10154   D     3    0  1  1   U1 User 71 arrives at floor 1, destination is 2, give up 10266
+10188   D     3    0  1  1   E5 Elevator doors start to close
+10223   D     3    0  1  0   E8 Elevator moving down
+10266   D     2    0  1  0   U4 User 71 decides to give up, leaves the system
+10290   D     2    0  1  0   U1 User 72 arrives at floor 3, destination is 0, give up 10599
+10307   D     2    0  1  0   E2 Elevator stops
+10307   D     2    0  1  0   E3 Elevator doors start to open
+10327   D     2    1  1  0   U5 User 70 gets in
+10383   D     2    0  1  1   E5 Elevator doors start to close
+10418   D     2    0  1  0   E8 Elevator moving down
+10437   D     1    0  1  0   U1 User 73 arrives at floor 4, destination is 0, give up 10752
+10502   D     1    0  1  0   E2 Elevator stops
+10502   D     1    0  1  0   E3 Elevator doors start to open
+10522   D     1    0  1  1   E4 Doors open, nobody is there
+10578   D     1    0  1  1   E5 Elevator doors start to close
+10599   D     1    0  1  0   U4 User 72 decides to give up, leaves the system
+10613   D     1    0  1  0   E8 Elevator moving down
+10615   D     0    0  1  0   U1 User 74 arrives at floor 4, destination is 2, give up 10871
+10697   D     0    0  1  0   E2 Elevator stops
+10697   N     0    0  1  0   E3 Elevator doors start to open
+10717   N     0    1  1  0   U6 User 70 gets out, leaves the system
+10752   N     0    0  1  1   U4 User 73 decides to give up, leaves the system
+10773   N     0    0  1  1   U1 User 75 arrives at floor 0, destination is 3, give up 10953
+10773   N     0    1  1  0   U5 User 75 gets in
+10798   U     0    0  1  1   E5 Elevator doors start to close
+10833   U     0    0  1  0   E7 Elevator moving up
+10871   U     1    0  1  0   U4 User 74 decides to give up, leaves the system
+10898   U     1    0  1  0   E2 Elevator stops
+10898   U     1    0  1  0   E3 Elevator doors start to open
+10918   U     1    0  1  1   E4 Doors open, nobody is there
+10926   U     1    0  1  1   U1 User 76 arrives at floor 0, destination is 3, give up 11272
+10974   U     1    0  1  1   E5 Elevator doors start to close
+11009   U     1    0  1  0   E7 Elevator moving up
+11060   U     2    0  1  0   E7 Elevator moving up
+11069   U     3    0  1  0   U1 User 77 arrives at floor 3, destination is 2, give up 11306
+11125   U     3    0  1  0   E2 Elevator stops
+11125   U     3    0  1  0   E3 Elevator doors start to open
+11145   U     3    1  1  0   U6 User 75 gets out, leaves the system
+11170   U     3    1  1  0   U1 User 78 arrives at floor 4, destination is 3, give up 11348
+11170   U     3    1  1  0   U5 User 77 gets in
+11201   U     3    0  1  1   E5 Elevator doors start to close
+11236   U     3    0  1  0   E7 Elevator moving up
+11272   U     4    0  1  0   U4 User 76 decides to give up, leaves the system
+11300   U     4    0  1  0   U1 User 79 arrives at floor 2, destination is 0, give up 11687
+11301   U     4    0  1  0   E2 Elevator stops
+11301   D     4    0  1  0   E3 Elevator doors start to open
+11321   D     4    1  1  0   U5 User 78 gets in
+11377   D     4    0  1  1   E5 Elevator doors start to close
+11412   D     4    0  1  0   E8 Elevator moving down
+11460   D     3    0  1  0   U1 User 80 arrives at floor 4, destination is 2, give up 11827
+11496   D     3    0  1  0   E2 Elevator stops
+11496   D     3    0  1  0   E3 Elevator doors start to open
+11516   D     3    1  1  0   U6 User 78 gets out, leaves the system
+11572   D     3    0  1  1   E5 Elevator doors start to close
+11607   D     3    0  1  0   E8 Elevator moving down
+11613   D     2    0  1  0   U1 User 81 arrives at floor 2, destination is 4, give up 11799
+11687   D     2    0  1  0   U4 User 79 decides to give up, leaves the system
+11691   D     2    0  1  0   E2 Elevator stops
+11691   D     2    0  1  0   E3 Elevator doors start to open
+11711   D     2    1  1  0   U6 User 77 gets out, leaves the system
+11736   D     2    1  1  0   U5 User 81 gets in
+11767   D     2    0  1  1   E5 Elevator doors start to close
+11776   D     2    0  1  0   U1 User 82 arrives at floor 1, destination is 3, give up 11915
+11802   D     2    0  1  0   E8 Elevator moving down
+11827   D     1    0  1  0   U4 User 80 decides to give up, leaves the system
+11863   D     1    0  1  0   E8 Elevator moving down
+11909   D     0    0  1  0   U1 User 83 arrives at floor 2, destination is 0, give up 12014
+11915   D     0    0  1  0   U4 User 82 decides to give up, leaves the system
+11947   D     0    0  1  0   E2 Elevator stops
+11947   U     0    0  1  0   E3 Elevator doors start to open
+11967   U     0    0  1  1   E4 Doors open, nobody is there
+12014   U     0    0  1  1   U4 User 83 decides to give up, leaves the system
+12023   U     0    0  1  1   E5 Elevator doors start to close
+12058   U     0    0  1  0   E7 Elevator moving up
+12060   U     1    0  1  0   U1 User 84 arrives at floor 3, destination is 1, give up 12442
+12123   U     1    0  1  0   E2 Elevator stops
+12123   U     1    0  1  0   E3 Elevator doors start to open
+12143   U     1    0  1  1   E4 Doors open, nobody is there
+12199   U     1    0  1  1   E5 Elevator doors start to close
+12234   U     1    0  1  0   E7 Elevator moving up
+12248   U     2    0  1  0   U1 User 85 arrives at floor 1, destination is 0, give up 12546
+12299   U     2    0  1  0   E2 Elevator stops
+12299   U     2    0  1  0   E3 Elevator doors start to open
+12319   U     2    0  1  1   E4 Doors open, nobody is there
+12374   U     2    0  1  1   U1 User 86 arrives at floor 1, destination is 2, give up 12630
+12375   U     2    0  1  1   E5 Elevator doors start to close
+12410   U     2    0  1  0   E7 Elevator moving up
+12442   U     3    0  1  0   U4 User 84 decides to give up, leaves the system
+12461   U     3    0  1  0   E7 Elevator moving up
+12526   U     4    0  1  0   E2 Elevator stops
+12526   N     4    0  1  0   E3 Elevator doors start to open
+12534   N     4    1  1  0   U1 User 87 arrives at floor 3, destination is 2, give up 12759
+12546   N     4    1  1  0   U4 User 85 decides to give up, leaves the system
+12546   N     4    1  1  0   U6 User 81 gets out, leaves the system
+12602   N     4    0  1  1   E5 Elevator doors start to close
+12630   D     4    0  1  0   U4 User 86 decides to give up, leaves the system
+12637   D     4    0  1  0   E8 Elevator moving down
+12721   D     3    0  1  0   E2 Elevator stops
+12721   D     3    0  1  0   E3 Elevator doors start to open
+12732   D     3    1  1  0   U1 User 88 arrives at floor 3, destination is 4, give up 12875
+12741   D     3    1  1  0   U5 User 87 gets in
+12766   D     3    1  1  0   U5 User 88 gets in
+12797   D     3    0  1  1   E5 Elevator doors start to close
+12832   D     3    0  1  0   E8 Elevator moving down
+12905   D     2    0  1  0   U1 User 89 arrives at floor 2, destination is 4, give up 13008
+12916   D     2    0  1  0   E2 Elevator stops
+12916   D     2    0  1  0   E3 Elevator doors start to open
+12936   D     2    1  1  0   U6 User 87 gets out, leaves the system
+12961   D     2    1  1  0   U5 User 89 gets in
+12992   D     2    0  1  1   E5 Elevator doors start to close
+13024   D     2    0  1  0   U1 User 90 arrives at floor 3, destination is 0, give up 13405
+13027   D     2    0  1  0   E8 Elevator moving down
+13111   D     1    0  1  0   E2 Elevator stops
+13111   U     1    0  1  0   E3 Elevator doors start to open
+13131   U     1    0  1  1   E4 Doors open, nobody is there
+13151   U     1    0  1  1   U1 User 91 arrives at floor 0, destination is 3, give up 13403
+13187   U     1    0  1  1   E5 Elevator doors start to close
+13222   U     1    0  1  0   E7 Elevator moving up
+13287   U     2    0  1  0   E2 Elevator stops
+13287   U     2    0  1  0   E3 Elevator doors start to open
+13294   U     2    1  1  0   U1 User 92 arrives at floor 2, destination is 3, give up 13675
+13307   U     2    1  1  0   U5 User 92 gets in
+13363   U     2    0  1  1   E5 Elevator doors start to close
+13398   U     2    0  1  0   E7 Elevator moving up
+13403   U     3    0  1  0   U4 User 91 decides to give up, leaves the system
+13405   U     3    0  1  0   U4 User 90 decides to give up, leaves the system
+13463   U     3    0  1  0   E2 Elevator stops
+13463   U     3    0  1  0   E3 Elevator doors start to open
+13483   U     3    1  1  0   U6 User 92 gets out, leaves the system
+13492   U     3    1  1  0   U1 User 93 arrives at floor 2, destination is 0, give up 13844
+13539   U     3    0  1  1   E5 Elevator doors start to close
+13574   U     3    0  1  0   E7 Elevator moving up
+13612   U     4    0  1  0   U1 User 94 arrives at floor 0, destination is 4, give up 13877
+13639   U     4    0  1  0   E2 Elevator stops
+13639   N     4    0  1  0   E3 Elevator doors start to open
+13659   N     4    1  1  0   U6 User 89 gets out, leaves the system
+13684   N     4    1  1  0   U6 User 88 gets out, leaves the system
+13715   N     4    0  1  1   E5 Elevator doors start to close
+13733   N     4    0  1  0   U1 User 95 arrives at floor 2, destination is 0, give up 13894
+13750   D     4    0  1  0   E8 Elevator moving down
+13834   D     3    0  1  0   E2 Elevator stops
+13834   D     3    0  1  0   E3 Elevator doors start to open
+13844   D     3    1  1  0   U4 User 93 decides to give up, leaves the system
+13854   D     3    0  1  1   E4 Doors open, nobody is there
+13877   D     3    0  1  1   U4 User 94 decides to give up, leaves the system
+13894   D     3    0  1  1   U4 User 95 decides to give up, leaves the system
+13895   D     3    0  1  1   U1 User 96 arrives at floor 3, destination is 1, give up 14243
+13895   D     3    1  1  0   U5 User 96 gets in
+13910   D     3    1  1  0   E5 Elevator doors flutter
+13950   D     3    0  1  1   E5 Elevator doors start to close
+13985   D     3    0  1  0   E8 Elevator moving down
+14051   D     2    0  1  0   U1 User 97 arrives at floor 1, destination is 0, give up 14256
+14069   D     2    0  1  0   E2 Elevator stops
+14069   D     2    0  1  0   E3 Elevator doors start to open
+14089   D     2    0  1  1   E4 Doors open, nobody is there
+14145   D     2    0  1  1   E5 Elevator doors start to close
+14171   D     2    0  1  0   U1 User 98 arrives at floor 0, destination is 1, give up 14320
+14180   D     2    0  1  0   E8 Elevator moving down
+14256   D     1    0  1  0   U4 User 97 decides to give up, leaves the system
+14264   D     1    0  1  0   E2 Elevator stops
+14264   D     1    0  1  0   E3 Elevator doors start to open
+14284   D     1    1  1  0   U6 User 96 gets out, leaves the system
+14293   D     1    1  1  0   U1 User 99 arrives at floor 0, destination is 1, give up 14648
+14320   D     1    0  1  1   U4 User 98 decides to give up, leaves the system
+14340   D     1    0  1  1   E5 Elevator doors start to close
+14375   D     1    0  1  0   E8 Elevator moving down
+14419   D     0    0  1  0   U1 User 100 arrives at floor 4, destination is 3, give up 14562
+14459   D     0    0  1  0   E2 Elevator stops
+14459   N     0    0  1  0   E3 Elevator doors start to open
+14479   N     0    1  1  0   U5 User 99 gets in
+14504   U     0    0  1  1   E5 Elevator doors start to close
+14539   U     0    0  1  0   E7 Elevator moving up
+14540   U     1    0  1  0   U1 User 101 arrives at floor 1, destination is 4, give up 14650
+14562   U     1    0  1  0   U4 User 100 decides to give up, leaves the system
+14604   U     1    0  1  0   E2 Elevator stops
+14604   U     1    0  1  0   E3 Elevator doors start to open
+14624   U     1    1  1  0   U6 User 99 gets out, leaves the system
+14649   U     1    1  1  0   U5 User 101 gets in
+14680   U     1    0  1  1   E5 Elevator doors start to close
+14701   U     1    0  1  0   U1 User 102 arrives at floor 3, destination is 2, give up 14824
+14715   U     1    0  1  0   E7 Elevator moving up
+14766   U     2    0  1  0   E7 Elevator moving up
+14817   U     3    0  1  0   E7 Elevator moving up
+14824   U     4    0  1  0   U4 User 102 decides to give up, leaves the system
+14849   U     4    0  1  0   U1 User 103 arrives at floor 2, destination is 1, give up 15036
+14882   U     4    0  1  0   E2 Elevator stops
+14882   N     4    0  1  0   E3 Elevator doors start to open
+14902   N     4    1  1  0   U6 User 101 gets out, leaves the system
+14958   N     4    0  1  1   E5 Elevator doors start to close
+14993   D     4    0  1  0   E8 Elevator moving down
+14999   D     3    0  1  0   U1 User 104 arrives at floor 1, destination is 0, give up 15110
+15036   D     3    0  1  0   U4 User 103 decides to give up, leaves the system
+15077   D     3    0  1  0   E2 Elevator stops
+15077   D     3    0  1  0   E3 Elevator doors start to open
+15097   D     3    0  1  1   E4 Doors open, nobody is there
+15110   D     3    0  1  1   U4 User 104 decides to give up, leaves the system
+15153   D     3    0  1  1   E5 Elevator doors start to close
+15162   D     3    0  1  0   U1 User 105 arrives at floor 2, destination is 1, give up 15494
+15188   D     3    0  1  0   E8 Elevator moving down
+15272   D     2    0  1  0   E2 Elevator stops
+15272   D     2    0  1  0   E3 Elevator doors start to open
+15281   D     2    1  1  0   U1 User 106 arrives at floor 2, destination is 0, give up 15432
+15292   D     2    1  1  0   U5 User 105 gets in
+15317   D     2    1  1  0   U5 User 106 gets in
+15348   D     2    0  1  1   E5 Elevator doors start to close
+15383   D     2    0  1  0   E8 Elevator moving down
+15388   D     1    0  1  0   U1 User 107 arrives at floor 2, destination is 1, give up 15540
+15467   D     1    0  1  0   E2 Elevator stops
+15467   D     1    0  1  0   E3 Elevator doors start to open
+15487   D     1    1  1  0   U6 User 105 gets out, leaves the system
+15540   D     1    0  1  1   U4 User 107 decides to give up, leaves the system
+15543   D     1    0  1  1   E5 Elevator doors start to close
+15563   D     1    0  1  0   U1 User 108 arrives at floor 0, destination is 2, give up 15725
+15578   D     1    0  1  0   E8 Elevator moving down
+15662   D     0    0  1  0   E2 Elevator stops
+15662   N     0    0  1  0   E3 Elevator doors start to open
+15682   N     0    1  1  0   U6 User 106 gets out, leaves the system
+15692   N     0    1  1  0   U1 User 109 arrives at floor 0, destination is 2, give up 15983
+15707   N     0    1  1  0   U5 User 108 gets in
+15732   U     0    1  1  0   U5 User 109 gets in
+15732   U     0    1  1  0   E5 Elevator doors flutter
+15772   U     0    0  1  1   E5 Elevator doors start to close
+15807   U     0    0  1  0   E7 Elevator moving up
+15858   U     1    0  1  0   E7 Elevator moving up
+15871   U     2    0  1  0   U1 User 110 arrives at floor 3, destination is 2, give up 16039
+15923   U     2    0  1  0   E2 Elevator stops
+15923   U     2    0  1  0   E3 Elevator doors start to open
+15943   U     2    1  1  0   U6 User 109 gets out, leaves the system
+15968   U     2    1  1  0   U6 User 108 gets out, leaves the system
+15999   U     2    0  1  1   E5 Elevator doors start to close
+16034   U     2    0  1  0   U1 User 111 arrives at floor 2, destination is 4, give up 16329
+16034   U     2    0  1  0   E7 Elevator moving up
+16039   U     3    0  1  0   U4 User 110 decides to give up, leaves the system
+16099   U     3    0  1  0   E2 Elevator stops
+16099   N     3    0  1  0   E3 Elevator doors start to open
+16119   N     3    0  1  1   E4 Doors open, nobody is there
+16175   N     3    0  1  1   E5 Elevator doors start to close
+16210   D     3    0  1  0   E8 Elevator moving down
+16224   D     2    0  1  0   U1 User 112 arrives at floor 4, destination is 0, give up 16608
+16294   D     2    0  1  0   E2 Elevator stops
+16294   N     2    0  1  0   E3 Elevator doors start to open
+16314   N     2    1  1  0   U5 User 111 gets in
+16339   U     2    0  1  1   E5 Elevator doors start to close
+16374   U     2    0  1  0   E7 Elevator moving up
+16388   U     3    0  1  0   U1 User 113 arrives at floor 0, destination is 3, give up 16582
+16425   U     3    0  1  0   E7 Elevator moving up
+16490   U     4    0  1  0   E2 Elevator stops
+16490   N     4    0  1  0   E3 Elevator doors start to open
+16492   N     4    1  1  0   U1 User 114 arrives at floor 0, destination is 1, give up 16892
+16510   N     4    1  1  0   U6 User 111 gets out, leaves the system
+16535   N     4    1  1  0   U5 User 112 gets in
+16560   D     4    0  1  1   E5 Elevator doors start to close
+16582   D     4    0  1  0   U4 User 113 decides to give up, leaves the system
+16595   D     4    0  1  0   E8 Elevator moving down
+16627   D     3    0  1  0   U1 User 115 arrives at floor 0, destination is 1, give up 16816
+16656   D     3    0  1  0   E8 Elevator moving down
+16717   D     2    0  1  0   E8 Elevator moving down
+16778   D     1    0  1  0   E8 Elevator moving down
+16812   D     0    0  1  0   U1 User 116 arrives at floor 0, destination is 3, give up 17194
+16816   D     0    0  1  0   U4 User 115 decides to give up, leaves the system
+16862   D     0    0  1  0   E2 Elevator stops
+16862   N     0    0  1  0   E3 Elevator doors start to open
+16882   N     0    1  1  0   U6 User 112 gets out, leaves the system
+16907   N     0    1  1  0   U5 User 114 gets in
+16932   U     0    1  1  0   U5 User 116 gets in
+16932   U     0    1  1  0   E5 Elevator doors flutter
+16956   U     0    1  1  0   U1 User 117 arrives at floor 4, destination is 2, give up 17294
+16972   U     0    0  1  1   E5 Elevator doors start to close
+17007   U     0    0  1  0   E7 Elevator moving up
+17072   U     1    0  1  0   E2 Elevator stops
+17072   U     1    0  1  0   E3 Elevator doors start to open
+17090   U     1    1  1  0   U1 User 118 arrives at floor 1, destination is 4, give up 17201
+17092   U     1    1  1  0   U6 User 114 gets out, leaves the system
+17117   U     1    1  1  0   U5 User 118 gets in
+17148   U     1    0  1  1   E5 Elevator doors start to close
+17183   U     1    0  1  0   E7 Elevator moving up
+17234   U     2    0  1  0   E7 Elevator moving up
+17287   U     3    0  1  0   U1 User 119 arrives at floor 0, destination is 2, give up 17653
+17294   U     3    0  1  0   U4 User 117 decides to give up, leaves the system
+17299   U     3    0  1  0   E2 Elevator stops
+17299   U     3    0  1  0   E3 Elevator doors start to open
+17319   U     3    1  1  0   U6 User 116 gets out, leaves the system
+17375   U     3    0  1  1   E5 Elevator doors start to close
+17410   U     3    0  1  0   E7 Elevator moving up
+17425   U     4    0  1  0   U1 User 120 arrives at floor 0, destination is 2, give up 17685
+17475   U     4    0  1  0   E2 Elevator stops
+17475   N     4    0  1  0   E3 Elevator doors start to open
+17495   N     4    1  1  0   U6 User 118 gets out, leaves the system
+17535   N     4    0  1  1   U1 User 121 arrives at floor 1, destination is 0, give up 17860
+17551   N     4    0  1  1   E5 Elevator doors start to close
+17586   D     4    0  1  0   E8 Elevator moving down
+17647   D     3    0  1  0   E8 Elevator moving down
+17653   D     2    0  1  0   U4 User 119 decides to give up, leaves the system
+17685   D     2    0  1  0   U4 User 120 decides to give up, leaves the system
+17685   D     2    0  1  0   U1 User 122 arrives at floor 3, destination is 1, give up 17866
+17708   D     2    0  1  0   E8 Elevator moving down
+17792   D     1    0  1  0   E2 Elevator stops
+17792   D     1    0  1  0   E3 Elevator doors start to open
+17812   D     1    1  1  0   U5 User 121 gets in
+17813   D     1    1  1  0   U1 User 123 arrives at floor 4, destination is 2, give up 18080
+17866   D     1    0  1  1   U4 User 122 decides to give up, leaves the system
+17868   D     1    0  1  1   E5 Elevator doors start to close
+17903   D     1    0  1  0   E8 Elevator moving down
+17987   D     0    0  1  0   E2 Elevator stops
+17987   N     0    0  1  0   E3 Elevator doors start to open
+18007   N     0    1  1  0   U6 User 121 gets out, leaves the system
+18008   N     0    1  1  0   U1 User 124 arrives at floor 4, destination is 2, give up 18227
+18063   N     0    0  1  1   E5 Elevator doors start to close
+18080   N     0    0  1  0   U4 User 123 decides to give up, leaves the system
+18098   U     0    0  1  0   E7 Elevator moving up
+18121   U     1    0  1  0   U1 User 125 arrives at floor 3, destination is 1, give up 18234
+18149   U     1    0  1  0   E7 Elevator moving up
+18200   U     2    0  1  0   E7 Elevator moving up
+18227   U     3    0  1  0   U4 User 124 decides to give up, leaves the system
+18234   U     3    0  1  0   U4 User 125 decides to give up, leaves the system
+18251   U     3    0  1  0   E7 Elevator moving up
+18309   U     4    0  1  0   U1 User 126 arrives at floor 4, destination is 1, give up 18501
+18316   U     4    0  1  0   E2 Elevator stops
+18316   N     4    0  1  0   E3 Elevator doors start to open
+18336   N     4    1  1  0   U5 User 126 gets in
+18361   D     4    0  1  1   E5 Elevator doors start to close
+18396   D     4    0  1  0   E8 Elevator moving down
+18480   D     3    0  1  0   E2 Elevator stops
+18480   D     3    0  1  0   E3 Elevator doors start to open
+18493   D     3    1  1  0   U1 User 127 arrives at floor 2, destination is 1, give up 18733
+18500   D     3    0  1  1   E4 Doors open, nobody is there
+18556   D     3    0  1  1   E5 Elevator doors start to close
+18591   D     3    0  1  0   E8 Elevator moving down
+18623   D     2    0  1  0   U1 User 128 arrives at floor 2, destination is 4, give up 18898
+18675   D     2    0  1  0   E2 Elevator stops
+18675   D     2    0  1  0   E3 Elevator doors start to open
+18695   D     2    1  1  0   U5 User 127 gets in
+18720   D     2    1  1  0   U5 User 128 gets in
+18751   D     2    0  1  1   E5 Elevator doors start to close
+18786   D     2    0  1  0   E8 Elevator moving down
+18809   D     1    0  1  0   U1 User 129 arrives at floor 3, destination is 1, give up 19048
+18870   D     1    0  1  0   E2 Elevator stops
+18870   U     1    0  1  0   E3 Elevator doors start to open
+18890   U     1    1  1  0   U6 User 127 gets out, leaves the system
+18915   U     1    1  1  0   U6 User 126 gets out, leaves the system
+18946   U     1    0  1  1   E5 Elevator doors start to close
+18981   U     1    0  1  0   E7 Elevator moving up
+19001   U     2    0  1  0   U1 User 130 arrives at floor 4, destination is 0, give up 19128
+19046   U     2    0  1  0   E2 Elevator stops
+19046   U     2    0  1  0   E3 Elevator doors start to open
+19048   U     2    1  1  0   U4 User 129 decides to give up, leaves the system
+19066   U     2    0  1  1   E4 Doors open, nobody is there
+19122   U     2    0  1  1   E5 Elevator doors start to close
+19128   U     2    0  1  0   U4 User 130 decides to give up, leaves the system
+19157   U     2    0  1  0   E7 Elevator moving up
+19163   U     3    0  1  0   U1 User 131 arrives at floor 2, destination is 3, give up 19540
+19208   U     3    0  1  0   E7 Elevator moving up
+19273   U     4    0  1  0   E2 Elevator stops
+19273   N     4    0  1  0   E3 Elevator doors start to open
+19293   N     4    1  1  0   U6 User 128 gets out, leaves the system
+19334   N     4    0  1  1   U1 User 132 arrives at floor 1, destination is 4, give up 19639
+19349   N     4    0  1  1   E5 Elevator doors start to close
+19384   D     4    0  1  0   E8 Elevator moving down
+19437   D     3    0  1  0   U1 User 133 arrives at floor 2, destination is 4, give up 19708
+19468   D     3    0  1  0   E2 Elevator stops
+19468   D     3    0  1  0   E3 Elevator doors start to open
+19488   D     3    0  1  1   E4 Doors open, nobody is there
+19540   D     3    0  1  1   U4 User 131 decides to give up, leaves the system
+19544   D     3    0  1  1   E5 Elevator doors start to close
+19579   D     3    0  1  0   E8 Elevator moving down
+19594   D     2    0  1  0   U1 User 134 arrives at floor 2, destination is 4, give up 19971
+19639   D     2    0  1  0   U4 User 132 decides to give up, leaves the system
+19640   D     2    0  1  0   E8 Elevator moving down
+19708   D     1    0  1  0   U4 User 133 decides to give up, leaves the system
+19714   D     1    0  1  0   U1 User 135 arrives at floor 2, destination is 3, give up 19930
+19724   D     1    0  1  0   E2 Elevator stops
+19724   N     1    0  1  0   E3 Elevator doors start to open
+19744   N     1    0  1  1   E4 Doors open, nobody is there
+19800   N     1    0  1  1   E5 Elevator doors start to close
+19835   U     1    0  1  0   E7 Elevator moving up
+19895   U     2    0  1  0   U1 User 136 arrives at floor 0, destination is 4, give up 20064
+19900   U     2    0  1  0   E2 Elevator stops
+19900   N     2    0  1  0   E3 Elevator doors start to open
+19920   N     2    1  1  0   U5 User 134 gets in
+19945   U     2    1  1  0   U5 User 135 gets in
+19945   U     2    1  1  0   E5 Elevator doors flutter
+19985   U     2    0  1  1   E5 Elevator doors start to close
+20020   U     2    0  1  0   E7 Elevator moving up
+20064   U     3    0  1  0   U4 User 136 decides to give up, leaves the system
+20076   U     3    0  1  0   U1 User 137 arrives at floor 3, destination is 1, give up 20229
+20085   U     3    0  1  0   E2 Elevator stops
+20085   U     3    0  1  0   E3 Elevator doors start to open
+20105   U     3    1  1  0   U6 User 135 gets out, leaves the system
+20130   U     3    1  1  0   U5 User 137 gets in
+20161   U     3    0  1  1   E5 Elevator doors start to close
+20194   U     3    0  1  0   U1 User 138 arrives at floor 1, destination is 2, give up 20479
+20196   U     3    0  1  0   E7 Elevator moving up
+20261   U     4    0  1  0   E2 Elevator stops
+20261   D     4    0  1  0   E3 Elevator doors start to open
+20281   D     4    1  1  0   U6 User 134 gets out, leaves the system
+20337   D     4    0  1  1   E5 Elevator doors start to close
+20372   D     4    0  1  0   E8 Elevator moving down
+20384   D     3    0  1  0   U1 User 139 arrives at floor 3, destination is 4, give up 20598
+20456   D     3    0  1  0   E2 Elevator stops
+20456   D     3    0  1  0   E3 Elevator doors start to open
+20476   D     3    1  1  0   U5 User 139 gets in
+20479   D     3    1  1  0   U4 User 138 decides to give up, leaves the system
+20532   D     3    0  1  1   E5 Elevator doors start to close
+20565   D     3    0  1  0   U1 User 140 arrives at floor 2, destination is 1, give up 20753
+20567   D     3    0  1  0   E8 Elevator moving down
+20651   D     2    0  1  0   E2 Elevator stops
+20651   D     2    0  1  0   E3 Elevator doors start to open
+20671   D     2    1  1  0   U5 User 140 gets in
+20694   D     2    1  1  0   U1 User 141 arrives at floor 0, destination is 4, give up 20929
+20727   D     2    0  1  1   E5 Elevator doors start to close
+20762   D     2    0  1  0   E8 Elevator moving down
+20846   D     1    0  1  0   E2 Elevator stops
+20846   D     1    0  1  0   E3 Elevator doors start to open
+20859   D     1    1  1  0   U1 User 142 arrives at floor 1, destination is 4, give up 21107
+20866   D     1    1  1  0   U6 User 140 gets out, leaves the system
+20891   D     1    1  1  0   U6 User 137 gets out, leaves the system
+20916   D     1    1  1  0   U5 User 142 gets in
+20922   D     1    1  1  0   E5 Elevator doors flutter
+20929   D     1    1  1  0   U4 User 141 decides to give up, leaves the system
+20962   D     1    0  1  1   E5 Elevator doors start to close
+20976   D     1    0  1  0   U1 User 143 arrives at floor 0, destination is 1, give up 21161
+20997   D     1    0  1  0   E8 Elevator moving down
+21081   D     0    0  1  0   E2 Elevator stops
+21081   U     0    0  1  0   E3 Elevator doors start to open
+21101   U     0    1  1  0   U5 User 143 gets in
+21147   U     0    0  1  1   U1 User 144 arrives at floor 0, destination is 2, give up 21516
+21147   U     0    1  1  0   U5 User 144 gets in
+21157   U     0    1  1  0   E5 Elevator doors flutter
+21197   U     0    0  1  1   E5 Elevator doors start to close
+21232   U     0    0  1  0   E7 Elevator moving up
+21285   U     1    0  1  0   U1 User 145 arrives at floor 0, destination is 2, give up 21433
+21297   U     1    0  1  0   E2 Elevator stops
+21297   U     1    0  1  0   E3 Elevator doors start to open
+21317   U     1    1  1  0   U6 User 143 gets out, leaves the system
+21373   U     1    0  1  1   E5 Elevator doors start to close
+21408   U     1    0  1  0   E7 Elevator moving up
+21433   U     2    0  1  0   U4 User 145 decides to give up, leaves the system
+21473   U     2    0  1  0   E2 Elevator stops
+21473   U     2    0  1  0   E3 Elevator doors start to open
+21485   U     2    1  1  0   U1 User 146 arrives at floor 4, destination is 1, give up 21689
+21493   U     2    1  1  0   U6 User 144 gets out, leaves the system
+21549   U     2    0  1  1   E5 Elevator doors start to close
+21584   U     2    0  1  0   E7 Elevator moving up
+21610   U     3    0  1  0   U1 User 147 arrives at floor 3, destination is 2, give up 21780
+21649   U     3    0  1  0   E2 Elevator stops
+21649   U     3    0  1  0   E3 Elevator doors start to open
+21669   U     3    1  1  0   U5 User 147 gets in
+21689   U     3    1  1  0   U4 User 146 decides to give up, leaves the system
+21725   U     3    0  1  1   E5 Elevator doors start to close
+21760   U     3    0  1  0   E7 Elevator moving up
+21800   U     4    0  1  0   U1 User 148 arrives at floor 1, destination is 4, give up 22126
+21825   U     4    0  1  0   E2 Elevator stops
+21825   D     4    0  1  0   E3 Elevator doors start to open
+21845   D     4    1  1  0   U6 User 142 gets out, leaves the system
+21870   D     4    1  1  0   U6 User 139 gets out, leaves the system
+21901   D     4    0  1  1   E5 Elevator doors start to close
+21926   D     4    0  1  0   U1 User 149 arrives at floor 3, destination is 0, give up 22120
+21936   D     4    0  1  0   E8 Elevator moving down
+22020   D     3    0  1  0   E2 Elevator stops
+22020   D     3    0  1  0   E3 Elevator doors start to open
+22040   D     3    1  1  0   U5 User 149 gets in
+22055   D     3    1  1  0   U1 User 150 arrives at floor 3, destination is 1, give up 22302
+22065   D     3    1  1  0   U5 User 150 gets in
+22096   D     3    0  1  1   E5 Elevator doors start to close
+22126   D     3    0  1  0   U4 User 148 decides to give up, leaves the system
+22131   D     3    0  1  0   E8 Elevator moving down
+22157   D     2    0  1  0   U1 User 151 arrives at floor 1, destination is 4, give up 22400
+22215   D     2    0  1  0   E2 Elevator stops
+22215   D     2    0  1  0   E3 Elevator doors start to open
+22235   D     2    1  1  0   U6 User 147 gets out, leaves the system
+22291   D     2    0  1  1   E5 Elevator doors start to close
+22304   D     2    0  1  0   U1 User 152 arrives at floor 4, destination is 1, give up 22461
+22326   D     2    0  1  0   E8 Elevator moving down
+22400   D     1    0  1  0   U4 User 151 decides to give up, leaves the system
+22408   D     1    0  1  0   U1 User 153 arrives at floor 3, destination is 2, give up 22578
+22410   D     1    0  1  0   E2 Elevator stops
+22410   D     1    0  1  0   E3 Elevator doors start to open
+22430   D     1    1  1  0   U6 User 150 gets out, leaves the system
+22461   D     1    0  1  1   U4 User 152 decides to give up, leaves the system
+22486   D     1    0  1  1   E5 Elevator doors start to close
+22521   D     1    0  1  0   E8 Elevator moving down
+22578   D     0    0  1  0   U4 User 153 decides to give up, leaves the system
+22579   D     0    0  1  0   U1 User 154 arrives at floor 4, destination is 0, give up 22838
+22605   D     0    0  1  0   E2 Elevator stops
+22605   N     0    0  1  0   E3 Elevator doors start to open
+22625   N     0    1  1  0   U6 User 149 gets out, leaves the system
+22681   N     0    0  1  1   E5 Elevator doors start to close
+22716   U     0    0  1  0   E7 Elevator moving up
+22720   U     1    0  1  0   U1 User 155 arrives at floor 0, destination is 3, give up 22934
+22781   U     1    0  1  0   E2 Elevator stops
+22781   U     1    0  1  0   E3 Elevator doors start to open
+22801   U     1    0  1  1   E4 Doors open, nobody is there
+22838   U     1    0  1  1   U4 User 154 decides to give up, leaves the system
+22857   U     1    0  1  1   E5 Elevator doors start to close
+22870   U     1    0  1  0   U1 User 156 arrives at floor 1, destination is 3, give up 23126
+22870   U     1    0  1  0   E3 Elevator doors start to open
+22890   U     1    1  1  0   U5 User 156 gets in
+22934   U     1    0  1  1   U4 User 155 decides to give up, leaves the system
+22946   U     1    0  1  1   E5 Elevator doors start to close
+22981   U     1    0  1  0   E7 Elevator moving up
+23032   U     2    0  1  0   E7 Elevator moving up
+23043   U     3    0  1  0   U1 User 157 arrives at floor 3, destination is 1, give up 23237
+23097   U     3    0  1  0   E2 Elevator stops
+23097   U     3    0  1  0   E3 Elevator doors start to open
+23117   U     3    1  1  0   U6 User 156 gets out, leaves the system
+23142   U     3    1  1  0   U5 User 157 gets in
+23173   U     3    0  1  1   E5 Elevator doors start to close
+23208   U     3    0  1  0   E7 Elevator moving up
+23228   U     4    0  1  0   U1 User 158 arrives at floor 2, destination is 3, give up 23609
+23273   U     4    0  1  0   E2 Elevator stops
+23273   D     4    0  1  0   E3 Elevator doors start to open
+23293   D     4    0  1  1   E4 Doors open, nobody is there
+23349   D     4    0  1  1   E5 Elevator doors start to close
+23384   D     4    0  1  0   E8 Elevator moving down
+23421   D     3    0  1  0   U1 User 159 arrives at floor 2, destination is 0, give up 23673
+23468   D     3    0  1  0   E2 Elevator stops
+23468   D     3    0  1  0   E3 Elevator doors start to open
+23488   D     3    0  1  1   E4 Doors open, nobody is there
+23544   D     3    0  1  1   E5 Elevator doors start to close
+23578   D     3    0  1  0   U1 User 160 arrives at floor 4, destination is 0, give up 23831
+23579   D     3    0  1  0   E8 Elevator moving down
+23609   D     2    0  1  0   U4 User 158 decides to give up, leaves the system
+23663   D     2    0  1  0   E2 Elevator stops
+23663   D     2    0  1  0   E3 Elevator doors start to open
+23683   D     2    1  1  0   U5 User 159 gets in
+23710   D     2    0  1  1   U1 User 161 arrives at floor 4, destination is 0, give up 24039
+23739   D     2    0  1  1   E5 Elevator doors start to close
+23774   D     2    0  1  0   E8 Elevator moving down
+23826   D     1    0  1  0   U1 User 162 arrives at floor 1, destination is 0, give up 23981
+23831   D     1    0  1  0   U4 User 160 decides to give up, leaves the system
+23858   D     1    0  1  0   E2 Elevator stops
+23858   D     1    0  1  0   E3 Elevator doors start to open
+23878   D     1    1  1  0   U6 User 157 gets out, leaves the system
+23903   D     1    1  1  0   U5 User 162 gets in
+23934   D     1    0  1  1   E5 Elevator doors start to close
+23969   D     1    0  1  0   E8 Elevator moving down
+24023   D     0    0  1  0   U1 User 163 arrives at floor 1, destination is 0, give up 24403
+24039   D     0    0  1  0   U4 User 161 decides to give up, leaves the system
+24053   D     0    0  1  0   E2 Elevator stops
+24053   N     0    0  1  0   E3 Elevator doors start to open
+24073   N     0    1  1  0   U6 User 162 gets out, leaves the system
+24098   N     0    1  1  0   U6 User 159 gets out, leaves the system
+24129   N     0    0  1  1   E5 Elevator doors start to close
+24151   U     0    0  1  0   U1 User 164 arrives at floor 4, destination is 1, give up 24251
+24164   U     0    0  1  0   E7 Elevator moving up
+24215   U     1    0  1  0   E7 Elevator moving up
+24251   U     2    0  1  0   U4 User 164 decides to give up, leaves the system
+24272   U     2    0  1  0   U1 User 165 arrives at floor 0, destination is 1, give up 24534
+24280   U     2    0  1  0   E2 Elevator stops
+24280   U     2    0  1  0   E3 Elevator doors start to open
+24300   U     2    0  1  1   E4 Doors open, nobody is there
+24356   U     2    0  1  1   E5 Elevator doors start to close
+24375   U     2    0  1  0   U1 User 166 arrives at floor 2, destination is 0, give up 24508
+24375   U     2    0  1  0   E3 Elevator doors start to open
+24395   U     2    1  1  0   U5 User 166 gets in
+24403   U     2    1  1  0   U4 User 163 decides to give up, leaves the system
+24451   U     2    0  1  1   E5 Elevator doors start to close
+24486   U     2    0  1  0   E7 Elevator moving up
+24515   U     3    0  1  0   U1 User 167 arrives at floor 0, destination is 1, give up 24765
+24534   U     3    0  1  0   U4 User 165 decides to give up, leaves the system
+24537   U     3    0  1  0   E7 Elevator moving up
+24602   U     4    0  1  0   E2 Elevator stops
+24602   D     4    0  1  0   E3 Elevator doors start to open
+24622   D     4    0  1  1   E4 Doors open, nobody is there
+24664   D     4    0  1  1   U1 User 168 arrives at floor 2, destination is 0, give up 24771
+24678   D     4    0  1  1   E5 Elevator doors start to close
+24713   D     4    0  1  0   E8 Elevator moving down
+24765   D     3    0  1  0   U4 User 167 decides to give up, leaves the system
+24771   D     3    0  1  0   U4 User 168 decides to give up, leaves the system
+24774   D     3    0  1  0   E8 Elevator moving down
+24839   D     2    0  1  0   U1 User 169 arrives at floor 0, destination is 3, give up 24963
+24858   D     2    0  1  0   E2 Elevator stops
+24858   D     2    0  1  0   E3 Elevator doors start to open
+24878   D     2    0  1  1   E4 Doors open, nobody is there
+24934   D     2    0  1  1   E5 Elevator doors start to close
+24963   D     2    0  1  0   U4 User 169 decides to give up, leaves the system
+24969   D     2    0  1  0   E8 Elevator moving down
+24983   D     1    0  1  0   U1 User 170 arrives at floor 2, destination is 0, give up 25311
+25053   D     1    0  1  0   E2 Elevator stops
+25053   D     1    0  1  0   E3 Elevator doors start to open
+25073   D     1    0  1  1   E4 Doors open, nobody is there
+25129   D     1    0  1  1   E5 Elevator doors start to close
+25164   D     1    0  1  0   E8 Elevator moving down
+25166   D     0    0  1  0   U1 User 171 arrives at floor 4, destination is 2, give up 25540
+25248   D     0    0  1  0   E2 Elevator stops
+25248   N     0    0  1  0   E3 Elevator doors start to open
+25268   N     0    1  1  0   U6 User 166 gets out, leaves the system
+25305   N     0    0  1  1   U1 User 172 arrives at floor 0, destination is 3, give up 25618
+25305   N     0    1  1  0   U5 User 172 gets in
+25311   U     0    1  1  0   U4 User 170 decides to give up, leaves the system
+25330   U     0    0  1  1   E5 Elevator doors start to close
+25365   U     0    0  1  0   E7 Elevator moving up
+25407   U     1    0  1  0   U1 User 173 arrives at floor 0, destination is 2, give up 25773
+25416   U     1    0  1  0   E7 Elevator moving up
+25467   U     2    0  1  0   E7 Elevator moving up
+25532   U     3    0  1  0   E2 Elevator stops
+25532   U     3    0  1  0   E3 Elevator doors start to open
+25540   U     3    1  1  0   U4 User 171 decides to give up, leaves the system
+25549   U     3    1  1  0   U1 User 174 arrives at floor 2, destination is 4, give up 25924
+25552   U     3    1  1  0   U6 User 172 gets out, leaves the system
+25608   U     3    0  1  1   E5 Elevator doors start to close
+25643   U     3    0  1  0   E7 Elevator moving up
+25698   U     4    0  1  0   U1 User 175 arrives at floor 0, destination is 2, give up 25828
+25708   U     4    0  1  0   E2 Elevator stops
+25708   N     4    0  1  0   E3 Elevator doors start to open
+25728   N     4    0  1  1   E4 Doors open, nobody is there
+25773   N     4    0  1  1   U4 User 173 decides to give up, leaves the system
+25784   N     4    0  1  1   E5 Elevator doors start to close
+25816   D     4    0  1  0   U1 User 176 arrives at floor 4, destination is 3, give up 26161
+25819   D     4    0  1  0   E8 Elevator moving down
+25828   D     3    0  1  0   U4 User 175 decides to give up, leaves the system
+25880   D     3    0  1  0   E8 Elevator moving down
+25924   D     2    0  1  0   U4 User 174 decides to give up, leaves the system
+25957   D     2    0  1  0   U1 User 177 arrives at floor 4, destination is 1, give up 26075
+25964   D     2    0  1  0   E2 Elevator stops
+25964   D     2    0  1  0   E3 Elevator doors start to open
+25984   D     2    0  1  1   E4 Doors open, nobody is there
+26040   D     2    0  1  1   E5 Elevator doors start to close
+26075   D     2    0  1  0   U4 User 177 decides to give up, leaves the system
+26075   D     2    0  1  0   E8 Elevator moving down
+26127   D     1    0  1  0   U1 User 178 arrives at floor 0, destination is 3, give up 26236
+26136   D     1    0  1  0   E8 Elevator moving down
+26161   D     0    0  1  0   U4 User 176 decides to give up, leaves the system
+26220   D     0    0  1  0   E2 Elevator stops
+26220   N     0    0  1  0   E3 Elevator doors start to open
+26240   N     0    1  1  0   U5 User 178 gets in
+26247   U     0    1  1  0   U1 User 179 arrives at floor 1, destination is 0, give up 26560
+26265   U     0    0  1  1   E5 Elevator doors start to close
+26300   U     0    0  1  0   E7 Elevator moving up
+26351   U     1    0  1  0   E7 Elevator moving up
+26416   U     2    0  1  0   E2 Elevator stops
+26416   U     2    0  1  0   E3 Elevator doors start to open
+26420   U     2    1  1  0   U1 User 180 arrives at floor 1, destination is 0, give up 26583
+26436   U     2    0  1  1   E4 Doors open, nobody is there
+26492   U     2    0  1  1   E5 Elevator doors start to close
+26527   U     2    0  1  0   E7 Elevator moving up
+26560   U     3    0  1  0   U4 User 179 decides to give up, leaves the system
+26583   U     3    0  1  0   U4 User 180 decides to give up, leaves the system
+26592   U     3    0  1  0   E2 Elevator stops
+26592   U     3    0  1  0   E3 Elevator doors start to open
+26599   U     3    1  1  0   U1 User 181 arrives at floor 0, destination is 2, give up 26875
+26612   U     3    1  1  0   U6 User 178 gets out, leaves the system
+26668   U     3    0  1  1   E5 Elevator doors start to close
+26703   U     3    0  1  0   E7 Elevator moving up
+26768   U     4    0  1  0   E2 Elevator stops
+26768   N     4    0  1  0   E3 Elevator doors start to open
+26788   N     4    0  1  1   E4 Doors open, nobody is there
+26799   N     4    0  1  1   U1 User 182 arrives at floor 1, destination is 2, give up 26950
+26844   N     4    0  1  1   E5 Elevator doors start to close
+26875   D     4    0  1  0   U4 User 181 decides to give up, leaves the system
+26879   D     4    0  1  0   E8 Elevator moving down
+26916   D     3    0  1  0   U1 User 183 arrives at floor 0, destination is 3, give up 27270
+26940   D     3    0  1  0   E8 Elevator moving down
+26950   D     2    0  1  0   U4 User 182 decides to give up, leaves the system
+27001   D     2    0  1  0   E8 Elevator moving down
+27049   D     1    0  1  0   U1 User 184 arrives at floor 1, destination is 4, give up 27312
+27085   D     1    0  1  0   E2 Elevator stops
+27085   D     1    0  1  0   E3 Elevator doors start to open
+27105   D     1    1  1  0   U5 User 184 gets in
+27161   D     1    0  1  1   E5 Elevator doors start to close
+27196   D     1    0  1  0   E8 Elevator moving down
+27216   D     0    0  1  0   U1 User 185 arrives at floor 1, destination is 4, give up 27569
+27270   D     0    0  1  0   U4 User 183 decides to give up, leaves the system
+27280   D     0    0  1  0   E2 Elevator stops
+27280   U     0    0  1  0   E3 Elevator doors start to open
+27300   U     0    0  1  1   E4 Doors open, nobody is there
+27356   U     0    0  1  1   E5 Elevator doors start to close
+27390   U     0    0  1  0   U1 User 186 arrives at floor 3, destination is 0, give up 27540
+27391   U     0    0  1  0   E7 Elevator moving up
+27456   U     1    0  1  0   E2 Elevator stops
+27456   U     1    0  1  0   E3 Elevator doors start to open
+27476   U     1    1  1  0   U5 User 185 gets in
+27494   U     1    1  1  0   U1 User 187 arrives at floor 2, destination is 4, give up 27851
+27532   U     1    0  1  1   E5 Elevator doors start to close
+27540   U     1    0  1  0   U4 User 186 decides to give up, leaves the system
+27567   U     1    0  1  0   E7 Elevator moving up
+27632   U     2    0  1  0   E2 Elevator stops
+27632   U     2    0  1  0   E3 Elevator doors start to open
+27652   U     2    1  1  0   U5 User 187 gets in
+27678   U     2    0  1  1   U1 User 188 arrives at floor 0, destination is 2, give up 27925
+27708   U     2    0  1  1   E5 Elevator doors start to close
+27743   U     2    0  1  0   E7 Elevator moving up
+27794   U     3    0  1  0   E7 Elevator moving up
+27814   U     4    0  1  0   U1 User 189 arrives at floor 4, destination is 1, give up 28145
+27859   U     4    0  1  0   E2 Elevator stops
+27859   N     4    0  1  0   E3 Elevator doors start to open
+27879   N     4    1  1  0   U6 User 187 gets out, leaves the system
+27904   N     4    1  1  0   U6 User 185 gets out, leaves the system
+27925   N     4    1  1  0   U4 User 188 decides to give up, leaves the system
+27929   N     4    1  1  0   U6 User 184 gets out, leaves the system
+27935   N     4    1  1  0   E5 Elevator doors flutter
+27954   N     4    1  1  0   U5 User 189 gets in
+27979   D     4    0  1  1   E5 Elevator doors start to close
+27987   D     4    0  1  0   U1 User 190 arrives at floor 1, destination is 0, give up 28162
+28014   D     4    0  1  0   E8 Elevator moving down
+28087   D     3    0  1  0   U1 User 191 arrives at floor 4, destination is 0, give up 28357
+28098   D     3    0  1  0   E2 Elevator stops
+28098   D     3    0  1  0   E3 Elevator doors start to open
+28118   D     3    0  1  1   E4 Doors open, nobody is there
+28162   D     3    0  1  1   U4 User 190 decides to give up, leaves the system
+28174   D     3    0  1  1   E5 Elevator doors start to close
+28209   D     3    0  1  0   E8 Elevator moving down
+28263   D     2    0  1  0   U1 User 192 arrives at floor 3, destination is 2, give up 28478
+28270   D     2    0  1  0   E8 Elevator moving down
+28354   D     1    0  1  0   E2 Elevator stops
+28354   D     1    0  1  0   E3 Elevator doors start to open
+28357   D     1    1  1  0   U4 User 191 decides to give up, leaves the system
+28374   D     1    1  1  0   U6 User 189 gets out, leaves the system
+28427   D     1    0  1  1   U1 User 193 arrives at floor 2, destination is 1, give up 28731
+28430   D     1    0  1  1   E5 Elevator doors start to close
+28465   D     1    0  1  0   E8 Elevator moving down
+28478   D     0    0  1  0   U4 User 192 decides to give up, leaves the system
+28549   D     0    0  1  0   E2 Elevator stops
+28549   N     0    0  1  0   E3 Elevator doors start to open
+28550   N     0    1  1  0   U1 User 194 arrives at floor 4, destination is 0, give up 28704
+28569   N     0    0  1  1   E4 Doors open, nobody is there
+28625   N     0    0  1  1   E5 Elevator doors start to close
+28660   U     0    0  1  0   E7 Elevator moving up
+28683   U     1    0  1  0   U1 User 195 arrives at floor 0, destination is 3, give up 28799
+28704   U     1    0  1  0   U4 User 194 decides to give up, leaves the system
+28711   U     1    0  1  0   E7 Elevator moving up
+28731   U     2    0  1  0   U4 User 193 decides to give up, leaves the system
+28762   U     2    0  1  0   E7 Elevator moving up
+28799   U     3    0  1  0   U4 User 195 decides to give up, leaves the system
+28813   U     3    0  1  0   E7 Elevator moving up
+28839   U     4    0  1  0   U1 User 196 arrives at floor 4, destination is 3, give up 29134
+28878   U     4    0  1  0   E2 Elevator stops
+28878   N     4    0  1  0   E3 Elevator doors start to open
+28898   N     4    1  1  0   U5 User 196 gets in
+28923   D     4    0  1  1   E5 Elevator doors start to close
+28958   D     4    0  1  0   E8 Elevator moving down
+29029   D     3    0  1  0   U1 User 197 arrives at floor 0, destination is 4, give up 29224
+29042   D     3    0  1  0   E2 Elevator stops
+29042   D     3    0  1  0   E3 Elevator doors start to open
+29062   D     3    1  1  0   U6 User 196 gets out, leaves the system
+29118   D     3    0  1  1   E5 Elevator doors start to close
+29153   D     3    0  1  0   E8 Elevator moving down
+29181   D     2    0  1  0   U1 User 198 arrives at floor 2, destination is 0, give up 29568
+29224   D     2    0  1  0   U4 User 197 decides to give up, leaves the system
+29237   D     2    0  1  0   E2 Elevator stops
+29237   D     2    0  1  0   E3 Elevator doors start to open
+29257   D     2    1  1  0   U5 User 198 gets in
+29313   D     2    0  1  1   E5 Elevator doors start to close
+29324   D     2    0  1  0   U1 User 199 arrives at floor 3, destination is 2, give up 29604
+29348   D     2    0  1  0   E8 Elevator moving down
+29409   D     1    0  1  0   E8 Elevator moving down
+29439   D     0    0  1  0   U1 User 200 arrives at floor 3, destination is 4, give up 29773
+29493   D     0    0  1  0   E2 Elevator stops
+29493   N     0    0  1  0   E3 Elevator doors start to open
+29513   N     0    1  1  0   U6 User 198 gets out, leaves the system
+29569   N     0    0  1  1   E5 Elevator doors start to close
+29604   U     0    0  1  0   U4 User 199 decides to give up, leaves the system
+29604   U     0    0  1  0   E7 Elevator moving up
+29614   U     1    0  1  0   U1 User 201 arrives at floor 4, destination is 1, give up 29855
+29655   U     1    0  1  0   E7 Elevator moving up
+29706   U     2    0  1  0   E7 Elevator moving up
+29771   U     3    0  1  0   E2 Elevator stops
+29771   U     3    0  1  0   E3 Elevator doors start to open
+29785   U     3    1  1  0   U1 User 202 arrives at floor 2, destination is 4, give up 29928
+29791   U     3    1  1  0   U5 User 200 gets in
+29847   U     3    0  1  1   E5 Elevator doors start to close
+29855   U     3    0  1  0   U4 User 201 decides to give up, leaves the system
+29882   U     3    0  1  0   E7 Elevator moving up
+29928   U     4    0  1  0   U4 User 202 decides to give up, leaves the system
+29947   U     4    0  1  0   E2 Elevator stops
+29947   N     4    0  1  0   E3 Elevator doors start to open
+29967   N     4    1  1  0   U6 User 200 gets out, leaves the system
+29982   N     4    1  1  0   U1 User 203 arrives at floor 3, destination is 2, give up 30196
+30023   N     4    0  1  1   E5 Elevator doors start to close
+30058   D     4    0  1  0   E8 Elevator moving down
+30120   D     3    0  1  0   U1 User 204 arrives at floor 2, destination is 0, give up 30495
+30142   D     3    0  1  0   E2 Elevator stops
+30142   D     3    0  1  0   E3 Elevator doors start to open
+30162   D     3    1  1  0   U5 User 203 gets in
+30218   D     3    0  1  1   E5 Elevator doors start to close
+30253   D     3    0  1  0   E8 Elevator moving down
+30310   D     2    0  1  0   U1 User 205 arrives at floor 2, destination is 3, give up 30650
+30337   D     2    0  1  0   E2 Elevator stops
+30337   N     2    0  1  0   E3 Elevator doors start to open
+30357   N     2    1  1  0   U6 User 203 gets out, leaves the system
+30382   N     2    1  1  0   U5 User 204 gets in
+30407   D     2    1  1  0   U5 User 205 gets in
+30407   D     2    1  1  0   E5 Elevator doors flutter
+30447   D     2    0  1  1   E5 Elevator doors start to close
+30453   D     2    0  1  0   U1 User 206 arrives at floor 0, destination is 2, give up 30642
+30482   D     2    0  1  0   E8 Elevator moving down
+30543   D     1    0  1  0   E8 Elevator moving down
+30576   D     0    0  1  0   U1 User 207 arrives at floor 3, destination is 1, give up 30888
+30627   D     0    0  1  0   E2 Elevator stops
+30627   U     0    0  1  0   E3 Elevator doors start to open
+30647   U     0    1  1  0   U6 User 204 gets out, leaves the system
+30672   U     0    1  1  0   U5 User 206 gets in
+30682   U     0    1  1  0   U1 User 208 arrives at floor 3, destination is 4, give up 30807
+30703   U     0    0  1  1   E5 Elevator doors start to close
+30738   U     0    0  1  0   E7 Elevator moving up
+30789   U     1    0  1  0   E7 Elevator moving up
+30807   U     2    0  1  0   U4 User 208 decides to give up, leaves the system
+30848   U     2    0  1  0   U1 User 209 arrives at floor 2, destination is 4, give up 31141
+30854   U     2    0  1  0   E2 Elevator stops
+30854   U     2    0  1  0   E3 Elevator doors start to open
+30874   U     2    1  1  0   U6 User 206 gets out, leaves the system
+30888   U     2    1  1  0   U4 User 207 decides to give up, leaves the system
+30899   U     2    1  1  0   U5 User 209 gets in
+30930   U     2    0  1  1   E5 Elevator doors start to close
+30962   U     2    0  1  0   U1 User 210 arrives at floor 3, destination is 0, give up 31113
+30965   U     2    0  1  0   E7 Elevator moving up
+31030   U     3    0  1  0   E2 Elevator stops
+31030   U     3    0  1  0   E3 Elevator doors start to open
+31050   U     3    1  1  0   U6 User 205 gets out, leaves the system
+31075   U     3    1  1  0   U5 User 210 gets in
+31106   U     3    0  1  1   E5 Elevator doors start to close
+31128   U     3    0  1  0   U1 User 211 arrives at floor 4, destination is 0, give up 31232
+31141   U     3    0  1  0   E7 Elevator moving up
+31206   U     4    0  1  0   E2 Elevator stops
+31206   D     4    0  1  0   E3 Elevator doors start to open
+31226   D     4    1  1  0   U6 User 209 gets out, leaves the system
+31251   D     4    1  1  0   U5 User 211 gets in
+31282   D     4    0  1  1   E5 Elevator doors start to close
+31295   D     4    0  1  0   U1 User 212 arrives at floor 3, destination is 1, give up 31580
+31317   D     4    0  1  0   E8 Elevator moving down
+31401   D     3    0  1  0   E2 Elevator stops
+31401   D     3    0  1  0   E3 Elevator doors start to open
+31421   D     3    1  1  0   U5 User 212 gets in
+31475   D     3    0  1  1   U1 User 213 arrives at floor 2, destination is 3, give up 31800
+31477   D     3    0  1  1   E5 Elevator doors start to close
+31512   D     3    0  1  0   E8 Elevator moving down
+31573   D     2    0  1  0   E8 Elevator moving down
+31650   D     1    0  1  0   U1 User 214 arrives at floor 1, destination is 3, give up 32018
+31657   D     1    0  1  0   E2 Elevator stops
+31657   D     1    0  1  0   E3 Elevator doors start to open
+31677   D     1    1  1  0   U6 User 212 gets out, leaves the system
+31702   D     1    1  1  0   U5 User 214 gets in
+31733   D     1    0  1  1   E5 Elevator doors start to close
+31768   D     1    0  1  0   E8 Elevator moving down
+31800   D     0    0  1  0   U4 User 213 decides to give up, leaves the system
+31841   D     0    0  1  0   U1 User 215 arrives at floor 3, destination is 0, give up 32178
+31852   D     0    0  1  0   E2 Elevator stops
+31852   U     0    0  1  0   E3 Elevator doors start to open
+31872   U     0    1  1  0   U6 User 211 gets out, leaves the system
+31897   U     0    1  1  0   U6 User 210 gets out, leaves the system
+31928   U     0    0  1  1   E5 Elevator doors start to close
+31963   U     0    0  1  0   E7 Elevator moving up
+32028   U     1    0  1  0   U1 User 216 arrives at floor 0, destination is 4, give up 32302
+32028   U     1    0  1  0   E2 Elevator stops
+32028   U     1    0  1  0   E3 Elevator doors start to open
+32048   U     1    0  1  1   E4 Doors open, nobody is there
+32104   U     1    0  1  1   E5 Elevator doors start to close
+32139   U     1    0  1  0   E7 Elevator moving up
+32162   U     2    0  1  0   U1 User 217 arrives at floor 0, destination is 4, give up 32324
+32178   U     2    0  1  0   U4 User 215 decides to give up, leaves the system
+32204   U     2    0  1  0   E2 Elevator stops
+32204   U     2    0  1  0   E3 Elevator doors start to open
+32224   U     2    0  1  1   E4 Doors open, nobody is there
+32280   U     2    0  1  1   E5 Elevator doors start to close
+32302   U     2    0  1  0   U4 User 216 decides to give up, leaves the system
+32315   U     2    0  1  0   E7 Elevator moving up
+32323   U     3    0  1  0   U1 User 218 arrives at floor 0, destination is 4, give up 32467
+32324   U     3    0  1  0   U4 User 217 decides to give up, leaves the system
+32380   U     3    0  1  0   E2 Elevator stops
+32380   N     3    0  1  0   E3 Elevator doors start to open
+32400   N     3    1  1  0   U6 User 214 gets out, leaves the system
+32456   N     3    0  1  1   E5 Elevator doors start to close
+32467   N     3    0  1  0   U4 User 218 decides to give up, leaves the system
+32491   D     3    0  1  0   E8 Elevator moving down
+32495   D     2    0  1  0   U1 User 219 arrives at floor 1, destination is 3, give up 32646
+32552   D     2    0  1  0   E8 Elevator moving down
+32610   D     1    0  1  0   U1 User 220 arrives at floor 3, destination is 2, give up 32967
+32613   D     1    0  1  0   E8 Elevator moving down
+32646   D     0    0  1  0   U4 User 219 decides to give up, leaves the system
+32697   D     0    0  1  0   E2 Elevator stops
+32697   N     0    0  1  0   E3 Elevator doors start to open
+32717   N     0    0  1  1   E4 Doors open, nobody is there
+32773   N     0    0  1  1   U1 User 221 arrives at floor 2, destination is 1, give up 32961
+32773   N     0    0  1  1   E5 Elevator doors start to close
+32808   U     0    0  1  0   E7 Elevator moving up
+32873   U     1    0  1  0   E2 Elevator stops
+32873   U     1    0  1  0   E3 Elevator doors start to open
+32893   U     1    0  1  1   E4 Doors open, nobody is there
+32904   U     1    0  1  1   U1 User 222 arrives at floor 0, destination is 4, give up 33045
+32949   U     1    0  1  1   E5 Elevator doors start to close
+32961   U     1    0  1  0   U4 User 221 decides to give up, leaves the system
+32967   U     1    0  1  0   U4 User 220 decides to give up, leaves the system
+32984   U     1    0  1  0   E7 Elevator moving up
+33035   U     2    0  1  0   E7 Elevator moving up
+33045   U     3    0  1  0   U4 User 222 decides to give up, leaves the system
+33068   U     3    0  1  0   U1 User 223 arrives at floor 3, destination is 0, give up 33256
+33100   U     3    0  1  0   E2 Elevator stops
+33100   N     3    0  1  0   E3 Elevator doors start to open
+33120   N     3    1  1  0   U5 User 223 gets in
+33145   D     3    0  1  1   E5 Elevator doors start to close
+33180   D     3    0  1  0   E8 Elevator moving down
+33256   D     2    0  1  0   U1 User 224 arrives at floor 2, destination is 4, give up 33401
+33264   D     2    0  1  0   E2 Elevator stops
+33264   D     2    0  1  0   E3 Elevator doors start to open
+33284   D     2    1  1  0   U5 User 224 gets in
+33340   D     2    0  1  1   E5 Elevator doors start to close
+33375   D     2    0  1  0   E8 Elevator moving down
+33383   D     1    0  1  0   U1 User 225 arrives at floor 0, destination is 4, give up 33598
+33436   D     1    0  1  0   E8 Elevator moving down
+33520   D     0    0  1  0   E2 Elevator stops
+33520   U     0    0  1  0   E3 Elevator doors start to open
+33540   U     0    1  1  0   U6 User 223 gets out, leaves the system
+33543   U     0    1  1  0   U1 User 226 arrives at floor 2, destination is 0, give up 33930
+33565   U     0    1  1  0   U5 User 225 gets in
+33596   U     0    0  1  1   E5 Elevator doors start to close
+33631   U     0    0  1  0   E7 Elevator moving up
+33682   U     1    0  1  0   E7 Elevator moving up
+33694   U     2    0  1  0   U1 User 227 arrives at floor 3, destination is 2, give up 33844
+33747   U     2    0  1  0   E2 Elevator stops
+33747   U     2    0  1  0   E3 Elevator doors start to open
+33767   U     2    1  1  0   U5 User 226 gets in
+33805   U     2    0  1  1   U1 User 228 arrives at floor 4, destination is 3, give up 34065
+33823   U     2    0  1  1   E5 Elevator doors start to close
+33844   U     2    0  1  0   U4 User 227 decides to give up, leaves the system
+33858   U     2    0  1  0   E7 Elevator moving up
+33909   U     3    0  1  0   E7 Elevator moving up
+33974   U     4    0  1  0   E2 Elevator stops
+33974   D     4    0  1  0   E3 Elevator doors start to open
+33994   D     4    1  1  0   U6 User 225 gets out, leaves the system
+34005   D     4    1  1  0   U1 User 229 arrives at floor 4, destination is 1, give up 34113
+34019   D     4    1  1  0   U6 User 224 gets out, leaves the system
+34044   D     4    1  1  0   U5 User 228 gets in
+34050   D     4    1  1  0   E5 Elevator doors flutter
+34069   D     4    1  1  0   U5 User 229 gets in
+34090   D     4    1  1  0   E5 Elevator doors flutter
+34115   D     4    0  1  1   U1 User 230 arrives at floor 1, destination is 2, give up 34347
+34130   D     4    0  1  1   E5 Elevator doors start to close
+34165   D     4    0  1  0   E8 Elevator moving down
+34249   D     3    0  1  0   E2 Elevator stops
+34249   D     3    0  1  0   E3 Elevator doors start to open
+34260   D     3    1  1  0   U1 User 231 arrives at floor 1, destination is 2, give up 34568
+34269   D     3    1  1  0   U6 User 228 gets out, leaves the system
+34325   D     3    0  1  1   E5 Elevator doors start to close
+34347   D     3    0  1  0   U4 User 230 decides to give up, leaves the system
+34360   D     3    0  1  0   E8 Elevator moving down
+34390   D     2    0  1  0   U1 User 232 arrives at floor 2, destination is 3, give up 34703
+34444   D     2    0  1  0   E2 Elevator stops
+34444   D     2    0  1  0   E3 Elevator doors start to open
+34464   D     2    1  1  0   U5 User 232 gets in
+34520   D     2    0  1  1   E5 Elevator doors start to close
+34541   D     2    0  1  0   U1 User 233 arrives at floor 1, destination is 2, give up 34814
+34555   D     2    0  1  0   E8 Elevator moving down
+34568   D     1    0  1  0   U4 User 231 decides to give up, leaves the system
+34639   D     1    0  1  0   E2 Elevator stops
+34639   D     1    0  1  0   E3 Elevator doors start to open
+34653   D     1    1  1  0   U1 User 234 arrives at floor 3, destination is 4, give up 34927
+34659   D     1    1  1  0   U6 User 229 gets out, leaves the system
+34684   D     1    1  1  0   U5 User 233 gets in
+34715   D     1    0  1  1   E5 Elevator doors start to close
+34750   D     1    0  1  0   E8 Elevator moving down
+34834   D     0    0  1  0   E2 Elevator stops
+34834   U     0    0  1  0   E3 Elevator doors start to open
+34835   U     0    1  1  0   U1 User 235 arrives at floor 3, destination is 2, give up 34939
+34854   U     0    1  1  0   U6 User 226 gets out, leaves the system
+34910   U     0    0  1  1   E5 Elevator doors start to close
+34927   U     0    0  1  0   U4 User 234 decides to give up, leaves the system
+34939   U     0    0  1  0   U4 User 235 decides to give up, leaves the system
+34945   U     0    0  1  0   E7 Elevator moving up
+35010   U     1    0  1  0   E2 Elevator stops
+35010   U     1    0  1  0   E3 Elevator doors start to open
+35029   U     1    1  1  0   U1 User 236 arrives at floor 0, destination is 4, give up 35299
+35030   U     1    0  1  1   E4 Doors open, nobody is there
+35086   U     1    0  1  1   E5 Elevator doors start to close
+35121   U     1    0  1  0   E7 Elevator moving up
+35186   U     2    0  1  0   E2 Elevator stops
+35186   U     2    0  1  0   E3 Elevator doors start to open
+35206   U     2    1  1  0   U6 User 233 gets out, leaves the system
+35225   U     2    1  1  0   U1 User 237 arrives at floor 3, destination is 2, give up 35497
+35262   U     2    0  1  1   E5 Elevator doors start to close
+35297   U     2    0  1  0   E7 Elevator moving up
+35299   U     3    0  1  0   U4 User 236 decides to give up, leaves the system
+35362   U     3    0  1  0   E2 Elevator stops
+35362   N     3    0  1  0   E3 Elevator doors start to open
+35382   N     3    1  1  0   U6 User 232 gets out, leaves the system
+35394   N     3    1  1  0   U1 User 238 arrives at floor 0, destination is 1, give up 35565
+35407   N     3    1  1  0   U5 User 237 gets in
+35432   D     3    0  1  1   E5 Elevator doors start to close
+35467   D     3    0  1  0   E8 Elevator moving down
+35535   D     2    0  1  0   U1 User 239 arrives at floor 4, destination is 3, give up 35765
+35551   D     2    0  1  0   E2 Elevator stops
+35551   D     2    0  1  0   E3 Elevator doors start to open
+35565   D     2    1  1  0   U4 User 238 decides to give up, leaves the system
+35571   D     2    1  1  0   U6 User 237 gets out, leaves the system
+35627   D     2    0  1  1   E5 Elevator doors start to close
+35662   D     2    0  1  0   E8 Elevator moving down
+35723   D     1    0  1  0   E8 Elevator moving down
+35733   D     0    0  1  0   U1 User 240 arrives at floor 4, destination is 1, give up 35887
+35765   D     0    0  1  0   U4 User 239 decides to give up, leaves the system
+35807   D     0    0  1  0   E2 Elevator stops
+35807   N     0    0  1  0   E3 Elevator doors start to open
+35827   N     0    0  1  1   E4 Doors open, nobody is there
+35848   N     0    0  1  1   U1 User 241 arrives at floor 0, destination is 2, give up 36241
+35848   N     0    1  1  0   U5 User 241 gets in
+35873   U     0    0  1  1   E5 Elevator doors start to close
+35887   U     0    0  1  0   U4 User 240 decides to give up, leaves the system
+35908   U     0    0  1  0   E7 Elevator moving up
+35959   U     1    0  1  0   E7 Elevator moving up
+35981   U     2    0  1  0   U1 User 242 arrives at floor 2, destination is 1, give up 36285
+36024   U     2    0  1  0   E2 Elevator stops
+36024   U     2    0  1  0   E3 Elevator doors start to open
+36044   U     2    1  1  0   U6 User 241 gets out, leaves the system
+36069   U     2    1  1  0   U5 User 242 gets in
+36100   U     2    0  1  1   E5 Elevator doors start to close
+36124   U     2    0  1  0   U1 User 243 arrives at floor 0, destination is 1, give up 36238
+36135   U     2    0  1  0   E7 Elevator moving up
+36186   U     3    0  1  0   E7 Elevator moving up
+36238   U     4    0  1  0   U4 User 243 decides to give up, leaves the system
+36251   U     4    0  1  0   E2 Elevator stops
+36251   D     4    0  1  0   E3 Elevator doors start to open
+36261   D     4    1  1  0   U1 User 244 arrives at floor 1, destination is 0, give up 36561
+36271   D     4    0  1  1   E4 Doors open, nobody is there
+36327   D     4    0  1  1   E5 Elevator doors start to close
+36362   D     4    0  1  0   E8 Elevator moving down
+36412   D     3    0  1  0   U1 User 245 arrives at floor 4, destination is 1, give up 36614
+36423   D     3    0  1  0   E8 Elevator moving down
+36507   D     2    0  1  0   E2 Elevator stops
+36507   D     2    0  1  0   E3 Elevator doors start to open
+36527   D     2    0  1  1   E4 Doors open, nobody is there
+36561   D     2    0  1  1   U4 User 244 decides to give up, leaves the system
+36563   D     2    0  1  1   U1 User 246 arrives at floor 3, destination is 2, give up 36957
+36583   D     2    0  1  1   E5 Elevator doors start to close
+36614   D     2    0  1  0   U4 User 245 decides to give up, leaves the system
+36618   D     2    0  1  0   E8 Elevator moving down
+36702   D     1    0  1  0   E2 Elevator stops
+36702   D     1    0  1  0   E3 Elevator doors start to open
+36722   D     1    1  1  0   U6 User 242 gets out, leaves the system
+36745   D     1    1  1  0   U1 User 247 arrives at floor 1, destination is 2, give up 36979
+36747   D     1    1  1  0   U5 User 247 gets in
+36778   D     1    0  1  1   E5 Elevator doors start to close
+36813   D     1    0  1  0   E8 Elevator moving down
+36897   D     0    0  1  0   E2 Elevator stops
+36897   U     0    0  1  0   E3 Elevator doors start to open
+36910   U     0    1  1  0   U1 User 248 arrives at floor 1, destination is 4, give up 37295
+36917   U     0    0  1  1   E4 Doors open, nobody is there
+36957   U     0    0  1  1   U4 User 246 decides to give up, leaves the system
+36973   U     0    0  1  1   E5 Elevator doors start to close
+37008   U     0    0  1  0   E7 Elevator moving up
+37073   U     1    0  1  0   E2 Elevator stops
+37073   U     1    0  1  0   E3 Elevator doors start to open
+37091   U     1    1  1  0   U1 User 249 arrives at floor 3, destination is 2, give up 37223
+37093   U     1    1  1  0   U5 User 248 gets in
+37149   U     1    0  1  1   E5 Elevator doors start to close
+37184   U     1    0  1  0   E7 Elevator moving up
+37223   U     2    0  1  0   U4 User 249 decides to give up, leaves the system
+37249   U     2    0  1  0   E2 Elevator stops
+37249   U     2    0  1  0   E3 Elevator doors start to open
+37258   U     2    1  1  0   U1 User 250 arrives at floor 0, destination is 4, give up 37563
+37269   U     2    1  1  0   U6 User 247 gets out, leaves the system
+37325   U     2    0  1  1   E5 Elevator doors start to close
+37360   U     2    0  1  0   E7 Elevator moving up
+37410   U     3    0  1  0   U1 User 251 arrives at floor 2, destination is 0, give up 37572
+37411   U     3    0  1  0   E7 Elevator moving up
+37476   U     4    0  1  0   E2 Elevator stops
+37476   N     4    0  1  0   E3 Elevator doors start to open
+37496   N     4    1  1  0   U6 User 248 gets out, leaves the system
+37552   N     4    0  1  1   E5 Elevator doors start to close
+37563   N     4    0  1  0   U4 User 250 decides to give up, leaves the system
+37570   N     4    0  1  0   U1 User 252 arrives at floor 3, destination is 1, give up 37817
+37572   N     4    0  1  0   U4 User 251 decides to give up, leaves the system
+37587   D     4    0  1  0   E8 Elevator moving down
+37671   D     3    0  1  0   E2 Elevator stops
+37671   D     3    0  1  0   E3 Elevator doors start to open
+37691   D     3    1  1  0   U5 User 252 gets in
+37740   D     3    0  1  1   U1 User 253 arrives at floor 2, destination is 1, give up 37896
+37747   D     3    0  1  1   E5 Elevator doors start to close
+37782   D     3    0  1  0   E8 Elevator moving down
+37866   D     2    0  1  0   E2 Elevator stops
+37866   D     2    0  1  0   E3 Elevator doors start to open
+37885   D     2    1  1  0   U1 User 254 arrives at floor 4, destination is 2, give up 38050
+37886   D     2    1  1  0   U5 User 253 gets in
+37942   D     2    0  1  1   E5 Elevator doors start to close
+37977   D     2    0  1  0   E8 Elevator moving down
+38050   D     1    0  1  0   U4 User 254 decides to give up, leaves the system
+38061   D     1    0  1  0   E2 Elevator stops
+38061   D     1    0  1  0   E3 Elevator doors start to open
+38078   D     1    1  1  0   U1 User 255 arrives at floor 1, destination is 0, give up 38409
+38081   D     1    1  1  0   U6 User 253 gets out, leaves the system
+38106   D     1    1  1  0   U6 User 252 gets out, leaves the system
+38131   D     1    1  1  0   U5 User 255 gets in
+38137   D     1    1  1  0   E5 Elevator doors flutter
+38177   D     1    0  1  1   E5 Elevator doors start to close
+38212   D     1    0  1  0   E8 Elevator moving down
+38272   D     0    0  1  0   U1 User 256 arrives at floor 3, destination is 1, give up 38627
+38296   D     0    0  1  0   E2 Elevator stops
+38296   N     0    0  1  0   E3 Elevator doors start to open
+38316   N     0    1  1  0   U6 User 255 gets out, leaves the system
+38372   N     0    0  1  1   E5 Elevator doors start to close
+38407   U     0    0  1  0   E7 Elevator moving up
+38410   U     1    0  1  0   U1 User 257 arrives at floor 0, destination is 3, give up 38682
+38458   U     1    0  1  0   E7 Elevator moving up
+38509   U     2    0  1  0   E7 Elevator moving up
+38560   U     3    0  1  0   E7 Elevator moving up
+38585   U     4    0  1  0   U1 User 258 arrives at floor 1, destination is 0, give up 38782
+38625   U     4    0  1  0   E2 Elevator stops
+38625   N     4    0  1  0   E3 Elevator doors start to open
+38627   N     4    1  1  0   U4 User 256 decides to give up, leaves the system
+38645   N     4    0  1  1   E4 Doors open, nobody is there
+38682   N     4    0  1  1   U4 User 257 decides to give up, leaves the system
+38701   N     4    0  1  1   E5 Elevator doors start to close
+38736   D     4    0  1  0   E8 Elevator moving down
+38737   D     3    0  1  0   U1 User 259 arrives at floor 0, destination is 2, give up 39054
+38782   D     3    0  1  0   U4 User 258 decides to give up, leaves the system
+38820   D     3    0  1  0   E2 Elevator stops
+38820   D     3    0  1  0   E3 Elevator doors start to open
+38840   D     3    0  1  1   E4 Doors open, nobody is there
+38890   D     3    0  1  1   U1 User 260 arrives at floor 2, destination is 4, give up 38992
+38896   D     3    0  1  1   E5 Elevator doors start to close
+38931   D     3    0  1  0   E8 Elevator moving down
+38992   D     2    0  1  0   U4 User 260 decides to give up, leaves the system
+38992   D     2    0  1  0   E8 Elevator moving down
+39032   D     1    0  1  0   U1 User 261 arrives at floor 4, destination is 2, give up 39316
+39054   D     1    0  1  0   U4 User 259 decides to give up, leaves the system
+39076   D     1    0  1  0   E2 Elevator stops
+39076   D     1    0  1  0   E3 Elevator doors start to open
+39096   D     1    0  1  1   E4 Doors open, nobody is there
+39152   D     1    0  1  1   E5 Elevator doors start to close
+39157   D     1    0  1  0   U1 User 262 arrives at floor 0, destination is 1, give up 39267
+39187   D     1    0  1  0   E8 Elevator moving down
+39267   D     0    0  1  0   U4 User 262 decides to give up, leaves the system
+39271   D     0    0  1  0   E2 Elevator stops
+39271   N     0    0  1  0   E3 Elevator doors start to open
+39277   N     0    1  1  0   U1 User 263 arrives at floor 1, destination is 0, give up 39461
+39291   N     0    0  1  1   E4 Doors open, nobody is there
+39316   N     0    0  1  1   U4 User 261 decides to give up, leaves the system
+39347   N     0    0  1  1   E5 Elevator doors start to close
+39382   U     0    0  1  0   E7 Elevator moving up
+39433   U     1    0  1  0   E7 Elevator moving up
+39452   U     2    0  1  0   U1 User 264 arrives at floor 2, destination is 0, give up 39580
+39461   U     2    0  1  0   U4 User 263 decides to give up, leaves the system
+39498   U     2    0  1  0   E2 Elevator stops
+39498   U     2    0  1  0   E3 Elevator doors start to open
+39518   U     2    1  1  0   U5 User 264 gets in
+39574   U     2    0  1  1   E5 Elevator doors start to close
+39584   U     2    0  1  0   U1 User 265 arrives at floor 2, destination is 3, give up 39694
+39584   U     2    0  1  0   E3 Elevator doors start to open
+39604   U     2    1  1  0   U5 User 265 gets in
+39660   U     2    0  1  1   E5 Elevator doors start to close
+39695   U     2    0  1  0   E7 Elevator moving up
+39760   U     3    0  1  0   E2 Elevator stops
+39760   U     3    0  1  0   E3 Elevator doors start to open
+39764   U     3    1  1  0   U1 User 266 arrives at floor 0, destination is 4, give up 39991
+39780   U     3    1  1  0   U6 User 265 gets out, leaves the system
+39836   U     3    0  1  1   E5 Elevator doors start to close
+39870   U     3    0  1  0   U1 User 267 arrives at floor 0, destination is 4, give up 40224
+39871   U     3    0  1  0   E7 Elevator moving up
+39936   U     4    0  1  0   E2 Elevator stops
+39936   D     4    0  1  0   E3 Elevator doors start to open
+39956   D     4    0  1  1   E4 Doors open, nobody is there
+39991   D     4    0  1  1   U4 User 266 decides to give up, leaves the system
+40006   D     4    0  1  1   U1 User 268 arrives at floor 1, destination is 0, give up 40286
+40012   D     4    0  1  1   E5 Elevator doors start to close
+40047   D     4    0  1  0   E8 Elevator moving down
+40108   D     3    0  1  0   E8 Elevator moving down
+40146   D     2    0  1  0   U1 User 269 arrives at floor 3, destination is 2, give up 40431
+40192   D     2    0  1  0   E2 Elevator stops
+40192   D     2    0  1  0   E3 Elevator doors start to open
+40212   D     2    0  1  1   E4 Doors open, nobody is there
+40224   D     2    0  1  1   U4 User 267 decides to give up, leaves the system
+40268   D     2    0  1  1   E5 Elevator doors start to close
+40286   D     2    0  1  0   U4 User 268 decides to give up, leaves the system
+40303   D     2    0  1  0   E8 Elevator moving down
+40315   D     1    0  1  0   U1 User 270 arrives at floor 4, destination is 1, give up 40500
+40387   D     1    0  1  0   E2 Elevator stops
+40387   D     1    0  1  0   E3 Elevator doors start to open
+40407   D     1    0  1  1   E4 Doors open, nobody is there
+40431   D     1    0  1  1   U4 User 269 decides to give up, leaves the system
+40432   D     1    0  1  1   U1 User 271 arrives at floor 2, destination is 4, give up 40599
+40463   D     1    0  1  1   E5 Elevator doors start to close
+40498   D     1    0  1  0   E8 Elevator moving down
+40500   D     0    0  1  0   U4 User 270 decides to give up, leaves the system
+40582   D     0    0  1  0   E2 Elevator stops
+40582   N     0    0  1  0   E3 Elevator doors start to open
+40587   N     0    1  1  0   U1 User 272 arrives at floor 4, destination is 2, give up 40783
+40599   N     0    1  1  0   U4 User 271 decides to give up, leaves the system
+40602   N     0    1  1  0   U6 User 264 gets out, leaves the system
+40658   N     0    0  1  1   E5 Elevator doors start to close
+40693   U     0    0  1  0   E7 Elevator moving up
+40743   U     1    0  1  0   U1 User 273 arrives at floor 1, destination is 4, give up 40971
+40758   U     1    0  1  0   E2 Elevator stops
+40758   U     1    0  1  0   E3 Elevator doors start to open
+40778   U     1    1  1  0   U5 User 273 gets in
+40783   U     1    1  1  0   U4 User 272 decides to give up, leaves the system
+40834   U     1    0  1  1   E5 Elevator doors start to close
+40869   U     1    0  1  0   E7 Elevator moving up
+40873   U     2    0  1  0   U1 User 274 arrives at floor 0, destination is 4, give up 41170
+40934   U     2    0  1  0   E2 Elevator stops
+40934   U     2    0  1  0   E3 Elevator doors start to open
+40954   U     2    0  1  1   E4 Doors open, nobody is there
+40982   U     2    0  1  1   U1 User 275 arrives at floor 1, destination is 2, give up 41305
+41010   U     2    0  1  1   E5 Elevator doors start to close
+41045   U     2    0  1  0   E7 Elevator moving up
+41096   U     3    0  1  0   E7 Elevator moving up
+41107   U     4    0  1  0   U1 User 276 arrives at floor 0, destination is 4, give up 41407
+41161   U     4    0  1  0   E2 Elevator stops
+41161   N     4    0  1  0   E3 Elevator doors start to open
+41170   N     4    1  1  0   U4 User 274 decides to give up, leaves the system
+41181   N     4    1  1  0   U6 User 273 gets out, leaves the system
+41222   N     4    0  1  1   U1 User 277 arrives at floor 4, destination is 3, give up 41370
+41222   N     4    1  1  0   U5 User 277 gets in
+41247   D     4    0  1  1   E5 Elevator doors start to close
+41282   D     4    0  1  0   E8 Elevator moving down
+41305   D     3    0  1  0   U4 User 275 decides to give up, leaves the system
+41366   D     3    0  1  0   E2 Elevator stops
+41366   D     3    0  1  0   E3 Elevator doors start to open
+41381   D     3    1  1  0   U1 User 278 arrives at floor 3, destination is 4, give up 41707
+41386   D     3    1  1  0   U6 User 277 gets out, leaves the system
+41407   D     3    1  1  0   U4 User 276 decides to give up, leaves the system
+41411   D     3    1  1  0   U5 User 278 gets in
+41442   D     3    0  1  1   E5 Elevator doors start to close
+41477   D     3    0  1  0   E8 Elevator moving down
+41538   D     2    0  1  0   E8 Elevator moving down
+41552   D     1    0  1  0   U1 User 279 arrives at floor 3, destination is 2, give up 41835
+41599   D     1    0  1  0   E8 Elevator moving down
+41683   D     0    0  1  0   E2 Elevator stops
+41683   U     0    0  1  0   E3 Elevator doors start to open
+41703   U     0    0  1  1   E4 Doors open, nobody is there
+41715   U     0    0  1  1   U1 User 280 arrives at floor 0, destination is 1, give up 42104
+41715   U     0    1  1  0   U5 User 280 gets in
+41759   U     0    0  1  1   E5 Elevator doors start to close
+41794   U     0    0  1  0   E7 Elevator moving up
+41835   U     1    0  1  0   U4 User 279 decides to give up, leaves the system
+41843   U     1    0  1  0   U1 User 281 arrives at floor 0, destination is 2, give up 42111
+41859   U     1    0  1  0   E2 Elevator stops
+41859   U     1    0  1  0   E3 Elevator doors start to open
+41879   U     1    1  1  0   U6 User 280 gets out, leaves the system
+41935   U     1    0  1  1   E5 Elevator doors start to close
+41943   U     1    0  1  0   U1 User 282 arrives at floor 1, destination is 2, give up 42296
+41943   U     1    0  1  0   E3 Elevator doors start to open
+41963   U     1    1  1  0   U5 User 282 gets in
+42019   U     1    0  1  1   E5 Elevator doors start to close
+42054   U     1    0  1  0   E7 Elevator moving up
+42067   U     2    0  1  0   U1 User 283 arrives at floor 4, destination is 0, give up 42426
+42111   U     2    0  1  0   U4 User 281 decides to give up, leaves the system
+42119   U     2    0  1  0   E2 Elevator stops
+42119   U     2    0  1  0   E3 Elevator doors start to open
+42139   U     2    1  1  0   U6 User 282 gets out, leaves the system
+42195   U     2    0  1  1   E5 Elevator doors start to close
+42221   U     2    0  1  0   U1 User 284 arrives at floor 3, destination is 1, give up 42521
+42230   U     2    0  1  0   E7 Elevator moving up
+42295   U     3    0  1  0   E2 Elevator stops
+42295   U     3    0  1  0   E3 Elevator doors start to open
+42315   U     3    1  1  0   U5 User 284 gets in
+42356   U     3    0  1  1   U1 User 285 arrives at floor 3, destination is 2, give up 42753
+42356   U     3    1  1  0   U5 User 285 gets in
+42371   U     3    1  1  0   E5 Elevator doors flutter
+42411   U     3    0  1  1   E5 Elevator doors start to close
+42426   U     3    0  1  0   U4 User 283 decides to give up, leaves the system
+42446   U     3    0  1  0   E7 Elevator moving up
+42457   U     4    0  1  0   U1 User 286 arrives at floor 0, destination is 1, give up 42664
+42511   U     4    0  1  0   E2 Elevator stops
+42511   D     4    0  1  0   E3 Elevator doors start to open
+42531   D     4    1  1  0   U6 User 278 gets out, leaves the system
+42587   D     4    0  1  1   E5 Elevator doors start to close
+42622   D     4    0  1  0   E8 Elevator moving down
+42642   D     3    0  1  0   U1 User 287 arrives at floor 0, destination is 2, give up 42871
+42664   D     3    0  1  0   U4 User 286 decides to give up, leaves the system
+42706   D     3    0  1  0   E2 Elevator stops
+42706   D     3    0  1  0   E3 Elevator doors start to open
+42726   D     3    0  1  1   E4 Doors open, nobody is there
+42782   D     3    0  1  1   E5 Elevator doors start to close
+42786   D     3    0  1  0   U1 User 288 arrives at floor 4, destination is 3, give up 43041
+42817   D     3    0  1  0   E8 Elevator moving down
+42871   D     2    0  1  0   U4 User 287 decides to give up, leaves the system
+42901   D     2    0  1  0   E2 Elevator stops
+42901   D     2    0  1  0   E3 Elevator doors start to open
+42921   D     2    1  1  0   U6 User 285 gets out, leaves the system
+42973   D     2    0  1  1   U1 User 289 arrives at floor 0, destination is 3, give up 43156
+42977   D     2    0  1  1   E5 Elevator doors start to close
+43012   D     2    0  1  0   E8 Elevator moving down
+43041   D     1    0  1  0   U4 User 288 decides to give up, leaves the system
+43096   D     1    0  1  0   E2 Elevator stops
+43096   D     1    0  1  0   E3 Elevator doors start to open
+43112   D     1    1  1  0   U1 User 290 arrives at floor 2, destination is 1, give up 43354
+43116   D     1    1  1  0   U6 User 284 gets out, leaves the system
+43156   D     1    0  1  1   U4 User 289 decides to give up, leaves the system
+43172   D     1    0  1  1   E5 Elevator doors start to close
+43207   D     1    0  1  0   E8 Elevator moving down
+43237   D     0    0  1  0   U1 User 291 arrives at floor 0, destination is 2, give up 43446
+43291   D     0    0  1  0   E2 Elevator stops
+43291   N     0    0  1  0   E3 Elevator doors start to open
+43311   N     0    1  1  0   U5 User 291 gets in
+43336   U     0    0  1  1   E5 Elevator doors start to close
+43354   U     0    0  1  0   U4 User 290 decides to give up, leaves the system
+43359   U     0    0  1  0   U1 User 292 arrives at floor 3, destination is 1, give up 43476
+43371   U     0    0  1  0   E7 Elevator moving up
+43422   U     1    0  1  0   E7 Elevator moving up
+43466   U     2    0  1  0   U1 User 293 arrives at floor 4, destination is 1, give up 43859
+43476   U     2    0  1  0   U4 User 292 decides to give up, leaves the system
+43487   U     2    0  1  0   E2 Elevator stops
+43487   U     2    0  1  0   E3 Elevator doors start to open
+43507   U     2    1  1  0   U6 User 291 gets out, leaves the system
+43563   U     2    0  1  1   E5 Elevator doors start to close
+43598   U     2    0  1  0   E7 Elevator moving up
+43630   U     3    0  1  0   U1 User 294 arrives at floor 0, destination is 4, give up 43782
+43649   U     3    0  1  0   E7 Elevator moving up
+43714   U     4    0  1  0   E2 Elevator stops
+43714   N     4    0  1  0   E3 Elevator doors start to open
+43734   N     4    1  1  0   U5 User 293 gets in
+43759   D     4    0  1  1   E5 Elevator doors start to close
+43782   D     4    0  1  0   U4 User 294 decides to give up, leaves the system
+43794   D     4    0  1  0   E8 Elevator moving down
+43827   D     3    0  1  0   U1 User 295 arrives at floor 3, destination is 0, give up 44087
+43878   D     3    0  1  0   E2 Elevator stops
+43878   D     3    0  1  0   E3 Elevator doors start to open
+43898   D     3    1  1  0   U5 User 295 gets in
+43937   D     3    0  1  1   U1 User 296 arrives at floor 0, destination is 1, give up 44269
+43954   D     3    0  1  1   E5 Elevator doors start to close
+43989   D     3    0  1  0   E8 Elevator moving down
+44073   D     2    0  1  0   E2 Elevator stops
+44073   D     2    0  1  0   E3 Elevator doors start to open
+44093   D     2    0  1  1   E4 Doors open, nobody is there
+44129   D     2    0  1  1   U1 User 297 arrives at floor 2, destination is 3, give up 44327
+44129   D     2    1  1  0   U5 User 297 gets in
+44149   D     2    1  1  0   E5 Elevator doors flutter
+44189   D     2    0  1  1   E5 Elevator doors start to close
+44224   D     2    0  1  0   E8 Elevator moving down
+44231   D     1    0  1  0   U1 User 298 arrives at floor 1, destination is 4, give up 44598
+44269   D     1    0  1  0   U4 User 296 decides to give up, leaves the system
+44308   D     1    0  1  0   E2 Elevator stops
+44308   D     1    0  1  0   E3 Elevator doors start to open
+44328   D     1    1  1  0   U6 User 293 gets out, leaves the system
+44353   D     1    1  1  0   U5 User 298 gets in
+44371   D     1    1  1  0   U1 User 299 arrives at floor 1, destination is 4, give up 44598
+44378   D     1    1  1  0   U5 User 299 gets in
+44384   D     1    1  1  0   E5 Elevator doors flutter
+44424   D     1    0  1  1   E5 Elevator doors start to close
+44459   D     1    0  1  0   E8 Elevator moving down
+44519   D     0    0  1  0   U1 User 300 arrives at floor 2, destination is 0, give up 44673
+44543   D     0    0  1  0   E2 Elevator stops
+44543   U     0    0  1  0   E3 Elevator doors start to open
+44563   U     0    1  1  0   U6 User 295 gets out, leaves the system
+44619   U     0    0  1  1   E5 Elevator doors start to close
+44654   U     0    0  1  0   E7 Elevator moving up
+44673   U     1    0  1  0   U4 User 300 decides to give up, leaves the system
+44700   U     1    0  1  0   U1 User 301 arrives at floor 2, destination is 1, give up 45039
+44719   U     1    0  1  0   E2 Elevator stops
+44719   U     1    0  1  0   E3 Elevator doors start to open
+44739   U     1    0  1  1   E4 Doors open, nobody is there
+44795   U     1    0  1  1   E5 Elevator doors start to close
+44830   U     1    0  1  0   E7 Elevator moving up
+44881   U     2    0  1  0   E7 Elevator moving up
+44893   U     3    0  1  0   U1 User 302 arrives at floor 4, destination is 2, give up 45274
+44946   U     3    0  1  0   E2 Elevator stops
+44946   U     3    0  1  0   E3 Elevator doors start to open
+44966   U     3    1  1  0   U6 User 297 gets out, leaves the system
+44995   U     3    0  1  1   U1 User 303 arrives at floor 2, destination is 0, give up 45210
+45022   U     3    0  1  1   E5 Elevator doors start to close
+45039   U     3    0  1  0   U4 User 301 decides to give up, leaves the system
+45057   U     3    0  1  0   E7 Elevator moving up
+45122   U     4    0  1  0   E2 Elevator stops
+45122   N     4    0  1  0   E3 Elevator doors start to open
+45142   N     4    1  1  0   U6 User 299 gets out, leaves the system
+45167   N     4    1  1  0   U6 User 298 gets out, leaves the system
+45175   N     4    1  1  0   U1 User 304 arrives at floor 4, destination is 2, give up 45416
+45192   N     4    1  1  0   U5 User 302 gets in
+45210   D     4    1  1  0   U4 User 303 decides to give up, leaves the system
+45217   D     4    1  1  0   U5 User 304 gets in
+45217   D     4    1  1  0   E5 Elevator doors flutter
+45257   D     4    0  1  1   E5 Elevator doors start to close
+45292   D     4    0  1  0   E8 Elevator moving down
+45338   D     3    0  1  0   U1 User 305 arrives at floor 0, destination is 3, give up 45737
+45353   D     3    0  1  0   E8 Elevator moving down
+45437   D     2    0  1  0   E2 Elevator stops
+45437   D     2    0  1  0   E3 Elevator doors start to open
+45457   D     2    1  1  0   U6 User 304 gets out, leaves the system
+45471   D     2    1  1  0   U1 User 306 arrives at floor 2, destination is 0, give up 45654
+45482   D     2    1  1  0   U6 User 302 gets out, leaves the system
+45507   D     2    1  1  0   U5 User 306 gets in
+45513   D     2    1  1  0   E5 Elevator doors flutter
+45553   D     2    0  1  1   E5 Elevator doors start to close
+45580   D     2    0  1  0   U1 User 307 arrives at floor 1, destination is 0, give up 45702
+45588   D     2    0  1  0   E8 Elevator moving down
+45672   D     1    0  1  0   E2 Elevator stops
+45672   D     1    0  1  0   E3 Elevator doors start to open
+45692   D     1    1  1  0   U5 User 307 gets in
+45737   D     1    0  1  1   U4 User 305 decides to give up, leaves the system
+45748   D     1    0  1  1   E5 Elevator doors start to close
+45779   D     1    0  1  0   U1 User 308 arrives at floor 1, destination is 0, give up 46043
+45783   D     1    0  1  0   E8 Elevator moving down
+45867   D     0    0  1  0   E2 Elevator stops
+45867   N     0    0  1  0   E3 Elevator doors start to open
+45887   N     0    1  1  0   U6 User 307 gets out, leaves the system
+45912   N     0    1  1  0   U6 User 306 gets out, leaves the system
+45943   N     0    0  1  1   E5 Elevator doors start to close
+45973   U     0    0  1  0   U1 User 309 arrives at floor 0, destination is 3, give up 46106
+45978   U     0    0  1  0   E7 Elevator moving up
+46043   U     1    0  1  0   U4 User 308 decides to give up, leaves the system
+46043   U     1    0  1  0   E2 Elevator stops
+46043   N     1    0  1  0   E3 Elevator doors start to open
+46063   N     1    0  1  1   E4 Doors open, nobody is there
+46083   N     1    0  1  1   U1 User 310 arrives at floor 3, destination is 4, give up 46236
+46106   N     1    0  1  1   U4 User 309 decides to give up, leaves the system
+46119   N     1    0  1  1   E5 Elevator doors start to close
+46154   D     1    0  1  0   E8 Elevator moving down
+46231   D     0    0  1  0   U1 User 311 arrives at floor 0, destination is 1, give up 46591
+46236   D     0    0  1  0   U4 User 310 decides to give up, leaves the system
+46238   D     0    0  1  0   E2 Elevator stops
+46238   N     0    0  1  0   E3 Elevator doors start to open
+46258   N     0    1  1  0   U5 User 311 gets in
+46283   U     0    0  1  1   E5 Elevator doors start to close
+46318   U     0    0  1  0   E7 Elevator moving up
+46349   U     1    0  1  0   U1 User 312 arrives at floor 4, destination is 3, give up 46549
+46383   U     1    0  1  0   E2 Elevator stops
+46383   U     1    0  1  0   E3 Elevator doors start to open
+46403   U     1    1  1  0   U6 User 311 gets out, leaves the system
+46459   U     1    0  1  1   E5 Elevator doors start to close
+46494   U     1    0  1  0   E7 Elevator moving up
+46538   U     2    0  1  0   U1 User 313 arrives at floor 0, destination is 2, give up 46717
+46545   U     2    0  1  0   E7 Elevator moving up
+46549   U     3    0  1  0   U4 User 312 decides to give up, leaves the system
+46610   U     3    0  1  0   E2 Elevator stops
+46610   U     3    0  1  0   E3 Elevator doors start to open
+46630   U     3    0  1  1   E4 Doors open, nobody is there
+46686   U     3    0  1  1   E5 Elevator doors start to close
+46708   U     3    0  1  0   U1 User 314 arrives at floor 0, destination is 2, give up 46962
+46717   U     3    0  1  0   U4 User 313 decides to give up, leaves the system
+46721   U     3    0  1  0   E7 Elevator moving up
+46786   U     4    0  1  0   E2 Elevator stops
+46786   N     4    0  1  0   E3 Elevator doors start to open
+46806   N     4    0  1  1   E4 Doors open, nobody is there
+46859   N     4    0  1  1   U1 User 315 arrives at floor 2, destination is 3, give up 47184
+46862   N     4    0  1  1   E5 Elevator doors start to close
+46897   D     4    0  1  0   E8 Elevator moving down
+46958   D     3    0  1  0   E8 Elevator moving down
+46962   D     2    0  1  0   U4 User 314 decides to give up, leaves the system
+47015   D     2    0  1  0   U1 User 316 arrives at floor 1, destination is 2, give up 47315
+47019   D     2    0  1  0   E8 Elevator moving down
+47080   D     1    0  1  0   E8 Elevator moving down
+47164   D     0    0  1  0   E2 Elevator stops
+47164   N     0    0  1  0   E3 Elevator doors start to open
+47184   N     0    1  1  0   U4 User 315 decides to give up, leaves the system
+47184   N     0    0  1  1   E4 Doors open, nobody is there
+47187   N     0    0  1  1   U1 User 317 arrives at floor 3, destination is 1, give up 47575
+47240   N     0    0  1  1   E5 Elevator doors start to close
+47275   U     0    0  1  0   E7 Elevator moving up
+47315   U     1    0  1  0   U4 User 316 decides to give up, leaves the system
+47323   U     1    0  1  0   U1 User 318 arrives at floor 0, destination is 2, give up 47654
+47340   U     1    0  1  0   E2 Elevator stops
+47340   U     1    0  1  0   E3 Elevator doors start to open
+47360   U     1    0  1  1   E4 Doors open, nobody is there
+47416   U     1    0  1  1   E5 Elevator doors start to close
+47451   U     1    0  1  0   E7 Elevator moving up
+47467   U     2    0  1  0   U1 User 319 arrives at floor 1, destination is 3, give up 47862
+47516   U     2    0  1  0   E2 Elevator stops
+47516   U     2    0  1  0   E3 Elevator doors start to open
+47536   U     2    0  1  1   E4 Doors open, nobody is there
+47575   U     2    0  1  1   U4 User 317 decides to give up, leaves the system
+47592   U     2    0  1  1   E5 Elevator doors start to close
+47627   U     2    0  1  0   E7 Elevator moving up
+47641   U     3    0  1  0   U1 User 320 arrives at floor 0, destination is 2, give up 48006
+47654   U     3    0  1  0   U4 User 318 decides to give up, leaves the system
+47692   U     3    0  1  0   E2 Elevator stops
+47692   N     3    0  1  0   E3 Elevator doors start to open
+47712   N     3    0  1  1   E4 Doors open, nobody is there
+47768   N     3    0  1  1   E5 Elevator doors start to close
+47801   D     3    0  1  0   U1 User 321 arrives at floor 4, destination is 2, give up 48012
+47803   D     3    0  1  0   E8 Elevator moving down
+47862   D     2    0  1  0   U4 User 319 decides to give up, leaves the system
+47864   D     2    0  1  0   E8 Elevator moving down
+47925   D     1    0  1  0   E8 Elevator moving down
+47971   D     0    0  1  0   U1 User 322 arrives at floor 4, destination is 3, give up 48118
+48006   D     0    0  1  0   U4 User 320 decides to give up, leaves the system
+48009   D     0    0  1  0   E2 Elevator stops
+48009   N     0    0  1  0   E3 Elevator doors start to open
+48012   N     0    1  1  0   U4 User 321 decides to give up, leaves the system
+48029   N     0    0  1  1   E4 Doors open, nobody is there
+48085   N     0    0  1  1   E5 Elevator doors start to close
+48118   U     0    0  1  0   U4 User 322 decides to give up, leaves the system
+48120   U     0    0  1  0   E7 Elevator moving up
+48145   U     1    0  1  0   U1 User 323 arrives at floor 0, destination is 2, give up 48245
+48185   U     1    0  1  0   E2 Elevator stops
+48185   U     1    0  1  0   E3 Elevator doors start to open
+48205   U     1    0  1  1   E4 Doors open, nobody is there
+48245   U     1    0  1  1   U4 User 323 decides to give up, leaves the system
+48257   U     1    0  1  1   U1 User 324 arrives at floor 0, destination is 3, give up 48397
+48261   U     1    0  1  1   E5 Elevator doors start to close
+48296   U     1    0  1  0   E7 Elevator moving up
+48347   U     2    0  1  0   E7 Elevator moving up
+48369   U     3    0  1  0   U1 User 325 arrives at floor 0, destination is 4, give up 48478
+48397   U     3    0  1  0   U4 User 324 decides to give up, leaves the system
+48398   U     3    0  1  0   E7 Elevator moving up
+48463   U     4    0  1  0   E2 Elevator stops
+48463   N     4    0  1  0   E3 Elevator doors start to open
+48478   N     4    1  1  0   U4 User 325 decides to give up, leaves the system
+48483   N     4    0  1  1   E4 Doors open, nobody is there
+48489   N     4    0  1  1   U1 User 326 arrives at floor 3, destination is 1, give up 48689
+48539   N     4    0  1  1   E5 Elevator doors start to close
+48574   D     4    0  1  0   E8 Elevator moving down
+48657   D     3    0  1  0   U1 User 327 arrives at floor 0, destination is 1, give up 48829
+48658   D     3    0  1  0   E2 Elevator stops
+48658   D     3    0  1  0   E3 Elevator doors start to open
+48678   D     3    1  1  0   U5 User 326 gets in
+48734   D     3    0  1  1   E5 Elevator doors start to close
+48769   D     3    0  1  0   E8 Elevator moving down
+48829   D     2    0  1  0   U4 User 327 decides to give up, leaves the system
+48830   D     2    0  1  0   E8 Elevator moving down
+48846   D     1    0  1  0   U1 User 328 arrives at floor 2, destination is 0, give up 49218
+48914   D     1    0  1  0   E2 Elevator stops
+48914   D     1    0  1  0   E3 Elevator doors start to open
+48934   D     1    1  1  0   U6 User 326 gets out, leaves the system
+48986   D     1    0  1  1   U1 User 329 arrives at floor 3, destination is 4, give up 49093
+48990   D     1    0  1  1   E5 Elevator doors start to close
+49025   D     1    0  1  0   E8 Elevator moving down
+49093   D     0    0  1  0   U4 User 329 decides to give up, leaves the system
+49095   D     0    0  1  0   U1 User 330 arrives at floor 4, destination is 0, give up 49229
+49109   D     0    0  1  0   E2 Elevator stops
+49109   N     0    0  1  0   E3 Elevator doors start to open
+49129   N     0    0  1  1   E4 Doors open, nobody is there
+49185   N     0    0  1  1   E5 Elevator doors start to close
+49218   U     0    0  1  0   U4 User 328 decides to give up, leaves the system
+49220   U     0    0  1  0   E7 Elevator moving up
+49229   U     1    0  1  0   U4 User 330 decides to give up, leaves the system
+49271   U     1    0  1  0   E7 Elevator moving up
+49289   U     2    0  1  0   U1 User 331 arrives at floor 4, destination is 0, give up 49552
+49322   U     2    0  1  0   E7 Elevator moving up
+49387   U     3    0  1  0   E2 Elevator stops
+49387   U     3    0  1  0   E3 Elevator doors start to open
+49407   U     3    0  1  1   E4 Doors open, nobody is there
+49415   U     3    0  1  1   U1 User 332 arrives at floor 3, destination is 4, give up 49538
+49415   U     3    1  1  0   U5 User 332 gets in
+49463   U     3    0  1  1   E5 Elevator doors start to close
+49498   U     3    0  1  0   E7 Elevator moving up
+49552   U     4    0  1  0   U4 User 331 decides to give up, leaves the system
+49563   U     4    0  1  0   E2 Elevator stops
+49563   N     4    0  1  0   E3 Elevator doors start to open
+49583   N     4    1  1  0   U6 User 332 gets out, leaves the system
+49589   N     4    1  1  0   U1 User 333 arrives at floor 4, destination is 2, give up 49825
+49608   N     4    1  1  0   U5 User 333 gets in
+49633   D     4    0  1  1   E5 Elevator doors start to close
+49668   D     4    0  1  0   E8 Elevator moving down
+49729   D     3    0  1  0   E8 Elevator moving down
+49766   D     2    0  1  0   U1 User 334 arrives at floor 0, destination is 1, give up 49961
+49813   D     2    0  1  0   E2 Elevator stops
+49813   D     2    0  1  0   E3 Elevator doors start to open
+49833   D     2    1  1  0   U6 User 333 gets out, leaves the system
+49889   D     2    0  1  1   E5 Elevator doors start to close
+49924   D     2    0  1  0   E8 Elevator moving down
+49934   D     1    0  1  0   U1 User 335 arrives at floor 0, destination is 2, give up 50140
+49961   D     1    0  1  0   U4 User 334 decides to give up, leaves the system
+49985   D     1    0  1  0   E8 Elevator moving down
+50044   D     0    0  1  0   U1 User 336 arrives at floor 0, destination is 1, give up 50153
+50069   D     0    0  1  0   E2 Elevator stops
+50069   N     0    0  1  0   E3 Elevator doors start to open
+50089   N     0    1  1  0   U5 User 335 gets in
+50114   U     0    1  1  0   U5 User 336 gets in
+50114   U     0    1  1  0   E5 Elevator doors flutter
+50154   U     0    0  1  1   E5 Elevator doors start to close
+50157   U     0    0  1  0   U1 User 337 arrives at floor 3, destination is 1, give up 50507
+50189   U     0    0  1  0   E7 Elevator moving up
+50254   U     1    0  1  0   E2 Elevator stops
+50254   U     1    0  1  0   E3 Elevator doors start to open
+50274   U     1    1  1  0   U6 User 336 gets out, leaves the system
+50324   U     1    0  1  1   U1 User 338 arrives at floor 0, destination is 1, give up 50538
+50330   U     1    0  1  1   E5 Elevator doors start to close
+50365   U     1    0  1  0   E7 Elevator moving up
+50430   U     2    0  1  0   E2 Elevator stops
+50430   U     2    0  1  0   E3 Elevator doors start to open
+50450   U     2    1  1  0   U6 User 335 gets out, leaves the system
+50491   U     2    0  1  1   U1 User 339 arrives at floor 1, destination is 3, give up 50656
+50506   U     2    0  1  1   E5 Elevator doors start to close
+50507   U     2    0  1  0   U4 User 337 decides to give up, leaves the system
+50538   U     2    0  1  0   U4 User 338 decides to give up, leaves the system
+50541   U     2    0  1  0   E7 Elevator moving up
+50606   U     3    0  1  0   E2 Elevator stops
+50606   N     3    0  1  0   E3 Elevator doors start to open
+50626   N     3    0  1  1   E4 Doors open, nobody is there
+50656   N     3    0  1  1   U4 User 339 decides to give up, leaves the system
+50672   N     3    0  1  1   U1 User 340 arrives at floor 3, destination is 1, give up 51018
+50672   N     3    1  1  0   U5 User 340 gets in
+50697   D     3    0  1  1   E5 Elevator doors start to close
+50732   D     3    0  1  0   E8 Elevator moving down
+50793   D     2    0  1  0   E8 Elevator moving down
+50865   D     1    0  1  0   U1 User 341 arrives at floor 4, destination is 0, give up 51228
+50877   D     1    0  1  0   E2 Elevator stops
+50877   D     1    0  1  0   E3 Elevator doors start to open
+50897   D     1    1  1  0   U6 User 340 gets out, leaves the system
+50953   D     1    0  1  1   E5 Elevator doors start to close
+50988   D     1    0  1  0   E8 Elevator moving down
+51031   D     0    0  1  0   U1 User 342 arrives at floor 2, destination is 3, give up 51253
+51072   D     0    0  1  0   E2 Elevator stops
+51072   N     0    0  1  0   E3 Elevator doors start to open
+51092   N     0    0  1  1   E4 Doors open, nobody is there
+51148   N     0    0  1  1   E5 Elevator doors start to close
+51183   U     0    0  1  0   E7 Elevator moving up
+51190   U     1    0  1  0   U1 User 343 arrives at floor 4, destination is 1, give up 51585
+51228   U     1    0  1  0   U4 User 341 decides to give up, leaves the system
+51248   U     1    0  1  0   E2 Elevator stops
+51248   U     1    0  1  0   E3 Elevator doors start to open
+51253   U     1    1  1  0   U4 User 342 decides to give up, leaves the system
+51268   U     1    0  1  1   E4 Doors open, nobody is there
+51324   U     1    0  1  1   E5 Elevator doors start to close
+51328   U     1    0  1  0   U1 User 344 arrives at floor 2, destination is 3, give up 51533
+51359   U     1    0  1  0   E7 Elevator moving up
+51424   U     2    0  1  0   E2 Elevator stops
+51424   U     2    0  1  0   E3 Elevator doors start to open
+51444   U     2    1  1  0   U5 User 344 gets in
+51477   U     2    0  1  1   U1 User 345 arrives at floor 4, destination is 3, give up 51860
+51500   U     2    0  1  1   E5 Elevator doors start to close
+51535   U     2    0  1  0   E7 Elevator moving up
+51585   U     3    0  1  0   U4 User 343 decides to give up, leaves the system
+51600   U     3    0  1  0   E2 Elevator stops
+51600   U     3    0  1  0   E3 Elevator doors start to open
+51619   U     3    1  1  0   U1 User 346 arrives at floor 3, destination is 1, give up 51869
+51620   U     3    1  1  0   U6 User 344 gets out, leaves the system
+51645   U     3    1  1  0   U5 User 346 gets in
+51676   U     3    0  1  1   E5 Elevator doors start to close
+51711   U     3    0  1  0   E7 Elevator moving up
+51766   U     4    0  1  0   U1 User 347 arrives at floor 1, destination is 4, give up 51950
+51776   U     4    0  1  0   E2 Elevator stops
+51776   D     4    0  1  0   E3 Elevator doors start to open
+51796   D     4    1  1  0   U5 User 345 gets in
+51852   D     4    0  1  1   E5 Elevator doors start to close
+51874   D     4    0  1  0   U1 User 348 arrives at floor 1, destination is 2, give up 52125
+51887   D     4    0  1  0   E8 Elevator moving down
+51950   D     3    0  1  0   U4 User 347 decides to give up, leaves the system
+51971   D     3    0  1  0   E2 Elevator stops
+51971   D     3    0  1  0   E3 Elevator doors start to open
+51991   D     3    1  1  0   U6 User 345 gets out, leaves the system
+52047   D     3    0  1  1   E5 Elevator doors start to close
+52056   D     3    0  1  0   U1 User 349 arrives at floor 3, destination is 2, give up 52284
+52056   D     3    0  1  0   E3 Elevator doors start to open
+52076   D     3    1  1  0   U5 User 349 gets in
+52125   D     3    0  1  1   U4 User 348 decides to give up, leaves the system
+52132   D     3    0  1  1   E5 Elevator doors start to close
+52167   D     3    0  1  0   E8 Elevator moving down
+52185   D     2    0  1  0   U1 User 350 arrives at floor 0, destination is 3, give up 52479
+52251   D     2    0  1  0   E2 Elevator stops
+52251   D     2    0  1  0   E3 Elevator doors start to open
+52271   D     2    1  1  0   U6 User 349 gets out, leaves the system
+52327   D     2    0  1  1   E5 Elevator doors start to close
+52359   D     2    0  1  0   U1 User 351 arrives at floor 2, destination is 4, give up 52735
+52362   D     2    0  1  0   E8 Elevator moving down
+52446   D     1    0  1  0   E2 Elevator stops
+52446   D     1    0  1  0   E3 Elevator doors start to open
+52466   D     1    1  1  0   U6 User 346 gets out, leaves the system
+52479   D     1    1  1  0   U4 User 350 decides to give up, leaves the system
+52522   D     1    0  1  1   E5 Elevator doors start to close
+52549   D     1    0  1  0   U1 User 352 arrives at floor 1, destination is 4, give up 52738
+52557   D     1    0  1  0   E8 Elevator moving down
+52641   D     0    0  1  0   E2 Elevator stops
+52641   N     0    0  1  0   E3 Elevator doors start to open
+52661   N     0    0  1  1   E4 Doors open, nobody is there
+52687   N     0    0  1  1   U1 User 353 arrives at floor 4, destination is 3, give up 53023
+52717   N     0    0  1  1   E5 Elevator doors start to close
+52735   N     0    0  1  0   U4 User 351 decides to give up, leaves the system
+52738   U     0    0  1  0   U4 User 352 decides to give up, leaves the system
+52752   U     0    0  1  0   E7 Elevator moving up
+52817   U     1    0  1  0   E2 Elevator stops
+52817   U     1    0  1  0   E3 Elevator doors start to open
+52819   U     1    1  1  0   U1 User 354 arrives at floor 2, destination is 3, give up 53133
+52837   U     1    0  1  1   E4 Doors open, nobody is there
+52893   U     1    0  1  1   E5 Elevator doors start to close
+52924   U     1    0  1  0   U1 User 355 arrives at floor 0, destination is 3, give up 53279
+52928   U     1    0  1  0   E7 Elevator moving up
+52993   U     2    0  1  0   E2 Elevator stops
+52993   U     2    0  1  0   E3 Elevator doors start to open
+53013   U     2    1  1  0   U5 User 354 gets in
+53023   U     2    1  1  0   U4 User 353 decides to give up, leaves the system
+53069   U     2    0  1  1   E5 Elevator doors start to close
+53104   U     2    0  1  0   E7 Elevator moving up
+53118   U     3    0  1  0   U1 User 356 arrives at floor 4, destination is 2, give up 53470
+53169   U     3    0  1  0   E2 Elevator stops
+53169   U     3    0  1  0   E3 Elevator doors start to open
+53189   U     3    1  1  0   U6 User 354 gets out, leaves the system
+53240   U     3    0  1  1   U1 User 357 arrives at floor 1, destination is 4, give up 53428
+53245   U     3    0  1  1   E5 Elevator doors start to close
+53279   U     3    0  1  0   U4 User 355 decides to give up, leaves the system
+53280   U     3    0  1  0   E7 Elevator moving up
+53345   U     4    0  1  0   E2 Elevator stops
+53345   N     4    0  1  0   E3 Elevator doors start to open
+53349   N     4    1  1  0   U1 User 358 arrives at floor 3, destination is 2, give up 53584
+53365   N     4    1  1  0   U5 User 356 gets in
+53390   D     4    0  1  1   E5 Elevator doors start to close
+53425   D     4    0  1  0   E8 Elevator moving down
+53428   D     3    0  1  0   U4 User 357 decides to give up, leaves the system
+53474   D     3    0  1  0   U1 User 359 arrives at floor 1, destination is 4, give up 53818
+53509   D     3    0  1  0   E2 Elevator stops
+53509   D     3    0  1  0   E3 Elevator doors start to open
+53529   D     3    1  1  0   U5 User 358 gets in
+53584   D     3    0  1  1   U1 User 360 arrives at floor 1, destination is 0, give up 53900
+53585   D     3    0  1  1   E5 Elevator doors start to close
+53620   D     3    0  1  0   E8 Elevator moving down
+53704   D     2    0  1  0   E2 Elevator stops
+53704   D     2    0  1  0   E3 Elevator doors start to open
+53724   D     2    1  1  0   U6 User 358 gets out, leaves the system
+53749   D     2    1  1  0   U6 User 356 gets out, leaves the system
+53776   D     2    0  1  1   U1 User 361 arrives at floor 2, destination is 4, give up 54018
+53776   D     2    1  1  0   U5 User 361 gets in
+53780   D     2    1  1  0   E5 Elevator doors flutter
+53818   D     2    0  1  1   U4 User 359 decides to give up, leaves the system
+53820   D     2    0  1  1   E5 Elevator doors start to close
+53855   D     2    0  1  0   E8 Elevator moving down
+53900   D     1    0  1  0   U4 User 360 decides to give up, leaves the system
+53936   D     1    0  1  0   U1 User 362 arrives at floor 0, destination is 3, give up 54189
+53939   D     1    0  1  0   E2 Elevator stops
+53939   D     1    0  1  0   E3 Elevator doors start to open
+53959   D     1    0  1  1   E4 Doors open, nobody is there
+54015   D     1    0  1  1   E5 Elevator doors start to close
+54041   D     1    0  1  0   U1 User 363 arrives at floor 0, destination is 2, give up 54335
+54050   D     1    0  1  0   E8 Elevator moving down
+54134   D     0    0  1  0   E2 Elevator stops
+54134   U     0    0  1  0   E3 Elevator doors start to open
+54154   U     0    1  1  0   U5 User 362 gets in
+54179   U     0    1  1  0   U5 User 363 gets in
+54210   U     0    0  1  1   E5 Elevator doors start to close
+54211   U     0    0  1  0   U1 User 364 arrives at floor 4, destination is 1, give up 54566
+54245   U     0    0  1  0   E7 Elevator moving up
+54310   U     1    0  1  0   E2 Elevator stops
+54310   U     1    0  1  0   E3 Elevator doors start to open
+54330   U     1    0  1  1   E4 Doors open, nobody is there
+54337   U     1    0  1  1   U1 User 365 arrives at floor 1, destination is 4, give up 54591
+54337   U     1    1  1  0   U5 User 365 gets in
+54386   U     1    0  1  1   E5 Elevator doors start to close
+54421   U     1    0  1  0   E7 Elevator moving up
+54441   U     2    0  1  0   U1 User 366 arrives at floor 3, destination is 0, give up 54671
+54486   U     2    0  1  0   E2 Elevator stops
+54486   U     2    0  1  0   E3 Elevator doors start to open
+54506   U     2    1  1  0   U6 User 363 gets out, leaves the system
+54551   U     2    0  1  1   U1 User 367 arrives at floor 3, destination is 2, give up 54934
+54562   U     2    0  1  1   E5 Elevator doors start to close
+54566   U     2    0  1  0   U4 User 364 decides to give up, leaves the system
+54597   U     2    0  1  0   E7 Elevator moving up
+54654   U     3    0  1  0   U1 User 368 arrives at floor 4, destination is 0, give up 54864
+54662   U     3    0  1  0   E2 Elevator stops
+54662   U     3    0  1  0   E3 Elevator doors start to open
+54682   U     3    1  1  0   U6 User 362 gets out, leaves the system
+54707   U     3    1  1  0   U5 User 366 gets in
+54732   U     3    1  1  0   U5 User 367 gets in
+54738   U     3    1  1  0   E5 Elevator doors flutter
+54772   U     3    0  1  1   U1 User 369 arrives at floor 1, destination is 4, give up 54878
+54778   U     3    0  1  1   E5 Elevator doors start to close
+54813   U     3    0  1  0   E7 Elevator moving up
+54864   U     4    0  1  0   U4 User 368 decides to give up, leaves the system
+54878   U     4    0  1  0   U4 User 369 decides to give up, leaves the system
+54878   U     4    0  1  0   E2 Elevator stops
+54878   D     4    0  1  0   E3 Elevator doors start to open
+54898   D     4    1  1  0   U6 User 365 gets out, leaves the system
+54923   D     4    1  1  0   U6 User 361 gets out, leaves the system
+54934   D     4    1  1  0   U1 User 370 arrives at floor 4, destination is 1, give up 55306
+54948   D     4    1  1  0   U5 User 370 gets in
+54954   D     4    1  1  0   E5 Elevator doors flutter
+54994   D     4    0  1  1   E5 Elevator doors start to close
+55029   D     4    0  1  0   E8 Elevator moving down
+55062   D     3    0  1  0   U1 User 371 arrives at floor 4, destination is 3, give up 55193
+55113   D     3    0  1  0   E2 Elevator stops
+55113   D     3    0  1  0   E3 Elevator doors start to open
+55133   D     3    0  1  1   E4 Doors open, nobody is there
+55175   D     3    0  1  1   U1 User 372 arrives at floor 0, destination is 1, give up 55508
+55189   D     3    0  1  1   E5 Elevator doors start to close
+55193   D     3    0  1  0   U4 User 371 decides to give up, leaves the system
+55224   D     3    0  1  0   E8 Elevator moving down
+55308   D     2    0  1  0   E2 Elevator stops
+55308   D     2    0  1  0   E3 Elevator doors start to open
+55328   D     2    1  1  0   U6 User 367 gets out, leaves the system
+55363   D     2    0  1  1   U1 User 373 arrives at floor 4, destination is 0, give up 55698
+55384   D     2    0  1  1   E5 Elevator doors start to close
+55419   D     2    0  1  0   E8 Elevator moving down
+55503   D     1    0  1  0   E2 Elevator stops
+55503   D     1    0  1  0   E3 Elevator doors start to open
+55508   D     1    1  1  0   U4 User 372 decides to give up, leaves the system
+55523   D     1    1  1  0   U6 User 370 gets out, leaves the system
+55530   D     1    1  1  0   U1 User 374 arrives at floor 1, destination is 2, give up 55634
+55548   D     1    1  1  0   U5 User 374 gets in
+55579   D     1    0  1  1   E5 Elevator doors start to close
+55614   D     1    0  1  0   E8 Elevator moving down
+55663   D     0    0  1  0   U1 User 375 arrives at floor 3, destination is 1, give up 55831
+55698   D     0    0  1  0   U4 User 373 decides to give up, leaves the system
+55698   D     0    0  1  0   E2 Elevator stops
+55698   U     0    0  1  0   E3 Elevator doors start to open
+55718   U     0    1  1  0   U6 User 366 gets out, leaves the system
+55774   U     0    0  1  1   E5 Elevator doors start to close
+55777   U     0    0  1  0   U1 User 376 arrives at floor 0, destination is 2, give up 56118
+55777   U     0    0  1  0   E3 Elevator doors start to open
+55797   U     0    1  1  0   U5 User 376 gets in
+55831   U     0    0  1  1   U4 User 375 decides to give up, leaves the system
+55853   U     0    0  1  1   E5 Elevator doors start to close
+55888   U     0    0  1  0   E7 Elevator moving up
+55953   U     1    0  1  0   U1 User 377 arrives at floor 0, destination is 1, give up 56195
+55953   U     1    0  1  0   E2 Elevator stops
+55953   U     1    0  1  0   E3 Elevator doors start to open
+55973   U     1    0  1  1   E4 Doors open, nobody is there
+56029   U     1    0  1  1   E5 Elevator doors start to close
+56064   U     1    0  1  0   E7 Elevator moving up
+56112   U     2    0  1  0   U1 User 378 arrives at floor 1, destination is 3, give up 56379
+56129   U     2    0  1  0   E2 Elevator stops
+56129   U     2    0  1  0   E3 Elevator doors start to open
+56149   U     2    1  1  0   U6 User 376 gets out, leaves the system
+56174   U     2    1  1  0   U6 User 374 gets out, leaves the system
+56195   U     2    1  1  0   U4 User 377 decides to give up, leaves the system
+56205   U     2    0  1  1   E5 Elevator doors start to close
+56240   U     2    0  1  0   E7 Elevator moving up
+56277   U     3    0  1  0   U1 User 379 arrives at floor 3, destination is 1, give up 56475
+56291   U     3    0  1  0   E7 Elevator moving up
+56356   U     4    0  1  0   E2 Elevator stops
+56356   N     4    0  1  0   E3 Elevator doors start to open
+56376   N     4    0  1  1   E4 Doors open, nobody is there
+56379   N     4    0  1  1   U4 User 378 decides to give up, leaves the system
+56406   N     4    0  1  1   U1 User 380 arrives at floor 0, destination is 4, give up 56783
+56432   N     4    0  1  1   E5 Elevator doors start to close
+56467   D     4    0  1  0   E8 Elevator moving down
+56475   D     3    0  1  0   U4 User 379 decides to give up, leaves the system
+56551   D     3    0  1  0   E2 Elevator stops
+56551   D     3    0  1  0   E3 Elevator doors start to open
+56571   D     3    0  1  1   E4 Doors open, nobody is there
+56603   D     3    0  1  1   U1 User 381 arrives at floor 4, destination is 3, give up 56998
+56627   D     3    0  1  1   E5 Elevator doors start to close
+56662   D     3    0  1  0   E8 Elevator moving down
+56704   D     2    0  1  0   U1 User 382 arrives at floor 2, destination is 3, give up 56985
+56723   D     2    0  1  0   E8 Elevator moving down
+56783   D     1    0  1  0   U4 User 380 decides to give up, leaves the system
+56784   D     1    0  1  0   E8 Elevator moving down
+56815   D     0    0  1  0   U1 User 383 arrives at floor 0, destination is 4, give up 56973
+56868   D     0    0  1  0   E2 Elevator stops
+56868   N     0    0  1  0   E3 Elevator doors start to open
+56888   N     0    1  1  0   U5 User 383 gets in
+56913   U     0    0  1  1   E5 Elevator doors start to close
+56948   U     0    0  1  0   E7 Elevator moving up
+56984   U     1    0  1  0   U1 User 384 arrives at floor 0, destination is 1, give up 57166
+56985   U     1    0  1  0   U4 User 382 decides to give up, leaves the system
+56998   U     1    0  1  0   U4 User 381 decides to give up, leaves the system
+57013   U     1    0  1  0   E2 Elevator stops
+57013   U     1    0  1  0   E3 Elevator doors start to open
+57033   U     1    0  1  1   E4 Doors open, nobody is there
+57089   U     1    0  1  1   E5 Elevator doors start to close
+57103   U     1    0  1  0   U1 User 385 arrives at floor 1, destination is 0, give up 57501
+57103   U     1    0  1  0   E3 Elevator doors start to open
+57123   U     1    1  1  0   U5 User 385 gets in
+57166   U     1    0  1  1   U4 User 384 decides to give up, leaves the system
+57179   U     1    0  1  1   E5 Elevator doors start to close
+57214   U     1    0  1  0   E7 Elevator moving up
+57250   U     2    0  1  0   U1 User 386 arrives at floor 1, destination is 2, give up 57394
+57279   U     2    0  1  0   E2 Elevator stops
+57279   U     2    0  1  0   E3 Elevator doors start to open
+57299   U     2    0  1  1   E4 Doors open, nobody is there
+57355   U     2    0  1  1   E5 Elevator doors start to close
+57390   U     2    0  1  0   E7 Elevator moving up
+57394   U     3    0  1  0   U4 User 386 decides to give up, leaves the system
+57429   U     3    0  1  0   U1 User 387 arrives at floor 0, destination is 4, give up 57804
+57441   U     3    0  1  0   E7 Elevator moving up
+57506   U     4    0  1  0   E2 Elevator stops
+57506   D     4    0  1  0   E3 Elevator doors start to open
+57526   D     4    1  1  0   U6 User 383 gets out, leaves the system
+57577   D     4    0  1  1   U1 User 388 arrives at floor 3, destination is 2, give up 57973
+57582   D     4    0  1  1   E5 Elevator doors start to close
+57617   D     4    0  1  0   E8 Elevator moving down
+57701   D     3    0  1  0   E2 Elevator stops
+57701   D     3    0  1  0   E3 Elevator doors start to open
+57714   D     3    1  1  0   U1 User 389 arrives at floor 3, destination is 0, give up 57894
+57721   D     3    1  1  0   U5 User 388 gets in
+57746   D     3    1  1  0   U5 User 389 gets in
+57777   D     3    0  1  1   E5 Elevator doors start to close
+57804   D     3    0  1  0   U4 User 387 decides to give up, leaves the system
+57812   D     3    0  1  0   E8 Elevator moving down
+57855   D     2    0  1  0   U1 User 390 arrives at floor 2, destination is 4, give up 58159
+57896   D     2    0  1  0   E2 Elevator stops
+57896   D     2    0  1  0   E3 Elevator doors start to open
+57916   D     2    1  1  0   U6 User 388 gets out, leaves the system
+57941   D     2    1  1  0   U5 User 390 gets in
+57972   D     2    0  1  1   E5 Elevator doors start to close
+58007   D     2    0  1  0   E8 Elevator moving down
+58010   D     1    0  1  0   U1 User 391 arrives at floor 4, destination is 1, give up 58272
+58068   D     1    0  1  0   E8 Elevator moving down
+58152   D     0    0  1  0   E2 Elevator stops
+58152   U     0    0  1  0   E3 Elevator doors start to open
+58172   U     0    1  1  0   U6 User 389 gets out, leaves the system
+58187   U     0    1  1  0   U1 User 392 arrives at floor 1, destination is 4, give up 58343
+58197   U     0    1  1  0   U6 User 385 gets out, leaves the system
+58228   U     0    0  1  1   E5 Elevator doors start to close
+58263   U     0    0  1  0   E7 Elevator moving up
+58272   U     1    0  1  0   U4 User 391 decides to give up, leaves the system
+58328   U     1    0  1  0   E2 Elevator stops
+58328   U     1    0  1  0   E3 Elevator doors start to open
+58348   U     1    1  1  0   U5 User 392 gets in
+58372   U     1    1  1  0   U1 User 393 arrives at floor 0, destination is 1, give up 58550
+58404   U     1    0  1  1   E5 Elevator doors start to close
+58439   U     1    0  1  0   E7 Elevator moving up
+58504   U     2    0  1  0   E2 Elevator stops
+58504   U     2    0  1  0   E3 Elevator doors start to open
+58524   U     2    0  1  1   E4 Doors open, nobody is there
+58538   U     2    0  1  1   U1 User 394 arrives at floor 2, destination is 4, give up 58673
+58538   U     2    1  1  0   U5 User 394 gets in
+58550   U     2    1  1  0   U4 User 393 decides to give up, leaves the system
+58580   U     2    0  1  1   E5 Elevator doors start to close
+58615   U     2    0  1  0   E7 Elevator moving up
+58639   U     3    0  1  0   U1 User 395 arrives at floor 0, destination is 3, give up 58850
+58666   U     3    0  1  0   E7 Elevator moving up
+58731   U     4    0  1  0   E2 Elevator stops
+58731   N     4    0  1  0   E3 Elevator doors start to open
+58742   N     4    1  1  0   U1 User 396 arrives at floor 4, destination is 3, give up 59083
+58751   N     4    1  1  0   U6 User 394 gets out, leaves the system
+58776   N     4    1  1  0   U6 User 392 gets out, leaves the system
+58801   N     4    1  1  0   U6 User 390 gets out, leaves the system
+58807   N     4    1  1  0   E5 Elevator doors flutter
+58826   N     4    1  1  0   U5 User 396 gets in
+58850   D     4    1  1  0   U4 User 395 decides to give up, leaves the system
+58851   D     4    0  1  1   E5 Elevator doors start to close
+58882   D     4    0  1  0   U1 User 397 arrives at floor 4, destination is 3, give up 59124
+58886   D     4    0  1  0   E8 Elevator moving down
+58970   D     3    0  1  0   E2 Elevator stops
+58970   D     3    0  1  0   E3 Elevator doors start to open
+58990   D     3    1  1  0   U6 User 396 gets out, leaves the system
+59010   D     3    1  1  0   U1 User 398 arrives at floor 0, destination is 4, give up 59280
+59046   D     3    0  1  1   E5 Elevator doors start to close
+59081   D     3    0  1  0   E8 Elevator moving down
+59124   D     2    0  1  0   U4 User 397 decides to give up, leaves the system
+59142   D     2    0  1  0   E8 Elevator moving down
+59186   D     1    0  1  0   U1 User 399 arrives at floor 1, destination is 2, give up 59298
+59203   D     1    0  1  0   E8 Elevator moving down
+59280   D     0    0  1  0   U4 User 398 decides to give up, leaves the system
+59287   D     0    0  1  0   E2 Elevator stops
+59287   N     0    0  1  0   E3 Elevator doors start to open
+59298   N     0    1  1  0   U4 User 399 decides to give up, leaves the system
+59302   N     0    1  1  0   U1 User 400 arrives at floor 3, destination is 4, give up 59505
+59307   N     0    0  1  1   E4 Doors open, nobody is there
+59363   N     0    0  1  1   E5 Elevator doors start to close
+59398   U     0    0  1  0   E7 Elevator moving up
+59463   U     1    0  1  0   E2 Elevator stops
+59463   U     1    0  1  0   E3 Elevator doors start to open
+59474   U     1    1  1  0   U1 User 401 arrives at floor 0, destination is 2, give up 59719
+59483   U     1    0  1  1   E4 Doors open, nobody is there
+59505   U     1    0  1  1   U4 User 400 decides to give up, leaves the system
+59539   U     1    0  1  1   E5 Elevator doors start to close
+59574   U     1    0  1  0   E7 Elevator moving up
+59625   U     2    0  1  0   E7 Elevator moving up
+59641   U     3    0  1  0   U1 User 402 arrives at floor 3, destination is 4, give up 59865
+59690   U     3    0  1  0   E2 Elevator stops
+59690   U     3    0  1  0   E3 Elevator doors start to open
+59710   U     3    1  1  0   U5 User 402 gets in
+59719   U     3    1  1  0   U4 User 401 decides to give up, leaves the system
+59766   U     3    0  1  1   E5 Elevator doors start to close
+59794   U     3    0  1  0   U1 User 403 arrives at floor 3, destination is 4, give up 60042
+59801   U     3    0  1  0   E7 Elevator moving up
+59866   U     4    0  1  0   E2 Elevator stops
+59866   N     4    0  1  0   E3 Elevator doors start to open
+59886   N     4    1  1  0   U6 User 402 gets out, leaves the system
+59942   N     4    0  1  1   E5 Elevator doors start to close
+59977   D     4    0  1  0   E8 Elevator moving down
+59983   D     3    0  1  0   U1 User 404 arrives at floor 3, destination is 4, give up 60170
+60038   D     3    0  1  0   E8 Elevator moving down
+60042   D     2    0  1  0   U4 User 403 decides to give up, leaves the system
+60099   D     2    0  1  0   E8 Elevator moving down
+60160   D     1    0  1  0   E8 Elevator moving down
+60167   D     0    0  1  0   U1 User 405 arrives at floor 0, destination is 3, give up 60412
+60170   D     0    0  1  0   U4 User 404 decides to give up, leaves the system
+60244   D     0    0  1  0   E2 Elevator stops
+60244   N     0    0  1  0   E3 Elevator doors start to open
+60264   N     0    1  1  0   U5 User 405 gets in
+60289   U     0    0  1  1   E5 Elevator doors start to close
+60324   U     0    0  1  0   E7 Elevator moving up
+60352   U     1    0  1  0   U1 User 406 arrives at floor 1, destination is 3, give up 60653
+60389   U     1    0  1  0   E2 Elevator stops
+60389   U     1    0  1  0   E3 Elevator doors start to open
+60409   U     1    1  1  0   U5 User 406 gets in
+60465   U     1    0  1  1   E5 Elevator doors start to close
+60466   U     1    0  1  0   U1 User 407 arrives at floor 3, destination is 0, give up 60653
+60500   U     1    0  1  0   E7 Elevator moving up
+60551   U     2    0  1  0   E7 Elevator moving up
+60585   U     3    0  1  0   U1 User 408 arrives at floor 4, destination is 1, give up 60841
+60616   U     3    0  1  0   E2 Elevator stops
+60616   U     3    0  1  0   E3 Elevator doors start to open
+60636   U     3    1  1  0   U6 User 406 gets out, leaves the system
+60661   U     3    1  1  0   U6 User 405 gets out, leaves the system
+60686   U     3    1  1  0   U5 User 407 gets in
+60692   U     3    1  1  0   E5 Elevator doors flutter
+60732   U     3    0  1  1   E5 Elevator doors start to close
+60736   U     3    0  1  0   U1 User 409 arrives at floor 3, destination is 4, give up 61032
+60736   U     3    0  1  0   E3 Elevator doors start to open
+60756   U     3    1  1  0   U5 User 409 gets in
+60812   U     3    0  1  1   E5 Elevator doors start to close
+60841   U     3    0  1  0   U4 User 408 decides to give up, leaves the system
+60847   U     3    0  1  0   E7 Elevator moving up
+60884   U     4    0  1  0   U1 User 410 arrives at floor 2, destination is 0, give up 61073
+60912   U     4    0  1  0   E2 Elevator stops
+60912   D     4    0  1  0   E3 Elevator doors start to open
+60932   D     4    1  1  0   U6 User 409 gets out, leaves the system
+60988   D     4    0  1  1   E5 Elevator doors start to close
+61023   D     4    0  1  0   E8 Elevator moving down
+61073   D     3    0  1  0   U4 User 410 decides to give up, leaves the system
+61084   D     3    0  1  0   U1 User 411 arrives at floor 0, destination is 3, give up 61219
+61107   D     3    0  1  0   E2 Elevator stops
+61107   D     3    0  1  0   E3 Elevator doors start to open
+61127   D     3    0  1  1   E4 Doors open, nobody is there
+61183   D     3    0  1  1   E5 Elevator doors start to close
+61218   D     3    0  1  0   E8 Elevator moving down
+61219   D     2    0  1  0   U4 User 411 decides to give up, leaves the system
+61279   D     2    0  1  0   U1 User 412 arrives at floor 4, destination is 3, give up 61424
+61302   D     2    0  1  0   E2 Elevator stops
+61302   D     2    0  1  0   E3 Elevator doors start to open
+61322   D     2    0  1  1   E4 Doors open, nobody is there
+61378   D     2    0  1  1   E5 Elevator doors start to close
+61405   D     2    0  1  0   U1 User 413 arrives at floor 4, destination is 2, give up 61781
+61413   D     2    0  1  0   E8 Elevator moving down
+61424   D     1    0  1  0   U4 User 412 decides to give up, leaves the system
+61474   D     1    0  1  0   E8 Elevator moving down
+61533   D     0    0  1  0   U1 User 414 arrives at floor 2, destination is 3, give up 61887
+61558   D     0    0  1  0   E2 Elevator stops
+61558   N     0    0  1  0   E3 Elevator doors start to open
+61578   N     0    1  1  0   U6 User 407 gets out, leaves the system
+61634   N     0    0  1  1   E5 Elevator doors start to close
+61669   U     0    0  1  0   E7 Elevator moving up
+61675   U     1    0  1  0   U1 User 415 arrives at floor 3, destination is 0, give up 61794
+61720   U     1    0  1  0   E7 Elevator moving up
+61781   U     2    0  1  0   U4 User 413 decides to give up, leaves the system
+61785   U     2    0  1  0   E2 Elevator stops
+61785   U     2    0  1  0   E3 Elevator doors start to open
+61789   U     2    1  1  0   U1 User 416 arrives at floor 4, destination is 1, give up 62080
+61794   U     2    1  1  0   U4 User 415 decides to give up, leaves the system
+61805   U     2    1  1  0   U5 User 414 gets in
+61861   U     2    0  1  1   E5 Elevator doors start to close
+61896   U     2    0  1  0   E7 Elevator moving up
+61961   U     3    0  1  0   E2 Elevator stops
+61961   U     3    0  1  0   E3 Elevator doors start to open
+61981   U     3    1  1  0   U6 User 414 gets out, leaves the system
+61982   U     3    1  1  0   U1 User 417 arrives at floor 0, destination is 3, give up 62149
+62037   U     3    0  1  1   E5 Elevator doors start to close
+62072   U     3    0  1  0   E7 Elevator moving up
+62080   U     4    0  1  0   U4 User 416 decides to give up, leaves the system
+62137   U     4    0  1  0   E2 Elevator stops
+62137   N     4    0  1  0   E3 Elevator doors start to open
+62149   N     4    1  1  0   U4 User 417 decides to give up, leaves the system
+62157   N     4    0  1  1   E4 Doors open, nobody is there
+62162   N     4    0  1  1   U1 User 418 arrives at floor 2, destination is 0, give up 62264
+62213   N     4    0  1  1   E5 Elevator doors start to close
+62248   D     4    0  1  0   E8 Elevator moving down
+62264   D     3    0  1  0   U4 User 418 decides to give up, leaves the system
+62332   D     3    0  1  0   E2 Elevator stops
+62332   D     3    0  1  0   E3 Elevator doors start to open
+62336   D     3    1  1  0   U1 User 419 arrives at floor 4, destination is 2, give up 62444
+62352   D     3    0  1  1   E4 Doors open, nobody is there
+62408   D     3    0  1  1   E5 Elevator doors start to close
+62439   D     3    0  1  0   U1 User 420 arrives at floor 4, destination is 3, give up 62637
+62443   D     3    0  1  0   E8 Elevator moving down
+62444   D     2    0  1  0   U4 User 419 decides to give up, leaves the system
+62527   D     2    0  1  0   E2 Elevator stops
+62527   D     2    0  1  0   E3 Elevator doors start to open
+62547   D     2    0  1  1   E4 Doors open, nobody is there
+62597   D     2    0  1  1   U1 User 421 arrives at floor 4, destination is 3, give up 62708
+62603   D     2    0  1  1   E5 Elevator doors start to close
+62637   D     2    0  1  0   U4 User 420 decides to give up, leaves the system
+62638   D     2    0  1  0   E8 Elevator moving down
+62699   D     1    0  1  0   E8 Elevator moving down
+62708   D     0    0  1  0   U4 User 421 decides to give up, leaves the system
+62766   D     0    0  1  0   U1 User 422 arrives at floor 3, destination is 4, give up 63149
+62783   D     0    0  1  0   E2 Elevator stops
+62783   N     0    0  1  0   E3 Elevator doors start to open
+62803   N     0    0  1  1   E4 Doors open, nobody is there
+62859   N     0    0  1  1   E5 Elevator doors start to close
+62892   U     0    0  1  0   U1 User 423 arrives at floor 2, destination is 0, give up 63103
+62894   U     0    0  1  0   E7 Elevator moving up
+62945   U     1    0  1  0   E7 Elevator moving up
+62996   U     2    0  1  0   E7 Elevator moving up
+63000   U     3    0  1  0   U1 User 424 arrives at floor 3, destination is 2, give up 63365
+63061   U     3    0  1  0   E2 Elevator stops
+63061   U     3    0  1  0   E3 Elevator doors start to open
+63081   U     3    1  1  0   U5 User 422 gets in
+63101   U     3    1  1  0   U1 User 425 arrives at floor 0, destination is 2, give up 63211
+63103   U     3    1  1  0   U4 User 423 decides to give up, leaves the system
+63106   U     3    1  1  0   U5 User 424 gets in
+63137   U     3    0  1  1   E5 Elevator doors start to close
+63172   U     3    0  1  0   E7 Elevator moving up
+63211   U     4    0  1  0   U4 User 425 decides to give up, leaves the system
+63237   U     4    0  1  0   E2 Elevator stops
+63237   D     4    0  1  0   E3 Elevator doors start to open
+63257   D     4    1  1  0   U6 User 422 gets out, leaves the system
+63264   D     4    1  1  0   U1 User 426 arrives at floor 3, destination is 2, give up 63484
+63313   D     4    0  1  1   E5 Elevator doors start to close
+63348   D     4    0  1  0   E8 Elevator moving down
+63432   D     3    0  1  0   E2 Elevator stops
+63432   D     3    0  1  0   E3 Elevator doors start to open
+63452   D     3    1  1  0   U5 User 426 gets in
+63460   D     3    1  1  0   U1 User 427 arrives at floor 1, destination is 3, give up 63850
+63508   D     3    0  1  1   E5 Elevator doors start to close
+63543   D     3    0  1  0   E8 Elevator moving down
+63568   D     2    0  1  0   U1 User 428 arrives at floor 4, destination is 1, give up 63766
+63627   D     2    0  1  0   E2 Elevator stops
+63627   D     2    0  1  0   E3 Elevator doors start to open
+63647   D     2    1  1  0   U6 User 426 gets out, leaves the system
+63672   D     2    1  1  0   U6 User 424 gets out, leaves the system
+63692   D     2    1  1  0   U1 User 429 arrives at floor 1, destination is 3, give up 63866
+63703   D     2    0  1  1   E5 Elevator doors start to close
+63738   D     2    0  1  0   E8 Elevator moving down
+63766   D     1    0  1  0   U4 User 428 decides to give up, leaves the system
+63799   D     1    0  1  0   E8 Elevator moving down
+63850   D     0    0  1  0   U4 User 427 decides to give up, leaves the system
+63866   D     0    0  1  0   U4 User 429 decides to give up, leaves the system
+63883   D     0    0  1  0   E2 Elevator stops
+63883   N     0    0  1  0   E3 Elevator doors start to open
+63891   N     0    1  1  0   U1 User 430 arrives at floor 2, destination is 1, give up 64080
+63903   N     0    0  1  1   E4 Doors open, nobody is there
+63959   N     0    0  1  1   E5 Elevator doors start to close
+63994   U     0    0  1  0   E7 Elevator moving up
+64030   U     1    0  1  0   U1 User 431 arrives at floor 1, destination is 0, give up 64362
+64059   U     1    0  1  0   E2 Elevator stops
+64059   U     1    0  1  0   E3 Elevator doors start to open
+64079   U     1    1  1  0   U5 User 431 gets in
+64080   U     1    1  1  0   U4 User 430 decides to give up, leaves the system
+64135   U     1    0  1  1   E5 Elevator doors start to close
+64170   U     1    0  1  0   E7 Elevator moving up
+64204   U     2    0  1  0   U1 User 432 arrives at floor 1, destination is 2, give up 64599
+64221   U     2    0  1  0   E7 Elevator moving up
+64272   U     3    0  1  0   E7 Elevator moving up
+64337   U     4    0  1  0   E2 Elevator stops
+64337   D     4    0  1  0   E3 Elevator doors start to open
+64357   D     4    0  1  1   E4 Doors open, nobody is there
+64363   D     4    0  1  1   U1 User 433 arrives at floor 0, destination is 3, give up 64635
+64413   D     4    0  1  1   E5 Elevator doors start to close
+64448   D     4    0  1  0   E8 Elevator moving down
+64509   D     3    0  1  0   E8 Elevator moving down
+64561   D     2    0  1  0   U1 User 434 arrives at floor 1, destination is 2, give up 64895
+64593   D     2    0  1  0   E2 Elevator stops
+64593   D     2    0  1  0   E3 Elevator doors start to open
+64599   D     2    1  1  0   U4 User 432 decides to give up, leaves the system
+64613   D     2    0  1  1   E4 Doors open, nobody is there
+64635   D     2    0  1  1   U4 User 433 decides to give up, leaves the system
+64669   D     2    0  1  1   E5 Elevator doors start to close
+64704   D     2    0  1  0   E8 Elevator moving down
+64717   D     1    0  1  0   U1 User 435 arrives at floor 3, destination is 4, give up 64984
+64788   D     1    0  1  0   E2 Elevator stops
+64788   D     1    0  1  0   E3 Elevator doors start to open
+64808   D     1    1  1  0   U5 User 434 gets in
+64864   D     1    0  1  1   E5 Elevator doors start to close
+64878   D     1    0  1  0   U1 User 436 arrives at floor 0, destination is 1, give up 65225
+64899   D     1    0  1  0   E8 Elevator moving down
+64983   D     0    0  1  0   E2 Elevator stops
+64983   U     0    0  1  0   E3 Elevator doors start to open
+64984   U     0    1  1  0   U4 User 435 decides to give up, leaves the system
+65003   U     0    1  1  0   U6 User 431 gets out, leaves the system
+65028   U     0    1  1  0   U5 User 436 gets in
+65059   U     0    0  1  1   E5 Elevator doors start to close
+65071   U     0    0  1  0   U1 User 437 arrives at floor 4, destination is 0, give up 65339
+65094   U     0    0  1  0   E7 Elevator moving up
+65159   U     1    0  1  0   E2 Elevator stops
+65159   U     1    0  1  0   E3 Elevator doors start to open
+65179   U     1    1  1  0   U6 User 436 gets out, leaves the system
+65192   U     1    1  1  0   U1 User 438 arrives at floor 1, destination is 4, give up 65465
+65204   U     1    1  1  0   U5 User 438 gets in
+65235   U     1    0  1  1   E5 Elevator doors start to close
+65270   U     1    0  1  0   E7 Elevator moving up
+65335   U     2    0  1  0   E2 Elevator stops
+65335   U     2    0  1  0   E3 Elevator doors start to open
+65339   U     2    1  1  0   U4 User 437 decides to give up, leaves the system
+65352   U     2    1  1  0   U1 User 439 arrives at floor 4, destination is 0, give up 65551
+65355   U     2    1  1  0   U6 User 434 gets out, leaves the system
+65411   U     2    0  1  1   E5 Elevator doors start to close
+65446   U     2    0  1  0   E7 Elevator moving up
+65459   U     3    0  1  0   U1 User 440 arrives at floor 4, destination is 0, give up 65648
+65511   U     3    0  1  0   E2 Elevator stops
+65511   U     3    0  1  0   E3 Elevator doors start to open
+65531   U     3    0  1  1   E4 Doors open, nobody is there
+65551   U     3    0  1  1   U4 User 439 decides to give up, leaves the system
+65586   U     3    0  1  1   U1 User 441 arrives at floor 1, destination is 0, give up 65917
+65587   U     3    0  1  1   E5 Elevator doors start to close
+65622   U     3    0  1  0   E7 Elevator moving up
+65648   U     4    0  1  0   U4 User 440 decides to give up, leaves the system
+65687   U     4    0  1  0   E2 Elevator stops
+65687   N     4    0  1  0   E3 Elevator doors start to open
+65691   N     4    1  1  0   U1 User 442 arrives at floor 0, destination is 3, give up 66033
+65707   N     4    1  1  0   U6 User 438 gets out, leaves the system
+65763   N     4    0  1  1   E5 Elevator doors start to close
+65798   D     4    0  1  0   E8 Elevator moving down
+65816   D     3    0  1  0   U1 User 443 arrives at floor 3, destination is 1, give up 66014
+65882   D     3    0  1  0   E2 Elevator stops
+65882   D     3    0  1  0   E3 Elevator doors start to open
+65902   D     3    1  1  0   U5 User 443 gets in
+65917   D     3    1  1  0   U4 User 441 decides to give up, leaves the system
+65946   D     3    0  1  1   U1 User 444 arrives at floor 4, destination is 1, give up 66250
+65958   D     3    0  1  1   E5 Elevator doors start to close
+65993   D     3    0  1  0   E8 Elevator moving down
+66033   D     2    0  1  0   U4 User 442 decides to give up, leaves the system
+66054   D     2    0  1  0   E8 Elevator moving down
+66062   D     1    0  1  0   U1 User 445 arrives at floor 2, destination is 1, give up 66268
+66138   D     1    0  1  0   E2 Elevator stops
+66138   D     1    0  1  0   E3 Elevator doors start to open
+66158   D     1    1  1  0   U6 User 443 gets out, leaves the system
+66188   D     1    0  1  1   U1 User 446 arrives at floor 1, destination is 4, give up 66512
+66188   D     1    1  1  0   U5 User 446 gets in
+66214   D     1    0  1  1   E5 Elevator doors start to close
+66249   D     1    0  1  0   E8 Elevator moving down
+66250   D     0    0  1  0   U4 User 444 decides to give up, leaves the system
+66268   D     0    0  1  0   U4 User 445 decides to give up, leaves the system
+66333   D     0    0  1  0   E2 Elevator stops
+66333   U     0    0  1  0   E3 Elevator doors start to open
+66347   U     0    1  1  0   U1 User 447 arrives at floor 2, destination is 0, give up 66649
+66353   U     0    0  1  1   E4 Doors open, nobody is there
+66409   U     0    0  1  1   E5 Elevator doors start to close
+66444   U     0    0  1  0   E7 Elevator moving up
+66480   U     1    0  1  0   U1 User 448 arrives at floor 1, destination is 3, give up 66738
+66509   U     1    0  1  0   E2 Elevator stops
+66509   U     1    0  1  0   E3 Elevator doors start to open
+66529   U     1    1  1  0   U5 User 448 gets in
+66585   U     1    0  1  1   E5 Elevator doors start to close
+66612   U     1    0  1  0   U1 User 449 arrives at floor 4, destination is 3, give up 66949
+66620   U     1    0  1  0   E7 Elevator moving up
+66649   U     2    0  1  0   U4 User 447 decides to give up, leaves the system
+66671   U     2    0  1  0   E7 Elevator moving up
+66728   U     3    0  1  0   U1 User 450 arrives at floor 0, destination is 2, give up 66928
+66736   U     3    0  1  0   E2 Elevator stops
+66736   U     3    0  1  0   E3 Elevator doors start to open
+66756   U     3    1  1  0   U6 User 448 gets out, leaves the system
+66812   U     3    0  1  1   E5 Elevator doors start to close
+66847   U     3    0  1  0   E7 Elevator moving up
+66861   U     4    0  1  0   U1 User 451 arrives at floor 0, destination is 4, give up 66969
+66912   U     4    0  1  0   E2 Elevator stops
+66912   N     4    0  1  0   E3 Elevator doors start to open
+66928   N     4    1  1  0   U4 User 450 decides to give up, leaves the system
+66932   N     4    1  1  0   U6 User 446 gets out, leaves the system
+66957   N     4    1  1  0   U5 User 449 gets in
+66969   D     4    1  1  0   U4 User 451 decides to give up, leaves the system
+66982   D     4    0  1  1   E5 Elevator doors start to close
+66998   D     4    0  1  0   U1 User 452 arrives at floor 2, destination is 3, give up 67304
+67017   D     4    0  1  0   E8 Elevator moving down
+67101   D     3    0  1  0   E2 Elevator stops
+67101   D     3    0  1  0   E3 Elevator doors start to open
+67121   D     3    1  1  0   U6 User 449 gets out, leaves the system
+67177   D     3    0  1  1   U1 User 453 arrives at floor 2, destination is 3, give up 67418
+67177   D     3    0  1  1   E5 Elevator doors start to close
+67212   D     3    0  1  0   E8 Elevator moving down
+67296   D     2    0  1  0   E2 Elevator stops
+67296   D     2    0  1  0   E3 Elevator doors start to open
+67306   D     2    1  1  0   U1 User 454 arrives at floor 0, destination is 3, give up 67471
+67316   D     2    1  1  0   U5 User 452 gets in
+67341   D     2    1  1  0   U5 User 453 gets in
+67372   D     2    0  1  1   E5 Elevator doors start to close
+67407   D     2    0  1  0   E8 Elevator moving down
+67432   D     1    0  1  0   U1 User 455 arrives at floor 2, destination is 0, give up 67649
+67468   D     1    0  1  0   E8 Elevator moving down
+67471   D     0    0  1  0   U4 User 454 decides to give up, leaves the system
+67552   D     0    0  1  0   E2 Elevator stops
+67552   U     0    0  1  0   E3 Elevator doors start to open
+67570   U     0    1  1  0   U1 User 456 arrives at floor 2, destination is 4, give up 67931
+67572   U     0    0  1  1   E4 Doors open, nobody is there
+67628   U     0    0  1  1   E5 Elevator doors start to close
+67649   U     0    0  1  0   U4 User 455 decides to give up, leaves the system
+67663   U     0    0  1  0   E7 Elevator moving up
+67686   U     1    0  1  0   U1 User 457 arrives at floor 3, destination is 0, give up 67957
+67714   U     1    0  1  0   E7 Elevator moving up
+67779   U     2    0  1  0   E2 Elevator stops
+67779   U     2    0  1  0   E3 Elevator doors start to open
+67799   U     2    1  1  0   U5 User 456 gets in
+67844   U     2    0  1  1   U1 User 458 arrives at floor 2, destination is 1, give up 67974
+67844   U     2    1  1  0   U5 User 458 gets in
+67855   U     2    1  1  0   E5 Elevator doors flutter
+67895   U     2    0  1  1   E5 Elevator doors start to close
+67930   U     2    0  1  0   E7 Elevator moving up
+67957   U     3    0  1  0   U4 User 457 decides to give up, leaves the system
+67995   U     3    0  1  0   E2 Elevator stops
+67995   U     3    0  1  0   E3 Elevator doors start to open
+67996   U     3    1  1  0   U1 User 459 arrives at floor 0, destination is 3, give up 68236
+68015   U     3    1  1  0   U6 User 453 gets out, leaves the system
+68040   U     3    1  1  0   U6 User 452 gets out, leaves the system
+68071   U     3    0  1  1   E5 Elevator doors start to close
+68106   U     3    0  1  0   E7 Elevator moving up
+68152   U     4    0  1  0   U1 User 460 arrives at floor 4, destination is 1, give up 68348
+68171   U     4    0  1  0   E2 Elevator stops
+68171   D     4    0  1  0   E3 Elevator doors start to open
+68191   D     4    1  1  0   U6 User 456 gets out, leaves the system
+68216   D     4    1  1  0   U5 User 460 gets in
+68236   D     4    1  1  0   U4 User 459 decides to give up, leaves the system
+68247   D     4    0  1  1   E5 Elevator doors start to close
+68269   D     4    0  1  0   U1 User 461 arrives at floor 0, destination is 4, give up 68505
+68282   D     4    0  1  0   E8 Elevator moving down
+68366   D     3    0  1  0   E2 Elevator stops
+68366   D     3    0  1  0   E3 Elevator doors start to open
+68379   D     3    1  1  0   U1 User 462 arrives at floor 3, destination is 0, give up 68708
+68386   D     3    1  1  0   U5 User 462 gets in
+68442   D     3    0  1  1   E5 Elevator doors start to close
+68477   D     3    0  1  0   E8 Elevator moving down
+68505   D     2    0  1  0   U4 User 461 decides to give up, leaves the system
+68561   D     2    0  1  0   E2 Elevator stops
+68561   D     2    0  1  0   E3 Elevator doors start to open
+68571   D     2    1  1  0   U1 User 463 arrives at floor 2, destination is 4, give up 68888
+68581   D     2    1  1  0   U5 User 463 gets in
+68637   D     2    0  1  1   E5 Elevator doors start to close
+68672   D     2    0  1  0   E8 Elevator moving down
+68756   D     1    0  1  0   E2 Elevator stops
+68756   D     1    0  1  0   E3 Elevator doors start to open
+68762   D     1    1  1  0   U1 User 464 arrives at floor 0, destination is 4, give up 68877
+68776   D     1    1  1  0   U6 User 460 gets out, leaves the system
+68801   D     1    1  1  0   U6 User 458 gets out, leaves the system
+68832   D     1    0  1  1   E5 Elevator doors start to close
+68867   D     1    0  1  0   E8 Elevator moving down
+68877   D     0    0  1  0   U4 User 464 decides to give up, leaves the system
+68922   D     0    0  1  0   U1 User 465 arrives at floor 4, destination is 2, give up 69203
+68951   D     0    0  1  0   E2 Elevator stops
+68951   U     0    0  1  0   E3 Elevator doors start to open
+68971   U     0    1  1  0   U6 User 462 gets out, leaves the system
+69027   U     0    0  1  1   E5 Elevator doors start to close
+69043   U     0    0  1  0   U1 User 466 arrives at floor 1, destination is 4, give up 69319
+69062   U     0    0  1  0   E7 Elevator moving up
+69127   U     1    0  1  0   E2 Elevator stops
+69127   U     1    0  1  0   E3 Elevator doors start to open
+69147   U     1    1  1  0   U5 User 466 gets in
+69167   U     1    1  1  0   U1 User 467 arrives at floor 1, destination is 2, give up 69348
+69172   U     1    1  1  0   U5 User 467 gets in
+69203   U     1    0  1  1   U4 User 465 decides to give up, leaves the system
+69203   U     1    0  1  1   E5 Elevator doors start to close
+69238   U     1    0  1  0   E7 Elevator moving up
+69303   U     2    0  1  0   E2 Elevator stops
+69303   U     2    0  1  0   E3 Elevator doors start to open
+69323   U     2    1  1  0   U6 User 467 gets out, leaves the system
+69366   U     2    0  1  1   U1 User 468 arrives at floor 2, destination is 4, give up 69745
+69366   U     2    1  1  0   U5 User 468 gets in
+69379   U     2    1  1  0   E5 Elevator doors flutter
+69419   U     2    0  1  1   E5 Elevator doors start to close
+69454   U     2    0  1  0   E7 Elevator moving up
+69505   U     3    0  1  0   E7 Elevator moving up
+69564   U     4    0  1  0   U1 User 469 arrives at floor 0, destination is 2, give up 69749
+69570   U     4    0  1  0   E2 Elevator stops
+69570   N     4    0  1  0   E3 Elevator doors start to open
+69590   N     4    1  1  0   U6 User 468 gets out, leaves the system
+69615   N     4    1  1  0   U6 User 466 gets out, leaves the system
+69640   N     4    1  1  0   U6 User 463 gets out, leaves the system
+69646   N     4    1  1  0   E5 Elevator doors flutter
+69686   N     4    0  1  1   E5 Elevator doors start to close
+69721   D     4    0  1  0   E8 Elevator moving down
+69737   D     3    0  1  0   U1 User 470 arrives at floor 4, destination is 3, give up 70117
+69749   D     3    0  1  0   U4 User 469 decides to give up, leaves the system
+69782   D     3    0  1  0   E8 Elevator moving down
+69843   D     2    0  1  0   E8 Elevator moving down
+69886   D     1    0  1  0   U1 User 471 arrives at floor 0, destination is 3, give up 69997
+69904   D     1    0  1  0   E8 Elevator moving down
+69988   D     0    0  1  0   E2 Elevator stops
+69988   N     0    0  1  0   E3 Elevator doors start to open
+70008   N     0    1  1  0   U5 User 471 gets in
+70033   U     0    0  1  1   E5 Elevator doors start to close
+70046   U     0    0  1  0   U1 User 472 arrives at floor 1, destination is 3, give up 70430
+70068   U     0    0  1  0   E7 Elevator moving up
+70117   U     1    0  1  0   U4 User 470 decides to give up, leaves the system
+70133   U     1    0  1  0   E2 Elevator stops
+70133   U     1    0  1  0   E3 Elevator doors start to open
+70153   U     1    1  1  0   U5 User 472 gets in
+70209   U     1    0  1  1   E5 Elevator doors start to close
+70233   U     1    0  1  0   U1 User 473 arrives at floor 1, destination is 3, give up 70573
+70244   U     1    0  1  0   E7 Elevator moving up
+70295   U     2    0  1  0   E7 Elevator moving up
+70360   U     3    0  1  0   E2 Elevator stops
+70360   U     3    0  1  0   E3 Elevator doors start to open
+70380   U     3    1  1  0   U6 User 472 gets out, leaves the system
+70396   U     3    1  1  0   U1 User 474 arrives at floor 1, destination is 0, give up 70724
+70405   U     3    1  1  0   U6 User 471 gets out, leaves the system
+70436   U     3    0  1  1   E5 Elevator doors start to close
+70471   U     3    0  1  0   E7 Elevator moving up
+70522   U     4    0  1  0   U1 User 475 arrives at floor 4, destination is 1, give up 70737
+70536   U     4    0  1  0   E2 Elevator stops
+70536   N     4    0  1  0   E3 Elevator doors start to open
+70556   N     4    1  1  0   U5 User 475 gets in
+70573   D     4    1  1  0   U4 User 473 decides to give up, leaves the system
+70581   D     4    0  1  1   E5 Elevator doors start to close
+70616   D     4    0  1  0   E8 Elevator moving down
+70674   D     3    0  1  0   U1 User 476 arrives at floor 3, destination is 4, give up 71031
+70677   D     3    0  1  0   E8 Elevator moving down
+70724   D     2    0  1  0   U4 User 474 decides to give up, leaves the system
+70738   D     2    0  1  0   E8 Elevator moving down
+70794   D     1    0  1  0   U1 User 477 arrives at floor 2, destination is 4, give up 71093
+70822   D     1    0  1  0   E2 Elevator stops
+70822   N     1    0  1  0   E3 Elevator doors start to open
+70842   N     1    1  1  0   U6 User 475 gets out, leaves the system
+70898   N     1    0  1  1   E5 Elevator doors start to close
+70929   U     1    0  1  0   U1 User 478 arrives at floor 4, destination is 2, give up 71052
+70933   U     1    0  1  0   E7 Elevator moving up
+70998   U     2    0  1  0   E2 Elevator stops
+70998   U     2    0  1  0   E3 Elevator doors start to open
+71018   U     2    1  1  0   U5 User 477 gets in
+71031   U     2    1  1  0   U4 User 476 decides to give up, leaves the system
+71052   U     2    0  1  1   U4 User 478 decides to give up, leaves the system
+71074   U     2    0  1  1   E5 Elevator doors start to close
+71108   U     2    0  1  0   U1 User 479 arrives at floor 4, destination is 3, give up 71299
+71109   U     2    0  1  0   E7 Elevator moving up
+71174   U     3    0  1  0   E2 Elevator stops
+71174   U     3    0  1  0   E3 Elevator doors start to open
+71194   U     3    0  1  1   E4 Doors open, nobody is there
+71243   U     3    0  1  1   U1 User 480 arrives at floor 3, destination is 4, give up 71620
+71243   U     3    1  1  0   U5 User 480 gets in
+71250   U     3    1  1  0   E5 Elevator doors flutter
+71290   U     3    0  1  1   E5 Elevator doors start to close
+71299   U     3    0  1  0   U4 User 479 decides to give up, leaves the system
+71325   U     3    0  1  0   E7 Elevator moving up
+71390   U     4    0  1  0   E2 Elevator stops
+71390   N     4    0  1  0   E3 Elevator doors start to open
+71407   N     4    1  1  0   U1 User 481 arrives at floor 1, destination is 2, give up 71746
+71410   N     4    1  1  0   U6 User 480 gets out, leaves the system
+71435   N     4    1  1  0   U6 User 477 gets out, leaves the system
+71466   N     4    0  1  1   E5 Elevator doors start to close
+71501   D     4    0  1  0   E8 Elevator moving down
+71516   D     3    0  1  0   U1 User 482 arrives at floor 3, destination is 4, give up 71688
+71562   D     3    0  1  0   E8 Elevator moving down
+71623   D     2    0  1  0   E8 Elevator moving down
+71640   D     1    0  1  0   U1 User 483 arrives at floor 2, destination is 4, give up 71758
+71688   D     1    0  1  0   U4 User 482 decides to give up, leaves the system
+71707   D     1    0  1  0   E2 Elevator stops
+71707   N     1    0  1  0   E3 Elevator doors start to open
+71727   N     1    1  1  0   U5 User 481 gets in
+71751   U     1    1  1  0   U1 User 484 arrives at floor 3, destination is 4, give up 72065
+71752   U     1    0  1  1   E5 Elevator doors start to close
+71758   U     1    0  1  0   U4 User 483 decides to give up, leaves the system
+71787   U     1    0  1  0   E7 Elevator moving up
+71852   U     2    0  1  0   E2 Elevator stops
+71852   U     2    0  1  0   E3 Elevator doors start to open
+71872   U     2    1  1  0   U6 User 481 gets out, leaves the system
+71928   U     2    0  1  1   E5 Elevator doors start to close
+71937   U     2    0  1  0   U1 User 485 arrives at floor 0, destination is 4, give up 72254
+71963   U     2    0  1  0   E7 Elevator moving up
+72028   U     3    0  1  0   E2 Elevator stops
+72028   N     3    0  1  0   E3 Elevator doors start to open
+72048   N     3    1  1  0   U5 User 484 gets in
+72073   U     3    0  1  1   E5 Elevator doors start to close
+72087   U     3    0  1  0   U1 User 486 arrives at floor 4, destination is 2, give up 72336
+72108   U     3    0  1  0   E7 Elevator moving up
+72173   U     4    0  1  0   E2 Elevator stops
+72173   N     4    0  1  0   E3 Elevator doors start to open
+72193   N     4    1  1  0   U1 User 487 arrives at floor 1, destination is 2, give up 72338
+72193   N     4    1  1  0   U6 User 484 gets out, leaves the system
+72218   N     4    1  1  0   U5 User 486 gets in
+72243   D     4    0  1  1   E5 Elevator doors start to close
+72254   D     4    0  1  0   U4 User 485 decides to give up, leaves the system
+72278   D     4    0  1  0   E8 Elevator moving down
+72338   D     3    0  1  0   U4 User 487 decides to give up, leaves the system
+72339   D     3    0  1  0   E8 Elevator moving down
+72376   D     2    0  1  0   U1 User 488 arrives at floor 4, destination is 0, give up 72639
+72423   D     2    0  1  0   E2 Elevator stops
+72423   D     2    0  1  0   E3 Elevator doors start to open
+72443   D     2    1  1  0   U6 User 486 gets out, leaves the system
+72499   D     2    0  1  1   E5 Elevator doors start to close
+72531   D     2    0  1  0   U1 User 489 arrives at floor 4, destination is 3, give up 72841
+72534   D     2    0  1  0   E8 Elevator moving down
+72595   D     1    0  1  0   E8 Elevator moving down
+72632   D     0    0  1  0   U1 User 490 arrives at floor 2, destination is 3, give up 72785
+72639   D     0    0  1  0   U4 User 488 decides to give up, leaves the system
+72679   D     0    0  1  0   E2 Elevator stops
+72679   N     0    0  1  0   E3 Elevator doors start to open
+72699   N     0    0  1  1   E4 Doors open, nobody is there
+72755   N     0    0  1  1   E5 Elevator doors start to close
+72758   N     0    0  1  0   U1 User 491 arrives at floor 0, destination is 4, give up 73024
+72758   N     0    0  1  0   E3 Elevator doors start to open
+72778   N     0    1  1  0   U5 User 491 gets in
+72785   U     0    1  1  0   U4 User 490 decides to give up, leaves the system
+72803   U     0    0  1  1   E5 Elevator doors start to close
+72838   U     0    0  1  0   E7 Elevator moving up
+72841   U     1    0  1  0   U4 User 489 decides to give up, leaves the system
+72890   U     1    0  1  0   U1 User 492 arrives at floor 4, destination is 2, give up 73119
+72903   U     1    0  1  0   E2 Elevator stops
+72903   U     1    0  1  0   E3 Elevator doors start to open
+72923   U     1    0  1  1   E4 Doors open, nobody is there
+72979   U     1    0  1  1   E5 Elevator doors start to close
+73000   U     1    0  1  0   U1 User 493 arrives at floor 1, destination is 2, give up 73314
+73014   U     1    0  1  0   E7 Elevator moving up
+73079   U     2    0  1  0   E2 Elevator stops
+73079   U     2    0  1  0   E3 Elevator doors start to open
+73099   U     2    0  1  1   E4 Doors open, nobody is there
+73119   U     2    0  1  1   U4 User 492 decides to give up, leaves the system
+73155   U     2    0  1  1   E5 Elevator doors start to close
+73184   U     2    0  1  0   U1 User 494 arrives at floor 4, destination is 2, give up 73551
+73190   U     2    0  1  0   E7 Elevator moving up
+73241   U     3    0  1  0   E7 Elevator moving up
+73306   U     4    0  1  0   E2 Elevator stops
+73306   N     4    0  1  0   E3 Elevator doors start to open
+73314   N     4    1  1  0   U4 User 493 decides to give up, leaves the system
+73326   N     4    1  1  0   U6 User 491 gets out, leaves the system
+73345   N     4    1  1  0   U1 User 495 arrives at floor 4, destination is 3, give up 73601
+73351   N     4    1  1  0   U5 User 494 gets in
+73376   D     4    1  1  0   U5 User 495 gets in
+73376   D     4    1  1  0   E5 Elevator doors flutter
+73416   D     4    0  1  1   E5 Elevator doors start to close
+73451   D     4    0  1  0   E8 Elevator moving down
+73458   D     3    0  1  0   U1 User 496 arrives at floor 4, destination is 3, give up 73620
+73535   D     3    0  1  0   E2 Elevator stops
+73535   D     3    0  1  0   E3 Elevator doors start to open
+73555   D     3    1  1  0   U6 User 495 gets out, leaves the system
+73563   D     3    1  1  0   U1 User 497 arrives at floor 2, destination is 1, give up 73893
+73611   D     3    0  1  1   E5 Elevator doors start to close
+73620   D     3    0  1  0   U4 User 496 decides to give up, leaves the system
+73646   D     3    0  1  0   E8 Elevator moving down
+73683   D     2    0  1  0   U1 User 498 arrives at floor 3, destination is 1, give up 73893
+73730   D     2    0  1  0   E2 Elevator stops
+73730   D     2    0  1  0   E3 Elevator doors start to open
+73750   D     2    1  1  0   U6 User 494 gets out, leaves the system
+73775   D     2    1  1  0   U5 User 497 gets in
+73806   D     2    0  1  1   E5 Elevator doors start to close
+73818   D     2    0  1  0   U1 User 499 arrives at floor 0, destination is 4, give up 73930
+73841   D     2    0  1  0   E8 Elevator moving down
+73893   D     1    0  1  0   U4 User 498 decides to give up, leaves the system
+73925   D     1    0  1  0   E2 Elevator stops
+73925   D     1    0  1  0   E3 Elevator doors start to open
+73930   D     1    1  1  0   U4 User 499 decides to give up, leaves the system
+73945   D     1    1  1  0   U6 User 497 gets out, leaves the system
+74001   D     1    0  1  1   E5 Elevator doors start to close
+74036   D     1    0  1  0   E8 Elevator moving down
+74120   D     0    0  1  0   E2 Elevator stops
+74120   N     0    0  1  0   E3 Elevator doors start to open
+74140   N     0    0  1  1   E4 Doors open, nobody is there
+74196   N     0    0  1  1   E5 Elevator doors start to close
+74231   U     0    0  1  0   E7 Elevator moving up
+74296   U     1    0  1  0   E2 Elevator stops
+74296   U     1    0  1  0   E3 Elevator doors start to open
+74316   U     1    0  1  1   E4 Doors open, nobody is there
+74372   U     1    0  1  1   E5 Elevator doors start to close
+74407   U     1    0  1  0   E7 Elevator moving up
+74458   U     2    0  1  0   E7 Elevator moving up
+74509   U     3    0  1  0   E7 Elevator moving up
+74574   U     4    0  1  0   E2 Elevator stops
+74574   N     4    0  1  0   E3 Elevator doors start to open
+74594   N     4    0  1  1   E4 Doors open, nobody is there
+74650   N     4    0  1  1   E5 Elevator doors start to close
+74685   D     4    0  1  0   E8 Elevator moving down
+74769   D     3    0  1  0   E2 Elevator stops
+74769   N     3    0  1  0   E3 Elevator doors start to open
+74789   N     3    0  1  1   E4 Doors open, nobody is there
+74845   N     3    0  1  1   E5 Elevator doors start to close
+74880   D     3    0  1  0   E8 Elevator moving down
+74964   D     2    0  1  0   E2 Elevator stops
+74964   N     2    0  1  0   E3 Elevator doors start to open
+74984   N     2    0  1  1   E4 Doors open, nobody is there
+75040   N     2    0  1  1   E5 Elevator doors start to close

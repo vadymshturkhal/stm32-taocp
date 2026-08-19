@@ -1,0 +1,20 @@
+TIME STATE FLOOR D1 D2 D3 step action
+0000   N     2    0  0  0   U1 User 0 arrives at floor 4, destination is 1, give up 370
+0035   U     2    0  0  0   E7 Elevator moving up
+0086   U     3    0  0  0   E7 Elevator moving up
+0151   U     4    0  0  0   E2 Elevator stops
+0151   N     4    0  0  0   E3 Elevator doors start to open
+0171   N     4    1  1  0   U5 User 0 gets in
+0196   D     4    0  1  1   E5 Elevator doors start to close
+0231   D     4    0  1  0   E8 Elevator moving down
+0292   D     3    0  1  0   E8 Elevator moving down
+0353   D     2    0  1  0   E8 Elevator moving down
+0437   D     1    0  1  0   E2 Elevator stops
+0437   N     1    0  1  0   E3 Elevator doors start to open
+0457   N     1    1  1  0   U6 User 0 gets out, leaves the system
+0513   N     1    0  1  1   E5 Elevator doors start to close
+0548   U     1    0  1  0   E7 Elevator moving up
+0613   U     2    0  1  0   E2 Elevator stops
+0613   N     2    0  1  0   E3 Elevator doors start to open
+0633   N     2    0  1  1   E4 Doors open, nobody is there
+0689   N     2    0  1  1   E5 Elevator doors start to close

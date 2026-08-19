@@ -23,6 +23,14 @@ jobs:
         working-directory: elevator/C_Native
         run: make elevator_sim
 
+      - name: Compare against trace output (0 users)
+        working-directory: elevator/C_Native
+        run: ./elevator_sim 0 | diff - ../Measurements/trace_0.txt
+
+      - name: Compare against trace output (1 user)
+        working-directory: elevator/C_Native
+        run: ./elevator_sim 1 | diff - ../Measurements/trace_1.txt
+
       - name: Compare against trace output (4 users)
         working-directory: elevator/C_Native
         run: ./elevator_sim 4 | diff - ../Measurements/trace_4.txt
@@ -30,6 +38,10 @@ jobs:
       - name: Compare against trace output (26 users)
         working-directory: elevator/C_Native
         run: ./elevator_sim 26 | diff - ../Measurements/trace_26.txt
+
+      - name: Compare against trace output (500 users)
+        working-directory: elevator/C_Native
+        run: ./elevator_sim 500 | diff - ../Measurements/trace_500.txt
 
       - name: Build elevator_sim_notrace
         working-directory: elevator/C_Native

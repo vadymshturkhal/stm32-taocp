@@ -23,6 +23,20 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Compare against trace output (0 users)
+        env:
+          TRACE: "1"
+        run: |
+          python3 elevator/Python_WAIT_LIST/main.py 0 \
+            | diff - elevator/Measurements/trace_0.txt
+
+      - name: Compare against trace output (1 user)
+        env:
+          TRACE: "1"
+        run: |
+          python3 elevator/Python_WAIT_LIST/main.py 1 \
+            | diff - elevator/Measurements/trace_1.txt
+
       - name: Compare against trace output (4 users)
         env:
           TRACE: "1"
@@ -36,3 +50,10 @@ jobs:
         run: |
           python3 elevator/Python_WAIT_LIST/main.py 26 \
             | diff - elevator/Measurements/trace_26.txt
+
+      - name: Compare against trace output (500 users)
+        env:
+          TRACE: "1"
+        run: |
+          python3 elevator/Python_WAIT_LIST/main.py 500 \
+            | diff - elevator/Measurements/trace_500.txt
