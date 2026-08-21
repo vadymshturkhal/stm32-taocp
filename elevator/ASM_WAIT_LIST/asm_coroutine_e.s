@@ -207,7 +207,6 @@ ASM_E1A:
 
 @ [Wait for call]
 ASM_E1:
-	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 @ Input:
@@ -513,7 +512,6 @@ ASM_E4_1H_QUEUE_EMPTY:
 ASM_E4_NO_TRACE:
 #endif
 
-	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 @ Input:
@@ -828,5 +826,4 @@ ASM_E9:
 
 	BL ASM_DECISION
 
-	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE

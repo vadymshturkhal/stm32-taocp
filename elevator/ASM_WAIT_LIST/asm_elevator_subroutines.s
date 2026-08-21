@@ -38,6 +38,11 @@
 @ NOTE: R7-R12 are global registers which contain global state and don't need to PUSH them every step
 @ NOTE: Using C NextInst with global parameters permanently stored in R8-R12 Registers
 @ NOTE: Doesn't increment or decrement storage pool counter
+@ R12 shared_state->WAIT_LIST.head
+@ R11 SharedState* shared_state
+@ R10 Elevator* elevator
+@ R9 Users* users
+@ R8 ElevatorNode* C
 
 @ SharedState fields definition
 .equ TIME, 				0
@@ -88,7 +93,7 @@
 @ R10 Elevator* elevator
 @ R9 Users* users
 @ R8 ElevatorNode* C
-.balign 8
+.balign 16
 ASM_START_SIMULATION:
 	PUSH {R4-R12, LR}			@ Save all Registers and use R3 for 8-byte alignment
 	MOVS R11, R0				@ R11 = shared_state
@@ -99,9 +104,6 @@ ASM_START_SIMULATION:
 	LDR R0, [R9, #USER1]		@ R0 = shared_state->users->USER1 (ASM_IMMED's node arg)
 	BL ASM_IMMED
 
-	@ Must come AFTER the insert above: R8 needs to see the just-inserted USER1 node
-	LDR R12, [R11, #WAIT_LIST]			@ R12 = shared_state->WAIT_LIST.head
-	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 @ Input:
@@ -385,11 +387,13 @@ ASM_SORTIN_DONE1:
 ASM_HOLDC:
 	STR R2, [R0, #NEXTINST]				@ node->NEXTINST = next_inst
 	BL ASM_HOLD
-	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 
+.balign 4
 ASM_CYCLE:
-	@ R8 must be already updated by the caller, R12 contains WAIT_LIST.head from the ASM_INIT
-	CMP R8, R12
+	LDR R0, [R11, #WAIT_LIST]			@ R0 = shared_state->WAIT_LIST.head
+	LDR R8, [R0, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
+
+	CMP R8, R0
 	BEQ ASM_CYCLE_DONE
 
 	LDR R0, [R8, #NEXTTIME]				@ R0 = C->NEXTTIME

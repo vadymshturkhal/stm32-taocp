@@ -430,7 +430,7 @@ ASM_U6_BODY:
 
 	@ AVAIL PUSH
 	LDR R0, [R9, #STORAGE_POOL]			@ R0 = shared_state->users->storage_pool
-	LDR R8, [R12, #RIGHT1]				@ For ASM_CYCLE: R8 = shared_state->WAIT_LIST.head->right1
+
 	LDR R2, [R0, #AVAIL]				@ R2 = storage_pool->avail
 	STR R2, [R7]						@ *(void**)user = storage_pool->avail (node's own link field)
 	STR R7, [R0, #AVAIL]				@ storage_pool->avail = user
@@ -482,8 +482,11 @@ ASM_U5:
 
 	@ 3. If STATE == NEUTRAL, set STATE = GOINGUP or GOINGDOWN as appropriate
 	CMP R3, #0
-	IT NE
-	LDRNE R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1 (only if leaving via ASM_CYCLE)
+	ITT NE
+	@ FIXME
+	@ LDRNE R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1 (only if leaving via ASM_CYCLE)
+	LDRNE R12, [R11, #WAIT_LIST]			@ R12 = shared_state->WAIT_LIST.head
+	LDRNE R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	BNE ASM_CYCLE
 
 	LDR R0, [R10, #ELEV2]					@ R0 = elevator->ELEV2
@@ -500,7 +503,6 @@ ASM_U5:
 	BL ASM_E5A
 
 DONE:
-	LDR R8, [R12, #RIGHT1]				@ R8 = shared_state->WAIT_LIST.head->right1
 	B ASM_CYCLE
 
 DONE_SP:
