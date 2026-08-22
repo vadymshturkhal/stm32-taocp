@@ -25,7 +25,7 @@ uint32_t buddy_system_init(BuddySystem* system, void* memory, uint32_t m) {
 		if (status != 0) return status;
 	}
 
-	// for m
+	// LINKF(0) = LINKB(0) = LOC(AVAIL[m])
 	return buddy_list_insert(block, &list[m]);
 }
 

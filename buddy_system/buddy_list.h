@@ -17,6 +17,6 @@ typedef struct {
 } BuddyList;
 
 uint32_t buddy_list_init(BuddyList* list, BuddyNode* head, uint32_t m);
-uint32_t buddy_list_insert(BuddyList* list, BuddyNode* node);
+uint32_t buddy_list_insert(BuddyNode* node, BuddyList* list);
 
 #endif
