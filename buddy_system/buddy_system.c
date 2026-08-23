@@ -36,8 +36,39 @@ BuddyNode* buddy_address(BuddySystem* system, BuddyNode* node, uint32_t k) {
 	return (BuddyNode*)(system->base + (offset ^ (1u << k)));
 }
 
+static uint32_t buddy_order_for_size(uint32_t size) {
+	// Adjust size to sizeof(BuddyNode))
+
+	// CLZ is a single instruction on Cortex-M4
+	uint32_t k = 31u - (uint32_t)__builtin_clz(size);
+	if ((1u << k) < size) k++;
+
+	while ((1u << k) < sizeof(BuddyNode)) k++;
+
+	return k;
+}
+
+void* buddy_alloc(BuddySystem* system, uint32_t size) {
+	// Retrieves k and invokes buddy_system_reservation
+	// NOTE: allocates minimum sizeof(BuddyNode) (16) bytes
+
+	if (system == NULL || size == 0) return NULL;
+	if (size > (1u << system->m)) return NULL;
+
+	return buddy_system_reservation(system, buddy_order_for_size(size));
+}
+
+uint32_t buddy_free(BuddySystem* system, void* ptr, uint32_t size) {
+	if (system == NULL || ptr == NULL || size == 0) return 1;
+	if (size > (1u << system->m)) return 1;
+
+	return buddy_system_liberation(system, ptr, buddy_order_for_size(size));
+}
+
 // Algorithm R (buddy system reservation)
 void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
+	// NOTE: allocates minimum sizeof(BuddyNode) (16) bytes
+
 	// The algorithm finds and reserves a block of 2**k locations
 	/// or reports failure
 	// A free block must hold LINKF/LINKB/TAG/KVAL
