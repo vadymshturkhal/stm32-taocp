@@ -8,10 +8,11 @@
 typedef struct {
     BuddyList* list;
     uint8_t*   base; // memory pointer
-    uint32_t   m;
+    uint16_t   m;    // 2**14 is max for G431RB
 } BuddySystem;
 
 uint32_t buddy_system_init(BuddySystem* system, void* memory, uint32_t m);
 BuddyNode* buddy_address(BuddySystem* system, BuddyNode* node, uint32_t k);
+void* buddy_system_reservation(BuddySystem* system, uint32_t k);
 
 #endif
