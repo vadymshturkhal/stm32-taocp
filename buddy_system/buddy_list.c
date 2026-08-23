@@ -17,11 +17,11 @@ uint32_t buddy_list_init(BuddyList* list, BuddyNode* head, uint32_t m) {
 uint32_t buddy_list_insert(BuddyNode* node, BuddyList* list) {
 	if (list == NULL || node == NULL) return 1;
 	
-	BuddyNode* S = list->head;
-	node->LINKF = S->LINKF;
-	node->LINKB = S;
-	S->LINKF->LINKB = node;
-	S->LINKF = node;
+	BuddyNode* P = list->head;
+	node->LINKF = P->LINKF;
+	node->LINKB = P;
+	P->LINKF->LINKB = node;
+	P->LINKF = node;
 	node->TAG = true;	// TAG = 1
 	node->KVAL = list->m;
 	return 0;

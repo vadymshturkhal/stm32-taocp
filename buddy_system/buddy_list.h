@@ -8,7 +8,7 @@ typedef struct BuddyNode {
     struct BuddyNode* LINKF;
     struct BuddyNode* LINKB;
     bool                TAG;
-    uint16_t            KVAL;
+    uint16_t           KVAL;   // field to specify k when their size is 2**k, 2**14 is max for G431RB
 } BuddyNode;
 
 typedef struct {
