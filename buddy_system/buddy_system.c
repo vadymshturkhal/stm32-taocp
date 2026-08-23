@@ -40,7 +40,8 @@ BuddyNode* buddy_address(BuddySystem* system, BuddyNode* node, uint32_t k) {
 void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
 	// The algorithm finds and reserves a block of 2**k locations
 	/// or reports failure
-	if (system == NULL || k > system->m) return NULL;
+	// A free block must hold LINKF/LINKB/TAG/KVAL
+	if (system == NULL || k > system->m || (1u << k) < sizeof(BuddyNode)) return NULL;
 
 	// R1. [Find block]
 	// let j be the smallest integer in the range k <= j <= m
@@ -86,4 +87,43 @@ void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
 
 	return L;
 }
+
+// Algorithm S (buddy system liberation)
+uint32_t buddy_system_liberation(BuddySystem* system, void* L, uint32_t k) {
+	// This algorithm returns a block of 2**k locations,
+	// starting in address L, to free storage
+
+	if (system == NULL || L == NULL) return 1;
+	if (k > system->m || (1u << k) < sizeof(BuddyNode)) return 1;
+
+	uint32_t offset = (uint32_t)((uint8_t*)L - system->base);
+	if (offset >= (1u << system->m)) return 2;   // outside the arena
+	if (offset & ((1u << k) - 1)) return 3;      // not 2**k aligned
+
+	BuddyNode* block = (BuddyNode*)L;
+
+	// S1. [Is buddy available]
+	// If k == m: Go to S3
+	while (k < system->m) {
+		// Set P = buddy_k(L)
+		BuddyNode* P = buddy_address(system, block, k);
+
+		// P->TAG == 0: Go to S3
+		if (P->TAG == false) break;   // buddy is reserved
+
+		// if P->TAG == 1 and P->KVAL != k: Go to S3
+		if (P->KVAL != k) break;      // buddy is available but split smaller
+
+		// S2. [Combine with buddy]
+		// Remove P from AVAIL[k]; the merged pair keeps the lower address
+		buddy_list_remove(P);
+		if ((uint8_t*)P < (uint8_t*)block) block = P;
+		k++;
+	}
+
+	// S3. [Put on list]
+	// buddy_list_insert sets TAG = 1 and KVAL = k
+	return buddy_list_insert(block, &system->list[k]);
+}
+
 
