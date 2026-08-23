@@ -22,7 +22,17 @@ uint32_t buddy_list_insert(BuddyNode* node, BuddyList* list) {
 	node->LINKB = S;
 	S->LINKF->LINKB = node;
 	S->LINKF = node;
-	node->TAG = 1;
+	node->TAG = true;	// TAG = 1
 	node->KVAL = list->m;
+	return 0;
+}
+
+uint32_t buddy_list_remove(BuddyNode* node) {
+	// Removes node from it's list
+	if (node == NULL) return 1;
+
+	node->LINKB->LINKF = node->LINKF;
+	node->LINKF->LINKB = node->LINKB;
+	node->TAG = false;	// TAG = 0
 	return 0;
 }

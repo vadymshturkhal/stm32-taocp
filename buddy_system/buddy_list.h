@@ -7,16 +7,17 @@
 typedef struct BuddyNode {
     struct BuddyNode* LINKF;
     struct BuddyNode* LINKB;
-    uint8_t             TAG;
-    uint8_t             KVAL;
+    bool                TAG;
+    uint16_t            KVAL;
 } BuddyNode;
 
 typedef struct {
     BuddyNode* head;
-    uint8_t     m;
+    uint32_t    m;
 } BuddyList;
 
 uint32_t buddy_list_init(BuddyList* list, BuddyNode* head, uint32_t m);
 uint32_t buddy_list_insert(BuddyNode* node, BuddyList* list);
+uint32_t buddy_list_remove(BuddyNode* node);
 
 #endif
