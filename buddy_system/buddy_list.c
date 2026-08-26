@@ -33,6 +33,5 @@ uint32_t buddy_list_remove(BuddyNode* node) {
 
 	node->LINKB->LINKF = node->LINKF;
 	node->LINKF->LINKB = node->LINKB;
-	node->TAG = false;	// TAG = 0
 	return 0;
 }
