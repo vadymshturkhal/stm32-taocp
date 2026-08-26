@@ -13,6 +13,9 @@
 #define BUDDY_M 14
 #endif
 
+// For exact 2**k cover
+#define BUDDY_BLOCK(k) ((1u << (k)) - BUDDY_HEADER)
+
 typedef struct {
     BuddyList* list;
     uint8_t*   base; // memory pointer
