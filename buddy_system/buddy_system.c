@@ -4,12 +4,24 @@
 
 #include "buddy_system.h"
 
-uint32_t buddy_system_init(BuddySystem* system, void* memory, uint32_t m) {
-	// memory is a starting memory of MCU
-	if (system == NULL || memory == NULL || m == 0) return 1;
+extern uint8_t _end;          // first byte after .bss, ALIGN(8) in the .ld
+extern uint8_t _stack_limit;  // _estack - 2048, in the .ld
+
+uint32_t buddy_system_init(BuddySystem* system) {
+	if (system == NULL) return 1;
+
+	const uint32_t m = BUDDY_M;
+	uint8_t* memory = &_end;
 
 	uint32_t arena_size = 1u << m;
 	uint32_t lists_size = (m + 1) * sizeof(BuddyList);
+	uint32_t heads_size = (m + 1) * sizeof(BuddyNode);
+
+	// .bss may legally reach past _stack_limit: the .ld only reserves
+	// _Min_Heap_Size + _Min_Stack_Size after _end
+	ptrdiff_t gap = &_stack_limit - &_end;
+	if (gap <= 0) return 4;
+	if (arena_size + lists_size + heads_size > (uint32_t)gap) return 4;
 
 	BuddyNode* block = (BuddyNode*)memory;
 	BuddyList* list = (BuddyList*)((uint8_t*)memory + arena_size);
@@ -156,5 +168,3 @@ uint32_t buddy_system_liberation(BuddySystem* system, void* L, uint32_t k) {
 	// buddy_list_insert sets TAG = 1 and KVAL = k
 	return buddy_list_insert(block, &system->list[k]);
 }
-
-
