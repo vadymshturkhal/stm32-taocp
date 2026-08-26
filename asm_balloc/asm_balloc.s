@@ -5,16 +5,10 @@
 @ Bump Allocator or Arena Allocator
 @ Allocates at least 8 bytes
 
-.section .bss				@ Block Started by Symbol (Uninitialized Memory)
-.balign 8
-custom_heap_base:
-	.space 21248			@ 0x5300
-custom_heap_end:
-
-.section .data				@ Initialized Memory
+.section .data
 .balign 4
-heap_head:
-	.word custom_heap_base	@ Create heap_head read/write variable in RAM with init value of custom_heap_base
+heap_head: .word _end              	@ first byte after .bss
+heap_end:  .word _stack_limit		@ _stack_limit = _estack - 2048; (in.ld file)
 
 .section .text
 	.global heap_head
@@ -24,11 +18,12 @@ heap_head:
 
 @ Input:
 @ R0 bytes quantity
-
 asm_balloc:
 	CBZ R0, exception
 
 	ADDS R0, R0, #7			@ ADD 7 to the requested size
+	BCS exception			@ If overflow
+
 	MOVS R1, #7
 	BICS R0, R0, R1			@ Bitwise Clear AND NOT the lower 3 bits
 
@@ -36,8 +31,10 @@ asm_balloc:
 	LDR R2, [R1]			@ Current free memory address
 
 	ADDS R3, R2, R0
+	BCS exception			@ If overflow
 
-	LDR R0, =custom_heap_end
+	LDR R0, =heap_end
+	LDR R0, [R0]
 	CMP R3, R0
 	BHI exception
 
