@@ -10,6 +10,9 @@ uint32_t buddy_list_init(BuddyList* list, BuddyNode* head, uint32_t m) {
 	list->head = head;
 	list->head->LINKF = list->head;
 	list->head->LINKB = list->head;
+	list->head->TAG = 0;
+	list->head->KVAL = m;
+
 	list->m = m;
 	return 0;
 }
@@ -22,7 +25,7 @@ uint32_t buddy_list_insert(BuddyNode* node, BuddyList* list) {
 	node->LINKB = P;
 	P->LINKF->LINKB = node;
 	P->LINKF = node;
-	node->TAG = true;	// TAG = 1
+	node->TAG = 1;
 	node->KVAL = list->m;
 	return 0;
 }

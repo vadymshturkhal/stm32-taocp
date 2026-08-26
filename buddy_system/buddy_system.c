@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stddef.h>
-#include <stdbool.h>
 
 #include "buddy_system.h"
 
@@ -171,7 +170,7 @@ uint32_t buddy_system_liberation(BuddySystem* system, void* L, uint32_t k) {
 		BuddyNode* P = buddy_address(system, block, k);
 
 		// P->TAG == 0: Go to S3
-		if (P->TAG == false) break;   // buddy is reserved
+		if (P->TAG == 0) break;   // buddy is reserved
 
 		// if P->TAG == 1 and P->KVAL != k: Go to S3
 		if (P->KVAL != k) break;      // buddy is available but split smaller
