@@ -5,7 +5,7 @@
 #include "buddy_system.h"
 
 extern uint8_t _end;          // first byte after .bss, ALIGN(8) in the .ld
-extern uint8_t _stack_limit;  // _estack - 2048, in the .ld
+extern uint8_t _stack_limit;  // _estack - 2048, in the STM32G431RBTX_FLASH.ld
 
 uint32_t buddy_system_init(BuddySystem* system) {
 	if (system == NULL) return 1;
@@ -17,11 +17,11 @@ uint32_t buddy_system_init(BuddySystem* system) {
 	uint32_t lists_size = (m + 1) * sizeof(BuddyList);
 	uint32_t heads_size = (m + 1) * sizeof(BuddyNode);
 
-	// .bss may legally reach past _stack_limit: the .ld only reserves
-	// _Min_Heap_Size + _Min_Stack_Size after _end
-	ptrdiff_t gap = &_stack_limit - &_end;
-	if (gap <= 0) return 4;
-	if (arena_size + lists_size + heads_size > (uint32_t)gap) return 4;
+	// Init m
+	system->m = m;
+
+	// The .ld asserts _end <= _stack_limit, so this cannot go negative
+	if (arena_size + lists_size + heads_size > (uint32_t)(&_stack_limit - &_end)) return 4;
 
 	BuddyNode* block = (BuddyNode*)memory;
 	BuddyList* list = (BuddyList*)((uint8_t*)memory + arena_size);
@@ -29,7 +29,6 @@ uint32_t buddy_system_init(BuddySystem* system) {
 
 	system->list = list;
 	system->base = (uint8_t*)memory;
-	system->m = m;
 
 	// AVAIL[0], AVAIL[1],...,AVAIL[m]
 	for (uint32_t k = 0; k <= m; k++) {
@@ -42,18 +41,19 @@ uint32_t buddy_system_init(BuddySystem* system) {
 	return buddy_list_insert(block, &list[m]);
 }
 
-// Emulated system->base memory starts at 0 
+// Emulated system->base memory starts at 0
 BuddyNode* buddy_address(BuddySystem* system, BuddyNode* node, uint32_t k) {
 	uint32_t offset = (uint32_t)((uint8_t*)node - system->base);
 	return (BuddyNode*)(system->base + (offset ^ (1u << k)));
 }
 
 static uint32_t buddy_order_for_size(uint32_t size) {
-	// Adjust size to sizeof(BuddyNode))
+	// A 2**k block yields 2**k - BUDDY_HEADER usable bytes, since TAG stays
+	uint32_t need = size + BUDDY_HEADER;
 
 	// CLZ is a single instruction on Cortex-M4
-	uint32_t k = 31u - (uint32_t)__builtin_clz(size);
-	if ((1u << k) < size) k++;
+	uint32_t k = 31u - (uint32_t)__builtin_clz(need);
+	if ((1u << k) < need) k++;
 
 	while ((1u << k) < sizeof(BuddyNode)) k++;
 
@@ -62,27 +62,35 @@ static uint32_t buddy_order_for_size(uint32_t size) {
 
 void* buddy_alloc(BuddySystem* system, uint32_t size) {
 	// Retrieves k and invokes buddy_system_reservation
-	// NOTE: allocates minimum sizeof(BuddyNode) (16) bytes
+	// NOTE: allocates minimum sizeof(BuddyNode) - BUDDY_HEADER, currently (12) bytes
 
 	if (system == NULL || size == 0) return NULL;
-	if (size > (1u << system->m)) return NULL;
+	if (size > (1u << system->m) - BUDDY_HEADER) return NULL;
 
-	return buddy_system_reservation(system, buddy_order_for_size(size));
+	void* L = buddy_system_reservation(system, buddy_order_for_size(size));
+	if (L == NULL) return NULL;
+
+	// The caller never sees TAG
+	return (uint8_t*)L + BUDDY_HEADER;
 }
 
-uint32_t buddy_free(BuddySystem* system, void* ptr, uint32_t size) {
-	if (system == NULL || ptr == NULL || size == 0) return 1;
-	if (size > (1u << system->m)) return 1;
+uint32_t buddy_free(BuddySystem* system, void* ptr) {
+	// The block carries its own KVAL, so no size is needed
+	if (system == NULL || ptr == NULL) return 1;
 
-	return buddy_system_liberation(system, ptr, buddy_order_for_size(size));
+	BuddyNode* L = (BuddyNode*)((uint8_t*)ptr - BUDDY_HEADER);
+
+	// KVAL must be in the arena before it is read
+	uint32_t offset = (uint32_t)((uint8_t*)L - system->base);
+	if (offset >= (1u << system->m)) return 2;
+
+	return buddy_system_liberation(system, L, L->KVAL);
 }
 
 // Algorithm R (buddy system reservation)
 void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
-	// NOTE: allocates minimum sizeof(BuddyNode) (16) bytes
-
 	// The algorithm finds and reserves a block of 2**k locations
-	/// or reports failure
+	// or reports failure
 	// A free block must hold LINKF/LINKB/TAG/KVAL
 	if (system == NULL || k > system->m || (1u << k) < sizeof(BuddyNode)) return NULL;
 
@@ -105,9 +113,11 @@ void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
 	// P = LINKF(L) = system->list[j].head->LINKF->LINKF
 	// AVAILF[j] = P => system->list[j].head->LINKF = P
 	// LINKB(P) = LOC(AVAIL[j]) => P->LINKB = system->list[j].head
-	// L->TAG = 0
 	BuddyNode* L = system->list[j].head->LINKF;
 	buddy_list_remove(L);
+
+	// L->TAG = 0
+	L->TAG = 0;
 
 	// R4. [Split]
 	// Decrease j by 1
@@ -128,6 +138,11 @@ void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
 	// if j == k, the algorithm terminates
 	// (we have found and reserved an available block starting at address L)
 
+	// Not in Knuth: L was inserted at order j, so its KVAL is stale after the
+	// split. KVAL is untouchable now, so a reserved block can carry its own
+	// order and buddy_free needs no size
+	L->KVAL = k;
+
 	return L;
 }
 
@@ -142,6 +157,10 @@ uint32_t buddy_system_liberation(BuddySystem* system, void* L, uint32_t k) {
 	uint32_t offset = (uint32_t)((uint8_t*)L - system->base);
 	if (offset >= (1u << system->m)) return 2;   // outside the arena
 	if (offset & ((1u << k) - 1)) return 3;      // not 2**k aligned
+
+	// NOTE: not in TAOCP, early return
+	// TAG == 1 means the block is already available: double free
+	if (((BuddyNode*)L)->TAG) return 4;
 
 	BuddyNode* block = (BuddyNode*)L;
 
@@ -160,8 +179,10 @@ uint32_t buddy_system_liberation(BuddySystem* system, void* L, uint32_t k) {
 		// S2. [Combine with buddy]
 		// Remove P from AVAIL[k]; the merged pair keeps the lower address
 		buddy_list_remove(P);
-		if ((uint8_t*)P < (uint8_t*)block) block = P;
 		k++;
+		if ((uint8_t*)P < (uint8_t*)block) {
+			block = P;
+		}
 	}
 
 	// S3. [Put on list]
