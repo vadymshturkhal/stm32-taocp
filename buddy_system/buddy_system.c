@@ -5,8 +5,14 @@
 
 extern uint8_t _end;          // first byte after .bss, ALIGN(8) in the .ld
 extern uint8_t _stack_limit;  // _estack - 2048, in the STM32G431RBTX_FLASH.ld
+static BuddySystem system;
+static int is_buddy_ready = 0;
 
-uint32_t buddy_system_init(BuddySystem* system) {
+// Prototypes
+static uint32_t buddy_system_liberation(void* L, uint32_t k);
+static void* buddy_system_reservation(uint32_t k);
+
+static uint32_t buddy_system_init(BuddySystem* system) {
 	if (system == NULL) return 1;
 
 	const uint32_t m = BUDDY_M;
@@ -41,9 +47,9 @@ uint32_t buddy_system_init(BuddySystem* system) {
 }
 
 // Emulated system->base memory starts at 0
-BuddyNode* buddy_address(BuddySystem* system, BuddyNode* node, uint32_t k) {
-	uint32_t offset = (uint32_t)((uint8_t*)node - system->base);
-	return (BuddyNode*)(system->base + (offset ^ (1u << k)));
+static BuddyNode* buddy_address(BuddyNode* node, uint32_t k) {
+	uint32_t offset = (uint32_t)((uint8_t*)node - system.base);
+	return (BuddyNode*)(system.base + (offset ^ (1u << k)));
 }
 
 static uint32_t buddy_order_for_size(uint32_t size) {
@@ -59,39 +65,43 @@ static uint32_t buddy_order_for_size(uint32_t size) {
 	return k;
 }
 
-void* buddy_alloc(BuddySystem* system, uint32_t size) {
+void* buddy_alloc(size_t size) {
 	// Retrieves k and invokes buddy_system_reservation
 	// NOTE: allocates minimum sizeof(BuddyNode) - BUDDY_HEADER, currently (12) bytes
+    if (!is_buddy_ready) {
+        buddy_system_init(&system);
+        is_buddy_ready = 1;
+    }
 
-	if (system == NULL || size == 0) return NULL;
-	if (size > (1u << system->m) - BUDDY_HEADER) return NULL;
+	if (size == 0) return NULL;
+	if (size > (1u << system.m) - BUDDY_HEADER) return NULL;
 
-	void* L = buddy_system_reservation(system, buddy_order_for_size(size));
+	void* L = buddy_system_reservation(buddy_order_for_size(size));
 	if (L == NULL) return NULL;
 
 	// The caller never sees TAG
 	return (uint8_t*)L + BUDDY_HEADER;
 }
 
-uint32_t buddy_free(BuddySystem* system, void* ptr) {
+uint32_t buddy_free(void* ptr) {
 	// The block carries its own KVAL, so no size is needed
-	if (system == NULL || ptr == NULL) return 1;
+	if (ptr == NULL) return 1;
 
 	BuddyNode* L = (BuddyNode*)((uint8_t*)ptr - BUDDY_HEADER);
 
 	// KVAL must be in the arena before it is read
-	uint32_t offset = (uint32_t)((uint8_t*)L - system->base);
-	if (offset >= (1u << system->m)) return 2;
+	uint32_t offset = (uint32_t)((uint8_t*)L - system.base);
+	if (offset >= (1u << system.m)) return 2;
 
-	return buddy_system_liberation(system, L, L->KVAL);
+	return buddy_system_liberation(L, L->KVAL);
 }
 
 // Algorithm R (buddy system reservation)
-void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
+static void* buddy_system_reservation(uint32_t k) {
 	// The algorithm finds and reserves a block of 2**k locations
 	// or reports failure
 	// A free block must hold LINKF/LINKB/TAG/KVAL
-	if (system == NULL || k > system->m || (1u << k) < sizeof(BuddyNode)) return NULL;
+	if (k > system.m || (1u << k) < sizeof(BuddyNode)) return NULL;
 
 	// R1. [Find block]
 	// let j be the smallest integer in the range k <= j <= m
@@ -99,12 +109,12 @@ void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
 	// that is for which the list of available block size 2**j
 	// is not empty
 	uint32_t j;
-	for (j = k; j <= system->m; j++) {
-		if (system->list[j].head->LINKF != system->list[j].head) {
+	for (j = k; j <= system.m; j++) {
+		if (system.list[j].head->LINKF != system.list[j].head) {
 			break;
 		}
 	}
-	if (j > system->m) return NULL;   // no block large enough
+	if (j > system.m) return NULL;   // no block large enough
 
 	// R2. [Remove from list]
 	// Set 
@@ -112,7 +122,7 @@ void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
 	// P = LINKF(L) = system->list[j].head->LINKF->LINKF
 	// AVAILF[j] = P => system->list[j].head->LINKF = P
 	// LINKB(P) = LOC(AVAIL[j]) => P->LINKB = system->list[j].head
-	BuddyNode* L = system->list[j].head->LINKF;
+	BuddyNode* L = system.list[j].head->LINKF;
 	buddy_list_remove(L);
 
 	// L->TAG = 0
@@ -129,32 +139,30 @@ void* buddy_system_reservation(BuddySystem* system, uint32_t k) {
 	// system->list[j].head->LINKB = P
 	while (j > k) {
 		j--;
-		BuddyNode* P = buddy_address(system, L, j);
-		buddy_list_insert(P, &system->list[j]);
+		BuddyNode* P = buddy_address(L, j);
+		buddy_list_insert(P, &system.list[j]);
 	}
 
 	// R3. [Split required?]
 	// if j == k, the algorithm terminates
 	// (we have found and reserved an available block starting at address L)
 
-	// Not in Knuth: L was inserted at order j, so its KVAL is stale after the
-	// split. KVAL is untouchable now, so a reserved block can carry its own
-	// order and buddy_free needs no size
+	// KVAL is in every block, was not in TAOCP
 	L->KVAL = k;
 
 	return L;
 }
 
 // Algorithm S (buddy system liberation)
-uint32_t buddy_system_liberation(BuddySystem* system, void* L, uint32_t k) {
+static uint32_t buddy_system_liberation(void* L, uint32_t k) {
 	// This algorithm returns a block of 2**k locations,
 	// starting in address L, to free storage
 
-	if (system == NULL || L == NULL) return 1;
-	if (k > system->m || (1u << k) < sizeof(BuddyNode)) return 1;
+	if (L == NULL) return 1;
+	if (k > system.m || (1u << k) < sizeof(BuddyNode)) return 1;
 
-	uint32_t offset = (uint32_t)((uint8_t*)L - system->base);
-	if (offset >= (1u << system->m)) return 2;   // outside the arena
+	uint32_t offset = (uint32_t)((uint8_t*)L - system.base);
+	if (offset >= (1u << system.m)) return 2;   // outside the arena
 	if (offset & ((1u << k) - 1)) return 3;      // not 2**k aligned
 
 	// NOTE: not in TAOCP, early return
@@ -165,9 +173,9 @@ uint32_t buddy_system_liberation(BuddySystem* system, void* L, uint32_t k) {
 
 	// S1. [Is buddy available]
 	// If k == m: Go to S3
-	while (k < system->m) {
+	while (k < system.m) {
 		// Set P = buddy_k(L)
-		BuddyNode* P = buddy_address(system, block, k);
+		BuddyNode* P = buddy_address(block, k);
 
 		// P->TAG == 0: Go to S3
 		if (P->TAG == 0) break;   // buddy is reserved
@@ -186,5 +194,5 @@ uint32_t buddy_system_liberation(BuddySystem* system, void* L, uint32_t k) {
 
 	// S3. [Put on list]
 	// buddy_list_insert sets TAG = 1 and KVAL = k
-	return buddy_list_insert(block, &system->list[k]);
+	return buddy_list_insert(block, &system.list[k]);
 }

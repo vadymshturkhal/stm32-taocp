@@ -4,6 +4,8 @@
 
 #include "buddy_list.h"
 
+// Doubly Linked Circular List
+
 uint32_t buddy_list_init(BuddyList* list, BuddyNode* head, uint32_t m) {
 	if (list == NULL || head == NULL) return 1;
 

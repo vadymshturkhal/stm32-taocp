@@ -5,16 +5,13 @@
 
 #include "buddy_list.h"
 
-// NOTE: Add ASSERT(_end <= _stack_limit, "RAM: .bss overruns _stack_limit") 
-// to.ld, after setting RAM
+// NOTE:
+// Add ASSERT(_end <= _stack_limit, "RAM: .bss overruns _stack_limit") to .ld file, after RAM setting
 
 // Arena size (2**BUDDY_M), and BUDDY_M is 14 for G431RB and allocates 16KB
 #ifndef BUDDY_M
 #define BUDDY_M 14
 #endif
-
-// For exact 2**k cover
-#define BUDDY_BLOCK(k) ((1u << (k)) - BUDDY_HEADER)
 
 typedef struct {
     BuddyList* list;
@@ -22,11 +19,6 @@ typedef struct {
     uint16_t   m;    // 2**14 is max for G431RB
 } BuddySystem;
 
-uint32_t buddy_system_init(BuddySystem* system);
-BuddyNode* buddy_address(BuddySystem* system, BuddyNode* node, uint32_t k);
-void* buddy_alloc(BuddySystem* system, uint32_t size);
-uint32_t buddy_free(BuddySystem* system, void* ptr);
-void* buddy_system_reservation(BuddySystem* system, uint32_t k);
-uint32_t buddy_system_liberation(BuddySystem* system, void* L, uint32_t k);
-
+void* buddy_alloc(size_t size);
+uint32_t buddy_free(void* ptr);
 #endif
