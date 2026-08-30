@@ -12,6 +12,12 @@ static int is_buddy_ready = 0;
 static uint32_t buddy_system_liberation(void* L, uint32_t k);
 static void* buddy_system_reservation(uint32_t k);
 
+#ifdef BUDDY_MALLOC
+// Replacing malloc
+void* malloc(size_t size) { return buddy_alloc(size); }
+void  free(void* ptr)     { buddy_free(ptr); }
+#endif
+
 static uint32_t buddy_system_init(BuddySystem* system) {
 	if (system == NULL) return 1;
 
