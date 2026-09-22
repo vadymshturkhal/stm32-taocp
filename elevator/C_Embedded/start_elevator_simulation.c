@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "storage_pool.h"
 #include "elevator_settings.h"
@@ -11,10 +12,6 @@
 #include "main.h"
 
 // NOTE: USER1 and ELEV's nodes are ElevatorNode, can change to special node with two links fields according to MIX
-
-// Prototypes
-extern void* asm_balloc(uint32_t size);
-extern void asm_balloc_free(void* memory_pointer);
 
 uint32_t start_elevator_simulation(uint32_t max_users) {
 	values_seed(1);  // fixed seed: reproducible runs, matches Python's random.seed(1)
@@ -28,7 +25,7 @@ uint32_t start_elevator_simulation(uint32_t max_users) {
 	uint32_t users_size = sizeof(Users);
 	uint32_t master_memory_size = storage_pool_size + shared_state_size + elevator_size + users_size;
 
-	void* master_memory = asm_balloc(master_memory_size);
+	void* master_memory = malloc(master_memory_size);
 	if (master_memory == NULL) return 1;
 
 	Storage_Pool* storage_pool = create_storage_pool(master_memory, sizeof(ElevatorNode), max_nodes);
@@ -44,19 +41,19 @@ uint32_t start_elevator_simulation(uint32_t max_users) {
 
 	uint32_t status = shared_state_init(shared_state, storage_pool);
 	if (status != 0) {
-		asm_balloc_free(master_memory);
+		free(master_memory);
 		return status;
 	}
 
 	 status = elevator_init(elevator, shared_state, storage_pool);
 	 if (status != 0) {
-	 	asm_balloc_free(master_memory);
+	 	free(master_memory);
 	 	return status;
 	 }
 
 	 status = users_init(users, shared_state, storage_pool, max_users);
 	 if (status != 0) {
-	 	asm_balloc_free(master_memory);
+	 	free(master_memory);
 	 	return status;
 	 }
 
@@ -66,6 +63,6 @@ uint32_t start_elevator_simulation(uint32_t max_users) {
 	// CYCLE control routine: run until the WAIT list runs dry
 	cycle(shared_state);
 
-	asm_balloc_free(master_memory);
+	free(master_memory);
 	return 0;
 }

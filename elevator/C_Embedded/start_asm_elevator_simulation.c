@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "storage_pool.h"
 #include "elevator_settings.h"
@@ -13,8 +14,6 @@
 // NOTE: USER1 and ELEV's nodes are ElevatorNode, can change to special node with two links fields according to MIX
 
 // Prototypes
-extern void* asm_balloc(uint32_t size);
-extern void asm_balloc_free(void* memory_pointer);
 uint32_t ASM_ELEVATOR_INIT(Elevator* elevator, SharedState* shared_state, Storage_Pool* storage_pool);
 uint32_t ASM_USERS_INIT(Users* users, SharedState* shared_state, Storage_Pool* storage_pool, uint32_t users_quantity);
 extern void ASM_START_SIMULATION(SharedState* shared_state);
@@ -31,7 +30,7 @@ uint32_t start_asm_elevator_simulation(uint32_t max_users) {
 	uint32_t users_size = sizeof(Users);
 	uint32_t master_memory_size = storage_pool_size + shared_state_size + elevator_size + users_size;
 
-	void* master_memory = asm_balloc(master_memory_size);
+	void* master_memory = malloc(master_memory_size);
 	if (master_memory == NULL) return 1;
 
 	Storage_Pool* storage_pool = create_storage_pool(master_memory, sizeof(ElevatorNode), max_nodes);
@@ -47,24 +46,24 @@ uint32_t start_asm_elevator_simulation(uint32_t max_users) {
 
 	uint32_t status = shared_state_init(shared_state, storage_pool);
 	if (status != 0) {
-		asm_balloc_free(master_memory);
+		free(master_memory);
 		return status;
 	}
 
 	status = ASM_ELEVATOR_INIT(elevator, shared_state, storage_pool);
 	if (status != 0) {
-		asm_balloc_free(master_memory);
+		free(master_memory);
 		return status;
 	}
 
 	status = ASM_USERS_INIT(users, shared_state, storage_pool, max_users);
 	if (status != 0) {
-		asm_balloc_free(master_memory);
+		free(master_memory);
 		return status;
 	}
 
 	ASM_START_SIMULATION(shared_state);
 
-	asm_balloc_free(master_memory);
+	free(master_memory);
 	return 0;
 }
