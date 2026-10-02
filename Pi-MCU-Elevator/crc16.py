@@ -4,10 +4,10 @@ def crc16(data: bytes) -> int:
 
     # 2. For each byte, XOR it into the top 8 bits of crc
     for byte in data:
-        byte<<=8
-        crc^= byte
+        byte <<= 8
+        crc ^= byte
 
-        # 3. Repeat 8 times:
+        # 3. Repeat 8 times
         for _ in range(8):
             # look at the top bit
             top_bit = crc >> 15
@@ -23,9 +23,3 @@ def crc16(data: bytes) -> int:
             crc &= 0xFFFF
 
     return crc
-
-
-if __name__ == "__main__":
-    res = crc16("A".encode("ascii"))
-    print(res)
-    print(0xB915)
