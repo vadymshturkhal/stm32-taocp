@@ -16,9 +16,11 @@ public:
         // If Rear == Front: Overflow (?)
         if (next == Front) return false;
 
-        Rear = next;
-
+        // Write a byte first
         buffer[Rear] = byte;
+
+        // Then move Rear
+        Rear = next;
         return true;
     }
 
