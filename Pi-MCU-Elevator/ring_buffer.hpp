@@ -7,12 +7,15 @@
 template <std::size_t Max>
 class RingBuffer {
 public:
+    static_assert(Max >= 2, "RingBuffer size must be >= 2");
+    static_assert((Max & (Max - 1)) == 0, "RingBuffer size must be a power of 2");
+
     // Insert into queue
     bool push(std::uint8_t byte) noexcept {
         // If Rear == Max - 1: Rear = 0, else Rear = Rear + 1
         std::size_t next = (Rear == Max - 1) ? 0 : Rear + 1;
 
-        // If Rear == Front: Overflow (?)
+        // If next Rear == Front: Overflow
         if (next == Front) return false;
 
         // Write a byte first
