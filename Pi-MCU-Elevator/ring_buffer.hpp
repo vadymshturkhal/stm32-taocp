@@ -1,12 +1,13 @@
 #pragma once
-#include <vector>
+#include <array>
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
 
+template <std::size_t Max>
 class RingBuffer {
 public:
-    RingBuffer(size_t capacity): Max(capacity + 1), Front(0), Rear(0), buffer(capacity + 1) {}
+    // RingBuffer(size_t capacity): Max(capacity + 1), Front(0), Rear(0), buffer(capacity + 1) {}
 
     // insert into queue
     bool push(std::uint8_t byte) noexcept {
@@ -29,17 +30,16 @@ public:
         // Underflow
         if (Front == Rear) return false;
 
-        // If Front == Max: Front = 0, else Front = Front + 1
-        Front = (Front == Max - 1) ? 0 : Front + 1; 
-
         // Y = buffer[Front]
         byte = buffer[Front];
+
+        // If Front == Max: Front = 0, else Front = Front + 1
+        Front = (Front == Max - 1) ? 0 : Front + 1; 
         return true;
     }
 
 private:
-    const size_t Max;
-    size_t Front;
-    size_t Rear;
-    std::vector<std::uint8_t> buffer;
+    std::size_t Front = 0;
+    std::size_t Rear = 0;
+    std::array<std::uint8_t, Max> buffer{};
 };
