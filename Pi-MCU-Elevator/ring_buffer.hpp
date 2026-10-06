@@ -4,41 +4,62 @@
 #include <cstddef>
 #include <cstdint>
 
-template <std::size_t Max>
+template <std::size_t M>
 class RingBuffer {
 public:
-    static_assert(Max >= 1, "RingBuffer size must be >= 1");
-    static_assert((Max & (Max - 1)) == 0, "RingBuffer size must be a power of 2");
+    static_assert(M >= 1, "RingBuffer size must be >= 1");
+    static_assert((M & (M - 1)) == 0, "RingBuffer size must be a power of 2");
+    static_assert(std::atomic<std::size_t>::is_always_lock_free, "Hidden deadlock occurs");
 
     // Insert into queue
     bool push(std::uint8_t byte) noexcept {
+        const std::size_t F = FRONT.load(std::memory_order_acquire);
+        const std::size_t R = REAR.load(std::memory_order_relaxed);
+
         // Overflow
-        if (Rear - Front == Max) return false;
+        if (R - F == M) {
+            DROPPED.fetch_add(1, std::memory_order_relaxed);
+            return false;
+        }
 
         // Write a byte
-        buffer[Rear & MASK] = byte;
+        BUFFER[R & MASK] = byte;
 
-        // Advance Rear
-        ++Rear;
+        // Advance REAR
+        REAR.store(R + 1, std::memory_order_release);
         return true;
     }
 
     // Delete from queue
     bool pop(std::uint8_t& byte) noexcept {
+        const std::size_t F = FRONT.load(std::memory_order_relaxed);
+        const std::size_t R = REAR.load(std::memory_order_acquire);
+
         // Underflow
-        if (Front == Rear) return false;
+        if (F == R) return false;
 
         // Read a byte
-        byte = buffer[Front & MASK];
+        byte = BUFFER[F & MASK];
 
-        // Advance Front
-        ++Front;
+        // Advance FRONT
+        FRONT.store(F + 1, std::memory_order_release);
         return true;
     }
 
+    std::size_t size() const noexcept {
+        const std::size_t F = FRONT.load(std::memory_order_acquire);
+        const std::size_t R = REAR.load(std::memory_order_acquire);
+        return R - F;
+    }
+
+    std::size_t dropped() const noexcept {
+        return DROPPED.load(std::memory_order_relaxed);
+    }
+
 private:
-    static constexpr std::size_t MASK = Max - 1;
-    std::size_t Front = 0;
-    std::size_t Rear = 0;
-    std::array<std::uint8_t, Max> buffer{};
+    static constexpr std::size_t MASK = M - 1;
+    std::atomic<std::size_t> FRONT = 0;
+    std::atomic<std::size_t> REAR = 0;
+    std::atomic<std::size_t> DROPPED = 0;
+    std::array<std::uint8_t, M> BUFFER{};
 };
