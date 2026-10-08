@@ -49,11 +49,11 @@ def unseal(line: bytes) -> str | None:
 
 if __name__ == "__main__":
     # seal("2 0 5 hello") => b"2 0 5 hello*EBDC\r\n"
-    str = "2 0 5 hello"
-    sealed = seal(str)
+    s = "2 0 5 hello"
+    sealed = seal(s)
     print(sealed)
 
     unsealed = unseal(sealed)
     print(unsealed)
 
-    print(str == unsealed)
+    print(s == unsealed)
