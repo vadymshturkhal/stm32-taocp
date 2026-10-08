@@ -14,7 +14,7 @@ constexpr std::uint16_t crc16_update(std::uint16_t crc, std::uint8_t byte) noexc
         bool top_bit = crc & 0x8000;
         
         // shift crc left by 1
-        crc <<= 1;
+        crc = static_cast<std::uint16_t>(crc << 1);
 
         // and if the top is 1: XOR the polynomial
         if (top_bit) crc ^= 0x1021;
