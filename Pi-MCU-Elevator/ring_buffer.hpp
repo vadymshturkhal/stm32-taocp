@@ -33,7 +33,7 @@ public:
     }
 
     // Push a bunch of bytes to the buffer
-    bool push_bunch(std::span<const std::uint8_t> data) noexcept {
+    bool push(std::span<const std::uint8_t> data) noexcept {
         const std::size_t F = FRONT.load(std::memory_order_acquire);
         std::size_t R = REAR.load(std::memory_order_relaxed);
 
