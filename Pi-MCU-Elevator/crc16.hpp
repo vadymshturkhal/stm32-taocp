@@ -3,6 +3,18 @@
 #include <span>
 #include <string_view>
 
+constexpr std::array<char, 4> crc_to_hex(std::uint16_t crc) noexcept {
+    constexpr std::string_view DIGITS = "0123456789ABCDEF";
+
+    // & 0xF keeps the low 4 bits after a shift
+    return {
+        DIGITS[(crc >> 12) & 0xF],
+        DIGITS[(crc >> 8)  & 0xF],
+        DIGITS[(crc >> 4)  & 0xF],
+        DIGITS[crc         & 0xF],
+    };
+}
+
 // One byte for CRC
 constexpr std::uint16_t crc16_update(std::uint16_t crc, std::uint8_t byte) noexcept {
     // 2. For each byte, XOR it into the top 8 bits of crc
