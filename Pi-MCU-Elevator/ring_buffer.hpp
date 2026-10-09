@@ -6,6 +6,7 @@
 #include <span>
 
 template <std::size_t M>
+// waiting + free_bytes = pop_bunch
 class RingBuffer {
 public:
     static_assert(M >= 1, "RingBuffer size must be >= 1");
@@ -54,12 +55,20 @@ public:
     }
 
     // Return waiting bytes
-    std::span<const std::uint8_t> readable() const noexcept {
+    std::span<const std::uint8_t> waiting() const noexcept {
 
     }
 
-    void consume(std::size_t n) noexcept {
+    [[nodiscard]] bool free_bytes(std::size_t n) noexcept {
+        const std::size_t F = FRONT.load(std::memory_order_relaxed);
+        const std::size_t R = REAR.load(std::memory_order_acquire);
 
+        // Underflow
+        if (n > R - F) return false;
+
+        // Advance FRONT
+        FRONT.store(F + n, std::memory_order_release);
+        return true;
     }
 
     // Delete from queue
