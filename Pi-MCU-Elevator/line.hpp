@@ -7,14 +7,20 @@
 
 #include "crc16.hpp"
 
+// size of XXXX
+inline constexpr std::size_t CRC_SIZE = 4;
+
+// size of *XXXX
+inline constexpr std::size_t STAR_CRC_SIZE = CRC_SIZE + 1;
+
 // size of *XXXX\r\n
-inline constexpr std::size_t SEAL_SIZE = 7;
+inline constexpr std::size_t SEAL_SIZE = STAR_CRC_SIZE + 2;
 
 // Seal in place
 // The body is already in buf, add *XXXX\r\n after it
-// buffer size must be body_len + 7
+// buffer size must be body_len + SEAL_SIZE
 [[nodiscard]] constexpr std::string_view seal(std::span<char> buf, std::size_t len) noexcept {
-    if (len + 7 > buf.size()) return {};
+    if (len + SEAL_SIZE > buf.size()) return {};
 
     const std::string_view body = std::string_view{buf.data(), len};
 
@@ -41,32 +47,31 @@ inline constexpr std::size_t SEAL_SIZE = 7;
     return {buf.data(), len};
 }
 
-// Write the body of the line to the out
-// body and crc point into the caller's buffer, 
-// they're only valid as long as the buffer is unchanged
-[[nodiscard]] constexpr bool unseal(std::string_view line, std::span<char> out) noexcept {
+// Return the body of a sealed line or std::nullopt
+// body point into line's buffer, and is valid as long as the buffer is unchanged
+[[nodiscard]] constexpr std::optional<std::string_view> unseal(std::string_view line) noexcept {
     //  Get rid of \r\n
     if (line.ends_with('\n')) line.remove_suffix(1);
     if (line.ends_with('\r')) line.remove_suffix(1);
 
     // Check the length and body
-    if (line.size() < 5 || line[line.size() - 5] != '*') return false;
+    if (line.size() < STAR_CRC_SIZE || line[line.size() - STAR_CRC_SIZE] != '*') return std::nullopt;
     
     // Split body and crc
-    const std::string_view body = line.substr(0, line.size() - 5);
-    const std::string_view crc = line.substr(line.size() - 4);
+    const std::string_view body = line.substr(0, line.size() - STAR_CRC_SIZE);
+    const std::string_view crc = line.substr(line.size() - CRC_SIZE);
 
     // Forbid "\r" and "\n" in the body
-    if (body.contains('\r') || body.contains('\n')) return false;
+    if (body.contains('\r') || body.contains('\n')) return std::nullopt;
 
     // Check crc
     const auto hex = crc_to_hex(crc16(body));
-    if (crc != std::string_view{hex.data(), hex.size()}) return false;
+    if (crc != std::string_view{hex.data(), hex.size()}) return std::nullopt;
 
     // ASCII check
     for (char c : body) {
-        if (static_cast<unsigned char>(c) > 127) return false;
+        if (static_cast<unsigned char>(c) > 127) return std::nullopt;
     }
 
-    return true;
+    return body;
 }
