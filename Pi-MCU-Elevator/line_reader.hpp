@@ -14,9 +14,11 @@ public:
 
     }
 
-    std::string_view line() const noexcept;
+    std::string_view line() const noexcept { return {buf.data(), len}; }
 
-    std::size_t dropped() const noexcept;
+    std::size_t dropped() const noexcept { return dropped_too_long; }
+
+    static constexpr std::size_t size() noexcept { return N; }
 
 private:
     std::array<char, N> buf{};
