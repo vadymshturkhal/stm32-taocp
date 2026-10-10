@@ -45,10 +45,11 @@ public:
 
         if (len == N) { 
             overflow = true;
-            return false;
         } else {
             buf[len++] = c;
         }
+
+        return false;
     }
 
     std::string_view line() const noexcept { return {buf.data(), len}; }
