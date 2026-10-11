@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 
 TODO*
+main*
 elevator/C_Native/elevator_sim
 elevator/C_Native/elevator_sim_notrace
 elevator/C_Native/*.o
