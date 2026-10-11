@@ -6,10 +6,10 @@ elevator/C_Native/elevator_sim_notrace
 elevator/C_Native/*.o
 .ipynb*
 
-# Pi-MCU-Elevator: test programs built on the PC (keep only the sources)
-Pi-MCU-Elevator/tests/*
-!Pi-MCU-Elevator/tests/*.cpp
-!Pi-MCU-Elevator/tests/*.hpp
-!Pi-MCU-Elevator/tests/*.py
-Pi-MCU-Elevator/**/*.o
-Pi-MCU-Elevator/**/a.out
+# pi_mcu_protocol: test programs built on the PC (keep only the sources)
+pi_mcu_protocol/tests/*
+!pi_mcu_protocol/tests/*.cpp
+!pi_mcu_protocol/tests/*.hpp
+!pi_mcu_protocol/tests/*.py
+pi_mcu_protocol/**/*.o
+pi_mcu_protocol/**/a.out

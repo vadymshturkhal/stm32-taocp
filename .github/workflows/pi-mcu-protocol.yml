@@ -3,11 +3,11 @@ name: Pi-MCU protocol
 on:
   push:
     paths:
-      - 'Pi-MCU-Elevator/**'
+      - 'pi_mcu_protocol/**'
       - '.github/workflows/pi-mcu-protocol.yml'
   pull_request:
     paths:
-      - 'Pi-MCU-Elevator/**'
+      - 'pi_mcu_protocol/**'
       - '.github/workflows/pi-mcu-protocol.yml'
   workflow_dispatch:
 
@@ -22,7 +22,7 @@ jobs:
           python-version: '3.12'
 
       - name: CRC-16 (Python)
-        working-directory: Pi-MCU-Elevator/tests
+        working-directory: pi_mcu_protocol/tests
         run: python3 test_crc16.py
 
   cpp:
@@ -33,7 +33,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Build and run every C++ test
-        working-directory: Pi-MCU-Elevator/tests
+        working-directory: pi_mcu_protocol/tests
         run: |
           for t in test_crc16 test_ring_buffer test_line_reader test_pipeline; do
             echo "::group::$t"
@@ -55,7 +55,7 @@ jobs:
         run: sudo sysctl vm.mmap_rnd_bits=28
 
       - name: AddressSanitizer + UndefinedBehaviorSanitizer (every C++ test)
-        working-directory: Pi-MCU-Elevator/tests
+        working-directory: pi_mcu_protocol/tests
         run: |
           for t in test_crc16 test_ring_buffer test_line_reader test_pipeline; do
             echo "::group::$t"
@@ -65,7 +65,7 @@ jobs:
           done
 
       - name: ThreadSanitizer (the tests with two threads)
-        working-directory: Pi-MCU-Elevator/tests
+        working-directory: pi_mcu_protocol/tests
         run: |
           for t in test_ring_buffer test_pipeline; do
             echo "::group::$t"
