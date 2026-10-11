@@ -257,14 +257,23 @@ while (rx.pop(byte)) {
 python3 test_crc16.py; echo $?
 
 g++-14 -std=c++23 -Wall -Wextra -Wconversion test_crc16.cpp -o test_crc16_cpp && ./test_crc16_cpp; echo $?
+
+g++-14 -std=c++23 -O2 -Wall -Wextra -Wconversion -pthread test_ring_buffer.cpp -o test_ring_buffer && ./test_ring_buffer; echo $?
+
+g++-14 -std=c++23 -Wall -Wextra -Wconversion -D_GLIBCXX_ASSERTIONS test_line_reader.cpp -o test_line_reader && ./test_line_reader; echo $?
+
+g++-14 -std=c++23 -O2 -Wall -Wextra -Wconversion -pthread test_pipeline.cpp -o test_pipeline && ./test_pipeline; echo $?
 ```
 
 Each one exits with 0 when every test passes.
 
-| Test             | What it checks                                                       |
-|------------------|----------------------------------------------------------------------|
-| `test_crc16.py`  | the 5 values above, plus 1000 random inputs compared with `binascii` |
-| `test_crc16.cpp` | the 5 values with `static_assert` (while compiling) and at run time   |
+| Test                   | What it checks                                                       |
+|------------------------|----------------------------------------------------------------------|
+| `test_crc16.py`        | the 5 values above, plus 1000 random inputs compared with `binascii` |
+| `test_crc16.cpp`       | the 5 values with `static_assert` (while compiling) and at run time   |
+| `test_ring_buffer.cpp` | `RingBuffer`: empty and full, drops, order, wrap-around, `push(span)` all or nothing, `waiting()` + `free_bytes()` on wrapped data, `clear_buffer()`; on 2 threads, 20 million bytes with `push`/`pop` and 7 million with `push(span)`/`waiting`/`free_bytes` |
+| `test_line_reader.cpp` | `LineReader`: line endings, empty lines, exactly N characters, too-long lines and resynchronisation, lines split across calls, bursts |
+| `test_pipeline.cpp`    | `seal` + `RingBuffer` + `LineReader` + `unseal` together: the RX and TX paths, a damaged line, a too-long line; on 2 threads, 200 000 lines each way |
 
 Sanitizers catch bugs that a passing test can hide. Use them for PC test builds
 only, never on the MCU:
