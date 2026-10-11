@@ -1,0 +1,75 @@
+name: Pi-MCU protocol
+
+on:
+  push:
+    paths:
+      - 'Pi-MCU-Elevator/**'
+      - '.github/workflows/pi-mcu-protocol.yml'
+  pull_request:
+    paths:
+      - 'Pi-MCU-Elevator/**'
+      - '.github/workflows/pi-mcu-protocol.yml'
+  workflow_dispatch:
+
+jobs:
+  python:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: CRC-16 (Python)
+        working-directory: Pi-MCU-Elevator/tests
+        run: python3 test_crc16.py
+
+  cpp:
+    runs-on: ubuntu-24.04            # has g++-14: needed for C++23 and <print>
+    env:
+      CXXFLAGS: -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -Werror -D_GLIBCXX_ASSERTIONS -pthread
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build and run every C++ test
+        working-directory: Pi-MCU-Elevator/tests
+        run: |
+          for t in test_crc16 test_ring_buffer test_line_reader test_pipeline; do
+            echo "::group::$t"
+            g++-14 $CXXFLAGS $t.cpp -o $t
+            ./$t
+            echo "::endgroup::"
+          done
+
+  sanitizers:
+    runs-on: ubuntu-24.04
+    env:
+      CXXFLAGS: -std=c++23 -I.. -O1 -g -Wall -Wextra -pthread
+    steps:
+      - uses: actions/checkout@v5
+
+      # Newer kernels randomise memory more than the sanitizers expect; without this
+      # ThreadSanitizer can stop with "unexpected memory mapping".
+      - name: Lower address-space randomisation for the sanitizers
+        run: sudo sysctl vm.mmap_rnd_bits=28
+
+      - name: AddressSanitizer + UndefinedBehaviorSanitizer (every C++ test)
+        working-directory: Pi-MCU-Elevator/tests
+        run: |
+          for t in test_crc16 test_ring_buffer test_line_reader test_pipeline; do
+            echo "::group::$t"
+            g++-14 $CXXFLAGS -fsanitize=address,undefined -fno-sanitize-recover=all $t.cpp -o ${t}_asan
+            ./${t}_asan
+            echo "::endgroup::"
+          done
+
+      - name: ThreadSanitizer (the tests with two threads)
+        working-directory: Pi-MCU-Elevator/tests
+        run: |
+          for t in test_ring_buffer test_pipeline; do
+            echo "::group::$t"
+            g++-14 $CXXFLAGS -fsanitize=thread $t.cpp -o ${t}_tsan
+            TSAN_OPTIONS=halt_on_error=1 ./${t}_tsan
+            echo "::endgroup::"
+          done
