@@ -8,7 +8,7 @@
 // The threaded tests run the writer and the reader on two real threads, like an
 // interrupt and the main loop, with small rings so they fill up and wrap often.
 //
-// Build:  g++-14 -std=c++23 -O2 -Wall -Wextra -Wconversion -pthread
+// Build (from tests/):  g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -pthread
 //             test_pipeline.cpp -o test_pipeline
 // Exit status: 0 if every check passed.
 #include <array>

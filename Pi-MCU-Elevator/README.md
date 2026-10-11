@@ -55,7 +55,7 @@ check every `[]` index. It is a debugging flag only, so don't use it on the MCU.
 | `seal.hpp`              | `seal()` / `unseal()` in C++                                   |
 | `ring_buffer.hpp`       | `RingBuffer<M>`: lock-free byte queue, one writer and one reader |
 | `line_reader.hpp`       | `LineReader<N>`: received bytes → complete lines               |
-| `test_*.py`, `test_*.cpp` | tests, see [Running the tests](#running-the-tests)           |
+| `tests/`                | the tests, see [Running the tests](#running-the-tests)        |
 
 ## Wire format
 
@@ -253,16 +253,22 @@ while (rx.pop(byte)) {
 
 ## Running the tests
 
+The tests are in `tests/`. Run these commands from that folder. `-I..` lets the
+C++ tests find the headers one folder up; the Python test adds that folder to
+its import path itself.
+
 ```
+cd tests
+
 python3 test_crc16.py; echo $?
 
-g++-14 -std=c++23 -Wall -Wextra -Wconversion test_crc16.cpp -o test_crc16_cpp && ./test_crc16_cpp; echo $?
+g++-14 -std=c++23 -I.. -Wall -Wextra -Wconversion test_crc16.cpp -o test_crc16_cpp && ./test_crc16_cpp; echo $?
 
-g++-14 -std=c++23 -O2 -Wall -Wextra -Wconversion -pthread test_ring_buffer.cpp -o test_ring_buffer && ./test_ring_buffer; echo $?
+g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -pthread test_ring_buffer.cpp -o test_ring_buffer && ./test_ring_buffer; echo $?
 
-g++-14 -std=c++23 -Wall -Wextra -Wconversion -D_GLIBCXX_ASSERTIONS test_line_reader.cpp -o test_line_reader && ./test_line_reader; echo $?
+g++-14 -std=c++23 -I.. -Wall -Wextra -Wconversion -D_GLIBCXX_ASSERTIONS test_line_reader.cpp -o test_line_reader && ./test_line_reader; echo $?
 
-g++-14 -std=c++23 -O2 -Wall -Wextra -Wconversion -pthread test_pipeline.cpp -o test_pipeline && ./test_pipeline; echo $?
+g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -pthread test_pipeline.cpp -o test_pipeline && ./test_pipeline; echo $?
 ```
 
 Each one exits with 0 when every test passes.

@@ -4,7 +4,7 @@
 // line endings, empty lines, the exact length limit, too-long lines and
 // resynchronisation, lines split across calls, and bursts of lines.
 //
-// Build:  g++-14 -std=c++23 -Wall -Wextra -Wconversion -D_GLIBCXX_ASSERTIONS
+// Build (from tests/):  g++-14 -std=c++23 -I.. -Wall -Wextra -Wconversion -D_GLIBCXX_ASSERTIONS
 //             test_line_reader.cpp -o test_line_reader
 // -D_GLIBCXX_ASSERTIONS makes every buf[] index checked, so a write past the end
 // of the line buffer stops the test instead of silently corrupting the next member.

@@ -6,7 +6,7 @@
 //                   waiting() + free_bytes()), many bytes through small rings,
 //                   like an interrupt and the main loop
 //
-// Build:  g++-14 -std=c++23 -O2 -Wall -Wextra -Wconversion -pthread
+// Build (from tests/):  g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -pthread
 //             test_ring_buffer.cpp -o test_ring_buffer
 // Data races: build with -fsanitize=thread instead of -O2.
 // Exit status: 0 if every check passed.

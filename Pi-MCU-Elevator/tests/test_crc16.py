@@ -1,6 +1,11 @@
 import binascii
+import pathlib
 import random
 import sys
+
+# The code is one folder up (Pi-MCU-Elevator/), the tests are in tests/
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
 from crc16 import crc16
 
 
