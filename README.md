@@ -2,6 +2,7 @@
 
 [![Elevator (Python)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-python.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-python.yml)
 [![Elevator (C)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-c.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-c.yml)
+[![Pi-MCU protocol](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/pi-mcu-protocol.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/pi-mcu-protocol.yml)
 
 - This repository contains Python, C, and hand-tuned ARM Assembly implementations of [Algorithms](#algorithms) and [Data Structures](#data-structures) from The Art of Computer Programming, Vol.1 
 
