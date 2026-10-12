@@ -5,6 +5,7 @@
 #include <string_view>
 
 // Copy each byte to the internal buffer
+// body can contain \r
 // \n is the separator between lines or the last char in the line
 template <std::size_t N>
 class LineReader {
@@ -39,7 +40,7 @@ public:
         }
 
         // Skip the byte
-        if (c == '\r' || overflow) {
+        if (overflow) {
             return false;
         }
 
@@ -57,6 +58,7 @@ public:
     // Return dropped bytes quantity
     std::size_t dropped() const noexcept { return dropped_too_long; }
 
+    // The longest line with trailing \r
     static constexpr std::size_t capacity() noexcept { return N; }
 
 private:
