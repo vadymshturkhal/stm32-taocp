@@ -48,7 +48,7 @@
 - [Doubly Linked List](doubly_linked_list)
 
 # Systems:
-- [Pi ↔ MCU protocol](pi_mcu_protocol): a Raspberry Pi ↔ STM32 serial link built from TAOCP ideas:
+- [Pi ↔ MCU protocol](pi_mcu_protocol) *(in progress: steps 1–3 of 9)*: a Raspberry Pi ↔ STM32 serial link built from TAOCP ideas:
   a lock-free circular queue (§2.2.2) between the UART interrupt and the main loop, CRC-framed lines,
   and next a circle of buffers (§1.4.4) for zero-copy DMA transmit.
   C++23 on the MCU, Python on the Pi, tested in CI under AddressSanitizer, UBSan and ThreadSanitizer.
