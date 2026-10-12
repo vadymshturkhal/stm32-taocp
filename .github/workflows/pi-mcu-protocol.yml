@@ -25,6 +25,10 @@ jobs:
         working-directory: pi_mcu_protocol/tests
         run: python3 test_crc16.py
 
+      - name: seal / unseal (Python)
+        working-directory: pi_mcu_protocol/tests
+        run: python3 test_line.py
+
   cpp:
     runs-on: ubuntu-24.04            # has g++-14: needed for C++23 and <print>
     env:
