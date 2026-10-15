@@ -23,7 +23,6 @@ private:
 // WaitList
 // peek
 // is_node_ready
-// delete_and_run
 
 template <class Context>
 class WaitList {
@@ -39,10 +38,7 @@ public:
         // Schedule node to run delay units from now
         node.NEXTTIME = now + delay;
         
-        // Unlink node
-        node.left->right = node.right;
-        node.right->left = node.left;
-
+        unlink_node(node);
         sortin(node);
     }
 
@@ -52,21 +48,10 @@ public:
         hold(node, now, delay);
     }
 
-    void delete_node(Node& node) noexcept {
-        // Unlink node
-        node.left->right = node.right;
-        node.right->left = node.left;
-
-        // Point to itself
-        node.left = &node;
-        node.right = &node;
-    }
-
     // Insert node first in WAIT list
     void immed(Node& node, std::uint32_t now) noexcept {
         // Unlink node
-        node.left->right = node.right;
-        node.right->left = node.left;
+        unlink_node(node);
 
         // Set NEXTTIME
         node.NEXTTIME = now;
@@ -78,12 +63,35 @@ public:
         head.right = &node;
     }
 
+    [[nodiscard]] NextInst delete_first() noexcept {
+        if (is_empty()) return nullptr;
+
+        Node& n = *head.right;
+        delete_node(n);
+
+        return n.NEXTINST;
+    }
+
+    void delete_node(Node& node) noexcept {
+        // Unlink node
+        unlink_node(node);
+
+        // Point to itself
+        node.left = &node;
+        node.right = &node;
+    }
+
     [[nodiscard]] bool is_empty() const noexcept {
         return head.right == &head;
     }
         
 private:
     WaitNode<Context> head;
+
+    void unlink_node(Node& node) noexcept {
+        node.left->right = node.right;
+        node.right->left = node.left;
+    }
 
     // Sort node into WAIT list using left and right
     void sortin(Node& C) noexcept {
