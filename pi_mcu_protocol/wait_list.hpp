@@ -26,7 +26,6 @@ private:
 // holdc
 // peek
 // delete
-// sortin
 // is_node_ready
 // delete_and_run
 
@@ -36,15 +35,24 @@ public:
     using Node = WaitNode<Context>;
     using NextInst = typename Node::NextInst;
 
-
     static constexpr bool is_less(std::uint32_t a, std::uint32_t b) noexcept {
         return static_cast<std::int32_t>(a - b) < 0;
     }
 
+    void hold(Node& node, std::uint32_t now, std::uint32_t delay) noexcept {
+        // Schedule node to run delay units from now
+        node.NEXTTIME = now + delay;
+        
+        // Unlink node
+        node.left->right = node.right;
+        node.right->left = node.left;
+        
+        sortin(node);
+    }
 
 private:
     WaitNode<Context> head;
-    
+
     // Sort node into WAIT list using left and right
     void sortin(Node& C) noexcept {
         Node* P = head.left;  // Last node
@@ -54,7 +62,7 @@ private:
             P = P->left;
         }
 
-        // Insert to WAIT list
+        // Insert node to WAIT list
         Node* Q = P->right;
         C.right = Q;
         C.left = P;
