@@ -21,7 +21,6 @@ private:
 };
 
 // WaitList
-// immed
 // peek
 // is_node_ready
 // delete_and_run
@@ -61,6 +60,22 @@ public:
         // Point to itself
         node.left = &node;
         node.right = &node;
+    }
+
+    // Insert node first in WAIT list
+    void immed(Node& node, std::uint32_t now) noexcept {
+        // Unlink node
+        node.left->right = node.right;
+        node.right->left = node.left;
+
+        // Set NEXTTIME
+        node.NEXTTIME = now;
+
+        // Insert
+        node.left = &head;
+        node.right = head.right;
+        head.right->left = &node;
+        head.right = &node;
     }
         
 private:
