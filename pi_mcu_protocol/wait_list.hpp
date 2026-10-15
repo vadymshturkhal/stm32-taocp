@@ -77,6 +77,10 @@ public:
         head.right->left = &node;
         head.right = &node;
     }
+
+    [[nodiscard]] bool is_empty() const noexcept {
+        return head.right == &head;
+    }
         
 private:
     WaitNode<Context> head;
