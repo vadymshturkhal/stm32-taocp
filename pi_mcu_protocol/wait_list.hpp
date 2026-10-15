@@ -23,7 +23,6 @@ private:
 // WaitList
 // immed
 // peek
-// delete
 // is_node_ready
 // delete_and_run
 
@@ -52,6 +51,16 @@ public:
         // Set NEXTINST and then invoke hold
         node.NEXTINST = next_inst;
         hold(node, now, delay);
+    }
+
+    void delete_node(Node& node) noexcept {
+        // Unlink node
+        node.left->right = node.right;
+        node.right->left = node.left;
+
+        // Point to itself
+        node.left = &node;
+        node.right = &node;
     }
         
 private:
