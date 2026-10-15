@@ -22,8 +22,6 @@ private:
 
 // WaitList
 // immed
-// hold
-// holdc
 // peek
 // delete
 // is_node_ready
@@ -46,10 +44,16 @@ public:
         // Unlink node
         node.left->right = node.right;
         node.right->left = node.left;
-        
+
         sortin(node);
     }
 
+    void holdc(Node& node, std::uint32_t now, std::uint32_t delay, NextInst next_inst) noexcept {
+        // Set NEXTINST and then invoke hold
+        node.NEXTINST = next_inst;
+        hold(node, now, delay);
+    }
+        
 private:
     WaitNode<Context> head;
 
