@@ -20,9 +20,6 @@ private:
     NextInst NEXTINST = nullptr;
 };
 
-// WaitList
-// is_node_ready
-
 template <class Context>
 class WaitList {
 public:
