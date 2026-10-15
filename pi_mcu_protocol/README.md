@@ -271,6 +271,8 @@ g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -pthread test_ring_buffer.
 g++-14 -std=c++23 -I.. -Wall -Wextra -Wconversion -D_GLIBCXX_ASSERTIONS test_line_reader.cpp -o test_line_reader && ./test_line_reader; echo $?
 
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -pthread test_pipeline.cpp -o test_pipeline && ./test_pipeline; echo $?
+
+g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion test_wait_list.cpp -o test_wait_list && ./test_wait_list; echo $?
 ```
 
 Each one exits with 0 when every test passes.
@@ -282,6 +284,7 @@ Each one exits with 0 when every test passes.
 | `test_ring_buffer.cpp` | `RingBuffer`: empty and full, drops, order, wrap-around, `push(span)` all or nothing, `waiting()` + `free_bytes()` on wrapped data, `clear_buffer()`; on 2 threads, 20 million bytes with `push`/`pop` and 7 million with `push(span)`/`waiting`/`free_bytes` |
 | `test_line_reader.cpp` | `LineReader`: line endings, empty lines, exactly N characters, too-long lines and resynchronisation, lines split across calls, bursts |
 | `test_pipeline.cpp`    | `seal` + `RingBuffer` + `LineReader` + `unseal` together: the RX and TX paths, a damaged line, a too-long line; on 2 threads, 200 000 lines each way |
+| `test_wait_list.cpp`   | `WaitList`: order by time, FIFO for equal times, due exactly on time, cancel (twice), re-hold = restart, `immed`, one node per step, a periodic node, a handler that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
 
 Sanitizers catch bugs that a passing test can hide. Use them for PC test builds
 only, never on the MCU:
