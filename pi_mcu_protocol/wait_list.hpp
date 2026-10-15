@@ -98,7 +98,7 @@ private:
         Node* P = head.left;  // Last node
 
         // Compare NEXTTIME fields right to left
-        while (is_less(C.NEXTTIME, P->NEXTTIME) && P != &head) {
+        while (P != &head && is_less(C.NEXTTIME, P->NEXTTIME)) {
             P = P->left;
         }
 
