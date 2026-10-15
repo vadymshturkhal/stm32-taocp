@@ -21,7 +21,6 @@ private:
 };
 
 // WaitList
-// peek
 // is_node_ready
 
 template <class Context>
@@ -61,6 +60,10 @@ public:
         node.right = head.right;
         head.right->left = &node;
         head.right = &node;
+    }
+
+    [[nodiscard]] bool is_node_ready(std::uint32_t now) const noexcept {
+        return !is_empty() && !is_less(now, head.right->NEXTTIME);
     }
 
     [[nodiscard]] NextInst delete_first() noexcept {
