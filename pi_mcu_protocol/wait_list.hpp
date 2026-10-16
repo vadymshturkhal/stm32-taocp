@@ -6,11 +6,14 @@ template <class Context> class WaitList;
 template <class Context>
 class WaitNode {
 public:
+    using NextInst = void (Context::*)(std::uint32_t now) noexcept;
+
     WaitNode() = default;
+    constexpr WaitNode(NextInst next_inst, std::uint32_t delay) noexcept 
+        : NEXTINST(next_inst), DELAY(delay) {}
+
     WaitNode(const WaitNode&) = delete;
     WaitNode& operator=(const WaitNode&) = delete;
-
-    using NextInst = void (Context::*)(std::uint32_t now) noexcept;
 
 private:
     friend class WaitList<Context>;
@@ -18,6 +21,7 @@ private:
     WaitNode* right = this;
     std::uint32_t NEXTTIME = 0;
     NextInst NEXTINST = nullptr;
+    std::uint32_t DELAY = 0;
 };
 
 template <class Context>
@@ -38,10 +42,27 @@ public:
         sortin(node);
     }
 
+    // Use node's DELAY
+    void hold(Node& node, std::uint32_t now) noexcept {
+        // Schedule node to run delay units from now
+        node.NEXTTIME = now + node.DELAY;
+        
+        unlink_node(node);
+        sortin(node);
+    }
+
     void holdc(Node& node, std::uint32_t now, std::uint32_t delay, NextInst next_inst) noexcept {
         // Set NEXTINST and then invoke hold
         node.NEXTINST = next_inst;
         hold(node, now, delay);
+    }
+
+    // Use node's DELAY
+    // NOTE: holdc(node, now, 0) will add nullptr to NEXTINST
+    void holdc(Node& node, std::uint32_t now, NextInst next_inst) noexcept {
+        // Set NEXTINST and then invoke hold
+        node.NEXTINST = next_inst;
+        hold(node, now);
     }
 
     // Insert node first in WAIT list
