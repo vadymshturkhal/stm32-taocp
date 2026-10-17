@@ -39,7 +39,7 @@ jobs:
       - name: Build and run every C++ test
         working-directory: pi_mcu_protocol/tests
         run: |
-          for t in test_crc16 test_ring_buffer test_line_reader test_pipeline test_wait_list; do
+          for t in test_crc16 test_ring_buffer test_line_reader test_pipeline; do
             echo "::group::$t"
             g++-14 $CXXFLAGS $t.cpp -o $t
             timeout 300 ./$t
@@ -61,7 +61,7 @@ jobs:
       - name: AddressSanitizer + UndefinedBehaviorSanitizer (every C++ test)
         working-directory: pi_mcu_protocol/tests
         run: |
-          for t in test_crc16 test_ring_buffer test_line_reader test_pipeline test_wait_list; do
+          for t in test_crc16 test_ring_buffer test_line_reader test_pipeline; do
             echo "::group::$t"
             g++-14 $CXXFLAGS -fsanitize=address,undefined -fno-sanitize-recover=all $t.cpp -o ${t}_asan
             timeout 300 ./${t}_asan

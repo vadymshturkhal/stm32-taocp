@@ -1,0 +1,47 @@
+name: Knuth kernel
+
+on:
+  push:
+    paths:
+      - 'knuth_kernel/**'
+      - '.github/workflows/knuth-kernel.yml'
+  pull_request:
+    paths:
+      - 'knuth_kernel/**'
+      - '.github/workflows/knuth-kernel.yml'
+  workflow_dispatch:
+
+jobs:
+  cpp:
+    runs-on: ubuntu-24.04            # has g++-14: needed for C++23 and <print>
+    env:
+      CXXFLAGS: -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -Werror -D_GLIBCXX_ASSERTIONS
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build and run every C++ test
+        working-directory: knuth_kernel/tests
+        run: |
+          for t in test_wait_list; do
+            echo "::group::$t"
+            g++-14 $CXXFLAGS $t.cpp -o $t
+            timeout 300 ./$t
+            echo "::endgroup::"
+          done
+
+  sanitizers:
+    runs-on: ubuntu-24.04
+    env:
+      CXXFLAGS: -std=c++23 -I.. -O1 -g -Wall -Wextra
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: AddressSanitizer + UndefinedBehaviorSanitizer (every C++ test)
+        working-directory: knuth_kernel/tests
+        run: |
+          for t in test_wait_list; do
+            echo "::group::$t"
+            g++-14 $CXXFLAGS -fsanitize=address,undefined -fno-sanitize-recover=all $t.cpp -o ${t}_asan
+            timeout 300 ./${t}_asan
+            echo "::endgroup::"
+          done

@@ -18,3 +18,6 @@ inline constexpr std::size_t   RX_BUFFER_SIZE     = 1024;
 
 // Back to LISTEN after TIMEOUT expires without receiving any ACK
 inline constexpr std::uint32_t SESSION_TIMEOUT_MS = 4000;
+inline constexpr std::uint32_t HEARTBEAT_MS = 1000;
+inline constexpr std::uint32_t PEER_SILENT_MS = 4000;
+inline constexpr std::uint32_t CLOSE_TIMEOUT = 8000;

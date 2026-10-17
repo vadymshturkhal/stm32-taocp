@@ -57,6 +57,7 @@ check every `[]` index. It is a debugging flag only, so don't use it on the MCU.
 | `seal.hpp`              | `seal()` / `unseal()` in C++                                   |
 | `ring_buffer.hpp`       | `RingBuffer<M>`: lock-free byte queue, one writer and one reader |
 | `line_reader.hpp`       | `LineReader<N>`: received bytes → complete lines               |
+| [`../knuth_kernel/wait_list.hpp`](../knuth_kernel/wait_list.hpp) | the timers: the Knuth kernel's `WaitList` (not in this folder, see [Timers](#timers-the-knuth-kernels-waitlist)) |
 | `tests/`                | the tests, see [Running the tests](#running-the-tests)        |
 
 ## Wire format
@@ -253,6 +254,26 @@ while (rx.pop(byte)) {
 }
 ```
 
+## Timers: the Knuth kernel's WaitList
+
+Every timeout and periodic job of the protocol (the handshake timeout in step 4,
+the close timeout in step 6, the heartbeat in step 7, the peer-silence timeout in
+step 8) is a node in the WAIT list of the [Knuth kernel](../knuth_kernel), not a
+timestamp checked by hand. The list is the elevator's WAIT list from TAOCP §2.2.5
+(`hold`, `holdc`, `immed`, `sortin`), running on real time:
+
+- a node holds its time (`NEXTTIME`) and its step (`NEXTINST`); the list is kept
+  sorted, so the next deadline is always the first node;
+- entering a state holds that state's timer, leaving it removes it, so a timer
+  of an old state can never fire in a new one;
+- times are compared wrap-safe (`static_cast<std::int32_t>(a - b) < 0`), so
+  the 32-bit millisecond counter can wrap round every 49.7 days.
+
+The list lives in `knuth_kernel/` and is tested there
+([`knuth_kernel/tests/test_wait_list.cpp`](../knuth_kernel/tests/test_wait_list.cpp),
+with its own CI workflow). Code here that uses it builds with
+`-I../../knuth_kernel` (from `tests/`).
+
 ## Running the tests
 
 The tests are in `tests/`. Run these commands from that folder. `-I..` lets the
@@ -272,7 +293,6 @@ g++-14 -std=c++23 -I.. -Wall -Wextra -Wconversion -D_GLIBCXX_ASSERTIONS test_lin
 
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -pthread test_pipeline.cpp -o test_pipeline && ./test_pipeline; echo $?
 
-g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion test_wait_list.cpp -o test_wait_list && ./test_wait_list; echo $?
 ```
 
 Each one exits with 0 when every test passes.
@@ -284,7 +304,6 @@ Each one exits with 0 when every test passes.
 | `test_ring_buffer.cpp` | `RingBuffer`: empty and full, drops, order, wrap-around, `push(span)` all or nothing, `waiting()` + `free_bytes()` on wrapped data, `clear_buffer()`; on 2 threads, 20 million bytes with `push`/`pop` and 7 million with `push(span)`/`waiting`/`free_bytes` |
 | `test_line_reader.cpp` | `LineReader`: line endings, empty lines, exactly N characters, too-long lines and resynchronisation, lines split across calls, bursts |
 | `test_pipeline.cpp`    | `seal` + `RingBuffer` + `LineReader` + `unseal` together: the RX and TX paths, a damaged line, a too-long line; on 2 threads, 200 000 lines each way |
-| `test_wait_list.cpp`   | `WaitList`: order by time, FIFO for equal times, due exactly on time, cancel (twice), re-hold = restart, `immed`, one node per step, a periodic node, a handler that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
 
 Sanitizers catch bugs that a passing test can hide. Use them for PC test builds
 only, never on the MCU:
@@ -297,11 +316,12 @@ only, never on the MCU:
 
 ## Next steps
 
-4. Handshake (SYN → SYNACK → ACK): the first time the MCU replies. Build the
+4. Handshake (SYN → SYNACK → ACK): the first time the MCU replies. The
+   SYN_RCVD timeout is a node in the kernel's WaitList. Build the
    TX side as Knuth's circle of buffers (TAOCP §1.4.4): a ring of line slots,
    `reserve()` → `seal` in place → `commit()`, one DMA transfer per line.
 5. DATA
 6. Close
-7. Heartbeat
-8. Timeout
+7. Heartbeat (a periodic WaitList node)
+8. Timeout (a WaitList node restarted by every received line)
 9. Flow control
