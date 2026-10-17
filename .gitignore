@@ -15,3 +15,10 @@ pi_mcu_protocol/tests/*
 !pi_mcu_protocol/tests/*.py
 pi_mcu_protocol/**/*.o
 pi_mcu_protocol/**/a.out
+
+# knuth_kernel: test programs built on the PC (keep only the sources)
+knuth_kernel/tests/*
+!knuth_kernel/tests/*.cpp
+!knuth_kernel/tests/*.hpp
+knuth_kernel/**/*.o
+knuth_kernel/**/a.out
