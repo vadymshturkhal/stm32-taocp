@@ -6,9 +6,9 @@ A small run-to-completion event kernel for the STM32 Nucleo-G431RB, built from
 the WAIT list of Knuth's elevator simulation (TAOCP Vol. 1, §2.2.5). In the
 simulation the WAIT list runs simulated time; here it runs real time.
 
-**Status:** in progress. The WAIT list (`wait_list.hpp`) is done and tested; the
-`Kernel` class, the first programs and the MCU port come next (see
-[Roadmap](#roadmap)).
+**Status:** in progress. The WAIT list (`wait_list.hpp`) and the `Kernel` class
+(`kernel.hpp`) are done and tested on the PC with small programs; the MCU port
+comes next (see [Roadmap](#roadmap)).
 
 ## The idea
 
@@ -65,15 +65,9 @@ public:
 
     bool is_node_ready(std::uint32_t now) const noexcept;  // the first node is due
     WaitNode* delete_first() noexcept;                     // take it out (nullptr if empty)
+    std::optional<std::uint32_t> next_time() const noexcept;  // the first node's time, if any
     bool is_empty() const noexcept;
 };
-```
-
-One step of the kernel:
-
-```cpp
-if (list.is_node_ready(now))
-    if (WaitNode* n = list.delete_first()) n->run(now);
 ```
 
 How it works:
@@ -114,6 +108,37 @@ void U2(WaitNode& n, std::uint32_t now) noexcept {
 There is no `virtual` anywhere: a `UserNode` is a `WaitNode` followed by its
 fields, with no vtable.
 
+## Kernel (`kernel.hpp`)
+
+Programs use the kernel, not the list:
+
+```cpp
+class Kernel {
+public:
+    void start(WaitNode& node, std::uint32_t now) noexcept;      // run as soon as possible (immed)
+    void hold(WaitNode& node, std::uint32_t now) noexcept;       // run after the node's DELAY
+    void hold(WaitNode& node, std::uint32_t now, std::uint32_t delay) noexcept;
+    void holdc(WaitNode& node, std::uint32_t now, std::uint32_t delay, WaitNode::NextInst next) noexcept;
+    void cancel(WaitNode& node) noexcept;
+
+    bool step(std::uint32_t now) noexcept;                       // run at most one due node
+    std::optional<std::uint32_t> next_time() const noexcept;     // the first node's time, if any
+};
+```
+
+`step` is one step of Knuth's `CYCLE`: if the first node is due, take it out of
+the list and run it. The main loop calls it again and again:
+
+```cpp
+k.start(blinker, now());
+while (true) k.step(now());
+```
+
+`step` runs one node per call, so the main loop gets a turn between steps. With
+`next_time()` the same kernel can also run event-driven, jumping from deadline
+to deadline like the simulation does; the tests check that both give the same
+run. On the MCU, `next_time()` tells how long it may sleep.
+
 ## Language and tools
 
 The same as [pi_mcu_protocol](../pi_mcu_protocol): C++23 with `g++-14` on the PC,
@@ -125,29 +150,33 @@ no exceptions, no RTTI, and every function is `noexcept`.
 | File                     | What it is                                         |
 |--------------------------|----------------------------------------------------|
 | `wait_list.hpp`          | `WaitNode` and `WaitList`                          |
+| `kernel.hpp`             | `Kernel`: the API for programs, and `step(now)`    |
 | `tests/test_wait_list.cpp` | the tests of the WAIT list                       |
+| `tests/test_kernel.cpp`  | the tests of the kernel, with small programs       |
 
 ## Running the tests
 
 ```
 cd tests
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion test_wait_list.cpp -o test_wait_list && ./test_wait_list; echo $?
+g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion test_kernel.cpp -o test_kernel && ./test_kernel; echo $?
 ```
 
-It exits with 0 when every test passes. CI runs it on every push that changes
+Each one exits with 0 when every test passes. CI runs it on every push that changes
 this folder, also under AddressSanitizer and UndefinedBehaviorSanitizer.
 
 | Test                 | What it checks                                                        |
 |----------------------|-----------------------------------------------------------------------|
 | `test_wait_list.cpp` | order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
+| `test_kernel.cpp`    | a new kernel; `start` runs at once; `step` runs one due node and says so; `next_time`; `cancel`; programs: a blinker, a periodic counter, two programs side by side, a message (one program starts another, ahead of overdue nodes), a supervisor that stops a program; across the clock wrap; "jump to `next_time`" (event-driven, like `CYCLE`) gives the same run as "every millisecond" (like SysTick) |
 
 ## Roadmap
 
-1. **Create the kernel:** the WAIT list (done), then a `Kernel` class that owns
-   it (`start`, `hold`, `holdc`, `cancel`, `step(now)`, `next_time()`), with a
-   fake clock for the PC tests.
-2. **Test it:** a blinker program, then two programs that send each other
-   messages (one program `immed`s another's node).
+1. **Create the kernel** (done): the WAIT list, and a `Kernel` class that owns
+   it (`start`, `hold`, `holdc`, `cancel`, `step(now)`, `next_time()`).
+2. **Test it** (done): with a fake clock on the PC: a blinker, a counter, a
+   message between two programs (one program `start`s another's node), a
+   supervisor, the clock wrap.
 3. **Run it on the MCU:** SysTick as the clock and the board's LED; then sleep
    (`WFI`) until the first node's time; UART interrupts turned into events
    through a lock-free ring buffer; a watchdog and a cycle budget per step
