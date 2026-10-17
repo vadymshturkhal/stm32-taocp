@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <optional>
 
 // forward declaration
 class WaitList;
@@ -108,7 +109,12 @@ public:
     [[nodiscard]] bool is_empty() const noexcept {
         return head.right == &head;
     }
-        
+
+    [[nodiscard]] std::optional<std::uint32_t> next_time() const noexcept {
+        if(is_empty()) return std::nullopt;
+        return head.right->NEXTTIME;
+    }
+         
 private:
     WaitNode head;
 
