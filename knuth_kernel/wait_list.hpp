@@ -17,6 +17,8 @@ public:
     constexpr WaitNode(NextInst next_inst, std::uint32_t delay) noexcept 
         : NEXTINST(next_inst), DELAY(delay) {}
 
+    [[nodiscard]] bool is_held() const noexcept { return right != this; }
+
     WaitNode(const WaitNode&) = delete;
     WaitNode& operator=(const WaitNode&) = delete;
 

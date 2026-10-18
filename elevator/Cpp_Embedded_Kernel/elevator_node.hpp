@@ -10,6 +10,8 @@ public:
     ElevatorNode(ElevatorState& s, NextInst next_inst) noexcept :
         WaitNode(next_inst, 0), state(&s) {}
 
+    // Same trick Linux uses: list_del_init() + list_empty(&node), 
+    // asks "is this node in any list?"
     [[nodiscard]] bool is_in_queue() const noexcept {return right2 != this; }
 
     // Back pointer state field, replaced global state
