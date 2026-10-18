@@ -10,6 +10,8 @@ public:
     ElevatorNode(ElevatorState& s, NextInst next_inst) noexcept :
         WaitNode(next_inst, 0), state(&s) {}
 
+    [[nodiscard]] bool is_in_queue() const noexcept {return right2 != this; }
+
     // Back pointer state field, replaced global state
     ElevatorState* state = nullptr;
 
