@@ -3,7 +3,8 @@
 //   is_less:     order and the 32-bit clock wrapping round (static_assert)
 //   the list:    empty, order by NEXTTIME, FIFO for equal times, due exactly at
 //                NEXTTIME, cancel (twice), re-hold = restart, the node's own DELAY,
-//                holdc changes the handler, immed jumps the queue, one node per step
+//                holdc changes the handler, next_inst / set_next_inst (also on a node
+//                that is waiting), immed jumps the queue, one node per step
 //   params:      one handler shared by many nodes, each node carrying its own data
 //                (a node type derived from WaitNode, like Knuth's user nodes)
 //   handlers:    a periodic node that re-holds itself, a handler that cancels
@@ -281,6 +282,37 @@ int main() {
         const std::string early = w.log;
         run_until(w.wait, 10);
         check("holdc(node, now, fn) uses the node's DELAY", early.empty() && w.log == "P");
+    }
+
+    // 11b. next_inst / set_next_inst: the node's next step is data that can be read and changed
+    {
+        World w;
+        const bool born_with = w.a.next_inst() == &write_letter;
+        w.wait.holdc(w.a, 0, 10, &write_upper);
+        const bool after_holdc = w.a.next_inst() == &write_upper;
+        check("next_inst: the step the node was created with, then the one holdc set",
+              born_with && after_holdc);
+    }
+    {
+        World w;
+        w.wait.hold(w.a, 0, 50);             // a is held for 50 with write_letter
+        w.wait.hold(w.b, 0, 30);
+        w.a.set_next_inst(&write_upper);     // change a's next step while it waits
+        const bool still_held = w.a.is_held();
+        run_until(w.wait, 49);
+        const std::string before = w.log;
+        run_until(w.wait, 50);
+        check("set_next_inst on a held node: still held, same time (50), the new step runs",
+              still_held && before == "b" && w.log == "bA");
+    }
+    {
+        World w;                              // Knuth's CYCLE1 / the elevator's E1A
+        w.a.set_next_inst(&write_upper);      // set the next step without scheduling it
+        const bool not_held = !w.a.is_held() && w.wait.is_empty();
+        w.wait.immed(w.a, 7);                 // later someone wakes it (DECISION)
+        run_until(w.wait, 7);
+        check("set_next_inst on a node that is not held: nothing runs until it is started",
+              not_held && w.log == "A");
     }
 
     // 12. immed jumps the queue, even ahead of overdue nodes

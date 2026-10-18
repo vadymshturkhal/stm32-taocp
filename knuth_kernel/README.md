@@ -50,6 +50,9 @@ public:
     using NextInst = void (*)(WaitNode& node, std::uint32_t now) noexcept;
     constexpr WaitNode(NextInst next_inst, std::uint32_t delay) noexcept;
     void run(std::uint32_t now) noexcept;          // NEXTINST(*this, now)
+    NextInst next_inst() const noexcept;           // the step it runs next
+    void set_next_inst(NextInst next) noexcept;    // change it, without scheduling
+    bool is_held() const noexcept;                 // is it in the list?
 };
 
 class WaitList {
@@ -84,6 +87,13 @@ How it works:
 - **Times are compared wrap-safe:** `static_cast<std::int32_t>(a - b) < 0`. The
   32-bit millisecond counter wraps round every 49.7 days; delays must stay
   below 2^31 ms (24.8 days).
+- **A node's next step is data.** `next_inst()` reads it and `set_next_inst()`
+  changes it, even while the node waits: it then runs the new step at the old
+  time. Knuth's `DECISION` relies on this ("is the elevator dormant at E1?").
+  An `asyncio` task can't do it: where a coroutine resumes is hidden in its
+  frame, so it can only be cancelled and started again. The
+  [async elevator](../elevator/Python_async/elevator.py) has to keep a
+  separate `nextinst` next to each task for exactly this reason.
 - **No heap.** Nodes belong to their programs; the list only links them.
   Nodes cannot be copied or moved, because their neighbours point to them.
 
@@ -180,7 +190,7 @@ this folder, also under AddressSanitizer and UndefinedBehaviorSanitizer.
 3. **Run it on the MCU:** SysTick as the clock and the board's LED; then sleep
    (`WFI`) until the first node's time; UART interrupts turned into events
    through a lock-free ring buffer; a watchdog and a cycle budget per step
-   (DWT); a storage pool (TAOCP §2.5) for nodes created at run time.
+   (DWT); nodes created at run time from one arena with a POOLMAX border and an AVAIL list per node type (TAOCP §2.2.3).
 4. **Port the elevator** ([`elevator/C_Embedded`](../elevator/C_Embedded)) to
    it: E1–E9 and U1–U6 as steps, running on real time.
 
