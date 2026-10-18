@@ -18,6 +18,8 @@ public:
         : NEXTINST(next_inst), DELAY(delay) {}
 
     [[nodiscard]] bool is_held() const noexcept { return right != this; }
+    [[nodiscard]] NextInst next_inst() const noexcept { return NEXTINST; }
+    void set_next_inst(NextInst next_inst) noexcept { NEXTINST = next_inst; }
 
     WaitNode(const WaitNode&) = delete;
     WaitNode& operator=(const WaitNode&) = delete;
