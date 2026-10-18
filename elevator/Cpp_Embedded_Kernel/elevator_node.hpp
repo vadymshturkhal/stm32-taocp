@@ -10,6 +10,7 @@ public:
     ElevatorNode(ElevatorState& s, NextInst next_inst) noexcept :
         WaitNode(next_inst, 0), state(&s) {}
 
+    // Back pointer state field, replaced global state
     ElevatorState* state = nullptr;
 
     ElevatorNode* left2 = this;
