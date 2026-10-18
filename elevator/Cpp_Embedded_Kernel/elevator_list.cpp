@@ -3,6 +3,9 @@
 void ElevatorList::delete_node(ElevatorNode& node) noexcept {
     node.left2->right2 = node.right2;
     node.right2->left2 = node.left2;
+
+    // Point links to itself
+    node.left2 = node.right2 = &node;
 }
 
 void ElevatorList::insert_at_rear(ElevatorNode& node) noexcept {
