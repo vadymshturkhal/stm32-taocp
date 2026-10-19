@@ -9,9 +9,9 @@
 #include "elevator_constants.hpp"
 
 // SharedState in C version
-class ElevatorState {
+class ElevatorSimulation {
 public:
-    explicit ElevatorState(Kernel& k) noexcept : kernel(k) {}
+    explicit ElevatorSimulation(Kernel& k) noexcept : kernel(k) {}
 
     Kernel& kernel;
     std::uint32_t t0 = 0;  // kernel tick at which the elevator started
@@ -37,10 +37,10 @@ public:
 
     void immed(WaitNode& n) noexcept { kernel.start(n, ticks()); }
     void cancel(WaitNode& n) noexcept { kernel.cancel(n); }
-    // void decision(WaitNode::NextInst caller) noexcept;
+    void decision(WaitNode::NextInst caller) noexcept;
 };
 
-inline ElevatorState& begin_step(WaitNode& n) noexcept {
+inline ElevatorSimulation& begin_step(WaitNode& n) noexcept {
     auto& node = static_cast<ElevatorNode&>(n);
     
     assert(node.state != nullptr);

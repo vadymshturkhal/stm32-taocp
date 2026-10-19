@@ -3,11 +3,11 @@
 #include "elevator_constants.hpp"
 #include "elevator_node.hpp"
 
-class ElevatorState;
+class ElevatorSimulation;
 
 class Elevator {
 public:
-    explicit Elevator(ElevatorState& s) noexcept
+    explicit Elevator(ElevatorSimulation& s) noexcept
         : ELEV1(s, &E1), ELEV2(s, &E5), ELEV3(s, &E9), state(s) {}
 
     std::int32_t STATE = 0; // neutral state
@@ -29,7 +29,7 @@ public:
     void E5A(std::uint32_t delay) noexcept;  // Run E5 after some delay
 
 private:
-    ElevatorState& state;
+    ElevatorSimulation& state;
     bool first_search = false;  // Look at E3-E4
 
     static void E2(WaitNode& C, std::uint32_t now) noexcept;

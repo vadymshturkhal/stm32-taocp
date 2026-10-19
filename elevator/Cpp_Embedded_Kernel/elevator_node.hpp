@@ -2,12 +2,12 @@
 #include <cstdint>
 #include "wait_list.hpp"
 
-class ElevatorState;
+class ElevatorSimulation;
 
 class ElevatorNode : public WaitNode {
 public:
     ElevatorNode() noexcept = default;
-    ElevatorNode(ElevatorState& s, NextInst next_inst) noexcept :
+    ElevatorNode(ElevatorSimulation& s, NextInst next_inst) noexcept :
         WaitNode(next_inst, 0), state(&s) {}
 
     // Same trick Linux uses: list_del_init() + list_empty(&node), 
@@ -15,7 +15,7 @@ public:
     [[nodiscard]] bool is_in_queue() const noexcept {return right2 != this; }
 
     // Back pointer state field, replaced global state
-    ElevatorState* state = nullptr;
+    ElevatorSimulation* state = nullptr;
 
     ElevatorNode* left2 = this;
     ElevatorNode* right2 = this;

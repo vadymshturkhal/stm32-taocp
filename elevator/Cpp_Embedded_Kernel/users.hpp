@@ -1,11 +1,11 @@
 #pragma once
 
-class ElevatorState;
+class ElevatorSimulation;
 
 class Users {
 public:
-    explicit Users(ElevatorState& s) noexcept : state(s) {}
+    explicit Users(ElevatorSimulation& s) noexcept : state(s) {}
 
 private:
-    ElevatorState& state;
+    ElevatorSimulation& state;
 };
