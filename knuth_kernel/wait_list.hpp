@@ -19,6 +19,7 @@ public:
 
     [[nodiscard]] bool is_held() const noexcept { return right != this; }
     [[nodiscard]] NextInst next_inst() const noexcept { return NEXTINST; }
+    [[nodiscard]] std::uint32_t next_time() const noexcept { return NEXTTIME; }
     void set_next_inst(NextInst next_inst) noexcept { NEXTINST = next_inst; }
 
     WaitNode(const WaitNode&) = delete;

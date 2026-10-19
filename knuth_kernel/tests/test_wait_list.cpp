@@ -4,7 +4,8 @@
 //   the list:    empty, order by NEXTTIME, FIFO for equal times, due exactly at
 //                NEXTTIME, cancel (twice), re-hold = restart, the node's own DELAY,
 //                holdc changes the handler, next_inst / set_next_inst (also on a node
-//                that is waiting), immed jumps the queue, one node per step
+//                that is waiting), the node's next_time (kept after delete_first),
+//                the list's next_time, is_held, immed jumps the queue, one node per step
 //   params:      one handler shared by many nodes, each node carrying its own data
 //                (a node type derived from WaitNode, like Knuth's user nodes)
 //   handlers:    a periodic node that re-holds itself, a handler that cancels
@@ -152,6 +153,19 @@ int main() {
               w.wait.is_empty() && !w.wait.is_node_ready(0) && w.wait.delete_first() == nullptr);
         w.wait.delete_node(w.a);             // a node that was never held
         check("delete_node on a node that was never held: harmless", w.wait.is_empty());
+    }
+
+    // 1b. The list's next_time (the first node's time) and is_held
+    {
+        World w;
+        const bool none = !w.wait.next_time();
+        w.wait.hold(w.a, 0, 300);
+        w.wait.hold(w.b, 0, 100);
+        const bool earliest = w.wait.next_time() == 100u;
+        const bool held = w.a.is_held() && w.b.is_held() && !w.c.is_held();
+        w.wait.delete_node(w.b);
+        check("list next_time: empty, then the earliest time (100), then 300 after cancelling it; is_held",
+              none && earliest && held && w.wait.next_time() == 300u && !w.b.is_held());
     }
 
     // 2. Order by NEXTTIME
@@ -304,6 +318,14 @@ int main() {
         run_until(w.wait, 50);
         check("set_next_inst on a held node: still held, same time (50), the new step runs",
               still_held && before == "b" && w.log == "bA");
+    }
+    {
+        World w;                              // C's cycle(): TIME = NEXTTIME of the node that runs
+        w.wait.hold(w.a, 1000, 20);
+        const bool held_at = w.a.next_time() == 1020;
+        WaitNode* n = w.wait.delete_first();
+        check("next_time: the scheduled time, still there after delete_first (the step reads it)",
+              held_at && n == &w.a && !w.a.is_held() && w.a.next_time() == 1020);
     }
     {
         World w;                              // Knuth's CYCLE1 / the elevator's E1A
