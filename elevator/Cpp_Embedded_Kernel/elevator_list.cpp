@@ -10,9 +10,9 @@ void ElevatorList::delete_node(ElevatorNode& node) noexcept {
 
 void ElevatorList::insert_at_rear(ElevatorNode& node) noexcept {
     ElevatorNode* Q = head.left2;
-	node.left2 = Q;
-	head.left2 = &node;
-	Q->right2 = &node;
+    node.left2 = Q;
+    head.left2 = &node;
+    Q->right2 = &node;
     node.right2 = &head;
 }
 
