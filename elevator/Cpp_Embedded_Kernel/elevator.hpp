@@ -8,7 +8,7 @@ class ElevatorSimulation;
 class Elevator {
 public:
     explicit Elevator(ElevatorSimulation& s) noexcept
-        : ELEV1(s, &E1), ELEV2(s, &E5), ELEV3(s, &E9), state(s) {}
+        : ELEV1(s, &E1), ELEV2(s, &E5), ELEV3(s, &E9), simulation(s) {}
 
     std::int32_t STATE = 0; // neutral state
     std::uint32_t FLOOR = HOME_FLOOR;
@@ -29,7 +29,7 @@ public:
     void E5A(std::uint32_t delay) noexcept;  // Run E5 after some delay
 
 private:
-    ElevatorSimulation& state;
+    ElevatorSimulation& simulation;
     bool first_search = false;  // Look at E3-E4
 
     static void E2(WaitNode& C, std::uint32_t now) noexcept;

@@ -4,8 +4,8 @@ class ElevatorSimulation;
 
 class Users {
 public:
-    explicit Users(ElevatorSimulation& s) noexcept : state(s) {}
+    explicit Users(ElevatorSimulation& s) noexcept : simulation(s) {}
 
 private:
-    ElevatorSimulation& state;
+    ElevatorSimulation& simulation;
 };
