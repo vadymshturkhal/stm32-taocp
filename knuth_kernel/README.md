@@ -34,7 +34,12 @@ so every program shares one stack and no step needs a lock against another.
 
 ### Rules for programs
 
-1. **Steps are short.** A long step delays every other program.
+1. **Steps are short.** A long step delays every other program. Example: the
+   elevator's `E4` (let people out, in) handles **one** user per step: it
+   starts that user's node (`immed`), holds itself for 25 units and returns.
+   A loop over every user on the floor in one step would also work, but it
+   would block the main loop. See the
+   [C++ elevator](../elevator/Cpp_Embedded_Kernel).
 2. **No waiting inside a step** (no busy loops, no `HAL_Delay`). To wait, hold
    the next step and return.
 3. **State lives in the node or the program object,** never in local
@@ -149,6 +154,27 @@ while (true) k.step(now());
 to deadline like the simulation does; the tests check that both give the same
 run. On the MCU, `next_time()` tells how long it may sleep.
 
+## The elevator as a reference program
+
+Knuth wrote the elevator simulation to show how the WAIT list is used, and this
+kernel is that WAIT list, so the [C++ elevator](../elevator/Cpp_Embedded_Kernel)
+is its natural example: almost every feature has a step that uses it.
+
+| Kernel feature                          | Where the elevator uses it                          |
+|-----------------------------------------|-----------------------------------------------------|
+| `hold`                                  | `E3` schedules E9 (after 300) and E5 (after 76)     |
+| `hold` on a waiting node = restart      | `E3` re-holds `ELEV3` (Knuth's `DELETEW` + `HOLD`)  |
+| `holdc` (a new next step)               | `E2A`, `E4A`, `E5A`; `E5` → `E6`                    |
+| `start` / `immed` (a message to another program) | `E4` starts a user's U5 or U6              |
+| `cancel`                                | `E4` cancels a user's U4 (giving up)                |
+| `next_inst()` as a state check          | `DECISION`: "is the elevator dormant at E1?"        |
+| `set_next_inst()` without scheduling    | `E1A`                                               |
+| short steps                             | `E4`: one user per step                             |
+| one step function for many nodes        | U1–U6 run every user's node                         |
+| a program's own data in its nodes       | `IN`, `OUT`, `GIVEUPTIME` in `ElevatorNode`         |
+
+The tests show that the kernel works; the elevator shows how to use it.
+
 ## Language and tools
 
 The same as [pi_mcu_protocol](../pi_mcu_protocol): C++23 with `g++-14` on the PC,
@@ -177,7 +203,7 @@ this folder, also under AddressSanitizer and UndefinedBehaviorSanitizer.
 
 | Test                 | What it checks                                                        |
 |----------------------|-----------------------------------------------------------------------|
-| `test_wait_list.cpp` | order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
+| `test_wait_list.cpp` | order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `next_inst` / `set_next_inst` (also on a waiting node), the node's and the list's `next_time`, `is_held`, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
 | `test_kernel.cpp`    | a new kernel; `start` runs at once; `step` runs one due node and says so; `next_time`; `cancel`; programs: a blinker, a periodic counter, two programs side by side, a message (one program starts another, ahead of overdue nodes), a supervisor that stops a program; across the clock wrap; "jump to `next_time`" (event-driven, like `CYCLE`) gives the same run as "every millisecond" (like SysTick) |
 
 ## Roadmap
