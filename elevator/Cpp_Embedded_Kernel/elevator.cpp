@@ -232,6 +232,48 @@ void Elevator::E5(WaitNode& node, std::uint32_t /*now*/) noexcept {
     sim.holdc(elevator.ELEV1, delay, &E6);
 }
 
+// [Prepare to move]
+void Elevator::E6(WaitNode& node, std::uint32_t now) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Elevator& elevator = sim.elevator;
+
+    // If STATE != GOINGDOWN: CALLUP and CALLCAR on this floor are reset
+    if (elevator.STATE >= 0) {
+        sim.CALLS[elevator.FLOOR] &= ~(CALLUP | CALLCAR);
+    }
+
+    // If STATE != GOINGUP: reset CALLCAR and CALLDOWN
+    if (elevator.STATE <= 0) {
+        sim.CALLS[elevator.FLOOR] &= ~(CALLCAR | CALLDOWN);
+    }
+
+    // Perform DECISION subroutine
+    if (elevator.STATE == 0) {
+        // J5Z DECISION
+        sim.decision(&E6);
+    }
+
+    elevator.E6B(elevator);
+}
+
+void Elevator::E6B(Elevator& elevator) noexcept {}
+
+void Elevator::E7(WaitNode& node, std::uint32_t now) noexcept {
+
+}
+
+void Elevator::E7_continue(WaitNode& node, std::uint32_t now) noexcept {
+
+}
+
+void Elevator::E8(WaitNode& node, std::uint32_t now) noexcept {
+
+}
+
+void Elevator::E8_continue(WaitNode& node, std::uint32_t now) noexcept {
+
+}
+
 // [Set inaction indicator]
 void Elevator::E9(WaitNode& node, std::uint32_t /*now*/) noexcept {
     ElevatorSimulation& sim = begin_step(node);
