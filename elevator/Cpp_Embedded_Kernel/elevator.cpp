@@ -1,5 +1,14 @@
 #include "elevator.hpp"
 #include "elevator_simulation.hpp"
+#include "trace.hpp"
+
+void Elevator::E1A() noexcept {
+    ELEV1.set_next_inst(&E1);
+}
+
+void Elevator::E1(WaitNode& /*C*/, std::uint32_t /*now*/) noexcept {
+
+}
 
 void Elevator::E5(WaitNode& node, std::uint32_t /*now*/) noexcept {
     ElevatorSimulation& sim = begin_step(node);
