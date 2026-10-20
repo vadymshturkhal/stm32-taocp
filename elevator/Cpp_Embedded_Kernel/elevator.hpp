@@ -21,25 +21,25 @@ public:
     ElevatorNode ELEV3;  // Represents the independent elevator action at E9
 
     void E1A() noexcept;
-    static void E1(WaitNode& C, std::uint32_t now) noexcept;
-    static void E3(WaitNode& C, std::uint32_t now) noexcept;
-    static void E5(WaitNode& C, std::uint32_t now) noexcept;
-    static void E6(WaitNode& C, std::uint32_t now) noexcept;
-    static void E9(WaitNode& C, std::uint32_t now) noexcept;
+    static void E1(WaitNode& node, std::uint32_t now) noexcept;
+    static void E3(WaitNode& node, std::uint32_t now) noexcept;
+    static void E5(WaitNode& node, std::uint32_t now) noexcept;
+    static void E6(WaitNode& node, std::uint32_t now) noexcept;
+    static void E9(WaitNode& node, std::uint32_t now) noexcept;
     void E5A(std::uint32_t delay) noexcept;  // Run E5 after some delay
 
 private:
     ElevatorSimulation& simulation;
     bool first_search = false;  // Look at E3-E4
 
-    static void E2(WaitNode& C, std::uint32_t now) noexcept;
-    static void E4(WaitNode& C, std::uint32_t now) noexcept;
-    static void E7(WaitNode& C, std::uint32_t now) noexcept;
-    static void E7_continue(WaitNode& C, std::uint32_t now) noexcept;
-    static void E8(WaitNode& C, std::uint32_t now) noexcept;
-    static void E8_continue(WaitNode& C, std::uint32_t now) noexcept;
+    static void E2(WaitNode& node, std::uint32_t now) noexcept;
+    static void E4(WaitNode& node, std::uint32_t now) noexcept;
+    static void E7(WaitNode& node, std::uint32_t now) noexcept;
+    static void E7_continue(WaitNode& node, std::uint32_t now) noexcept;
+    static void E8(WaitNode& node, std::uint32_t now) noexcept;
+    static void E8_continue(WaitNode& node, std::uint32_t now) noexcept;
 
-    void E2A(WaitNode& C, std::uint32_t delay) noexcept;
+    void E2A(WaitNode& node, std::uint32_t delay) noexcept;
     void E4A(std::uint32_t delay) noexcept;
     void E6B() noexcept;
 };
