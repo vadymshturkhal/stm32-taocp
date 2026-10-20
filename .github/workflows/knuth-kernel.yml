@@ -15,7 +15,7 @@ jobs:
   cpp:
     runs-on: ubuntu-24.04            # has g++-14: needed for C++23 and <print>
     env:
-      CXXFLAGS: -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion -Werror -D_GLIBCXX_ASSERTIONS
+      CXXFLAGS: -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion -Werror -D_GLIBCXX_ASSERTIONS
     steps:
       - uses: actions/checkout@v5
 
