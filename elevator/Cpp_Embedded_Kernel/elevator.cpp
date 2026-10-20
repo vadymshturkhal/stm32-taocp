@@ -231,3 +231,20 @@ void Elevator::E5(WaitNode& node, std::uint32_t /*now*/) noexcept {
     std::uint32_t delay = 20;
     sim.holdc(elevator.ELEV1, delay, &E6);
 }
+
+// [Set inaction indicator]
+void Elevator::E9(WaitNode& node, std::uint32_t /*now*/) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Elevator& elevator = sim.elevator;
+
+    // Unschedule ELEV3
+    // The kernel unlinked ELEV3 before running E9, 
+    // so we can don't need to call: 
+    // sim.cancel(elevator.ELEV3);
+
+    // Set D2 = 0
+    elevator.D2 = 0;
+
+    // Call the decision
+    sim.decision(&E9);
+}
