@@ -34,8 +34,8 @@ public:
         return true;
     }
 
-    std::optional<std::uint32_t> next_time() const noexcept {
-        return list_.next_time();
+    std::optional<std::uint32_t> get_next_time() const noexcept {
+        return list_.get_next_time();
     }
 
 private:

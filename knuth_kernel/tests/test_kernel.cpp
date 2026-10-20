@@ -1,17 +1,17 @@
 // test_kernel.cpp - tests of Kernel (kernel.hpp) with small programs, run on the PC
 //
 //   the kernel:  a new kernel has nothing to do; start runs a program at once;
-//                step runs one due node and says so; next_time follows the list
+//                step runs one due node and says so; get_next_time follows the list
 //   programs:    a blinker (two steps that hold each other), a periodic counter,
 //                two programs side by side, one program sending a message to
 //                another (start of its node), a supervisor that stops a program
 //   time:        a program running across the 32-bit clock wrap; the same programs
-//                driven by "jump to next_time" (event-driven, like the elevator's
+//                driven by "jump to get_next_time" (event-driven, like the elevator's
 //                CYCLE) give the same log as "every millisecond" (a real clock)
 //
 // A program here writes "time:name what" into a log, so a run is a string.
 //
-// Build (from tests/):  g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion
+// Build (from tests/):  g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion
 //             test_kernel.cpp -o test_kernel
 // Exit status: 0 if every check passed.
 #include <cstdint>
@@ -31,8 +31,8 @@ static void check(const char* name, bool ok) {
 // ---- A test program: a node with its kernel, its log, its name and a few params ----
 
 struct Program : WaitNode {
-    Program(Kernel& k, std::string& log, const char* name, NextInst first, std::uint32_t delay = 0) noexcept
-        : WaitNode(first, delay), kernel(&k), log(&log), name(name) {}
+    Program(Kernel& k, std::string& l, const char* n, NextInst first, std::uint32_t delay = 0) noexcept
+        : WaitNode(first, delay), kernel(&k), log(&l), name(n) {}
 
     Kernel* kernel;
     std::string* log;
@@ -94,7 +94,7 @@ static void every_ms(Kernel& k, std::uint32_t from, std::uint32_t to) noexcept {
 
 // Run the kernel event-driven: jump straight to the next deadline, until `to`.
 static void jump(Kernel& k, std::uint32_t to) noexcept {
-    while (const auto t = k.next_time()) {
+    while (const auto t = k.get_next_time()) {
         if (WaitList::is_less(to, *t)) break;
         while (k.step(*t)) {}
     }
@@ -104,7 +104,7 @@ int main() {
     // 1. A new kernel
     {
         Kernel k;
-        check("new kernel: step runs nothing, next_time is empty", !k.step(0) && !k.next_time());
+        check("new kernel: step runs nothing, get_next_time is empty", !k.step(0) && !k.get_next_time());
     }
 
     // 2. start runs a program at once, and step reports it
@@ -129,19 +129,19 @@ int main() {
               log == "0:b on, 100:b off, 1000:b on, 1100:b off, 2000:b on, 2100:b off, ");
     }
 
-    // 4. next_time follows the list
+    // 4. get_next_time follows the list
     {
         Kernel k; std::string log;
         Program b{k, log, "b", &blink_on};
         k.start(b, 0);
-        const auto t0 = k.next_time();
+        const auto t0 = k.get_next_time();
         k.step(0);
-        const auto t1 = k.next_time();
+        const auto t1 = k.get_next_time();
         k.step(100);
-        const auto t2 = k.next_time();
+        const auto t2 = k.get_next_time();
         k.cancel(b);
-        check("next_time: 0 after start, 100 after on, 1000 after off, empty after cancel",
-              t0 == 0u && t1 == 100u && t2 == 1000u && !k.next_time());
+        check("get_next_time: 0 after start, 100 after on, 1000 after off, empty after cancel",
+              t0 == 0u && t1 == 100u && t2 == 1000u && !k.get_next_time());
     }
 
     // 5. cancel stops a program for good
@@ -212,7 +212,7 @@ int main() {
         k.hold(sup, 0, 1050);
         every_ms(k, 0, 5000);
         check("supervisor stops the blinker at 1050",
-              log == "0:b on, 100:b off, 1000:b on, 1050:sup stop, " && !k.next_time());
+              log == "0:b on, 100:b off, 1000:b on, 1050:sup stop, " && !k.get_next_time());
     }
 
     // 10. start on a program that is already waiting moves it to now
@@ -235,7 +235,7 @@ int main() {
               log == "4294967040:b on, 4294967140:b off, 744:b on, 844:b off, ");
     }
 
-    // 12. Event-driven time (jump to next_time) gives the same log as a real clock
+    // 12. Event-driven time (jump to get_next_time) gives the same log as a real clock
     {
         auto run = [](bool event_driven) {
             Kernel k; std::string log;
@@ -251,7 +251,7 @@ int main() {
         };
         const std::string clock = run(false);
         const std::string events = run(true);
-        check("jump to next_time (like CYCLE) = every millisecond (like SysTick)",
+        check("jump to get_next_time (like CYCLE) = every millisecond (like SysTick)",
               !clock.empty() && clock == events);
     }
 

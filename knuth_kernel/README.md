@@ -55,7 +55,7 @@ public:
     using NextInst = void (*)(WaitNode& node, std::uint32_t now) noexcept;
     constexpr WaitNode(NextInst next_inst, std::uint32_t delay) noexcept;
     void run(std::uint32_t now) noexcept;          // NEXTINST(*this, now)
-    NextInst next_inst() const noexcept;           // the step it runs next
+    NextInst get_next_inst() const noexcept;       // the step it runs next
     void set_next_inst(NextInst next) noexcept;    // change it, without scheduling
     bool is_held() const noexcept;                 // is it in the list?
 };
@@ -73,7 +73,7 @@ public:
 
     bool is_node_ready(std::uint32_t now) const noexcept;  // the first node is due
     WaitNode* delete_first() noexcept;                     // take it out (nullptr if empty)
-    std::optional<std::uint32_t> next_time() const noexcept;  // the first node's time, if any
+    std::optional<std::uint32_t> get_next_time() const noexcept;  // the first node's time, if any
     bool is_empty() const noexcept;
 };
 ```
@@ -92,7 +92,7 @@ How it works:
 - **Times are compared wrap-safe:** `static_cast<std::int32_t>(a - b) < 0`. The
   32-bit millisecond counter wraps round every 49.7 days; delays must stay
   below 2^31 ms (24.8 days).
-- **A node's next step is data.** `next_inst()` reads it and `set_next_inst()`
+- **A node's next step is data.** `get_next_inst()` reads it and `set_next_inst()`
   changes it, even while the node waits: it then runs the new step at the old
   time. Knuth's `DECISION` relies on this ("is the elevator dormant at E1?").
   An `asyncio` task can't do it: where a coroutine resumes is hidden in its
@@ -137,7 +137,7 @@ public:
     void cancel(WaitNode& node) noexcept;
 
     bool step(std::uint32_t now) noexcept;                       // run at most one due node
-    std::optional<std::uint32_t> next_time() const noexcept;     // the first node's time, if any
+    std::optional<std::uint32_t> get_next_time() const noexcept;     // the first node's time, if any
 };
 ```
 
@@ -150,9 +150,9 @@ while (true) k.step(now());
 ```
 
 `step` runs one node per call, so the main loop gets a turn between steps. With
-`next_time()` the same kernel can also run event-driven, jumping from deadline
+`get_next_time()` the same kernel can also run event-driven, jumping from deadline
 to deadline like the simulation does; the tests check that both give the same
-run. On the MCU, `next_time()` tells how long it may sleep.
+run. On the MCU, `get_next_time()` tells how long it may sleep.
 
 ## The elevator as a reference program
 
@@ -167,7 +167,7 @@ is its natural example: almost every feature has a step that uses it.
 | `holdc` (a new next step)               | `E2A`, `E4A`, `E5A`; `E5` → `E6`                    |
 | `start` / `immed` (a message to another program) | `E4` starts a user's U5 or U6              |
 | `cancel`                                | `E4` cancels a user's U4 (giving up)                |
-| `next_inst()` as a state check          | `DECISION`: "is the elevator dormant at E1?"        |
+| `get_next_inst()` as a state check      | `DECISION`: "is the elevator dormant at E1?"        |
 | `set_next_inst()` without scheduling    | `E1A`                                               |
 | short steps                             | `E4`: one user per step                             |
 | one step function for many nodes        | U1–U6 run every user's node                         |
@@ -194,8 +194,8 @@ no exceptions, no RTTI, and every function is `noexcept`.
 
 ```
 cd tests
-g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion test_wait_list.cpp -o test_wait_list && ./test_wait_list; echo $?
-g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wconversion test_kernel.cpp -o test_kernel && ./test_kernel; echo $?
+g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_wait_list.cpp -o test_wait_list && ./test_wait_list; echo $?
+g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_kernel.cpp -o test_kernel && ./test_kernel; echo $?
 ```
 
 Each one exits with 0 when every test passes. CI runs it on every push that changes
@@ -203,13 +203,13 @@ this folder, also under AddressSanitizer and UndefinedBehaviorSanitizer.
 
 | Test                 | What it checks                                                        |
 |----------------------|-----------------------------------------------------------------------|
-| `test_wait_list.cpp` | order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `next_inst` / `set_next_inst` (also on a waiting node), the node's and the list's `next_time`, `is_held`, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
-| `test_kernel.cpp`    | a new kernel; `start` runs at once; `step` runs one due node and says so; `next_time`; `cancel`; programs: a blinker, a periodic counter, two programs side by side, a message (one program starts another, ahead of overdue nodes), a supervisor that stops a program; across the clock wrap; "jump to `next_time`" (event-driven, like `CYCLE`) gives the same run as "every millisecond" (like SysTick) |
+| `test_wait_list.cpp` | order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `get_next_inst` / `set_next_inst` (also on a waiting node), the node's and the list's `get_next_time`, `is_held`, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
+| `test_kernel.cpp`    | a new kernel; `start` runs at once; `step` runs one due node and says so; `get_next_time`; `cancel`; programs: a blinker, a periodic counter, two programs side by side, a message (one program starts another, ahead of overdue nodes), a supervisor that stops a program; across the clock wrap; "jump to `get_next_time`" (event-driven, like `CYCLE`) gives the same run as "every millisecond" (like SysTick) |
 
 ## Roadmap
 
 1. **Create the kernel** (done): the WAIT list, and a `Kernel` class that owns
-   it (`start`, `hold`, `holdc`, `cancel`, `step(now)`, `next_time()`).
+   it (`start`, `hold`, `holdc`, `cancel`, `step(now)`, `get_next_time()`).
 2. **Test it** (done): with a fake clock on the PC: a blinker, a counter, a
    message between two programs (one program `start`s another's node), a
    supervisor, the clock wrap.

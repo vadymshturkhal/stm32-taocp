@@ -18,9 +18,10 @@ public:
         : NEXTINST(next_inst), DELAY(delay) {}
 
     [[nodiscard]] bool is_held() const noexcept { return right != this; }
-    [[nodiscard]] NextInst next_inst() const noexcept { return NEXTINST; }
-    [[nodiscard]] std::uint32_t next_time() const noexcept { return NEXTTIME; }
+    [[nodiscard]] std::uint32_t get_next_time() const noexcept { return NEXTTIME; }
+    [[nodiscard]] NextInst get_next_inst() const noexcept { return NEXTINST; }
     void set_next_inst(NextInst next_inst) noexcept { NEXTINST = next_inst; }
+
 
     WaitNode(const WaitNode&) = delete;
     WaitNode& operator=(const WaitNode&) = delete;
@@ -115,7 +116,7 @@ public:
         return head.right == &head;
     }
 
-    [[nodiscard]] std::optional<std::uint32_t> next_time() const noexcept {
+    [[nodiscard]] std::optional<std::uint32_t> get_next_time() const noexcept {
         if(is_empty()) return std::nullopt;
         return head.right->NEXTTIME;
     }
