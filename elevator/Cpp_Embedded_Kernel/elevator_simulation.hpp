@@ -46,6 +46,6 @@ inline ElevatorSimulation& begin_step(WaitNode& n) noexcept {
     assert(node.simulation != nullptr);
 
     ElevatorSimulation& simulation = *node.simulation;
-    simulation.TIME = (node.next_time() - simulation.t0) / TICKS_PER_TIME_UNIT;
+    simulation.TIME = (node.get_next_time() - simulation.t0) / TICKS_PER_TIME_UNIT;
     return simulation;
 }

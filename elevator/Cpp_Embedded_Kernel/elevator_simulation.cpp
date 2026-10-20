@@ -6,7 +6,7 @@ void ElevatorSimulation::decision(WaitNode::NextInst caller) noexcept {
     if (elevator.STATE != 0) return;
     
     // D2. Should door open?
-    if (elevator.ELEV1.next_inst() == Elevator::E1 && CALLS[HOME_FLOOR] != 0) {
+    if (elevator.ELEV1.get_next_inst() == Elevator::E1 && CALLS[HOME_FLOOR] != 0) {
         // Wait 20 units of time
         uint32_t delay = 20;
 
@@ -42,7 +42,7 @@ void ElevatorSimulation::decision(WaitNode::NextInst caller) noexcept {
 
     // D5. Elevator dormant?
     // Jump if not at E1 or j == 2
-    if (elevator.ELEV1.next_inst() != Elevator::E1 || elevator.STATE == 0) return;
+    if (elevator.ELEV1.get_next_inst() != Elevator::E1 || elevator.STATE == 0) return;
 
     // Otherwise schedule E6
     // Wait 20 units of time (same as in D2)
