@@ -39,7 +39,7 @@ private:
     static void E8(WaitNode& node, std::uint32_t now) noexcept;
     static void E8_continue(WaitNode& node, std::uint32_t now) noexcept;
 
-    void E2A(WaitNode& node, std::uint32_t delay) noexcept;
+    void E2A(std::uint32_t delay) noexcept;  // Run E2 after delay
     void E4A(std::uint32_t delay) noexcept;
     void E6B() noexcept;
 };

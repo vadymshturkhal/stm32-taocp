@@ -4,8 +4,13 @@
 #include "trace.hpp"
 
 void Elevator::E1A() noexcept { ELEV1.set_next_inst(&E1); }
+void Elevator::E2A(std::uint32_t delay) noexcept { simulation.holdc(ELEV1, delay, &E2); }
+void Elevator::E4A(std::uint32_t delay) noexcept { simulation.holdc(ELEV1, delay, &E4); }
+
+// [Wait for call]
 void Elevator::E1(WaitNode& /*node*/, std::uint32_t /*now*/) noexcept {}
 
+// [Change of state?]
 void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
     ElevatorSimulation& sim = begin_step(node);
     Elevator& elevator = sim.elevator;
@@ -92,8 +97,35 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
     E3(node, now);
 }
 
+// [Open door]
 void Elevator::E3(WaitNode& node, std::uint32_t /*now*/) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Elevator& elevator = sim.elevator;
 
+    trace(sim, "E3", "Elevator doors start to open");
+
+    // If activity already scheduled: remove it from WAIT list
+    // Note that it can be removed as WaitList::hold unlinks the node before sorting
+    // sim.cancel(elevator.ELEV3);
+
+    // Schedule activity E9 after 300 units
+    std::uint32_t delay = 300;
+    sim.hold(elevator.ELEV3, delay);
+
+    // Schedule activity E5 after 76 units
+    delay = 76;
+    sim.hold(elevator.ELEV2, delay);
+
+    // Set D2 to nonzero
+    elevator.D2 = 1;
+
+    // Set D1 to nonzero
+    elevator.D1 = 1;
+
+    elevator.first_search = true;
+
+    delay = 20;
+    elevator.E4A(delay);
 }
 
 void Elevator::E5(WaitNode& node, std::uint32_t /*now*/) noexcept {
@@ -107,7 +139,7 @@ void Elevator::E5(WaitNode& node, std::uint32_t /*now*/) noexcept {
         trace(sim, "E5", "Elevator doors flutter");
 
         // Wait 40 units, repeat E5
-        uint32_t delay = 40;
+        std::uint32_t delay = 40;
         elevator.E5A(delay);
         return;
     }
@@ -119,6 +151,6 @@ void Elevator::E5(WaitNode& node, std::uint32_t /*now*/) noexcept {
     elevator.D3 = 0;
 
     // Wait 20 units, then go to E6
-    uint32_t delay = 20;
-    sim.holdc(elevator.ELEV1, delay, Elevator::E6);
+    std::uint32_t delay = 20;
+    sim.holdc(elevator.ELEV1, delay, &E6);
 }
