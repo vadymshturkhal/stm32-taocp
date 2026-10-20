@@ -1,11 +1,15 @@
 #include <cassert>
+#include <cstdint>
+#include "wait_list.hpp"
 #include "elevator.hpp"
 #include "elevator_simulation.hpp"
 #include "trace.hpp"
+#include "users.hpp"
 
 void Elevator::E1A() noexcept { ELEV1.set_next_inst(&E1); }
 void Elevator::E2A(std::uint32_t delay) noexcept { simulation.holdc(ELEV1, delay, &E2); }
 void Elevator::E4A(std::uint32_t delay) noexcept { simulation.holdc(ELEV1, delay, &E4); }
+void Elevator::E5A(std::uint32_t delay) noexcept { simulation.holdc(ELEV2, delay, &E5); }
 
 // [Wait for call]
 void Elevator::E1(WaitNode& /*node*/, std::uint32_t /*now*/) noexcept {}
@@ -126,6 +130,79 @@ void Elevator::E3(WaitNode& node, std::uint32_t /*now*/) noexcept {
 
     delay = 20;
     elevator.E4A(delay);
+}
+
+// [Let people out, in]
+void Elevator::E4(WaitNode& node, std::uint32_t) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Elevator& elevator = sim.elevator;
+
+    // Copy first_search and set it to false in elevator
+    bool first_search = elevator.first_search;
+    elevator.first_search = false;
+
+    ElevatorNode* head = &sim.ELEVATOR_LIST.head;
+    ElevatorNode* C = head->left2;
+
+    // Search ELEVATOR_LIST from tail to head
+    while (C != head) {
+        // Compare OUT node with FLOOR and continue if it's not equal
+        if (C->OUT != elevator.FLOOR) {
+            C = C->left2;
+            continue;
+        }
+
+        // Otherwise prepare to send user to U6
+        // Set NEXTINST of the node to U6 in place
+        // Note that async/await approach can't do this
+        C->set_next_inst(&Users::U6);
+
+        // Put user at front of the WaitList (at front of the kernel)
+        sim.immed(*C);
+
+        // Wait 25 units and repeat E4A
+        std::uint32_t delay = 25;
+        elevator.E4A(delay);
+
+        // Return to simulate other events
+        return;
+    }
+
+    // If C == ELEVATOR_LIST.head: search is complete for ELEVATOR_LIST
+    
+    // Now handle the QUEUE[elevator.FLOOR] list
+    head = &sim.QUEUE[elevator.FLOOR].head;
+    C = head->right2;
+    
+    if (C != head) {
+        // Cancel action U4 for this User
+        sim.cancel(*C);
+
+        // Prepare to replace U4 by U5;
+        C->set_next_inst(&Users::U5);
+
+        // Put user at front of the WaitList (at front of the kernel)
+        sim.immed(*C);
+
+        // Wait 25 units and repeat E4A
+        std::uint32_t delay = 25;
+        elevator.E4A(delay);
+
+        // Return to simulate other events
+        return;
+    }
+
+    // If C == QUEUE[elevator.FLOOR].head: floor is empty
+
+    // Set D1 = 0
+    elevator.D1 = 0;
+
+    // Set D3 = nonzero
+    elevator.D3 = 1;
+
+    if (first_search) {
+        trace(sim, "E4", "Doors open, nobody is there");
+    }
 }
 
 void Elevator::E5(WaitNode& node, std::uint32_t /*now*/) noexcept {
