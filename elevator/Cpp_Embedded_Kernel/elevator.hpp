@@ -41,5 +41,5 @@ private:
 
     void E2A(std::uint32_t delay) noexcept;  // Run E2 after delay
     void E4A(std::uint32_t delay) noexcept;
-    void E6B(Elevator& elevator) noexcept;
+    void E6B() noexcept;
 };

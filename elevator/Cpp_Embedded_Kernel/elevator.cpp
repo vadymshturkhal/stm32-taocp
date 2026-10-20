@@ -27,7 +27,7 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
     if (elevator.STATE > 0) {
         // Are there calls for higher floors?
         bool has_higher_call = false;
-        for (std::uint32_t j = elevator.FLOOR + 1; j < FLOORS; j++) {
+        for (std::uint32_t j = elevator.FLOOR + 1; j < FLOORS; ++j) {
             if (sim.CALLS[j] != 0) {
                 has_higher_call = true;
                 break;
@@ -41,7 +41,7 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
         }
         // Have passengers in the elevator called for lower floors?
         bool has_lower_callcar = false;
-        for (std::uint32_t j = 0; j < elevator.FLOOR; j++) {
+        for (std::uint32_t j = 0; j < elevator.FLOOR; ++j) {
             if (sim.CALLS[j] & CALLCAR) {
                 has_lower_callcar = true;
                 break;
@@ -60,7 +60,7 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
     else if (elevator.STATE < 0) {
         // Are there calls for lower floors?
         bool has_lower_call = false;
-        for (std::uint32_t j = 0; j < elevator.FLOOR; j++) {
+        for (std::uint32_t j = 0; j < elevator.FLOOR; ++j) {
             if (sim.CALLS[j] != 0) {
                 has_lower_call = true;
                 break;
@@ -75,7 +75,7 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
 
         // Have passengers in the elevator called for higher floors?
         bool has_higher_callcar = false;
-        for (std::uint32_t j = elevator.FLOOR + 1; j < FLOORS; j++) {
+        for (std::uint32_t j = elevator.FLOOR + 1; j < FLOORS; ++j) {
             if (sim.CALLS[j] & CALLCAR) {
                 has_higher_callcar = true;
                 break;
@@ -233,7 +233,7 @@ void Elevator::E5(WaitNode& node, std::uint32_t /*now*/) noexcept {
 }
 
 // [Prepare to move]
-void Elevator::E6(WaitNode& node, std::uint32_t now) noexcept {
+void Elevator::E6(WaitNode& node, std::uint32_t /*now*/) noexcept {
     ElevatorSimulation& sim = begin_step(node);
     Elevator& elevator = sim.elevator;
 
@@ -253,10 +253,27 @@ void Elevator::E6(WaitNode& node, std::uint32_t now) noexcept {
         sim.decision(&E6);
     }
 
-    elevator.E6B(elevator);
+    elevator.E6B();
 }
 
-void Elevator::E6B(Elevator& elevator) noexcept {}
+void Elevator::E6B() noexcept {
+    // If STATE == NEUTRAL: go to E1 and wait
+    if (STATE == 0) {
+        E1A();  // NOTE: can skip this line
+        return;
+    }
+
+    if (D2 != 0) {
+        // Cancel activity E9 without scheduling it
+        simulation.cancel(ELEV3);
+    }
+
+    // Wait 15 units of time
+    std::uint32_t delay = 15;
+
+    // If STATE == GOINGDOWN, go to E8, else go to E7
+    simulation.holdc(ELEV1, delay, STATE < 0 ? &E8 : &E7);
+}
 
 void Elevator::E7(WaitNode& node, std::uint32_t now) noexcept {
 
