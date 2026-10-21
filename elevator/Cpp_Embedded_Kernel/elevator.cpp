@@ -42,7 +42,7 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
         // Have passengers in the elevator called for lower floors?
         bool has_lower_callcar = false;
         for (std::uint32_t j = 0; j < elevator.FLOOR; ++j) {
-            if (sim.CALLS[j] & CALLCAR) {
+            if ((sim.CALLS[j] & CALLCAR) != 0) {
                 has_lower_callcar = true;
                 break;
             }
@@ -76,7 +76,7 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
         // Have passengers in the elevator called for higher floors?
         bool has_higher_callcar = false;
         for (std::uint32_t j = elevator.FLOOR + 1; j < FLOORS; ++j) {
-            if (sim.CALLS[j] & CALLCAR) {
+            if ((sim.CALLS[j] & CALLCAR) != 0) {
                 has_higher_callcar = true;
                 break;
             }
@@ -275,12 +275,62 @@ void Elevator::E6B() noexcept {
     simulation.holdc(ELEV1, delay, STATE < 0 ? &E8 : &E7);
 }
 
-void Elevator::E7(WaitNode& node, std::uint32_t now) noexcept {
+// [Go up a floor]
+void Elevator::E7(WaitNode& node, std::uint32_t /*now*/) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Elevator& elevator = sim.elevator;
 
+    trace(sim, "E7", "Elevator moving up");
+
+    elevator.FLOOR += 1;
+
+    // Wait 51 units
+    std::uint32_t delay = 51;
+    sim.holdc(elevator.ELEV1, delay, &E7_continue);
 }
 
+// [Move up]
 void Elevator::E7_continue(WaitNode& node, std::uint32_t now) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Elevator& elevator = sim.elevator;
 
+    // Is CALLCAR[FLOOR] or CALLUP[FLOOR] != 0?
+    const bool is_callcar_or_callup = (sim.CALLS[elevator.FLOOR] & (CALLCAR | CALLUP)) != 0;
+
+    // If yes: it is time to stop elevator
+    if (is_callcar_or_callup) {
+        // Wait 14 units and go to E2
+        std::uint32_t delay = 14;
+        elevator.E2A(delay);
+        return;
+    }
+
+    // If not
+    // Is FLOOR == HOME_FLOOR or CALLDOWN[FLOOR] != 0?
+    if (elevator.FLOOR == HOME_FLOOR || (sim.CALLS[elevator.FLOOR] & CALLDOWN) != 0) {
+        // Are there calls for higher floors?
+        bool has_higher_call = false;
+        for (std::uint32_t j = elevator.FLOOR + 1; j < FLOORS; ++j) {
+            if (sim.CALLS[j] != 0) {
+                has_higher_call = true;
+                break;
+            }
+        }
+
+        // If yes: repeat E7
+        if (has_higher_call) {
+            E7(node, now);
+            return;
+        }
+    } else {
+        // repeat E7
+        E7(node, now);
+        return;
+    }
+
+    // It's time to stop elevator
+    std::uint32_t delay = 14;
+    elevator.E2A(delay);
 }
 
 void Elevator::E8(WaitNode& node, std::uint32_t now) noexcept {
