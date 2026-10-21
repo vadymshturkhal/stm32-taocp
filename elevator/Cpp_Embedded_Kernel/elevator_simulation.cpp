@@ -1,4 +1,4 @@
-#include <optional>
+#include <cstdint>
 #include "elevator_simulation.hpp"
 
 void ElevatorSimulation::decision(WaitNode::NextInst caller) noexcept {
@@ -6,13 +6,12 @@ void ElevatorSimulation::decision(WaitNode::NextInst caller) noexcept {
     if (elevator.STATE != 0) return;
     
     // D2. Should door open?
-    if (elevator.ELEV1.get_next_inst() == Elevator::E1 && CALLS[HOME_FLOOR] != 0) {
+    if (elevator.ELEV1.get_next_inst() == &Elevator::E1 && CALLS[HOME_FLOOR] != 0) {
         // Wait 20 units of time
-        uint32_t delay = 20;
+        std::uint32_t delay = 20;
 
         // Schedule E3
-        elevator.ELEV1.set_next_inst(Elevator::E3);
-        hold(elevator.ELEV1, delay);
+        holdc(elevator.ELEV1, delay, &Elevator::E3);
         return;
     }
 
@@ -21,7 +20,7 @@ void ElevatorSimulation::decision(WaitNode::NextInst caller) noexcept {
     for (std::uint32_t i = 0; i < FLOORS; i++) {
         if (i == elevator.FLOOR) continue;
         if (CALLS[i] == 0) continue;
-        j = static_cast<int32_t>(i);
+        j = static_cast<std::int32_t>(i);
         break;
     }
 
@@ -29,9 +28,9 @@ void ElevatorSimulation::decision(WaitNode::NextInst caller) noexcept {
     if (j == -1) {
         // Is caller E6B?
         // NOTE: I decided to use E6 as caller is E6, and MIX version uses E6B
-        if (caller == Elevator::E6){
-            // If yes: set j = 2
-            j = HOME_FLOOR;
+        if (caller == &Elevator::E6){
+            // If yes: set j = HOME_FLOOR
+            j = static_cast<std::int32_t>(HOME_FLOOR);
         }
         else return;
     }
@@ -42,11 +41,10 @@ void ElevatorSimulation::decision(WaitNode::NextInst caller) noexcept {
 
     // D5. Elevator dormant?
     // Jump if not at E1 or j == 2
-    if (elevator.ELEV1.get_next_inst() != Elevator::E1 || elevator.STATE == 0) return;
+    if (elevator.ELEV1.get_next_inst() != &Elevator::E1 || elevator.STATE == 0) return;
 
     // Otherwise schedule E6
     // Wait 20 units of time (same as in D2)
-    uint32_t delay = 20;
-    elevator.ELEV1.set_next_inst(Elevator::E6);
-    hold(elevator.ELEV1, delay);
+    std::uint32_t delay = 20;
+    holdc(elevator.ELEV1, delay, &Elevator::E6);
 }
