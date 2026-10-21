@@ -205,6 +205,7 @@ void Elevator::E4(WaitNode& node, std::uint32_t) noexcept {
     }
 }
 
+// [Close door]
 void Elevator::E5(WaitNode& node, std::uint32_t /*now*/) noexcept {
     ElevatorSimulation& sim = begin_step(node);
     Elevator& elevator = sim.elevator;
@@ -333,12 +334,63 @@ void Elevator::E7_continue(WaitNode& node, std::uint32_t now) noexcept {
     elevator.E2A(delay);
 }
 
-void Elevator::E8(WaitNode& node, std::uint32_t now) noexcept {
+// [Go down a floor]
+void Elevator::E8(WaitNode& node, std::uint32_t /*now*/) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Elevator& elevator = sim.elevator;
 
+    trace(sim, "E8", "Elevator moving down");
+
+    // DEC4 1
+    elevator.FLOOR -= 1;
+
+    // Wait 61 units
+    std::uint32_t delay = 61;
+    sim.holdc(elevator.ELEV1, delay, &E8_continue);
 }
 
+// [Move down]
 void Elevator::E8_continue(WaitNode& node, std::uint32_t now) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Elevator& elevator = sim.elevator;
 
+    // Is CALLCAR[FLOOR] or CALLDOWN[FLOOR] != 0
+    const bool is_callcar_or_calldown = (sim.CALLS[elevator.FLOOR] & (CALLCAR | CALLDOWN)) != 0;
+
+    // If yes: it is time to stop elevator
+    if (is_callcar_or_calldown) {
+        // Wait 23 units and go to E2
+        std::uint32_t delay = 23;
+        elevator.E2A(delay);
+        return;
+    }
+
+    // If not
+    // Is FLOOR == HOME_FLOOR or CALLUP[FLOOR] != 0?
+    if (elevator.FLOOR == HOME_FLOOR || (sim.CALLS[elevator.FLOOR] & CALLUP) != 0) {
+        // Are there calls for lower floors?
+        bool has_lower_call = false;
+        for (std::uint32_t j = 0; j < elevator.FLOOR; ++j) {
+            if (sim.CALLS[j] != 0) {
+                has_lower_call = true;
+                break;
+            }
+        }
+
+        // If yes: repeat E8
+        if (has_lower_call) {
+            E8(node, now);
+            return;
+        }
+    } else {
+        // repeat E8
+        E8(node, now);
+        return;
+    }
+
+    // It's time to stop elevator
+    std::uint32_t delay = 23;
+    elevator.E2A(delay);
 }
 
 // [Set inaction indicator]
@@ -348,7 +400,7 @@ void Elevator::E9(WaitNode& node, std::uint32_t /*now*/) noexcept {
 
     // Unschedule ELEV3
     // The kernel unlinked ELEV3 before running E9, 
-    // so we can don't need to call: 
+    // so there is no need to call: 
     // sim.cancel(elevator.ELEV3);
 
     // Set D2 = 0
