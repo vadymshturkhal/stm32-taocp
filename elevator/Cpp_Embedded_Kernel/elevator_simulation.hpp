@@ -22,6 +22,8 @@ public:
     Elevator elevator{*this};
     Users users{*this};
 
+    void start(std::uint32_t users_quantity, std::uint32_t now_ticks) noexcept;
+
     // The wrappers for deterministic TIME: units in -> kernel ticks out
     std::uint32_t ticks() const noexcept { 
         return t0 + TIME * TICKS_PER_TIME_UNIT; 

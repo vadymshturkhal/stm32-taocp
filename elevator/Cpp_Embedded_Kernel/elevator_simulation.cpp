@@ -1,6 +1,12 @@
 #include <cstdint>
 #include "elevator_simulation.hpp"
 
+void ElevatorSimulation::start(std::uint32_t users_quantity, std::uint32_t now_ticks) noexcept {
+    t0 = now_ticks;
+    TIME = 0;
+    users.start(users_quantity);
+}
+
 void ElevatorSimulation::decision(WaitNode::NextInst caller) noexcept {
     // D1. Decision necessary?
     if (elevator.STATE != 0) return;
