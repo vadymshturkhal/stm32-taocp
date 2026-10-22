@@ -5,15 +5,51 @@
 #include "trace.hpp"
 
 void Users::start(std::uint32_t quantity) noexcept {
+    // USER1 node represents action U1 and it is initially the sole entry in the WAIT list
     users_quantity = quantity; 
     simulation.immed(USER1);
 }
+
 void Users::U1(WaitNode& node, std::uint32_t now) noexcept {}
 void Users::U2(WaitNode& node, std::uint32_t now) noexcept {}
 void Users::U3(WaitNode& node, std::uint32_t now) noexcept {}
 void Users::U4(WaitNode& node, std::uint32_t now) noexcept {}
 void Users::U4A(ElevatorNode& user) noexcept {}
-void Users::U5(WaitNode& node, std::uint32_t now) noexcept {}
+
+void Users::U5(WaitNode& node, std::uint32_t /*now*/) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    ElevatorNode& user = static_cast<ElevatorNode&>(node);
+
+    trace(sim, "U5", "User %u gets in", user.id);
+
+    // 1. This user now leaves QUEUE and enters ELEVATOR
+
+    // Delete User from QUEUE[IN]
+    ElevatorList::delete_node(user);
+
+    // Insert it at right of ELEVATOR
+    sim.ELEVATOR_LIST.insert_at_rear(user);
+
+    // 2. Set CALLCAR[OUT] = 1
+    sim.CALLS[user.OUT] |= CALLCAR;
+
+    Elevator& elevator = sim.elevator;
+    // 3. Jump if STATE != NEUTRAL
+    if (elevator.STATE != 0) {
+        // J5NZ CYCLE
+        return;
+    }
+
+    // Knuth's style: set STATE = GOINGUP or GOINGDOWN as appropriate
+    elevator.STATE = static_cast<std::int32_t>(user.OUT) - static_cast<std::int32_t>(elevator.FLOOR);
+
+    // 4. Remove action E5 from WAIT list
+    sim.cancel(elevator.ELEV2);
+
+    // Restart E5 after 25 units
+    std::uint32_t delay = 25;
+    elevator.E5A(delay);
+}
 
 // [Get out]
 void Users::U6(WaitNode& node, std::uint32_t /*now*/) noexcept {
