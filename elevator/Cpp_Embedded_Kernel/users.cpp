@@ -3,6 +3,7 @@
 #include "users.hpp"
 #include "elevator_simulation.hpp"
 #include "trace.hpp"
+#include "elevator.hpp"
 
 void Users::start(std::uint32_t quantity) noexcept {
     // USER1 node represents action U1 and it is initially the sole entry in the WAIT list
@@ -13,9 +14,37 @@ void Users::start(std::uint32_t quantity) noexcept {
 void Users::U1(WaitNode& node, std::uint32_t now) noexcept {}
 void Users::U2(WaitNode& node, std::uint32_t now) noexcept {}
 void Users::U3(WaitNode& node, std::uint32_t now) noexcept {}
-void Users::U4(WaitNode& node, std::uint32_t now) noexcept {}
-void Users::U4A(ElevatorNode& user) noexcept {}
 
+// [Give up]
+void Users::U4(WaitNode& node, std::uint32_t /*now*/) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Elevator& elevator = sim.elevator;
+    Users& users = sim.users;
+    ElevatorNode& user = static_cast<ElevatorNode&>(node);
+
+    // If the user's IN floor differs from the elevator's current FLOOR: give up
+    if (user.IN != elevator.FLOOR) {
+        trace(sim, "U4", "User %u decides to give up, leaves the system", user.id);
+        users.U6_impl(user, false);
+        return;
+    }
+
+    // JANZ U4A: doors still busy: reschedule U4
+    if (elevator.D1 != 0) {
+        users.U4A(user);
+        return;
+    }
+
+    trace(sim, "U4", "User %u decides to give up, leaves the system", user.id);
+    users.U6_impl(user, false);
+}
+
+// [Wait GIVEUPTIME units]
+void Users::U4A(ElevatorNode& user) noexcept {
+    simulation.holdc(user, user.GIVEUPTIME, &U4);
+}
+
+// [Get in]
 void Users::U5(WaitNode& node, std::uint32_t /*now*/) noexcept {
     ElevatorSimulation& sim = begin_step(node);
     ElevatorNode& user = static_cast<ElevatorNode&>(node);
