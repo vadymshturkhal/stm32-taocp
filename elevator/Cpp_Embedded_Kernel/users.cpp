@@ -14,7 +14,13 @@ void Users::U3(WaitNode& node, std::uint32_t now) noexcept {}
 void Users::U4(WaitNode& node, std::uint32_t now) noexcept {}
 void Users::U4A(ElevatorNode& user) noexcept {}
 void Users::U5(WaitNode& node, std::uint32_t now) noexcept {}
-void Users::U6(WaitNode& node, std::uint32_t now) noexcept {}
+
+// [Get out]
+void Users::U6(WaitNode& node, std::uint32_t /*now*/) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Users& users = sim.users;
+    users.U6_impl(static_cast<ElevatorNode&>(node), true);
+}
 
 void Users::U6_impl(ElevatorNode& user, bool is_print) noexcept {
     if (is_print) {
@@ -24,8 +30,9 @@ void Users::U6_impl(ElevatorNode& user, bool is_print) noexcept {
     // JMP DELETE: leave the QUEUE or the ELEVATOR
     ElevatorList::delete_node(user);
 
-	// Not in MIX -- Python relies on garbage collection here; 
+    // Not in MIX -- Python relies on garbage collection here; 
     // C++ manages the storage pool manually, so the node must be returned once the user leaves
+    assert(!user.is_held() && !user.is_in_queue());
     pool.push(user);
 
     // Park and wake: U1 was waiting for a free node
