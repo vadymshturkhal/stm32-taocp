@@ -4,7 +4,6 @@
 #include "elevator_simulation.hpp"
 #include "trace.hpp"
 #include "elevator.hpp"
-#include "values.hpp" 
 
 void Users::start(std::uint32_t quantity) noexcept {
     // USER1 node represents action U1 and it is initially the sole entry in the WAIT list
@@ -12,7 +11,46 @@ void Users::start(std::uint32_t quantity) noexcept {
     simulation.immed(USER1);
 }
 
-void Users::U1(WaitNode& node, std::uint32_t now) noexcept {}
+// Users fabric
+// [Enter, prepare for successor]
+void Users::U1(WaitNode& node, std::uint32_t /*now*/) noexcept {
+    ElevatorSimulation& sim = begin_step(node);
+    Users& users = sim.users;
+
+    // Not in MIX: stop after users_quantity reached
+    if (users.user_id >= users.users_quantity) return;
+
+    // 1 Create User or parked if there is not available node
+    ElevatorNode* user = users.pool.pop();
+    if (user == nullptr) {
+        users.parked = true;
+        return;
+    }
+
+    // 2 JMP VALUES: parked U1 consumes no random numbers
+    const UserValues user_values = users.values.next();
+
+    // 3 LDA INTERTIME (time before another user enters) / JMP HOLD
+    sim.hold(users.USER1, user_values.INTERTIME);
+
+    // 4 Add User
+    users.add_user(*user, user_values.IN, user_values.OUT, user_values.GIVEUPTIME);
+}
+
+void Users::add_user(ElevatorNode& user, std::uint32_t in, std::uint32_t out, std::uint32_t giveuptime) noexcept {
+    user.simulation = &simulation;
+    user.set_next_inst(nullptr);
+    user.IN = in;
+    user.OUT = out;
+    user.GIVEUPTIME = giveuptime;
+    user.id = user_id++;
+
+    trace(simulation, "U1", "User %u arrives at floor %u, destination is %u, give up %u",
+        user.id, user.IN, user.OUT, simulation.TIME + user.GIVEUPTIME);
+
+    // 5 to U2
+    U2(user);
+}
 
 // [Signal and wait]
 void Users::U2(ElevatorNode& user) noexcept {

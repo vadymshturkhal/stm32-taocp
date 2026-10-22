@@ -14,3 +14,4 @@ inline constexpr std::uint32_t CALLCAR = 0b001;
 // 1 is the fastest speed
 inline constexpr std::uint32_t TICKS_PER_TIME_UNIT = 1;
 static_assert(TICKS_PER_TIME_UNIT > 0);
+inline constexpr std::uint32_t VALUES_SEED = 1;

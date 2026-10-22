@@ -4,6 +4,8 @@
 #include "wait_list.hpp"
 #include "storage_pool.hpp"
 #include "elevator_node.hpp"
+#include "values.hpp"
+#include "elevator_constants.hpp"
 
 class ElevatorSimulation;
 
@@ -18,6 +20,7 @@ public:
 private:
     ElevatorSimulation& simulation;
     ElevatorNode USER1;
+    Values values{VALUES_SEED};  // from constants
     std::uint32_t users_quantity = 0;
     std::uint32_t user_id = 0;
 
@@ -26,6 +29,7 @@ private:
     StoragePool<ElevatorNode> pool{POOL_SIZE};
     bool parked = false;    // U1 waits for a free node (park and wake)
 
+    void add_user(ElevatorNode& user, std::uint32_t in, std::uint32_t out, std::uint32_t giveuptime) noexcept;
     static void U1(WaitNode& node, std::uint32_t now) noexcept;
     void U2(ElevatorNode& user) noexcept;
     void U3(ElevatorNode& user) noexcept;
