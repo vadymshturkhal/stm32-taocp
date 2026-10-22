@@ -13,7 +13,13 @@ void Users::start(std::uint32_t quantity) noexcept {
 
 void Users::U1(WaitNode& node, std::uint32_t now) noexcept {}
 void Users::U2(WaitNode& node, std::uint32_t now) noexcept {}
-void Users::U3(WaitNode& node, std::uint32_t now) noexcept {}
+
+// [Enter queue]
+void Users::U3(ElevatorNode& user) noexcept {
+    // Insert node at right end of QUEUE[IN]
+    simulation.QUEUE[user.IN].insert_at_rear(user);
+    U4A(user);
+}
 
 // [Give up]
 void Users::U4(WaitNode& node, std::uint32_t /*now*/) noexcept {
