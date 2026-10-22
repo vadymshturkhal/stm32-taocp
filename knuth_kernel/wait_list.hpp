@@ -1,4 +1,5 @@
 #pragma once
+#include <concepts>
 #include <cstdint>
 #include <optional>
 
@@ -22,12 +23,12 @@ public:
     [[nodiscard]] NextInst get_next_inst() const noexcept { return NEXTINST; }
     void set_next_inst(NextInst next_inst) noexcept { NEXTINST = next_inst; }
 
-
     WaitNode(const WaitNode&) = delete;
     WaitNode& operator=(const WaitNode&) = delete;
 
 private:
     friend class WaitList;
+    template <std::derived_from<WaitNode> T> friend class StoragePool;   // uses left for the AVAIL list
 
     WaitNode* left = this;
     WaitNode* right = this;

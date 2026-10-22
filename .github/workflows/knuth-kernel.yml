@@ -22,7 +22,7 @@ jobs:
       - name: Build and run every C++ test
         working-directory: knuth_kernel/tests
         run: |
-          for t in test_wait_list test_kernel; do
+          for t in test_wait_list test_kernel test_storage_pool; do
             echo "::group::$t"
             g++-14 $CXXFLAGS $t.cpp -o $t
             timeout 300 ./$t
@@ -39,7 +39,7 @@ jobs:
       - name: AddressSanitizer + UndefinedBehaviorSanitizer (every C++ test)
         working-directory: knuth_kernel/tests
         run: |
-          for t in test_wait_list test_kernel; do
+          for t in test_wait_list test_kernel test_storage_pool; do
             echo "::group::$t"
             g++-14 $CXXFLAGS -fsanitize=address,undefined -fno-sanitize-recover=all $t.cpp -o ${t}_asan
             timeout 300 ./${t}_asan
