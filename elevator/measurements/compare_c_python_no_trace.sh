@@ -14,8 +14,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ELEVATOR_DIR="$(dirname "$SCRIPT_DIR")"
-ELEVATOR_C_DIR="$ELEVATOR_DIR/C_Native"
-ELEVATOR_PY_DIR="$ELEVATOR_DIR/Python_WAIT_LIST"
+ELEVATOR_C_DIR="$ELEVATOR_DIR/c_native"
+ELEVATOR_PY_DIR="$ELEVATOR_DIR/python_wait_list"
 
 USER_COUNTS="${1:-4 66 1000 10000}"
 REPEATS="${2:-5}"

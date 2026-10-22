@@ -3,9 +3,11 @@ __pycache__/
 
 TODO*
 main*
-elevator/C_Native/elevator_sim
-elevator/C_Native/elevator_sim_notrace
-elevator/C_Native/*.o
+!elevator/cpp_embedded_kernel/pc/main.cpp
+elevator/cpp_embedded_kernel/elevator_sim*
+elevator/c_native/elevator_sim
+elevator/c_native/elevator_sim_notrace
+elevator/c_native/*.o
 .ipynb*
 
 # pi_mcu_protocol: test programs built on the PC (keep only the sources)

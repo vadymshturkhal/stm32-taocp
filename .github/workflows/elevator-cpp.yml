@@ -1,0 +1,79 @@
+name: Elevator (C++ on the Knuth kernel)
+
+on:
+  push:
+    paths:
+      - 'elevator/cpp_embedded_kernel/**'
+      - 'knuth_kernel/*.hpp'
+      - 'elevator/measurements/trace_*.txt'
+      - '.github/workflows/elevator-cpp.yml'
+  pull_request:
+    paths:
+      - 'elevator/cpp_embedded_kernel/**'
+      - 'knuth_kernel/*.hpp'
+      - 'elevator/measurements/trace_*.txt'
+      - '.github/workflows/elevator-cpp.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash                      # -eo pipefail: a crash in elevator_sim fails the step
+    working-directory: elevator/cpp_embedded_kernel
+
+env:
+  SOURCES: '*.cpp pc/main.cpp'
+  INCLUDES: -I. -I../../knuth_kernel
+
+jobs:
+  correctness:
+    runs-on: ubuntu-24.04            # has g++-14: needed for C++23
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build elevator_sim (traced)
+        run: |
+          g++-14 -std=c++23 $INCLUDES -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion -Werror \
+                 -DTRACE $SOURCES -o elevator_sim
+
+      - name: Compare against the golden traces (0, 1, 4, 26, 500 users)
+        run: |
+          for n in 0 1 4 26 500; do
+            echo "::group::trace_$n"
+            ./elevator_sim $n | diff - ../measurements/trace_$n.txt
+            echo "trace_$n OK"
+            echo "::endgroup::"
+          done
+
+      - name: Build elevator_sim_notrace
+        run: |
+          g++-14 -std=c++23 $INCLUDES -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion -Werror \
+                 $SOURCES -o elevator_sim_notrace
+
+      - name: Smoke test elevator_sim_notrace (must run without crashing, no output expected)
+        run: |
+          output=$(./elevator_sim_notrace 26)
+          if [ -n "$output" ]; then
+            echo "Expected no output from the notrace build, got:"
+            echo "$output"
+            exit 1
+          fi
+
+  sanitizers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build with AddressSanitizer + UndefinedBehaviorSanitizer (asserts on)
+        run: |
+          g++-14 -std=c++23 $INCLUDES -O1 -g -Wall -Wextra \
+                 -fsanitize=address,undefined -fno-sanitize-recover=all \
+                 -DTRACE $SOURCES -o elevator_sim_asan
+
+      - name: Compare against the golden traces under the sanitizers
+        run: |
+          for n in 0 1 4 26 500; do
+            echo "::group::trace_$n"
+            ./elevator_sim_asan $n | diff - ../measurements/trace_$n.txt
+            echo "trace_$n OK"
+            echo "::endgroup::"
+          done

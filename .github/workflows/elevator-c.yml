@@ -3,13 +3,13 @@ name: Elevator (C)
 on:
   push:
     paths:
-      - 'elevator/C_Native/**'
-      - 'elevator/Measurements/trace_*.txt'
+      - 'elevator/c_native/**'
+      - 'elevator/measurements/trace_*.txt'
       - '.github/workflows/elevator-c.yml'
   pull_request:
     paths:
-      - 'elevator/C_Native/**'
-      - 'elevator/Measurements/trace_*.txt'
+      - 'elevator/c_native/**'
+      - 'elevator/measurements/trace_*.txt'
       - '.github/workflows/elevator-c.yml'
   workflow_dispatch:
 
@@ -20,35 +20,35 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Build elevator_sim (traced)
-        working-directory: elevator/C_Native
+        working-directory: elevator/c_native
         run: make elevator_sim
 
       - name: Compare against trace output (0 users)
-        working-directory: elevator/C_Native
-        run: ./elevator_sim 0 | diff - ../Measurements/trace_0.txt
+        working-directory: elevator/c_native
+        run: ./elevator_sim 0 | diff - ../measurements/trace_0.txt
 
       - name: Compare against trace output (1 user)
-        working-directory: elevator/C_Native
-        run: ./elevator_sim 1 | diff - ../Measurements/trace_1.txt
+        working-directory: elevator/c_native
+        run: ./elevator_sim 1 | diff - ../measurements/trace_1.txt
 
       - name: Compare against trace output (4 users)
-        working-directory: elevator/C_Native
-        run: ./elevator_sim 4 | diff - ../Measurements/trace_4.txt
+        working-directory: elevator/c_native
+        run: ./elevator_sim 4 | diff - ../measurements/trace_4.txt
 
       - name: Compare against trace output (26 users)
-        working-directory: elevator/C_Native
-        run: ./elevator_sim 26 | diff - ../Measurements/trace_26.txt
+        working-directory: elevator/c_native
+        run: ./elevator_sim 26 | diff - ../measurements/trace_26.txt
 
       - name: Compare against trace output (500 users)
-        working-directory: elevator/C_Native
-        run: ./elevator_sim 500 | diff - ../Measurements/trace_500.txt
+        working-directory: elevator/c_native
+        run: ./elevator_sim 500 | diff - ../measurements/trace_500.txt
 
       - name: Build elevator_sim_notrace
-        working-directory: elevator/C_Native
+        working-directory: elevator/c_native
         run: make elevator_sim_notrace
 
       - name: Smoke test elevator_sim_notrace (must run without crashing, no output expected)
-        working-directory: elevator/C_Native
+        working-directory: elevator/c_native
         run: |
           output=$(./elevator_sim_notrace 26)
           if [ -n "$output" ]; then

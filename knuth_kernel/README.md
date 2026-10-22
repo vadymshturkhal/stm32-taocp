@@ -39,7 +39,7 @@ so every program shares one stack and no step needs a lock against another.
    starts that user's node (`immed`), holds itself for 25 units and returns.
    A loop over every user on the floor in one step would also work, but it
    would block the main loop. See the
-   [C++ elevator](../elevator/Cpp_Embedded_Kernel).
+   [C++ elevator](../elevator/cpp_embedded_kernel).
 2. **No waiting inside a step** (no busy loops, no `HAL_Delay`). To wait, hold
    the next step and return.
 3. **State lives in the node or the program object,** never in local
@@ -97,7 +97,7 @@ How it works:
   time. Knuth's `DECISION` relies on this ("is the elevator dormant at E1?").
   An `asyncio` task can't do it: where a coroutine resumes is hidden in its
   frame, so it can only be cancelled and started again. The
-  [async elevator](../elevator/Python_async/elevator.py) has to keep a
+  [async elevator](../elevator/python_async/elevator.py) has to keep a
   separate `nextinst` next to each task for exactly this reason.
 - **No heap.** Nodes belong to their programs; the list only links them.
   Nodes cannot be copied or moved, because their neighbours point to them.
@@ -157,7 +157,7 @@ run. On the MCU, `get_next_time()` tells how long it may sleep.
 ## The elevator as a reference program
 
 Knuth wrote the elevator simulation to show how the WAIT list is used, and this
-kernel is that WAIT list, so the [C++ elevator](../elevator/Cpp_Embedded_Kernel)
+kernel is that WAIT list, so the [C++ elevator](../elevator/cpp_embedded_kernel)
 is its natural example: almost every feature has a step that uses it.
 
 | Kernel feature                          | Where the elevator uses it                          |
@@ -175,11 +175,54 @@ is its natural example: almost every feature has a step that uses it.
 
 The tests show that the kernel works; the elevator shows how to use it.
 
+## StoragePool (`storage_pool.hpp`)
+
+Nodes created at run time (the elevator's users) come from a pool, Knuth's
+AVAIL list (TAOCP §2.2.3), ported from the C
+[storage pool](../storage_pool), typed, for node types derived from `WaitNode`.
+
+```cpp
+template <std::derived_from<WaitNode> T>
+class StoragePool {
+public:
+    explicit StoragePool(std::size_t count) noexcept;       // malloc once, construct every T, link all into AVAIL
+    [[nodiscard]] bool valid() const noexcept;               // false: count 0 / too big, or malloc failed
+    [[nodiscard]] T* pop() noexcept;                         // a free node; nullptr = overflow
+    void push(T& node) noexcept;                             // give it back (LIFO)
+    [[nodiscard]] bool owns(const T& node) const noexcept;  // is it one of this pool's nodes?
+};
+```
+
+- **One `malloc`, at startup, never given back while the program runs** (the
+  destructor frees it, which matters only for the tests on the PC). There are
+  no exceptions, so a failure shows as `valid() == false`: check it at startup.
+  On the MCU the heap in the linker script (`_Min_Heap_Size`) must hold
+  `count * sizeof(T)`; a pool inside a static object is built before `main`.
+- **Every node is constructed once, in the constructor.** After that `pop` and `push`
+  only relink: no constructor runs at run time. So a popped node keeps the
+  fields of its previous user, and **the caller sets every per-user field**
+  (the elevator does it in one place, `add_user`).
+- **The AVAIL link is `WaitNode::left`**, Knuth's LINK field. A free node's
+  `right` still points to itself, so `is_held()` is false; `pop` points `left`
+  back to the node itself, so `cancel` on a popped node changes nothing. The
+  pool is a `friend` of `WaitNode` for this.
+- **Typed, unlike C:** no node size to pass (it is `sizeof(T)`), no casts at the
+  call sites; `std::derived_from<WaitNode>` rejects other types at compile time.
+- **`push` checks** (with `assert`) that the node is in no list and comes from
+  this pool: a node given back while a list still points to it is the classic
+  pool bug.
+- **Each program owns its pool** (rule 4): the users own a
+  `StoragePool<ElevatorNode>`; the kernel provides the class, not the memory.
+- **Overflow is a clean `nullptr`.** A program can wait for a free node instead
+  of losing work: the elevator's U1 parks when the pool is empty, and the user
+  who leaves wakes it (like the elevator parked at E1).
+
 ## Language and tools
 
 The same as [pi_mcu_protocol](../pi_mcu_protocol): C++23 with `g++-14` on the PC,
-`arm-none-eabi-g++` 14.3.1 for the MCU. Code that runs on the MCU uses no heap,
-no exceptions, no RTTI, and every function is `noexcept`.
+`arm-none-eabi-g++` 14.3.1 for the MCU. Code that runs on the MCU uses the heap
+only once, at startup (the `StoragePool` constructor), no exceptions, no RTTI, and every
+function is `noexcept`.
 
 ## Files
 
@@ -187,8 +230,10 @@ no exceptions, no RTTI, and every function is `noexcept`.
 |--------------------------|----------------------------------------------------|
 | `wait_list.hpp`          | `WaitNode` and `WaitList`                          |
 | `kernel.hpp`             | `Kernel`: the API for programs, and `step(now)`    |
+| `storage_pool.hpp`       | `StoragePool<T>`: nodes created at run time        |
 | `tests/test_wait_list.cpp` | the tests of the WAIT list                       |
 | `tests/test_kernel.cpp`  | the tests of the kernel, with small programs       |
+| `tests/test_storage_pool.cpp` | the tests of the storage pool                 |
 
 ## Running the tests
 
@@ -196,6 +241,7 @@ no exceptions, no RTTI, and every function is `noexcept`.
 cd tests
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_wait_list.cpp -o test_wait_list && ./test_wait_list; echo $?
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_kernel.cpp -o test_kernel && ./test_kernel; echo $?
+g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_storage_pool.cpp -o test_storage_pool && ./test_storage_pool; echo $?
 ```
 
 Each one exits with 0 when every test passes. CI runs it on every push that changes
@@ -205,6 +251,7 @@ this folder, also under AddressSanitizer and UndefinedBehaviorSanitizer.
 |----------------------|-----------------------------------------------------------------------|
 | `test_wait_list.cpp` | order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `get_next_inst` / `set_next_inst` (also on a waiting node), the node's and the list's `get_next_time`, `is_held`, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
 | `test_kernel.cpp`    | a new kernel; `start` runs at once; `step` runs one due node and says so; `get_next_time`; `cancel`; programs: a blinker, a periodic counter, two programs side by side, a message (one program starts another, ahead of overdue nodes), a supervisor that stops a program; across the clock wrap; "jump to `get_next_time`" (event-driven, like `CYCLE`) gives the same run as "every millisecond" (like SysTick) |
+| `test_storage_pool.cpp` | a count of 0 or a size that overflows gives a pool that is not `valid()`; exactly `count` nodes, then `nullptr`; the nodes are one block, distinct, aligned, not overlapping; `owns`; LIFO reuse; a free node is not held, and `cancel` on a popped node changes nothing; every node constructed once by the constructor and destroyed once with the pool; a reused node keeps its previous user's fields; a popped node held and run by a `WaitList`, pushed back and reused; 100 000 random pops and pushes compared with a model |
 
 ## Roadmap
 
@@ -216,8 +263,10 @@ this folder, also under AddressSanitizer and UndefinedBehaviorSanitizer.
 3. **Run it on the MCU:** SysTick as the clock and the board's LED; then sleep
    (`WFI`) until the first node's time; UART interrupts turned into events
    through a lock-free ring buffer; a watchdog and a cycle budget per step
-   (DWT); nodes created at run time from one arena with a POOLMAX border and an AVAIL list per node type (TAOCP §2.2.3).
-4. **Port the elevator** ([`elevator/C_Embedded`](../elevator/C_Embedded)) to
+   (DWT). Nodes created at run time come from a `StoragePool<T>` per node type
+   (done and tested on the PC); a boundary-tag allocator (TAOCP §2.5) for
+   blocks of different sizes may come later.
+4. **Port the elevator** ([`elevator/c_embedded`](../elevator/c_embedded)) to
    it: E1–E9 and U1–U6 as steps, running on real time.
 
 Then: the [Pi ↔ MCU protocol](../pi_mcu_protocol) as a program (its timers

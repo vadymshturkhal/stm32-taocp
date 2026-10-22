@@ -25,17 +25,17 @@
 - [Algorithm T (Topological Sort)](topological_sort)
 - [Algorithm A (Addition of polynomials)](polynomials/addition_of_polynomials)
 - [Algorithm M (Multiplication of polynomials)](polynomials/multiplication_of_polynomials)
-- [Elevator: discrete simulation program](elevator) ([Python](elevator/Python_WAIT_LIST), [C](elevator/C_Embedded), [C (native)](elevator/C_Native), [ARM Assembly](elevator/Assembly), [Python (async)](elevator/Python_async), [C++ on the Knuth kernel](elevator/Cpp_Embedded_Kernel), [Measurements](elevator/Measurements))
+- [Elevator: discrete simulation program](elevator) ([Python](elevator/python_wait_list), [C](elevator/c_embedded), [C (native)](elevator/c_native), [ARM Assembly](elevator/assembly), [Python (async)](elevator/python_async), [C++ on the Knuth kernel](elevator/cpp_embedded_kernel), [Measurements](elevator/measurements))
   <details>
   <summary>Knuth's MIX elevator simulation (TAOCP Vol. 1, 2.2.5), implemented across languages and targets</summary>
 
-  - [Python](elevator/Python_WAIT_LIST): subroutine-based port driven by an explicit WAIT list, without `yield`/`async`
-  - [C](elevator/C_Embedded): embedded-target port for the STM32G4, paired with the ARM Assembly port below
-  - [C (native)](elevator/C_Native): standalone laptop build (malloc-based, no STM32 dependencies), used for timing comparisons against Python
-  - [ARM Assembly](elevator/Assembly): hand-tuned Cortex-M4 Thumb-2 port, paired with the embedded C port above
-  - [Python (async)](elevator/Python_async): coroutine-based port using `asyncio`/`await` instead of an explicit WAIT list
-  - [C++ on the Knuth kernel](elevator/Cpp_Embedded_Kernel) *(in progress)*: the 1968 discrete-event design running, unchanged in spirit, as the scheduler of a real microcontroller: the steps E1–E9 and U1–U6 are nodes of the [Knuth kernel](knuth_kernel)'s WAIT list, with a trace that can be checked against the book
-  - [Measurements](elevator/Measurements): scripts comparing timing and trace-output correctness between the C (native) and Python ports -- see [RESULTS.md](elevator/Measurements/RESULTS.md) for measured numbers (ASM vs GCC on STM32, C vs Python on laptop)
+  - [Python](elevator/python_wait_list): subroutine-based port driven by an explicit WAIT list, without `yield`/`async`
+  - [C](elevator/c_embedded): embedded-target port for the STM32G4, paired with the ARM Assembly port below
+  - [C (native)](elevator/c_native): standalone laptop build (malloc-based, no STM32 dependencies), used for timing comparisons against Python
+  - [ARM Assembly](elevator/assembly): hand-tuned Cortex-M4 Thumb-2 port, paired with the embedded C port above
+  - [Python (async)](elevator/python_async): coroutine-based port using `asyncio`/`await` instead of an explicit WAIT list
+  - [C++ on the Knuth kernel](elevator/cpp_embedded_kernel) *(runs on the PC; next: the board)*: the 1968 discrete-event design running, unchanged in spirit, as the scheduler of a real microcontroller: the steps E1–E9 and U1–U6 are nodes of the [Knuth kernel](knuth_kernel)'s WAIT list, users come from its storage pool, and the trace matches the C port byte for byte
+  - [Measurements](elevator/measurements): the golden traces the ports are checked against (in CI for C, C++ and Python), and scripts comparing timing and trace-output correctness between the C (native) and Python ports -- see [RESULTS.md](elevator/measurements/RESULTS.md) for measured numbers (ASM vs GCC on STM32, C vs Python on laptop)
   </details>
 
 ## Algorithm from Concrete Mathematics:
@@ -49,6 +49,9 @@
 - [Doubly Linked List](doubly_linked_list)
 
 # Systems:
+- [Knuth kernel](knuth_kernel): a run-to-completion event kernel built from the elevator's WAIT list (§2.2.5):
+  programs are nodes, `HOLD`/`IMMED`/`CYCLE` are the scheduler, nodes created at run time come from an AVAIL-list
+  storage pool (§2.2.3). No preemption, one stack, no heap after startup; tested in CI under AddressSanitizer and UBSan.
 - [Pi ↔ MCU protocol](pi_mcu_protocol) *(in progress: steps 1–3 of 9)*: a Raspberry Pi ↔ STM32 serial link built from TAOCP ideas:
   a lock-free circular queue (§2.2.2) between the UART interrupt and the main loop, CRC-framed lines,
   and next a circle of buffers (§1.4.4) for zero-copy DMA transmit.

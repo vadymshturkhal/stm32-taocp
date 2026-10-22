@@ -3,13 +3,13 @@ name: Elevator (Python)
 on:
   push:
     paths:
-      - 'elevator/Python_WAIT_LIST/**'
-      - 'elevator/Measurements/trace_*.txt'
+      - 'elevator/python_wait_list/**'
+      - 'elevator/measurements/trace_*.txt'
       - '.github/workflows/elevator-python.yml'
   pull_request:
     paths:
-      - 'elevator/Python_WAIT_LIST/**'
-      - 'elevator/Measurements/trace_*.txt'
+      - 'elevator/python_wait_list/**'
+      - 'elevator/measurements/trace_*.txt'
       - '.github/workflows/elevator-python.yml'
   workflow_dispatch:
 
@@ -27,33 +27,33 @@ jobs:
         env:
           TRACE: "1"
         run: |
-          python3 elevator/Python_WAIT_LIST/main.py 0 \
-            | diff - elevator/Measurements/trace_0.txt
+          python3 elevator/python_wait_list/main.py 0 \
+            | diff - elevator/measurements/trace_0.txt
 
       - name: Compare against trace output (1 user)
         env:
           TRACE: "1"
         run: |
-          python3 elevator/Python_WAIT_LIST/main.py 1 \
-            | diff - elevator/Measurements/trace_1.txt
+          python3 elevator/python_wait_list/main.py 1 \
+            | diff - elevator/measurements/trace_1.txt
 
       - name: Compare against trace output (4 users)
         env:
           TRACE: "1"
         run: |
-          python3 elevator/Python_WAIT_LIST/main.py 4 \
-            | diff - elevator/Measurements/trace_4.txt
+          python3 elevator/python_wait_list/main.py 4 \
+            | diff - elevator/measurements/trace_4.txt
 
       - name: Compare against trace output (26 users)
         env:
           TRACE: "1"
         run: |
-          python3 elevator/Python_WAIT_LIST/main.py 26 \
-            | diff - elevator/Measurements/trace_26.txt
+          python3 elevator/python_wait_list/main.py 26 \
+            | diff - elevator/measurements/trace_26.txt
 
       - name: Compare against trace output (500 users)
         env:
           TRACE: "1"
         run: |
-          python3 elevator/Python_WAIT_LIST/main.py 500 \
-            | diff - elevator/Measurements/trace_500.txt
+          python3 elevator/python_wait_list/main.py 500 \
+            | diff - elevator/measurements/trace_500.txt

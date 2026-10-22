@@ -127,7 +127,7 @@ TIME STATE FLOOR D1 D2 D3 step action
 ## Reproducing
 
 ```bash
-cd elevator/Measurements
+cd elevator/measurements
 ./measure_c.sh "100 1000 10000 100000 1000000" 5       # C only, large scale
 ./compare_c_python_no_trace.sh "4 66 1000 10000" 5      # C vs Python, small scale
 ./compare_outputs.sh 66                                  # correctness: diff C vs Python trace output
