@@ -27,7 +27,7 @@ private:
     bool parked = false;    // U1 waits for a free node (park and wake)
 
     static void U1(WaitNode& node, std::uint32_t now) noexcept;
-    static void U2(WaitNode& user, std::uint32_t now) noexcept;
+    void U2(ElevatorNode& user) noexcept;
     void U3(ElevatorNode& user) noexcept;
     static void U4(WaitNode& user, std::uint32_t now) noexcept;
     void U4A(ElevatorNode& user) noexcept;

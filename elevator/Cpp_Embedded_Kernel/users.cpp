@@ -4,6 +4,7 @@
 #include "elevator_simulation.hpp"
 #include "trace.hpp"
 #include "elevator.hpp"
+#include "values.hpp" 
 
 void Users::start(std::uint32_t quantity) noexcept {
     // USER1 node represents action U1 and it is initially the sole entry in the WAIT list
@@ -12,7 +13,60 @@ void Users::start(std::uint32_t quantity) noexcept {
 }
 
 void Users::U1(WaitNode& node, std::uint32_t now) noexcept {}
-void Users::U2(WaitNode& node, std::uint32_t now) noexcept {}
+
+// [Signal and wait]
+void Users::U2(ElevatorNode& user) noexcept {
+    Elevator& elevator = simulation.elevator;
+
+    // 1. If FLOOR == IN
+    if (elevator.FLOOR == user.IN) {
+        // 2. And if the elevator's next action is step E6
+        // (if the elevator doors are now closing)
+        if (elevator.ELEV1.get_next_inst() == &Elevator::E6) {
+            // Reposition it at E3
+            elevator.ELEV1.set_next_inst(&Elevator::E3);
+
+            // No DELETEW, immed unlinks ELEV1 first
+
+            // JMP IMMED
+            simulation.immed(elevator.ELEV1);
+
+            // JMP U3
+            U3(user);
+            return;
+        }
+
+        // 3. If D3 != 0
+        if (elevator.D3 != 0) {
+            // Set D3 = 0, D1 to a nonzero value and start up the elevator's activity E4 again
+            elevator.D1 = 1;
+            elevator.D3 = 0;
+
+            // JMP IMMED
+            simulation.immed(elevator.ELEV1);
+
+            // JMP U3
+            U3(user);
+            return;
+        }
+    }
+
+    // 4. In all other cases the user sets CALLUP[IN] = 1 or CALLDOWN[IN] = 1
+    // according as OUT > IN or OUT < IN
+    if (user.OUT > user.IN) {
+        simulation.CALLS[user.IN] |= CALLUP;
+    } else {
+        simulation.CALLS[user.IN] |= CALLDOWN;
+    }
+
+    // 5. And if D2 == 0 or the elevator in its "dormant" position E1, DECISION is performed
+    if (elevator.D2 == 0 || elevator.ELEV1.get_next_inst() == &Elevator::E1) {
+        // U2 runs from U1 step and decision only checks caller == E6
+        simulation.decision(&U1);
+    }
+
+    U3(user);
+}
 
 // [Enter queue]
 void Users::U3(ElevatorNode& user) noexcept {
