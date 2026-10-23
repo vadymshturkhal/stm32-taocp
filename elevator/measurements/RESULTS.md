@@ -80,6 +80,8 @@ Run 1 -> run 35: **88401 -> 70140 cold cycles, a 20.7% cumulative reduction** fr
 
 ## Embedded: C vs C++ (STM32G4, Cortex-M4 @ DWT->CYCCNT, 66 users)
 
+Written up as a short paper: [PAPER.md](PAPER.md).
+
 Three implementations of the same simulation, run one after another on the same board:
 
 - **C** -- [`c_embedded`](../c_embedded), the port measured against ASM above.

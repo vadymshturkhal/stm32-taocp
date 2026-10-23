@@ -8,6 +8,7 @@
 [![Pi-MCU protocol](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/pi-mcu-protocol.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/pi-mcu-protocol.yml)
 
 - This repository contains Python, C, C++ and hand-tuned ARM Assembly implementations of [Algorithms](#algorithms) and [Data Structures](#data-structures) from The Art of Computer Programming, Vol.1, and a [Raspberry Pi ↔ STM32 protocol](#systems) built from its ideas.
+- [Paper](#papers): *Is C++ Slower than C on a Cortex-M4?* A controlled measurement on the board: the same design costs the same in both languages.
 
 ## Hardware and tools
 
@@ -60,6 +61,24 @@
 
   The same design costs the same in C and C++: C++ itself is free. The kernel's extra ~20% with LTO is the price of its guarantees (a wrap-safe 32-bit clock, no globals), and the code is 2x larger (5.5 KB vs 2.8 KB). On a laptop the C port runs at ~0.17 µs per user up to 2 million users, ~10-200x faster than Python.
 
+  <details>
+  <summary>How the C vs C++ result was found (written up as a short paper: <a href="elevator/measurements/PAPER.md">PAPER.md</a>)</summary>
+
+  | Paper section | In this experiment |
+  |---|---|
+  | **Hypothesis** | "C++ is slower than C" |
+  | **First experiment** | C vs the C++ kernel port: +40%, seemingly confirmed |
+  | **Proposed mechanisms** | code size and the instruction cache, kernel overhead, translation-unit boundaries: plausible, mostly wrong |
+  | **Falsification attempts** | an inline-ASM `sortin`, `noinline` hot functions, the kernel by value: they disproved the explanations, not the result |
+  | **Control** | the C design written in C++: only the language changes |
+  | **Confounder found** | `-flto` set on the C folder only: a hidden variable in the setup |
+  | **Controlled result** | equal flags: 198 / 198 / 197 cycles per step, and 142 / 140 / 171 with LTO |
+  | **Validity checks** | an on-board checksum (`same_run`), golden traces, PC tests under sanitizers |
+  | **Threats to validity** | interrupts inside steps, code-placement noise (±1k cycles), one board and one compiler |
+  | **Conclusion** | the language costs nothing; LTO and the design's guarantees do |
+
+  </details>
+
 ## Algorithm from Concrete Mathematics:
 - [Josephus Problem (Generalized)](josephus_generalized)
 
@@ -78,3 +97,13 @@
   a lock-free circular queue (§2.2.2) between the UART interrupt and the main loop, CRC-framed lines,
   and next a circle of buffers (§1.4.4) for zero-copy DMA transmit.
   C++23 on the MCU, Python on the Pi, tested in CI under AddressSanitizer, UBSan and ThreadSanitizer.
+
+# Papers:
+- [Is C++ Slower than C on a Cortex-M4? A Controlled Measurement with Knuth's Elevator](elevator/measurements/PAPER.md):
+  the elevator implemented three ways (C, the C design written in C++, and C++ on the [Knuth kernel](knuth_kernel)),
+  measured with the DWT cycle counter on the NUCLEO-G431RB, with an on-board checksum proving all three run the same 544 events.
+  A first comparison showed C++ 40% slower; a control version exposed the cause, `-flto` enabled for the C code only.
+  With identical flags C and C++ run at the same speed (198 vs 198 cycles per event, 142 vs 140 with LTO);
+  the general kernel costs ~20% more under LTO, the price of its guarantees, not of the language.
+  Sections: abstract, method, results, the confounder and the hypotheses it disproved, threats to validity;
+  the full run history is in [RESULTS.md](elevator/measurements/RESULTS.md#history-c-vs-c-runs-in-order).
