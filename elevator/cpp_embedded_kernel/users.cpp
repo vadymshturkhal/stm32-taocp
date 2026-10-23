@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cinttypes>
 #include <cstdint>
 #include "users.hpp"
 #include "elevator_simulation.hpp"
@@ -45,7 +46,7 @@ void Users::add_user(ElevatorNode& user, std::uint32_t in, std::uint32_t out, st
     user.GIVEUPTIME = giveuptime;
     user.id = user_id++;
 
-    trace(simulation, "U1", "User %u arrives at floor %u, destination is %u, give up %u",
+    trace(simulation, "U1", "User %" PRIu32 " arrives at floor %" PRIu32 ", destination is %" PRIu32 ", give up %" PRIu32,
         user.id, user.IN, user.OUT, simulation.TIME + user.GIVEUPTIME);
 
     // 5 to U2
@@ -122,7 +123,7 @@ void Users::U4(WaitNode& node, std::uint32_t /*now*/) noexcept {
 
     // If the user's IN floor differs from the elevator's current FLOOR: give up
     if (user.IN != elevator.FLOOR) {
-        trace(sim, "U4", "User %u decides to give up, leaves the system", user.id);
+        trace(sim, "U4", "User %" PRIu32 " decides to give up, leaves the system", user.id);
         users.U6_impl(user, false);
         return;
     }
@@ -133,7 +134,7 @@ void Users::U4(WaitNode& node, std::uint32_t /*now*/) noexcept {
         return;
     }
 
-    trace(sim, "U4", "User %u decides to give up, leaves the system", user.id);
+    trace(sim, "U4", "User %" PRIu32 " decides to give up, leaves the system", user.id);
     users.U6_impl(user, false);
 }
 
@@ -147,7 +148,7 @@ void Users::U5(WaitNode& node, std::uint32_t /*now*/) noexcept {
     ElevatorSimulation& sim = begin_step(node);
     ElevatorNode& user = static_cast<ElevatorNode&>(node);
 
-    trace(sim, "U5", "User %u gets in", user.id);
+    trace(sim, "U5", "User %" PRIu32 " gets in", user.id);
 
     // 1. This user now leaves QUEUE and enters ELEVATOR
 
@@ -187,7 +188,7 @@ void Users::U6(WaitNode& node, std::uint32_t /*now*/) noexcept {
 
 void Users::U6_impl(ElevatorNode& user, bool is_print) noexcept {
     if (is_print) {
-        trace(simulation, "U6", "User %u gets out, leaves the system", user.id);
+        trace(simulation, "U6", "User %" PRIu32 " gets out, leaves the system", user.id);
     }
 
     // JMP DELETE: leave the QUEUE or the ELEVATOR
