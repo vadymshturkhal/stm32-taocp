@@ -132,10 +132,18 @@ private:
 
     // Sort node into WAIT list using left and right
     void sortin(WaitNode& C) noexcept {
+        // Sentinel: the head gets C's own time. is_less(C, head) is then false, so
+        // the walk always stops at the head and the loop needs no "P != &head"
+        // test. Knuth's fixed sentinel (a head time of 0) cannot work on a clock
+        // that wraps: past 2^31 every time counts as "before" 0, and the walk would
+        // go round the circle for ever. One store per hold instead of one compare
+        // and branch per node passed.
+        head.NEXTTIME = C.NEXTTIME;
+
         WaitNode* P = head.left;  // Last node
 
         // Compare NEXTTIME fields right to left
-        while (P != &head && is_less(C.NEXTTIME, P->NEXTTIME)) {
+        while (is_less(C.NEXTTIME, P->NEXTTIME)) {
             P = P->left;
         }
 

@@ -1,11 +1,12 @@
 # Elevator simulation: measured results (Claude helped to generate this summary)
 
-Two separate comparisons live here, because they measure different things:
+Three separate comparisons live here, because they measure different things:
 
 - **Embedded (STM32G4, DWT cycle counts)** -- hand-tuned ARM Assembly vs GCC-compiled C, same algorithm, same hardware. Answers "how much does hand-written ASM buy you over the compiler."
+- **Embedded (STM32G4, DWT cycle counts)** -- C vs C++: the C port, the same design written in C++, and the C++ port on the [Knuth kernel](../../knuth_kernel). Answers "is C++ slower than C, and what does a general kernel cost."
 - **Native (laptop, wall-clock)** -- C vs Python, both running the WAIT-list algorithm natively. Answers "how much does the language/runtime cost."
 
-They are not directly comparable to each other (different hardware, different clocks) -- keep them as two separate stories.
+The embedded and native numbers are not directly comparable to each other (different hardware, different clocks) -- keep them as separate stories.
 
 ## Embedded: ASM vs GCC (STM32G4, Cortex-M4 @ DWT->CYCCNT, 66 users)
 
@@ -77,6 +78,58 @@ Every entry below is a real measurement from `measure_elevator_performance.c`'s 
 
 Run 1 -> run 35: **88401 -> 70140 cold cycles, a 20.7% cumulative reduction** from the first working ASM port to the current one -- entirely from register-allocation, inlining, and instruction-scheduling changes, no algorithmic changes.
 
+## Embedded: C vs C++ (STM32G4, Cortex-M4 @ DWT->CYCCNT, 66 users)
+
+Three implementations of the same simulation, run one after another on the same board:
+
+- **C** -- [`c_embedded`](../c_embedded), the port measured against ASM above.
+- **C-style C++** -- [`cpp_cstyle`](../cpp_cstyle): the C design ported 1:1 to C++: the same structs, one `malloc`'d block, `shared_state` passed everywhere, Knuth's sentinel (head `NEXTTIME = 0`) with unsigned compares, the same functions in the same files. Only zero-cost spellings differ (`namespace`, `constexpr`, `nullptr`, `static_cast`). It isolates the *language*.
+- **Kernel C++** -- [`cpp_embedded_kernel`](../cpp_embedded_kernel): the steps E1-E9 / U1-U6 as nodes of the general [Knuth kernel](../../knuth_kernel) (wrap-safe 32-bit time, no globals, back-pointers, "re-hold = restart", a typed storage pool).
+
+**Method.** `main()` runs the three one after another, **one node per main-loop pass beside the Pi link** (`Link_Poll`), as fast as possible (each node at its own simulated time, no waiting). DWT cycles are read around every step (minus the cost of reading `CYCCNT` twice) and summed; setup (allocation, init, the first `immed`) is timed separately. All three run the same 66 users from seed 1: **544 steps** each. After every step a checksum `sum = sum * 31 + TIME` is folded in; equal checksums for all three (`same_run = 1`, true in every run below) prove they ran the same nodes in the same order at the same times. Interrupts that land inside a step (SysTick, UART, DMA) are counted, the same for all three.
+
+### Result: the same flags for all three
+
+| Flags (all three folders) | C | C-style C++ | Kernel C++ |
+|---|---|---|---|
+| `-O3`, no LTO | **198** cycles/step | **198** | **197** |
+| `-O3 -flto` | **142** | **140** | **171** |
+
+| `-O3 -flto` | C | C-style C++ | Kernel C++ |
+|---|---|---|---|
+| Steps (cycles) | 77 656 | 76 700 | 93 442 |
+| Setup (cycles) | 1 555 | 1 166 | 6 847 |
+| Total (cycles) | 79 211 | 77 866 | 100 289 |
+
+- **C++ itself costs nothing.** The same design gives the same cycles in both languages (198 = 198, 140 vs 142). Classes, references, `static_cast`, templates and `std::optional` all compile away at `-O3`; at `-O0` they do not (the kernel C++ took 2 385 cycles/step there, 12x its `-O3` speed).
+- **LTO is the big lever** for the C design (-28%): it inlines `hold`/`sortin`/`delete` across `.c` files.
+- **The kernel's guarantees cost ~30 cycles/step (~20%), visible only with LTO.** Without LTO the header-only kernel is already inlined, which pays for its extra checks (197 vs 198). With LTO the C designs catch up on inlining and the kernel's extra work shows: the wrap-safe compare in `sortin`, `hold` always unlinking first, back-pointers, `TIME` converted from the node, nodes reset to point to themselves.
+- **Setup:** the kernel C++ constructs (and zero-fills) every object and all 16 pool nodes on every run: ~7k vs ~1.5k cycles. In firmware that runs once at boot.
+
+**Flash size** (elevator objects, `-O3`, no LTO, `arm-none-eabi-size`): C ~2 740 B, C-style C++ 2 992 B, kernel C++ 5 532 B (the header-only kernel is inlined into every step).
+
+### History: C vs C++ runs, in order
+
+Every run as measured, including the ones that misled. **The C folder had `-flto` from run 4 on while the C++ folders did not**, which was only found at run 12 by reading the generated `subdir.mk` files; runs 4-11 compare C with LTO against C++ without it.
+
+| # | C | C-style C++ | Kernel C++ | What changed |
+|---|---|---|---|---|
+| 1 | 91 389 / 91 201 total | -- | 118 828 / 118 876 total | batch run (whole simulation per call, cold / warm), `-O3`, C++ asserts on |
+| 2 | 90 469 / 90 313 total | -- | 113 027 / 113 104 total | `NDEBUG` for the C++ asserts |
+| 3 | -- | -- | 211 /step (setup 8 187) | the kernel C++ in the main loop, one node per pass |
+| 4 | 144 /step (setup 1 547) | -- | 212 /step (setup 8 084) | C in the main loop too |
+| 5 | 144 | -- | **201** | wrap-safe sentinel in `sortin` (head `NEXTTIME` = the new node's time): no `P != &head` test per node passed. **Kept.** |
+| 6 | 142 | -- | 202 | `sortin` walk in inline ASM (`ASM_SORTIN`'s unrolled, latency-hiding loop, `cmp`+`bmi` = wrap-safe): no gain, reverted. Most inserts stop at the first compare. |
+| 7 | 142 | -- | 198 (setup 12 188) | the kernel owned by value, not by reference: -3/step; setup +4k from value-initialisation zero-filling the object (`= default` constructor). Reverted. |
+| 8 | 142 | -- | 216 | `[[gnu::noinline]]` `hold`/`sortin` (one shared copy, as in C): slower. Reverted. |
+| 9 | 142 | -- | 2 385 | kernel C++ at `-O0` |
+| 10 | 146 | 196 | 202 | C-style C++ added (C++ folders at `-O2`) |
+| 11 | 146 | 194 | 195 | C++ folders at `-O3` (C still `-O3 -flto`) |
+| 12 | **198** | **198** | **197** | all three `-O3`, no LTO |
+| 13 | **142** | **140** | **171** | all three `-O3 -flto` |
+
+**Lesson:** before comparing builds, read the flags every folder was really compiled with (`Debug/Core/Src/<folder>/subdir.mk`); the settings dialog is per folder and per configuration. Runs 4-11 were spent explaining a gap that was mostly a build flag.
+
 ## Native: C vs Python (laptop, wall-clock, `TRACE=0` / notrace builds)
 
 Small-to-medium scale, C vs Python head to head (`compare_c_python_no_trace.sh`):
@@ -134,3 +187,5 @@ cd elevator/measurements
 ```
 
 Embedded numbers come from flashing `elevator/C_WAIT_LIST` (GCC) and `elevator/ASM_WAIT_LIST` (hand-tuned) onto an STM32G4 Nucleo board and reading `measure_elevator_performance()`'s DWT cycle counts over a debug session -- see that file's comment trail for the full incremental history.
+
+C vs C++ numbers come from the board project's `main()`: the three versions run one after another in the main loop, and `elevator_finish()` collects every count (`c_*`, `cs_*`, `cpp_*`, `same_run`) as locals; a breakpoint on its `__NOP()` shows them all in the debugger's Variables view.

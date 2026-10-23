@@ -4,6 +4,8 @@ __pycache__/
 TODO*
 main*
 !elevator/cpp_embedded_kernel/pc/main.cpp
+!elevator/cpp_cstyle/pc/main.cpp
+elevator/cpp_cstyle/elevator_sim*
 elevator/cpp_embedded_kernel/elevator_sim*
 elevator/c_native/elevator_sim
 elevator/c_native/elevator_sim_notrace

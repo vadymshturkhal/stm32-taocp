@@ -25,7 +25,7 @@
 - [Algorithm T (Topological Sort)](topological_sort)
 - [Algorithm A (Addition of polynomials)](polynomials/addition_of_polynomials)
 - [Algorithm M (Multiplication of polynomials)](polynomials/multiplication_of_polynomials)
-- [Elevator: discrete simulation program](elevator) ([Python](elevator/python_wait_list), [C](elevator/c_embedded), [C (native)](elevator/c_native), [ARM Assembly](elevator/assembly), [Python (async)](elevator/python_async), [C++ on the Knuth kernel](elevator/cpp_embedded_kernel), [Measurements](elevator/measurements))
+- [Elevator: discrete simulation program](elevator) ([Python](elevator/python_wait_list), [C](elevator/c_embedded), [C (native)](elevator/c_native), [ARM Assembly](elevator/assembly), [Python (async)](elevator/python_async), [C++ on the Knuth kernel](elevator/cpp_embedded_kernel), [C-style C++](elevator/cpp_cstyle), [Measurements](elevator/measurements))
   <details>
   <summary>Knuth's MIX elevator simulation (TAOCP Vol. 1, 2.2.5), implemented across languages and targets</summary>
 
@@ -35,7 +35,8 @@
   - [ARM Assembly](elevator/assembly): hand-tuned Cortex-M4 Thumb-2 port, paired with the embedded C port above
   - [Python (async)](elevator/python_async): coroutine-based port using `asyncio`/`await` instead of an explicit WAIT list
   - [C++ on the Knuth kernel](elevator/cpp_embedded_kernel) *(runs on the PC; next: the board)*: the 1968 discrete-event design running, unchanged in spirit, as the scheduler of a real microcontroller: the steps E1–E9 and U1–U6 are nodes of the [Knuth kernel](knuth_kernel)'s WAIT list, users come from its storage pool, and the trace matches the C port byte for byte
-  - [Measurements](elevator/measurements): the golden traces the ports are checked against (in CI for C, C++ and Python), and scripts comparing timing and trace-output correctness between the C (native) and Python ports -- see [RESULTS.md](elevator/measurements/RESULTS.md) for measured numbers (ASM vs GCC on STM32, C vs Python on laptop)
+  - [C-style C++](elevator/cpp_cstyle): the C port's design rewritten 1:1 in C++ (same structs, same calls, same unsigned compares), to measure the language alone: on the STM32G4 it runs at the same cycles per step as C
+  - [Measurements](elevator/measurements): the golden traces the ports are checked against (in CI for C, both C++ ports and Python), and scripts comparing timing and trace-output correctness between the C (native) and Python ports -- see [RESULTS.md](elevator/measurements/RESULTS.md) for measured numbers (ASM vs GCC on STM32, C vs Python on laptop)
   </details>
 
 ## Algorithm from Concrete Mathematics:
