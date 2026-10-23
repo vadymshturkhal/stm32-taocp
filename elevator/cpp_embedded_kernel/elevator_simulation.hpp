@@ -40,6 +40,15 @@ public:
     void immed(WaitNode& n) noexcept { kernel.start(n, ticks()); }
     void cancel(WaitNode& n) noexcept { kernel.cancel(n); }
     void decision(WaitNode::NextInst caller) noexcept;
+
+    [[nodiscard]] bool is_any_call(std::uint32_t from, std::uint32_t to, std::uint32_t mask) const noexcept {
+        for (std::uint32_t j = from; j < to; ++j) {
+            if ((CALLS[j] & mask) != 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 inline ElevatorSimulation& begin_step(WaitNode& n) noexcept {
