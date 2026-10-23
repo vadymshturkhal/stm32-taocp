@@ -26,64 +26,33 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
     // 1 STATE is GOINGUP
     if (elevator.STATE > 0) {
         // Are there calls for higher floors?
-        bool has_higher_call = false;
-        for (std::uint32_t j = elevator.FLOOR + 1; j < FLOORS; ++j) {
-            if (sim.CALLS[j] != 0) {
-                has_higher_call = true;
-                break;
-            }
-        }
-
-        // If yes, go to E3
-        if (has_higher_call) {
+        if (sim.is_any_call(elevator.FLOOR + 1, FLOORS, ANY_CALL)) {
             E3(node, now);
             return;
         }
-        // Have passengers in the elevator called for lower floors?
-        bool has_lower_callcar = false;
-        for (std::uint32_t j = 0; j < elevator.FLOOR; ++j) {
-            if ((sim.CALLS[j] & CALLCAR) != 0) {
-                has_lower_callcar = true;
-                break;
-            }
-        }
 
-        // If yes, reverse direction of STATE, else set STATE to NEUTRAL
-        if (has_lower_callcar) {
+        // Have passengers in the elevator called for lower floors?
+        if (sim.is_any_call(0, elevator.FLOOR, CALLCAR)) {
+            // If yes, reverse direction of STATE, else set STATE to NEUTRAL
             elevator.STATE = -elevator.STATE;
         } else {
             elevator.STATE = 0;
+
         }
     }
 
     // 2 STATE is GOINGDOWN
     else if (elevator.STATE < 0) {
         // Are there calls for lower floors?
-        bool has_lower_call = false;
-        for (std::uint32_t j = 0; j < elevator.FLOOR; ++j) {
-            if (sim.CALLS[j] != 0) {
-                has_lower_call = true;
-                break;
-            }
-        }
-
-        // If yes, go to E3
-        if (has_lower_call) {
+        if (sim.is_any_call(0, elevator.FLOOR, ANY_CALL)) {
+            // If yes, go to E3
             E3(node, now);
             return;
         }
 
         // Have passengers in the elevator called for higher floors?
-        bool has_higher_callcar = false;
-        for (std::uint32_t j = elevator.FLOOR + 1; j < FLOORS; ++j) {
-            if ((sim.CALLS[j] & CALLCAR) != 0) {
-                has_higher_callcar = true;
-                break;
-            }
-        }
-
-        // If yes, reverse direction of STATE, else set STATE to NEUTRAL
-        if (has_higher_callcar) {
+        if (sim.is_any_call(elevator.FLOOR + 1, FLOORS, CALLCAR)) {
+            // If yes, reverse direction of STATE, else set STATE to NEUTRAL
             elevator.STATE = -elevator.STATE;
         } else {
             elevator.STATE = 0;
