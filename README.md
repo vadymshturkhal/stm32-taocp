@@ -107,3 +107,4 @@
   the general kernel costs ~20% more under LTO, the price of its guarantees, not of the language.
   Sections: abstract, method, results, the confounder and the hypotheses it disproved, threats to validity;
   the full run history is in [RESULTS.md](elevator/measurements/RESULTS.md#history-c-vs-c-runs-in-order).
+  To run it yourself: [the board harness](elevator/measurements/board) (`main.c` and how to set up the CubeIDE project).

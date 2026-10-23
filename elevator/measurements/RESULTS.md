@@ -190,4 +190,4 @@ cd elevator/measurements
 
 Embedded numbers come from flashing `elevator/C_WAIT_LIST` (GCC) and `elevator/ASM_WAIT_LIST` (hand-tuned) onto an STM32G4 Nucleo board and reading `measure_elevator_performance()`'s DWT cycle counts over a debug session -- see that file's comment trail for the full incremental history.
 
-C vs C++ numbers come from the board project's `main()`: the three versions run one after another in the main loop, and `elevator_finish()` collects every count (`c_*`, `cs_*`, `cpp_*`, `same_run`) as locals; a breakpoint on its `__NOP()` shows them all in the debugger's Variables view.
+C vs C++ numbers come from the board project's `main()` ([`board/`](board) has its files and how to set it up and run it): the three versions run one after another in the main loop, and `elevator_finish()` collects every count (`c_*`, `cs_*`, `cpp_*`, `same_run`) as locals; a breakpoint on its `__NOP()` shows them all in the debugger's Variables view.

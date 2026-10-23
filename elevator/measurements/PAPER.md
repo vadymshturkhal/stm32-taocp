@@ -139,6 +139,7 @@ dozen runs, an uncontrolled flag looked like a property of the language.
   [`cpp_embedded_kernel`](../cpp_embedded_kernel), [`knuth_kernel`](../../knuth_kernel).
 - PC correctness: each port's README; CI diffs all five golden traces
   ([`measurements`](.)), also under AddressSanitizer and UBSan.
-- Board numbers: the CubeIDE project's `main()` runs the three versions and
-  collects every count in `elevator_finish()`; the full run history, including
+- Board numbers: the CubeIDE project's `main()` ([`board/`](board), with setup
+  and run instructions) runs the three versions and collects every count in
+  `elevator_finish()`; the full run history, including
   the misleading runs, is in [RESULTS.md](RESULTS.md).

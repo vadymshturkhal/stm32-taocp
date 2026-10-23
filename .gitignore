@@ -3,6 +3,7 @@ __pycache__/
 
 TODO*
 main*
+!elevator/measurements/board/main.c
 !elevator/cpp_embedded_kernel/pc/main.cpp
 !elevator/cpp_cstyle/pc/main.cpp
 elevator/cpp_cstyle/elevator_sim*
