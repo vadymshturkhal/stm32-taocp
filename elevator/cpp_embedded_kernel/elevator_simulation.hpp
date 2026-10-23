@@ -49,6 +49,8 @@ public:
         }
         return false;
     }
+
+    [[nodiscard]] bool finished() const noexcept;
 };
 
 inline ElevatorSimulation& begin_step(WaitNode& n) noexcept {

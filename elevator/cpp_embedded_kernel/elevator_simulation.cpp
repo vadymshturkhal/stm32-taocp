@@ -7,6 +7,14 @@ void ElevatorSimulation::start(std::uint32_t users_quantity, std::uint32_t now_t
     users.start(users_quantity);
 }
 
+// Not in MIX: with a shared kernel the WAIT list never empties, so the elevator
+// ends when all its users are done and its own nodes are idle, dormant at E1
+bool ElevatorSimulation::finished() const noexcept {
+    return users.done()
+        && !elevator.ELEV1.is_held() && !elevator.ELEV2.is_held() && !elevator.ELEV3.is_held()
+        && elevator.ELEV1.get_next_inst() == &Elevator::E1;
+}
+
 void ElevatorSimulation::decision(WaitNode::NextInst caller) noexcept {
     // D1. Decision necessary?
     if (elevator.STATE != 0) return;
