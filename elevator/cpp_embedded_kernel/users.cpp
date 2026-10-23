@@ -121,19 +121,13 @@ void Users::U4(WaitNode& node, std::uint32_t /*now*/) noexcept {
     Users& users = sim.users;
     ElevatorNode& user = static_cast<ElevatorNode&>(node);
 
-    // If the user's IN floor differs from the elevator's current FLOOR: give up
-    if (user.IN != elevator.FLOOR) {
-        trace(sim, "U4", "User %" PRIu32 " decides to give up, leaves the system", user.id);
-        users.U6_impl(user, false);
-        return;
-    }
-
     // JANZ U4A: doors still busy: reschedule U4
-    if (elevator.D1 != 0) {
+    if (user.IN == elevator.FLOOR && elevator.D1 != 0) {
         users.U4A(user);
         return;
     }
 
+    // If the user's IN floor differs from the elevator's current FLOOR: give up
     trace(sim, "U4", "User %" PRIu32 " decides to give up, leaves the system", user.id);
     users.U6_impl(user, false);
 }
