@@ -2,6 +2,9 @@
 
 [![Elevator (Python)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-python.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-python.yml)
 [![Elevator (C)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-c.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-c.yml)
+[![Elevator (C++ on the Knuth kernel)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-cpp.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-cpp.yml)
+[![Elevator (C-style C++)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-cpp-cstyle.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/elevator-cpp-cstyle.yml)
+[![Knuth kernel](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/knuth-kernel.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/knuth-kernel.yml)
 [![Pi-MCU protocol](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/pi-mcu-protocol.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/pi-mcu-protocol.yml)
 
 - This repository contains Python, C, C++ and hand-tuned ARM Assembly implementations of [Algorithms](#algorithms) and [Data Structures](#data-structures) from The Art of Computer Programming, Vol.1, and a [Raspberry Pi ↔ STM32 protocol](#systems) built from its ideas.
@@ -34,10 +37,28 @@
   - [C (native)](elevator/c_native): standalone laptop build (malloc-based, no STM32 dependencies), used for timing comparisons against Python
   - [ARM Assembly](elevator/assembly): hand-tuned Cortex-M4 Thumb-2 port, paired with the embedded C port above
   - [Python (async)](elevator/python_async): coroutine-based port using `asyncio`/`await` instead of an explicit WAIT list
-  - [C++ on the Knuth kernel](elevator/cpp_embedded_kernel) *(runs on the PC; next: the board)*: the 1968 discrete-event design running, unchanged in spirit, as the scheduler of a real microcontroller: the steps E1–E9 and U1–U6 are nodes of the [Knuth kernel](knuth_kernel)'s WAIT list, users come from its storage pool, and the trace matches the C port byte for byte
+  - [C++ on the Knuth kernel](elevator/cpp_embedded_kernel) *(runs on the PC and on the STM32G4)*: the 1968 discrete-event design running, unchanged in spirit, as the scheduler of a real microcontroller: the steps E1–E9 and U1–U6 are nodes of the [Knuth kernel](knuth_kernel)'s WAIT list, users come from its storage pool, and the trace matches the C port byte for byte
   - [C-style C++](elevator/cpp_cstyle): the C port's design rewritten 1:1 in C++ (same structs, same calls, same unsigned compares), to measure the language alone: on the STM32G4 it runs at the same cycles per step as C
-  - [Measurements](elevator/measurements): the golden traces the ports are checked against (in CI for C, both C++ ports and Python), and scripts comparing timing and trace-output correctness between the C (native) and Python ports -- see [RESULTS.md](elevator/measurements/RESULTS.md) for measured numbers (ASM vs GCC on STM32, C vs Python on laptop)
+  - [Measurements](elevator/measurements): the golden traces the ports are checked against (in CI for C, both C++ ports and Python), and scripts comparing timing and trace-output correctness between the C (native) and Python ports -- see [RESULTS.md](elevator/measurements/RESULTS.md) for measured numbers (ASM vs GCC and C vs C++ on STM32, C vs Python on laptop)
   </details>
+
+  **Measured** ([RESULTS.md](elevator/measurements/RESULTS.md)): the same 66-user simulation on the NUCLEO-G431RB at 170 MHz, DWT cycle counts:
+
+  | Elevator on the STM32G4 | Cycles | |
+  |---|---|---|
+  | C, `-O3` | 90 322 (whole run) | |
+  | C, `-O3 -flto` | 77 794 | |
+  | Hand-tuned ARM Assembly | **70 140** | 10% faster than the compiler's best |
+
+  C vs C++, cycles per step, one node per main-loop pass beside the Pi link (a checksum proves all three run the same 544 steps in the same order):
+
+  | Per step | `-O3` | `-O3 -flto` |
+  |---|---|---|
+  | C | 198 | 142 |
+  | C's design in C++ | **198** | **140** |
+  | C++ on the Knuth kernel | 197 | 171 |
+
+  The same design costs the same in C and C++: C++ itself is free. The kernel's extra ~20% with LTO is the price of its guarantees (a wrap-safe 32-bit clock, no globals), and the code is 2x larger (5.5 KB vs 2.8 KB). On a laptop the C port runs at ~0.17 µs per user up to 2 million users, ~10-200x faster than Python.
 
 ## Algorithm from Concrete Mathematics:
 - [Josephus Problem (Generalized)](josephus_generalized)
