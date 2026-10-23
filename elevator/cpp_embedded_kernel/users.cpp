@@ -38,6 +38,11 @@ void Users::U1(WaitNode& node, std::uint32_t /*now*/) noexcept {
     users.add_user(*user, user_values.IN, user_values.OUT, user_values.GIVEUPTIME);
 }
 
+bool Users::done() const noexcept {
+    // all created (U1 stopped re-holding itself) and every one left through U6_impl
+    return user_id == users_quantity && !USER1.is_held() && active_users == 0;
+}
+
 void Users::add_user(ElevatorNode& user, std::uint32_t in, std::uint32_t out, std::uint32_t giveuptime) noexcept {
     user.simulation = &simulation;
     user.set_next_inst(nullptr);
@@ -45,6 +50,7 @@ void Users::add_user(ElevatorNode& user, std::uint32_t in, std::uint32_t out, st
     user.OUT = out;
     user.GIVEUPTIME = giveuptime;
     user.id = user_id++;
+    ++active_users;
 
     trace(simulation, "U1", "User %" PRIu32 " arrives at floor %" PRIu32 ", destination is %" PRIu32 ", give up %" PRIu32,
         user.id, user.IN, user.OUT, simulation.TIME + user.GIVEUPTIME);
@@ -192,6 +198,8 @@ void Users::U6_impl(ElevatorNode& user, bool is_print) noexcept {
     // C++ manages the storage pool manually, so the node must be returned once the user leaves
     assert(!user.is_held() && !user.is_in_queue());
     pool.push(user);
+    assert(active_users > 0);
+    --active_users;
 
     // Park and wake: U1 was waiting for a free node
     if (parked) {

@@ -14,6 +14,7 @@ public:
     explicit Users(ElevatorSimulation& s) noexcept : simulation(s), USER1(s, &U1) {}
 
     void start(std::uint32_t quantity) noexcept;
+    [[nodiscard]] bool done() const noexcept;   // every user created and gone
     static void U5(WaitNode& node, std::uint32_t now) noexcept;
     static void U6(WaitNode& node, std::uint32_t now) noexcept;
 
@@ -23,6 +24,7 @@ private:
     Values values{VALUES_SEED};  // from constants
     std::uint32_t users_quantity = 0;
     std::uint32_t user_id = 0;
+    std::uint32_t active_users = 0;   // in the system now: add_user +1, U6_impl -1
 
     // Users in the system at once (not in total); the most seen is 7-10, depending on VALUES
     static constexpr std::size_t POOL_SIZE = 16;
