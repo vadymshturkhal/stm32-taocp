@@ -279,16 +279,8 @@ void Elevator::E7_continue(WaitNode& node, std::uint32_t now) noexcept {
     // Is FLOOR == HOME_FLOOR or CALLDOWN[FLOOR] != 0?
     if (elevator.FLOOR == HOME_FLOOR || (sim.CALLS[elevator.FLOOR] & CALLDOWN) != 0) {
         // Are there calls for higher floors?
-        bool has_higher_call = false;
-        for (std::uint32_t j = elevator.FLOOR + 1; j < FLOORS; ++j) {
-            if (sim.CALLS[j] != 0) {
-                has_higher_call = true;
-                break;
-            }
-        }
-
-        // If yes: repeat E7
-        if (has_higher_call) {
+        if (sim.is_any_call(elevator.FLOOR + 1, FLOORS, ANY_CALL)) {
+            // If yes: repeat E7
             E7(node, now);
             return;
         }
@@ -338,16 +330,8 @@ void Elevator::E8_continue(WaitNode& node, std::uint32_t now) noexcept {
     // Is FLOOR == HOME_FLOOR or CALLUP[FLOOR] != 0?
     if (elevator.FLOOR == HOME_FLOOR || (sim.CALLS[elevator.FLOOR] & CALLUP) != 0) {
         // Are there calls for lower floors?
-        bool has_lower_call = false;
-        for (std::uint32_t j = 0; j < elevator.FLOOR; ++j) {
-            if (sim.CALLS[j] != 0) {
-                has_lower_call = true;
-                break;
-            }
-        }
-
-        // If yes: repeat E8
-        if (has_lower_call) {
+        if (sim.is_any_call(0, elevator.FLOOR, ANY_CALL)) {
+            // If yes: repeat E8
             E8(node, now);
             return;
         }
