@@ -59,7 +59,16 @@
   | C's design in C++ | **198** | **140** |
   | C++ on the Knuth kernel | 197 | 171 |
 
-  The same design costs the same in C and C++: C++ itself is free. The kernel's extra ~20% with LTO is the price of its guarantees (a wrap-safe 32-bit clock, no globals), and the code is 2x larger (5.5 KB vs 2.8 KB). On a laptop the C port runs at ~0.17 µs per user up to 2 million users, ~10-200x faster than Python.
+  Flash used by the elevator, in bytes (Cortex-M4 builds of each version with a minimal `main`, `.text` minus an empty program that only calls `malloc`/`free`: steps, scheduler, lists, storage pool, `VALUES` and start/stop glue):
+
+  | Flash | `-O3` | `-O3 -flto` | LTO |
+  |---|---|---|---|
+  | Hand-tuned ARM Assembly | **2 116** | **2 052** | −64 (its C glue only) |
+  | C | 2 688 | 3 292 | +604 (+22%) |
+  | C's design in C++ | 2 824 | 3 360 | +536 (+19%) |
+  | C++ on the Knuth kernel | 5 144 | 5 304 | +160 (+3%) |
+
+  The same design costs the same in C and C++, in time and in flash: C++ itself is free. LTO buys C its speed with flash: it removes the calls between files by inlining `hold`, `holdc` and the list functions into every step (41 calls out of the steps become 5). The kernel is header-only, so it was inlined already, and LTO changes it little. Its extra ~20% time with LTO and 2x flash are the price of its guarantees (a wrap-safe 32-bit clock, no globals, each node constructed once), not of the language. The hand-tuned assembly is both the fastest and the smallest. On a laptop the C port runs at ~0.17 µs per user up to 2 million users, ~10-200x faster than Python.
 
   <details>
   <summary>How the C vs C++ result was found (written up as a short paper: <a href="elevator/measurements/PAPER.md">PAPER.md</a>)</summary>
