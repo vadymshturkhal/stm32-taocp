@@ -56,9 +56,12 @@
 
   | Per step | `-O3` | `-O3 -flto` |
   |---|---|---|
+  | Hand-tuned ARM Assembly | **~129**\* | **~129**\* |
   | C | 198 | 142 |
-  | C's design in C++ | **198** | **140** |
+  | C's design in C++ | 198 | 140 |
   | C++ on the Knuth kernel | 197 | 171 |
+
+  \* The whole run (70 140 cycles, setup included) ÷ 544 steps: measured as one batch, not per pass. The same calculation for C with LTO gives 143 against the 142 measured per step. The compiler flags only touch the assembly's C glue.
 
   Flash used by the elevator, in bytes (Cortex-M4 builds of each version with a minimal `main`, `.text` minus an empty program that only calls `malloc`/`free`: steps, scheduler, lists, storage pool, `VALUES` and start/stop glue):
 
