@@ -53,6 +53,12 @@ private:
     friend class WaitList;
     template <std::derived_from<WaitNode> T> friend class StoragePool;   // uses left for the AVAIL list
 
+    // On a pool's AVAIL list: in no list (right points to itself), but left links
+    // the next free node. A node in use points to itself both ways when it is in
+    // no list, so only a free node looks like this. No list operation may touch it:
+    // unlinking it would write into the next free node and cut AVAIL.
+    [[nodiscard]] bool is_on_avail() const noexcept { return right == this && left != this; }
+
     WaitNode* left = this;
     WaitNode* right = this;
     std::uint32_t NEXTTIME = 0;
@@ -69,7 +75,9 @@ public:
     }
 
     void hold(WaitNode& node, std::uint32_t now, std::uint32_t delay) noexcept {
+        assert(!node.is_on_avail() && "hold: the node is free (on a pool's AVAIL)");
         assert(node.NEXTINST != nullptr && "hold: a node with no step would never run");
+        if (node.is_on_avail()) return;          // release builds: refuse, do not corrupt AVAIL
 
         // Schedule node to run delay units from now
         node.NEXTTIME = now + delay;
@@ -80,7 +88,9 @@ public:
 
     // Use node's DELAY
     void hold(WaitNode& node, std::uint32_t now) noexcept {
+        assert(!node.is_on_avail() && "hold: the node is free (on a pool's AVAIL)");
         assert(node.NEXTINST != nullptr && "hold: a node with no step would never run");
+        if (node.is_on_avail()) return;          // release builds: refuse, do not corrupt AVAIL
 
         // Schedule node to run delay units from now
         node.NEXTTIME = now + node.DELAY;
@@ -113,7 +123,9 @@ public:
 
     // Insert node first in WAIT list
     void immed(WaitNode& node, std::uint32_t now) noexcept {
+        assert(!node.is_on_avail() && "immed: the node is free (on a pool's AVAIL)");
         assert(node.NEXTINST != nullptr && "immed: a node with no step would never run");
+        if (node.is_on_avail()) return;          // release builds: refuse, do not corrupt AVAIL
 
         // Unlink node
         unlink_node(node);
@@ -143,7 +155,12 @@ public:
         return &n;
     }
 
+    // Cancel. A node in no list (never held, already cancelled, or running now)
+    // stays as it is; a free node (on a pool's AVAIL) is refused.
     void delete_node(WaitNode& node) noexcept {
+        assert(!node.is_on_avail() && "cancel: the node is free (on a pool's AVAIL)");
+        if (node.is_on_avail()) return;          // release builds: refuse, do not corrupt AVAIL
+
         // Unlink node
         unlink_node(node);
 

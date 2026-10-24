@@ -9,7 +9,7 @@
 //   params:      one handler shared by many nodes, each node carrying its own data
 //                (a node type derived from WaitNode, like Knuth's user nodes)
 //   handlers:    a periodic node that re-holds itself, a handler that cancels
-//                another due node
+//                another due node, a handler that cancels its own (running) node
 //   wrap:        deadlines on both sides of 0xFFFFFFFF -> 0
 //   random:      100 000 random hold / cancel / time steps across the wrap,
 //                compared with a simple model that uses 64-bit time
@@ -103,6 +103,14 @@ static void cancel_b(WaitNode& n, std::uint32_t) noexcept {
     auto& node = static_cast<LetterNode&>(n);
     node.world->log += 'x';
     node.world->wait.delete_node(node.world->b);
+}
+
+// A handler that cancels its own node while it runs: writes 'y'. The node is out
+// of the list while it runs, so this changes nothing (and must not touch b or c).
+static void cancel_self(WaitNode& n, std::uint32_t) noexcept {
+    auto& node = static_cast<LetterNode&>(n);
+    node.world->log += 'y';
+    node.world->wait.delete_node(node);
 }
 
 LetterNode::LetterNode(World& w, char c, std::uint32_t delay) noexcept
@@ -393,6 +401,17 @@ int main() {
         w.wait.hold(w.b, 0, 10);
         run_until(w.wait, 10);
         check("handler cancels a due node: it never runs", w.log == "x" && w.wait.is_empty());
+    }
+
+    // 15b. A handler that cancels its own node while it runs: nothing changes
+    {
+        World w;
+        w.wait.holdc(w.a, 0, 10, &cancel_self);
+        w.wait.hold(w.b, 0, 10);
+        w.wait.hold(w.c, 0, 20);
+        run_until(w.wait, 30);
+        check("handler cancels its own running node: it runs once, b and c still run",
+              w.log == "ybc" && w.wait.is_empty() && !w.a.is_held());
     }
 
     // 16. The clock wrapping round

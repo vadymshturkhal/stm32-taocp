@@ -29,6 +29,16 @@ jobs:
             echo "::endgroup::"
           done
 
+      - name: Build and run every C++ test with NDEBUG (the board's build; misuse is refused, not asserted)
+        working-directory: knuth_kernel/tests
+        run: |
+          for t in test_wait_list test_wait_list_stats test_kernel test_storage_pool; do
+            echo "::group::$t (NDEBUG)"
+            g++-14 $CXXFLAGS -DNDEBUG $t.cpp -o ${t}_ndebug
+            timeout 300 ./${t}_ndebug
+            echo "::endgroup::"
+          done
+
   sanitizers:
     runs-on: ubuntu-24.04
     env:

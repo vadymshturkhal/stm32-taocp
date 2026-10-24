@@ -13,6 +13,14 @@
 //   with a list: a popped node held and run by a WaitList, pushed back, reused
 //   random:      100 000 random pops and pushes compared with a model (the set of
 //                nodes in use): never a node twice, overflow exactly at count
+//   double push: is_free() for a popped, a held, a pushed node; pushing a free node
+//                again (the AVAIL head or another one), a held node, or a node from
+//                another pool aborts with the asserts on (checked in a child process)
+//   bad states:  the valid paths (held, cancelled twice, pushed, popped; a running
+//                step that gives its own node back, like the elevator's U6); cancel,
+//                hold, holdc, immed or Kernel::cancel on a free node abort with the
+//                asserts on, and with NDEBUG (the board's build) every misuse is
+//                refused: the list stays empty, the pool gives each node once
 //
 // Build (from tests/):  g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion
 //             test_storage_pool.cpp -o test_storage_pool
@@ -22,9 +30,15 @@
 #include <cstdint>
 #include <print>
 #include <random>
+#include <csignal>
+#include <cstdio>
 #include <set>
 #include <vector>
 
+#include <sys/wait.h>
+#include <unistd.h>
+
+#include "kernel.hpp"
 #include "storage_pool.hpp"
 #include "wait_list.hpp"
 
@@ -51,6 +65,42 @@ struct Counted : WaitNode {
     Counted() noexcept { ++constructed; }
     ~Counted() { ++destroyed; }
 };
+
+// Runs f in a child process: true if the child dies by abort() (a failed assert).
+// The child's stderr goes to /dev/null, so the assert message does not clutter the log.
+template <class F>
+static bool aborts(F f) {
+    std::fflush(stdout);
+    const pid_t pid = fork();
+    if (pid == 0) {
+        if (std::freopen("/dev/null", "w", stderr) == nullptr) _exit(2);
+        f();
+        _exit(0);                           // no abort: the misuse went through
+    }
+    int status = 0;
+    waitpid(pid, &status, 0);
+    return WIFSIGNALED(status) && WTERMSIG(status) == SIGABRT;
+}
+
+// Pops until nullptr: true if that gives exactly n different nodes (AVAIL intact).
+template <class T>
+static bool pops_each_once(StoragePool<T>& pool, std::size_t n) {
+    std::set<T*> seen;
+    for (std::size_t i = 0; i <= n; ++i) {
+        T* p = pool.pop();
+        if (p == nullptr) return i == n;
+        if (!seen.insert(p).second) return false;   // a node twice: AVAIL is corrupt
+    }
+    return false;                                   // more nodes than the pool holds
+}
+
+// A step that gives its own node back while it runs, like the elevator's U6
+static StoragePool<UserNode>* g_pool = nullptr;
+static WaitList* g_list = nullptr;
+static void give_back(WaitNode& n, std::uint32_t) noexcept {
+    g_list->delete_node(n);                 // running: in no list, so this changes nothing
+    g_pool->push(static_cast<UserNode&>(n));
+}
 
 static bool aligned(const void* p, std::size_t a) {
     return reinterpret_cast<std::uintptr_t>(p) % a == 0;
@@ -204,6 +254,156 @@ int main() {
               ok && overflows > 0);
         for (UserNode* p : order) pool.push(*p);
     }
+
+    // 8. A node pushed twice: caught before it can corrupt AVAIL
+    {
+        StoragePool<UserNode> pool(4);
+        UserNode* a = pool.pop();
+        check("a popped node is not free", !pool.is_free(*a));
+        WaitList list;
+        a->set_next_inst(&count_run);
+        list.hold(*a, 0, 10);
+        check("a held node is not free", !pool.is_free(*a));
+        list.delete_node(*a);
+        check("out of the list again: still not free", !pool.is_free(*a));
+        pool.push(*a);
+        check("a pushed node is free", pool.is_free(*a));
+        UserNode* b = pool.pop();
+        check("and pop gives it back", b == a && !pool.is_free(*a));
+    }
+#ifndef NDEBUG
+    check("pushing the AVAIL head again aborts", aborts([] {
+        StoragePool<UserNode> pool(4);
+        UserNode* a = pool.pop();
+        pool.push(*a);                      // a is the AVAIL head now
+        pool.push(*a);                      // would link a to itself
+    }));
+    check("pushing a free node that is not the head aborts", aborts([] {
+        StoragePool<UserNode> pool(4);
+        UserNode* a = pool.pop();
+        UserNode* b = pool.pop();
+        pool.push(*a);
+        pool.push(*b);                      // head is b, a is below it
+        pool.push(*a);
+    }));
+    check("pushing a node that is still held aborts", aborts([] {
+        StoragePool<UserNode> pool(4);
+        WaitList list;
+        UserNode* a = pool.pop();
+        a->set_next_inst(&count_run);
+        list.hold(*a, 0, 10);
+        pool.push(*a);
+    }));
+    check("pushing a node from another pool aborts", aborts([] {
+        StoragePool<UserNode> pool(4);
+        StoragePool<UserNode> other(4);
+        pool.push(*other.pop());
+    }));
+#endif
+
+    // 9. Nodes in bad states: the valid paths first
+    {
+        StoragePool<UserNode> pool(2);
+        WaitList list;
+        UserNode* a = pool.pop();
+        a->set_next_inst(&count_run);
+        list.hold(*a, 0, 10);
+        list.delete_node(*a);
+        list.delete_node(*a);                       // cancel twice: the second changes nothing
+        pool.push(*a);
+        check("held, cancelled twice, pushed: free, the list empty, the pool whole",
+              pool.is_free(*a) && list.is_empty() && pops_each_once(pool, 2));
+    }
+    {
+        StoragePool<UserNode> pool(2);
+        WaitList list;
+        g_pool = &pool;
+        g_list = &list;
+        UserNode* a = pool.pop();
+        a->set_next_inst(&give_back);
+        list.hold(*a, 0, 10);
+        WaitNode* due = list.delete_first();        // the kernel's step: out of the list, then run
+        due->run(10);
+        check("a running step cancels and pushes its own node (U6): free, the pool whole",
+              due == a && pool.is_free(*a) && list.is_empty() && pops_each_once(pool, 2));
+    }
+
+#ifndef NDEBUG
+    // With the asserts on, every misuse of a free node stops at once
+    check("cancel of a free node aborts", aborts([] {
+        StoragePool<UserNode> pool(4);
+        WaitList list;
+        UserNode* a = pool.pop();
+        pool.push(*a);
+        list.delete_node(*a);
+    }));
+    check("hold of a free node aborts", aborts([] {
+        StoragePool<UserNode> pool(4);
+        WaitList list;
+        UserNode* a = pool.pop();
+        a->set_next_inst(&count_run);
+        pool.push(*a);
+        list.hold(*a, 0, 10);
+    }));
+    check("holdc of a free node aborts", aborts([] {
+        StoragePool<UserNode> pool(4);
+        WaitList list;
+        UserNode* a = pool.pop();
+        pool.push(*a);
+        list.holdc(*a, 0, 10, &count_run);
+    }));
+    check("immed of a free node aborts", aborts([] {
+        StoragePool<UserNode> pool(4);
+        WaitList list;
+        UserNode* a = pool.pop();
+        a->set_next_inst(&count_run);
+        pool.push(*a);
+        list.immed(*a, 0);
+    }));
+    check("Kernel::cancel of a free node aborts", aborts([] {
+        StoragePool<UserNode> pool(4);
+        Kernel k;
+        UserNode* a = pool.pop();
+        pool.push(*a);
+        k.cancel(*a);
+    }));
+#else
+    // With NDEBUG (the board's build) every misuse is refused and changes nothing
+    {
+        StoragePool<UserNode> pool(4);
+        WaitList list;
+        UserNode* a = pool.pop();
+        UserNode* b = pool.pop();
+        UserNode* c = pool.pop();
+        b->set_next_inst(&count_run);
+        pool.push(*a);
+        pool.push(*b);
+        pool.push(*c);                              // AVAIL: c, b, a, and the 4th node
+        list.delete_node(*b);                       // b is free and in the middle of AVAIL
+        list.hold(*b, 0, 10);
+        list.holdc(*b, 0, 10, &count_run);
+        list.immed(*b, 0);
+        Kernel k;
+        k.cancel(*b);
+        pool.push(*b);                              // a second push
+        check("NDEBUG: cancel, hold, holdc, immed, Kernel::cancel and a second push of a free node are refused",
+              list.is_empty() && pool.is_free(*a) && pool.is_free(*b) && pool.is_free(*c) && !a->is_held()
+              && pops_each_once(pool, 4));
+    }
+    {
+        StoragePool<UserNode> pool(2);
+        WaitList list;
+        UserNode* a = pool.pop();
+        a->set_next_inst(&count_run);
+        a->runs = 0;
+        list.hold(*a, 0, 10);
+        pool.push(*a);                              // still held: refused
+        WaitNode* due = list.delete_first();
+        if (due != nullptr) due->run(10);
+        check("NDEBUG: a push of a held node is refused, the node still runs",
+              due == a && a->runs == 1 && !pool.is_free(*a));
+    }
+#endif
 
     std::println("\n{}", failures ? "SOME TESTS FAILED" : "all passed");
     return failures != 0;

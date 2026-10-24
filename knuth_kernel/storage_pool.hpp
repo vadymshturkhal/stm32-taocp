@@ -55,16 +55,29 @@ public:
         return node;
     }
 
-    // The node must come from this pool and be in no list.
+    // The node must come from this pool, be in use (popped) and be in no list.
+    // In use and out of every list, a node points to itself both ways (pop,
+    // WaitList::delete_node); on AVAIL its left is the next free node or nullptr,
+    // never itself. That catches a second push of the same node: without the check,
+    // pushing the AVAIL head again links it to itself, and every pop after that
+    // returns the same object. Release builds refuse the push instead (no change).
     void push(T& node) noexcept {
-        assert(!node.is_held() && "node is still in a list");
         assert(owns(node) && "node is not from this pool");
+        assert(!node.is_held() && "node is still in a list");
+        assert(!is_free(node) && "node is already free: pushed twice");
+        if (!owns(node) || node.is_held() || is_free(node)) return;
+
         node.left = avail;
         avail = &node;
     }
 
     [[nodiscard]] bool owns(const T& node) const noexcept {
         return memory != nullptr && &node >= memory && &node < memory + size;
+    }
+
+    // On AVAIL: not in a list (right points to itself) but linked to the next free node
+    [[nodiscard]] bool is_free(const T& node) const noexcept {
+        return owns(node) && node.is_on_avail();
     }
 
 private:

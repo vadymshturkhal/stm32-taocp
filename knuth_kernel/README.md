@@ -94,6 +94,13 @@ How it works:
   timeout can be pushed back by every new event.
 - **`delete_first` takes the node out before it runs**, so a step may hold its
   own node again (a periodic program) or cancel other nodes.
+- **Cancel is safe in every state a program can reach:** on a node that was never
+  held, was cancelled already, or is running now (out of the list) it changes
+  nothing. A node that is **free on a pool's AVAIL** is different: unlinking it
+  would write into the next free node and cut AVAIL, so the pool later hands out
+  one node again and again. The list recognises that state (`right` points to
+  itself but `left` does not) and refuses `cancel`, `hold`, `holdc` and `immed`
+  on it: an `assert` in debug builds, no change at all with `NDEBUG`.
 - **Times are compared wrap-safe:** `static_cast<std::int32_t>(a - b) < 0`. The
   kernel counts in **ticks** and does not care how long a tick is: the port
   decides. The 32-bit tick counter wraps round every 2^32 ticks, and every
@@ -223,6 +230,7 @@ public:
     [[nodiscard]] T* pop() noexcept;                         // a free node; nullptr = overflow
     void push(T& node) noexcept;                             // give it back (LIFO)
     [[nodiscard]] bool owns(const T& node) const noexcept;  // is it one of this pool's nodes?
+    [[nodiscard]] bool is_free(const T& node) const noexcept; // is it on AVAIL?
 };
 ```
 
@@ -241,9 +249,13 @@ public:
   pool is a `friend` of `WaitNode` for this.
 - **Typed, unlike C:** no node size to pass (it is `sizeof(T)`), no casts at the
   call sites; `std::derived_from<WaitNode>` rejects other types at compile time.
-- **`push` checks** (with `assert`) that the node is in no list and comes from
-  this pool: a node given back while a list still points to it is the classic
-  pool bug.
+- **`push` checks** (with `assert`) that the node comes from this pool, is in no
+  list, and **is not free already**: a node given back while a list still points
+  to it is the classic pool bug, and so is giving it back twice (pushing the
+  AVAIL head again would link it to itself, and every later `pop` would return
+  the same object). The two states differ in `left`: a node in use and in no list
+  points to itself both ways, a free one points to the next free node. Release
+  builds refuse such a push instead of corrupting AVAIL.
 - **Each program owns its pool** (rule 4): the users own a
   `StoragePool<ElevatorNode>`; the kernel provides the class, not the memory.
 - **Overflow is a clean `nullptr`.** A program can wait for a free node instead
@@ -281,14 +293,15 @@ g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion
 ```
 
 Each one exits with 0 when every test passes. CI runs it on every push that changes
-this folder, also under AddressSanitizer and UndefinedBehaviorSanitizer.
+this folder, also with `NDEBUG` (the board's build, where misuse is refused
+instead of asserted) and under AddressSanitizer and UndefinedBehaviorSanitizer.
 
 | Test                 | What it checks                                                        |
 |----------------------|-----------------------------------------------------------------------|
-| `test_wait_list.cpp` | at compile time: `holdc` with a literal `0` or `nullptr` as the step does not compile (it would hold a node with no step); order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `get_next_inst` / `set_next_inst` (also on a waiting node), the node's and the list's `get_next_time`, `is_held`, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
+| `test_wait_list.cpp` | at compile time: `holdc` with a literal `0` or `nullptr` as the step does not compile (it would hold a node with no step); order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `get_next_inst` / `set_next_inst` (also on a waiting node), the node's and the list's `get_next_time`, `is_held`, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, a step that cancels its own running node (no change), the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
 | `test_kernel.cpp`    | at compile time: `Kernel::holdc` with a literal `0` or `nullptr` as the step does not compile; a new kernel; `start` runs at once; `step` runs one due node and says so; `get_next_time`; `cancel`; programs: a blinker, a periodic counter, two programs side by side, a message (one program starts another, ahead of overdue nodes), a supervisor that stops a program; across the clock wrap; "jump to `get_next_time`" (event-driven, like `CYCLE`) gives the same run as "every millisecond" (like SysTick) |
 | `test_wait_list_stats.cpp` | with `KNUTH_KERNEL_STATS`: the length after holds, `immed`, a re-hold (unchanged), delete, delete twice, `delete_first` to empty; `sortins` counts `hold` and `holdc`, not `immed`; the walk from the tail (0 for the latest time, all nodes for the earliest, equal times after the ones already there); the sums and maxima against hand-computed values |
-| `test_storage_pool.cpp` | a count of 0 or a size that overflows gives a pool that is not `valid()`; exactly `count` nodes, then `nullptr`; the nodes are one block, distinct, aligned, not overlapping; `owns`; LIFO reuse; a free node is not held, and `cancel` on a popped node changes nothing; every node constructed once by the constructor and destroyed once with the pool; a reused node keeps its previous user's fields; a popped node held and run by a `WaitList`, pushed back and reused; 100 000 random pops and pushes compared with a model |
+| `test_storage_pool.cpp` | a count of 0 or a size that overflows gives a pool that is not `valid()`; exactly `count` nodes, then `nullptr`; the nodes are one block, distinct, aligned, not overlapping; `owns`; LIFO reuse; a free node is not held, and `cancel` on a popped node changes nothing; every node constructed once by the constructor and destroyed once with the pool; a reused node keeps its previous user's fields; a popped node held and run by a `WaitList`, pushed back and reused; 100 000 random pops and pushes compared with a model; `is_free` for a popped, a held and a pushed node; pushing a free node again (the AVAIL head or one below it), a held node, or another pool's node aborts (child processes, asserts on); the valid paths (held, cancelled twice, pushed, popped; a running step giving its own node back, like U6); `cancel`, `hold`, `holdc`, `immed` and `Kernel::cancel` on a free node abort with the asserts on, and with `NDEBUG` every misuse is refused (the list stays empty, the pool gives each node once) |
 
 ## Roadmap
 
