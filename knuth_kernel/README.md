@@ -6,9 +6,14 @@ A small run-to-completion event kernel for the STM32 Nucleo-G431RB, built from
 the WAIT list of Knuth's elevator simulation (TAOCP Vol. 1, §2.2.5). In the
 simulation the WAIT list runs simulated time; here it runs real time.
 
-**Status:** in progress. The WAIT list (`wait_list.hpp`) and the `Kernel` class
-(`kernel.hpp`) are done and tested on the PC with small programs; the MCU port
-comes next (see [Roadmap](#roadmap)).
+**Status:** the WAIT list (`wait_list.hpp`), the `Kernel` class (`kernel.hpp`)
+and the storage pool are done and tested on the PC. On the STM32G431 the kernel
+runs in **PendSV**, woken by the **TIM2 compare** at each deadline
+([`port/stm32g4`](port/stm32g4)); the elevator runs on it in real time, every
+step within 6 µs of its deadline
+([elevator/cpp_embedded_kernel/board](../elevator/cpp_embedded_kernel/board)).
+Next: a second program beside it, and UART interrupts as events (see
+[Roadmap](#roadmap)).
 
 ## The idea
 
@@ -231,6 +236,7 @@ function is `noexcept`.
 | `wait_list.hpp`          | `WaitNode` and `WaitList`                          |
 | `kernel.hpp`             | `Kernel`: the API for programs, and `step(now)`    |
 | `storage_pool.hpp`       | `StoragePool<T>`: nodes created at run time        |
+| `port/stm32g4/kernel_port.{hpp,cpp}` | the STM32G4 port: TIM2 as the 1 µs clock (`now()`), the one shared `kernel`, `kernel_pendsv()` (run every due node, `KernelStats`), `aim()` (TIM2 compare at the next deadline, with the race re-check), `TIM2_IRQHandler`, the hook `kernel_port_after_step()` |
 | `tests/test_wait_list.cpp` | the tests of the WAIT list                       |
 | `tests/test_kernel.cpp`  | the tests of the kernel, with small programs       |
 | `tests/test_storage_pool.cpp` | the tests of the storage pool                 |
@@ -260,14 +266,17 @@ this folder, also under AddressSanitizer and UndefinedBehaviorSanitizer.
 2. **Test it** (done): with a fake clock on the PC: a blinker, a counter, a
    message between two programs (one program `start`s another's node), a
    supervisor, the clock wrap.
-3. **Run it on the MCU:** SysTick as the clock and the board's LED; then sleep
-   (`WFI`) until the first node's time; UART interrupts turned into events
+3. **Run it on the MCU** (in progress): the kernel in PendSV, TIM2 as the
+   1 µs clock and its compare as the wake-up, sleep (`WFI`) in between (done,
+   with the elevator); next a second program (the board's LED); UART interrupts turned into events
    through a lock-free ring buffer; a watchdog and a cycle budget per step
    (DWT). Nodes created at run time come from a `StoragePool<T>` per node type
    (done and tested on the PC); a boundary-tag allocator (TAOCP §2.5) for
    blocks of different sizes may come later.
 4. **Port the elevator** ([`elevator/c_embedded`](../elevator/c_embedded)) to
-   it: E1–E9 and U1–U6 as steps, running on real time.
+   it: E1–E9 and U1–U6 as steps, running on real time (done:
+   [`elevator/cpp_embedded_kernel`](../elevator/cpp_embedded_kernel), on the PC
+   and on the board).
 
 Then: the [Pi ↔ MCU protocol](../pi_mcu_protocol) as a program (its timers
 already use this WAIT list), and the DWT benchmarks. Preemption (a stack per

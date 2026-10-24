@@ -70,7 +70,12 @@ same program.
 [`../measurements`](../measurements) (also under AddressSanitizer and
 UndefinedBehaviorSanitizer, with the asserts on). CI
 ([elevator-cpp.yml](../../.github/workflows/elevator-cpp.yml)) checks all five on
-every push that changes this folder, the kernel or the traces. Next: the board.
+every push that changes this folder, the kernel or the traces.
+
+**On the board:** it runs in real time on the STM32G431, the kernel in PendSV
+woken by the TIM2 compare: the same 544 steps and checksum as on the PC, every
+step within 6 µs of its deadline (301 ns on average), the CPU asleep 99.8 % of
+the time. See [`board/`](board).
 
 ## Layout
 
@@ -78,7 +83,7 @@ every push that changes this folder, the kernel or the traces. Next: the board.
 |------|------------|
 | `*.cpp`, `*.hpp` (this folder) | the elevator itself: steps, users, lists, `VALUES`, trace; **no `main`**, the same sources for the PC and the board |
 | `pc/main.cpp` | the PC entry point: users count from `argv`, the trace header, the kernel run event-driven until the WAIT list is empty |
-| `board/` (later) | the G431 project: its own `main` (clocks, TIM2, PendSV), which starts the same elevator |
+| `board/` | the G431 applications, one folder per variant (now [`pendsv/`](board/pendsv): the kernel in PendSV; later a tickless one): each with its own `main` (the link, sleep, the measurements) and the C-callable start/stop, running the same elevator in real time ([README](board/README.md)) |
 
 The PC build names its entry point explicitly (`*.cpp pc/main.cpp`), so a
 board `main` can never end up in the PC build, or the other way round. The

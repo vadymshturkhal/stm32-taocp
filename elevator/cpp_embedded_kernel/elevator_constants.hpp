@@ -13,6 +13,6 @@ inline constexpr std::uint32_t ANY_CALL = CALLUP | CALLDOWN | CALLCAR;
 // Kernel ticks per Knuth time unit. 
 // Originally it is set to tenths of seconds, for that set it to 100
 // 1 is the fastest speed
-inline constexpr std::uint32_t TICKS_PER_TIME_UNIT = 1;
+inline constexpr std::uint32_t TICKS_PER_TIME_UNIT = 1000;
 static_assert(TICKS_PER_TIME_UNIT > 0);
 inline constexpr std::uint32_t VALUES_SEED = 1;

@@ -5,6 +5,7 @@ TODO*
 main*
 !elevator/measurements/board/main.c
 !elevator/cpp_embedded_kernel/pc/main.cpp
+!elevator/cpp_embedded_kernel/board/*/main.c
 !elevator/cpp_cstyle/pc/main.cpp
 elevator/cpp_cstyle/elevator_sim*
 elevator/cpp_embedded_kernel/elevator_sim*
