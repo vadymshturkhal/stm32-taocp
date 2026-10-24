@@ -145,6 +145,21 @@ struct Model {
     }
 };
 
+// holdc with a literal 0 or nullptr as the step does not compile: it would hold the
+// node with no step, and the program would stop silently. A real step does.
+// (Concepts on the list type, so a call that does not compile makes them false
+// instead of stopping the build.)
+static void some_step(WaitNode&, std::uint32_t) noexcept {}
+template <class L> concept holdc_0         = requires(L& l, WaitNode& n) { l.holdc(n, 0u, 0); };
+template <class L> concept holdc_nullptr   = requires(L& l, WaitNode& n) { l.holdc(n, 0u, nullptr); };
+template <class L> concept holdc_d_0       = requires(L& l, WaitNode& n) { l.holdc(n, 0u, 10u, 0); };
+template <class L> concept holdc_d_nullptr = requires(L& l, WaitNode& n) { l.holdc(n, 0u, 10u, nullptr); };
+template <class L> concept holdc_step      = requires(L& l, WaitNode& n) { l.holdc(n, 0u, &some_step); };
+template <class L> concept holdc_d_step    = requires(L& l, WaitNode& n) { l.holdc(n, 0u, 10u, &some_step); };
+static_assert(!holdc_0<WaitList> && !holdc_nullptr<WaitList>, "holdc(node, now, 0) must not compile");
+static_assert(!holdc_d_0<WaitList> && !holdc_d_nullptr<WaitList>, "holdc(node, now, delay, 0) must not compile");
+static_assert(holdc_step<WaitList> && holdc_d_step<WaitList>, "holdc with a real step must compile");
+
 int main() {
     // 1. A new list
     {

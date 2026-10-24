@@ -1,7 +1,27 @@
 #pragma once
+#include <cassert>
 #include <concepts>
+#include <cstddef>
 #include <cstdint>
 #include <optional>
+
+// Knuth (§2.2.5): about 10 nodes wait at a time, and SORTIN is the main cost.
+// WaitListStats checks both. The counters run only with KNUTH_KERNEL_STATS
+// defined; set it for the whole program (a compiler flag), so every file sees the
+// same WaitList.
+#ifdef KNUTH_KERNEL_STATS
+inline constexpr bool WAIT_LIST_STATS = true;
+#else
+inline constexpr bool WAIT_LIST_STATS = false;
+#endif
+
+struct WaitListStats {
+    std::uint32_t sortins = 0;      // insertions by time (hold, holdc)
+    std::uint32_t length_max = 0;   // nodes already waiting when one is sorted in
+    std::uint32_t length_sum = 0;   // / sortins = the average length
+    std::uint32_t walk_max = 0;     // nodes one sortin passes on its way from the tail
+    std::uint32_t walk_sum = 0;     // / sortins = the average walk
+};
 
 // forward declaration
 class WaitList;
@@ -11,6 +31,9 @@ public:
     using NextInst = void (*)(WaitNode&, std::uint32_t now) noexcept;
 
     void run(std::uint32_t now) noexcept {
+        // hold, holdc and immed assert a step; the test stays so that a release
+        // build never jumps to address 0 if a step is cleared while a node waits
+        assert(NEXTINST != nullptr && "run: a node with no step");
         if(NEXTINST) NEXTINST(*this, now);
     }
 
@@ -46,6 +69,8 @@ public:
     }
 
     void hold(WaitNode& node, std::uint32_t now, std::uint32_t delay) noexcept {
+        assert(node.NEXTINST != nullptr && "hold: a node with no step would never run");
+
         // Schedule node to run delay units from now
         node.NEXTTIME = now + delay;
         
@@ -55,6 +80,8 @@ public:
 
     // Use node's DELAY
     void hold(WaitNode& node, std::uint32_t now) noexcept {
+        assert(node.NEXTINST != nullptr && "hold: a node with no step would never run");
+
         // Schedule node to run delay units from now
         node.NEXTTIME = now + node.DELAY;
         
@@ -68,8 +95,16 @@ public:
         hold(node, now, delay);
     }
 
+    // A literal 0 or nullptr as the step converts to a null NextInst: the node would
+    // be held with no step, and the program would stop without a sound (it is also
+    // the easy slip of writing holdc(node, now, 0) for "hold 0 with the same step").
+    // These make both a compile error.
+    void holdc(WaitNode&, std::uint32_t, int) = delete;
+    void holdc(WaitNode&, std::uint32_t, std::nullptr_t) = delete;
+    void holdc(WaitNode&, std::uint32_t, std::uint32_t, int) = delete;
+    void holdc(WaitNode&, std::uint32_t, std::uint32_t, std::nullptr_t) = delete;
+
     // Use node's DELAY
-    // NOTE: holdc(node, now, 0) will add nullptr to NEXTINST
     void holdc(WaitNode& node, std::uint32_t now, NextInst next_inst) noexcept {
         // Set NEXTINST and then invoke hold
         node.NEXTINST = next_inst;
@@ -78,6 +113,8 @@ public:
 
     // Insert node first in WAIT list
     void immed(WaitNode& node, std::uint32_t now) noexcept {
+        assert(node.NEXTINST != nullptr && "immed: a node with no step would never run");
+
         // Unlink node
         unlink_node(node);
 
@@ -89,6 +126,8 @@ public:
         node.right = head.right;
         head.right->left = &node;
         head.right = &node;
+
+        if constexpr (WAIT_LIST_STATS) ++length_;
     }
 
     [[nodiscard]] bool is_node_ready(std::uint32_t now) const noexcept {
@@ -121,11 +160,21 @@ public:
         if(is_empty()) return std::nullopt;
         return head.right->NEXTTIME;
     }
+
+    // All zero unless KNUTH_KERNEL_STATS is defined
+    [[nodiscard]] const WaitListStats& stats() const noexcept { return stats_; }
+    [[nodiscard]] std::uint32_t length() const noexcept { return length_; }
          
 private:
     WaitNode head;
+    std::uint32_t length_ = 0;      // nodes in the list (counted with KNUTH_KERNEL_STATS)
+    WaitListStats stats_{};
 
     void unlink_node(WaitNode& node) noexcept {
+        // A node that is not held points to itself: unlinking it changes nothing
+        if constexpr (WAIT_LIST_STATS) {
+            if (node.right != &node) --length_;
+        }
         node.left->right = node.right;
         node.right->left = node.left;
     }
@@ -141,10 +190,21 @@ private:
         head.NEXTTIME = C.NEXTTIME;
 
         WaitNode* P = head.left;  // Last node
+        std::uint32_t walked = 0;
 
         // Compare NEXTTIME fields right to left
         while (is_less(C.NEXTTIME, P->NEXTTIME)) {
             P = P->left;
+            if constexpr (WAIT_LIST_STATS) ++walked;
+        }
+
+        if constexpr (WAIT_LIST_STATS) {
+            ++stats_.sortins;
+            stats_.length_sum += length_;
+            if (length_ > stats_.length_max) stats_.length_max = length_;
+            stats_.walk_sum += walked;
+            if (walked > stats_.walk_max) stats_.walk_max = walked;
+            ++length_;
         }
 
         // Insert node to WAIT list

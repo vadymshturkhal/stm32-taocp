@@ -68,5 +68,14 @@ extern "C" void kernel_pendsv(void) {
 
         kernel_port_after_step();
     }
+
+    if constexpr (WAIT_LIST_STATS) {    // the WAIT list's own counters, copied for C
+        const WaitListStats& w = kernel.list_stats();
+        kernel_stats.sortins = w.sortins;
+        kernel_stats.list_max = w.length_max;
+        kernel_stats.list_sum = w.length_sum;
+        kernel_stats.walk_max = w.walk_max;
+        kernel_stats.walk_sum = w.walk_sum;
+    }
     aim();
 }

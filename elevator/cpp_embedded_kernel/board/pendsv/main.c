@@ -115,6 +115,14 @@ static void __attribute__((noinline)) elevator_finish(void)
   volatile uint32_t idle_us = elevator_cpp.idle_us;
   volatile uint32_t idle_permille = elapsed_us ? (uint32_t)((uint64_t)idle_us * 1000u / elapsed_us) : 0;
 
+  /* The WAIT list (with KNUTH_KERNEL_STATS in the C++ symbols; otherwise 0) */
+  volatile uint32_t sortins = kernel_stats.sortins;                   /* 568 expected */
+  volatile uint32_t list_max = kernel_stats.list_max;                 /* 7 */
+  volatile uint32_t list_avg_x100 = sortins ? kernel_stats.list_sum * 100u / sortins : 0;   /* 310 = 3.10 nodes */
+  volatile uint32_t walk_max = kernel_stats.walk_max;                 /* 6 */
+  volatile uint32_t walk_avg_x100 = sortins ? kernel_stats.walk_sum * 100u / sortins : 0;   /* 194 = 1.94 nodes */
+  (void)sortins; (void)list_max; (void)list_avg_x100; (void)walk_max; (void)walk_avg_x100;
+
   (void)steps; (void)checksum; (void)start_cycles; (void)busy_cycles;
   (void)cycles_per_step; (void)max_cycles; (void)late_sum_us; (void)late_avg_ns; (void)max_late_us;
   (void)elapsed_us; (void)idle_us; (void)idle_permille;

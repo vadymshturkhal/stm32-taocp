@@ -9,6 +9,12 @@ typedef struct {
     uint32_t late_sum_us;  // average lateness
     uint32_t max_late_us;  // the worst lateness
 
+    // The WAIT list, with KNUTH_KERNEL_STATS (C++ compiler flag) only; Knuth: ~10 nodes, SORTIN the main cost
+    uint32_t sortins;      // insertions by time (hold, holdc)
+    uint32_t list_max;     // the most nodes waiting when one was sorted in
+    uint32_t list_sum;     // / sortins = the average
+    uint32_t walk_max;     // the most nodes one sortin passed
+    uint32_t walk_sum;     // / sortins = the average
 } KernelStats;
 
 #ifdef __cplusplus

@@ -95,8 +95,16 @@ How it works:
 - **`delete_first` takes the node out before it runs**, so a step may hold its
   own node again (a periodic program) or cancel other nodes.
 - **Times are compared wrap-safe:** `static_cast<std::int32_t>(a - b) < 0`. The
-  32-bit millisecond counter wraps round every 49.7 days; delays must stay
-  below 2^31 ms (24.8 days).
+  kernel counts in **ticks** and does not care how long a tick is: the port
+  decides. The 32-bit tick counter wraps round every 2^32 ticks, and every
+  delay (from now to any waiting deadline) must stay **below 2^31 ticks**, or the
+  compare takes the deadline for the past and runs the node at once. On the
+  [STM32G4 port](port/stm32g4) a tick is **1 µs** (TIM2): the clock wraps every
+  **71.6 minutes**, so **no delay may exceed about 35.8 minutes**. (With a 1 ms
+  tick, such as `HAL_GetTick()`, the limits would be 49.7 days and 24.8 days.)
+  A longer wait needs a program that re-holds itself in shorter hops. The
+  elevator multiplies its delays by `TICKS_PER_TIME_UNIT` (1000), so its Knuth
+  units must stay below 2^31 / 1000 ≈ 2.1 million: far above anything it holds.
 - **A node's next step is data.** `get_next_inst()` reads it and `set_next_inst()`
   changes it, even while the node waits: it then runs the new step at the old
   time. Knuth's `DECISION` relies on this ("is the elevator dormant at E1?").
@@ -106,6 +114,26 @@ How it works:
   separate `nextinst` next to each task for exactly this reason.
 - **No heap.** Nodes belong to their programs; the list only links them.
   Nodes cannot be copied or moved, because their neighbours point to them.
+
+### Knuth's estimate, measured
+
+Knuth expects about 10 nodes in the WAIT list at a time, and names SORTIN as
+the main cost (§2.2.5). With `KNUTH_KERNEL_STATS` defined (a compiler flag for
+the whole program: it adds counters to `WaitList`, read with
+`kernel.list_stats()`), the list counts its length at each insertion and how
+many nodes each sortin passes on its way from the tail. The elevator, 66 users
+(the same run on the PC and the board: checksum 2487227626):
+
+| | Max | Average |
+|---|---|---|
+| Nodes waiting when one is sorted in (568 sortins) | 7 | 3.10 |
+| Nodes one sortin passes | 6 | 1.94 |
+
+500 users give the same: 7 / 3.12 and 6 / 1.95. The list stays short, so a
+sorted linked list is the right structure (a heap or a timer wheel pays off
+only with hundreds of entries), and searching from the tail, as Knuth does,
+passes about 2 nodes per insertion. Without the flag the counters compile away
+(`if constexpr`) and the list is exactly as fast as before.
 
 ### A program's own data in its nodes
 
@@ -240,6 +268,7 @@ function is `noexcept`.
 | `tests/test_wait_list.cpp` | the tests of the WAIT list                       |
 | `tests/test_kernel.cpp`  | the tests of the kernel, with small programs       |
 | `tests/test_storage_pool.cpp` | the tests of the storage pool                 |
+| `tests/test_wait_list_stats.cpp` | the tests of the optional list counters (`KNUTH_KERNEL_STATS`) |
 
 ## Running the tests
 
@@ -248,6 +277,7 @@ cd tests
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_wait_list.cpp -o test_wait_list && ./test_wait_list; echo $?
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_kernel.cpp -o test_kernel && ./test_kernel; echo $?
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_storage_pool.cpp -o test_storage_pool && ./test_storage_pool; echo $?
+g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_wait_list_stats.cpp -o test_wait_list_stats && ./test_wait_list_stats; echo $?
 ```
 
 Each one exits with 0 when every test passes. CI runs it on every push that changes
@@ -255,8 +285,9 @@ this folder, also under AddressSanitizer and UndefinedBehaviorSanitizer.
 
 | Test                 | What it checks                                                        |
 |----------------------|-----------------------------------------------------------------------|
-| `test_wait_list.cpp` | order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `get_next_inst` / `set_next_inst` (also on a waiting node), the node's and the list's `get_next_time`, `is_held`, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
-| `test_kernel.cpp`    | a new kernel; `start` runs at once; `step` runs one due node and says so; `get_next_time`; `cancel`; programs: a blinker, a periodic counter, two programs side by side, a message (one program starts another, ahead of overdue nodes), a supervisor that stops a program; across the clock wrap; "jump to `get_next_time`" (event-driven, like `CYCLE`) gives the same run as "every millisecond" (like SysTick) |
+| `test_wait_list.cpp` | at compile time: `holdc` with a literal `0` or `nullptr` as the step does not compile (it would hold a node with no step); order by time, FIFO for equal times, due exactly on time and once, cancel (twice), re-hold = restart, the node's own `DELAY`, `holdc` replacing the step, `get_next_inst` / `set_next_inst` (also on a waiting node), the node's and the list's `get_next_time`, `is_held`, `immed` ahead of overdue nodes, one node per step, one step function for many nodes with their own data, a periodic node, a step that cancels another, the 32-bit clock wrap; 100 000 random operations across the wrap compared with a 64-bit model |
+| `test_kernel.cpp`    | at compile time: `Kernel::holdc` with a literal `0` or `nullptr` as the step does not compile; a new kernel; `start` runs at once; `step` runs one due node and says so; `get_next_time`; `cancel`; programs: a blinker, a periodic counter, two programs side by side, a message (one program starts another, ahead of overdue nodes), a supervisor that stops a program; across the clock wrap; "jump to `get_next_time`" (event-driven, like `CYCLE`) gives the same run as "every millisecond" (like SysTick) |
+| `test_wait_list_stats.cpp` | with `KNUTH_KERNEL_STATS`: the length after holds, `immed`, a re-hold (unchanged), delete, delete twice, `delete_first` to empty; `sortins` counts `hold` and `holdc`, not `immed`; the walk from the tail (0 for the latest time, all nodes for the earliest, equal times after the ones already there); the sums and maxima against hand-computed values |
 | `test_storage_pool.cpp` | a count of 0 or a size that overflows gives a pool that is not `valid()`; exactly `count` nodes, then `nullptr`; the nodes are one block, distinct, aligned, not overlapping; `owns`; LIFO reuse; a free node is not held, and `cancel` on a popped node changes nothing; every node constructed once by the constructor and destroyed once with the pool; a reused node keeps its previous user's fields; a popped node held and run by a `WaitList`, pushed back and reused; 100 000 random pops and pushes compared with a model |
 
 ## Roadmap

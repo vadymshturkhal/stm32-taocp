@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <optional>
 #include "wait_list.hpp"
 
@@ -21,6 +22,10 @@ public:
         list_.holdc(node, now, delay, next_inst);
     }
 
+    // A literal 0 or nullptr as the step would hold the node with no step (see WaitList)
+    void holdc(WaitNode&, std::uint32_t, std::uint32_t, int) = delete;
+    void holdc(WaitNode&, std::uint32_t, std::uint32_t, std::nullptr_t) = delete;
+
     void cancel(WaitNode& node) noexcept {
         list_.delete_node(node);
     }
@@ -37,6 +42,9 @@ public:
     std::optional<std::uint32_t> get_next_time() const noexcept {
         return list_.get_next_time();
     }
+
+    // Length and sortin walk counters: all zero unless KNUTH_KERNEL_STATS is defined
+    [[nodiscard]] const WaitListStats& list_stats() const noexcept { return list_.stats(); }
 
 private:
     WaitList list_;

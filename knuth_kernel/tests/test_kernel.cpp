@@ -100,6 +100,14 @@ static void jump(Kernel& k, std::uint32_t to) noexcept {
     }
 }
 
+// Kernel::holdc with a literal 0 or nullptr as the step does not compile (see WaitList)
+static void some_step(WaitNode&, std::uint32_t) noexcept {}
+template <class K> concept holdc_d_0       = requires(K& k, WaitNode& n) { k.holdc(n, 0u, 10u, 0); };
+template <class K> concept holdc_d_nullptr = requires(K& k, WaitNode& n) { k.holdc(n, 0u, 10u, nullptr); };
+template <class K> concept holdc_d_step    = requires(K& k, WaitNode& n) { k.holdc(n, 0u, 10u, &some_step); };
+static_assert(!holdc_d_0<Kernel> && !holdc_d_nullptr<Kernel>, "Kernel::holdc(node, now, delay, 0) must not compile");
+static_assert(holdc_d_step<Kernel>, "Kernel::holdc with a real step must compile");
+
 int main() {
     // 1. A new kernel
     {
