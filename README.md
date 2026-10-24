@@ -11,6 +11,17 @@
 - [Knuth kernel](#systems): Knuth's 1968 CYCLE running as a real-time kernel on the Cortex-M4, in PendSV woken by a hardware timer: every event within 6 µs of its deadline, the CPU asleep 99.8% of the time, the same result as the simulation to the last bit.
 - [Paper](#papers): *Is C++ Slower than C on a Cortex-M4?* A controlled measurement on the board: the same design costs the same in both languages.
 
+## Why this repository exists
+
+I planned to work through TAOCP in Python. Then I met MIX, Knuth's assembly
+language for an imaginary computer, and almost stopped. I kept going instead, and
+MIX turned out to be the bridge: it led to hand-written ARM assembly on a real
+microcontroller (now faster and smaller than GCC's best), then to C and C++
+versions checked against the same output, and finally to Knuth's 1968 elevator
+scheduler running as a real-time kernel on the board. Knuth keeps MIX in the
+books so that readers understand what the machine really does; this repository
+is what came of taking that seriously.
+
 ## Hardware and tools
 
 | What | Used |
