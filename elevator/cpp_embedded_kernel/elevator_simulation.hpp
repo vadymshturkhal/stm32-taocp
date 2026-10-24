@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdint>
 #include <cassert>
 
@@ -36,6 +37,10 @@ public:
     void holdc(WaitNode& n, std::uint32_t delay, WaitNode::NextInst next_inst) noexcept {
         kernel.holdc(n, ticks(), delay * TICKS_PER_TIME_UNIT, next_inst);
     }
+
+    // A literal 0 or nullptr as the step would hold the node with no step (see WaitList)
+    void holdc(WaitNode&, std::uint32_t, int) = delete;
+    void holdc(WaitNode&, std::uint32_t, std::nullptr_t) = delete;
 
     void immed(WaitNode& n) noexcept { kernel.start(n, ticks()); }
     void cancel(WaitNode& n) noexcept { kernel.cancel(n); }
