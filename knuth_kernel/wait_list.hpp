@@ -77,7 +77,7 @@ public:
     void hold(WaitNode& node, std::uint32_t now, std::uint32_t delay) noexcept {
         assert(!node.is_on_avail() && "hold: the node is free (on a pool's AVAIL)");
         assert(node.NEXTINST != nullptr && "hold: a node with no step would never run");
-        if (node.is_on_avail()) return;          // release builds: refuse, do not corrupt AVAIL
+        if (node.is_on_avail()) { ++refused_; return; }   // release builds: refuse, and count it
 
         // Schedule node to run delay units from now
         node.NEXTTIME = now + delay;
@@ -90,7 +90,7 @@ public:
     void hold(WaitNode& node, std::uint32_t now) noexcept {
         assert(!node.is_on_avail() && "hold: the node is free (on a pool's AVAIL)");
         assert(node.NEXTINST != nullptr && "hold: a node with no step would never run");
-        if (node.is_on_avail()) return;          // release builds: refuse, do not corrupt AVAIL
+        if (node.is_on_avail()) { ++refused_; return; }   // release builds: refuse, and count it
 
         // Schedule node to run delay units from now
         node.NEXTTIME = now + node.DELAY;
@@ -125,7 +125,7 @@ public:
     void immed(WaitNode& node, std::uint32_t now) noexcept {
         assert(!node.is_on_avail() && "immed: the node is free (on a pool's AVAIL)");
         assert(node.NEXTINST != nullptr && "immed: a node with no step would never run");
-        if (node.is_on_avail()) return;          // release builds: refuse, do not corrupt AVAIL
+        if (node.is_on_avail()) { ++refused_; return; }   // release builds: refuse, and count it
 
         // Unlink node
         unlink_node(node);
@@ -159,7 +159,7 @@ public:
     // stays as it is; a free node (on a pool's AVAIL) is refused.
     void delete_node(WaitNode& node) noexcept {
         assert(!node.is_on_avail() && "cancel: the node is free (on a pool's AVAIL)");
-        if (node.is_on_avail()) return;          // release builds: refuse, do not corrupt AVAIL
+        if (node.is_on_avail()) { ++refused_; return; }   // release builds: refuse, and count it
 
         // Unlink node
         unlink_node(node);
@@ -178,12 +178,18 @@ public:
         return head.right->NEXTTIME;
     }
 
+    // Operations refused because the node was free (on a pool's AVAIL). Release
+    // builds only (debug builds assert first): a refused hold leaves the node
+    // never running, so this is the one place it shows.
+    [[nodiscard]] std::uint32_t refused() const noexcept { return refused_; }
+
     // All zero unless KNUTH_KERNEL_STATS is defined
     [[nodiscard]] const WaitListStats& stats() const noexcept { return stats_; }
     [[nodiscard]] std::uint32_t length() const noexcept { return length_; }
          
 private:
     WaitNode head;
+    std::uint32_t refused_ = 0;     // see refused()
     std::uint32_t length_ = 0;      // nodes in the list (counted with KNUTH_KERNEL_STATS)
     WaitListStats stats_{};
 

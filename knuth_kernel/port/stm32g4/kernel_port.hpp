@@ -8,6 +8,7 @@ typedef struct {
     uint32_t max_cycles;   // the longest step
     uint32_t late_sum_us;  // average lateness
     uint32_t max_late_us;  // the worst lateness
+    uint32_t refused_ops;  // misuse refused by the kernel (a free node held or cancelled, a null step): 0 expected
 
     // The WAIT list, with KNUTH_KERNEL_STATS (C++ compiler flag) only; Knuth: ~10 nodes, SORTIN the main cost
     uint32_t sortins;      // insertions by time (hold, holdc)

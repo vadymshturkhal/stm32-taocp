@@ -46,6 +46,8 @@ numbers down to the cycle.
 | `elapsed_us` | 10 361 004 | TIM2 µs from the start to `finished()` |
 | `idle_us` | 10 348 837 | µs `main` slept in `__WFI()` |
 | `idle_permille` | 998 | `idle_us * 1000 / elapsed_us` |
+| `refused_ops` | 0 | misuse the kernel refused (a free node held or cancelled, a due node with no step): must be 0 |
+| `pool_refused` | 0 | pushes the users' pool refused (a free, held or foreign node): must be 0 |
 
 Awake: `elapsed_us - idle_us` = 12 167 µs, of which the steps are ~0.67 ms
 (`busy_cycles` / 170); the rest is mostly SysTick's 1 ms wake-ups (~1 µs each).

@@ -69,6 +69,8 @@ extern "C" void kernel_pendsv(void) {
         kernel_port_after_step();
     }
 
+    kernel_stats.refused_ops = kernel.refused();
+
     if constexpr (WAIT_LIST_STATS) {    // the WAIT list's own counters, copied for C
         const WaitListStats& w = kernel.list_stats();
         kernel_stats.sortins = w.sortins;

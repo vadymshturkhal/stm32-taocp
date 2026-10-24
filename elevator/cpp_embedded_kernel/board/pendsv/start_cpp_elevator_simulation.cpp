@@ -76,6 +76,11 @@ extern "C" int cpp_elevator_running(void) {
     return (simulation && !simulation->finished()) ? 1 : 0;
 }
 
+// Pushes the users' pool refused (release builds): 0 in a correct run. Read it before stop.
+extern "C" std::uint32_t cpp_elevator_pool_refused(void) {
+    return simulation ? simulation->users.pool_refused() : 0;
+}
+
 extern "C" std::uint32_t cpp_elevator_time(void) {
     return simulation ? simulation->TIME : 0;
 }

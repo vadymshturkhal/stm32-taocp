@@ -21,6 +21,9 @@
 //                hold, holdc, immed or Kernel::cancel on a free node abort with the
 //                asserts on, and with NDEBUG (the board's build) every misuse is
 //                refused: the list stays empty, the pool gives each node once
+//   refused:     the counters stay 0 on the valid paths; with NDEBUG each refused
+//                operation counts once (list, Kernel, pool), and so does a due node
+//                whose step was cleared while it waited (skipped, not run)
 //
 // Build (from tests/):  g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion
 //             test_storage_pool.cpp -o test_storage_pool
@@ -313,6 +316,7 @@ int main() {
         pool.push(*a);
         check("held, cancelled twice, pushed: free, the list empty, the pool whole",
               pool.is_free(*a) && list.is_empty() && pops_each_once(pool, 2));
+        check("the valid path refuses nothing", list.refused() == 0 && pool.refused() == 0);
     }
     {
         StoragePool<UserNode> pool(2);
@@ -326,6 +330,7 @@ int main() {
         due->run(10);
         check("a running step cancels and pushes its own node (U6): free, the pool whole",
               due == a && pool.is_free(*a) && list.is_empty() && pops_each_once(pool, 2));
+        check("the U6 path refuses nothing", list.refused() == 0 && pool.refused() == 0);
     }
 
 #ifndef NDEBUG
@@ -389,6 +394,8 @@ int main() {
         check("NDEBUG: cancel, hold, holdc, immed, Kernel::cancel and a second push of a free node are refused",
               list.is_empty() && pool.is_free(*a) && pool.is_free(*b) && pool.is_free(*c) && !a->is_held()
               && pops_each_once(pool, 4));
+        check("NDEBUG: each refusal counted once (list 4, Kernel 1, pool 1)",
+              list.refused() == 4 && k.refused() == 1 && pool.refused() == 1);
     }
     {
         StoragePool<UserNode> pool(2);
@@ -402,6 +409,18 @@ int main() {
         if (due != nullptr) due->run(10);
         check("NDEBUG: a push of a held node is refused, the node still runs",
               due == a && a->runs == 1 && !pool.is_free(*a));
+        check("NDEBUG: and counted", pool.refused() == 1);
+    }
+    {
+        Kernel k;
+        UserNode a;
+        a.set_next_inst(&count_run);
+        a.runs = 0;
+        k.hold(a, 0, 10);
+        a.set_next_inst(nullptr);                   // cleared while it waits
+        const bool stepped = k.step(10);
+        check("NDEBUG: a due node with no step is skipped, and counted",
+              stepped && a.runs == 0 && k.refused() == 1 && !k.get_next_time());
     }
 #endif
 

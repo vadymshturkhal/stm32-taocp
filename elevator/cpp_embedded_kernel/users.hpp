@@ -15,6 +15,7 @@ public:
 
     void start(std::uint32_t quantity) noexcept;
     [[nodiscard]] bool done() const noexcept;   // every user created and gone
+    [[nodiscard]] std::uint32_t pool_refused() const noexcept { return pool.refused(); }   // 0 expected
     static void U5(WaitNode& node, std::uint32_t now) noexcept;
     static void U6(WaitNode& node, std::uint32_t now) noexcept;
 

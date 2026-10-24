@@ -65,7 +65,7 @@ public:
         assert(owns(node) && "node is not from this pool");
         assert(!node.is_held() && "node is still in a list");
         assert(!is_free(node) && "node is already free: pushed twice");
-        if (!owns(node) || node.is_held() || is_free(node)) return;
+        if (!owns(node) || node.is_held() || is_free(node)) { ++refused_; return; }
 
         node.left = avail;
         avail = &node;
@@ -74,6 +74,10 @@ public:
     [[nodiscard]] bool owns(const T& node) const noexcept {
         return memory != nullptr && &node >= memory && &node < memory + size;
     }
+
+    // Pushes refused (another pool's node, a held one, a free one). Release builds
+    // only (debug builds assert first); 0 in a correct program.
+    [[nodiscard]] std::uint32_t refused() const noexcept { return refused_; }
 
     // On AVAIL: not in a list (right points to itself) but linked to the next free node
     [[nodiscard]] bool is_free(const T& node) const noexcept {
@@ -84,4 +88,5 @@ private:
     T* memory = nullptr;        // count constructed T's, from malloc
     T* avail = nullptr;         // the first free node
     std::size_t size = 0;
+    std::uint32_t refused_ = 0;     // see refused()
 };

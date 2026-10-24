@@ -35,9 +35,16 @@ public:
         if(!list_.is_node_ready(now)) return false;
 
         // can remove if guard
-        if (WaitNode* n = list_.delete_first()) n->run(now);
+        if (WaitNode* n = list_.delete_first()) {
+            if (n->get_next_inst() == nullptr) ++null_steps_;   // run() skips it: count it
+            n->run(now);
+        }
         return true;
     }
+
+    // Misuse a release build refuses silently: list operations on a free node, and
+    // due nodes with no step (skipped). 0 in a correct program; debug builds assert.
+    [[nodiscard]] std::uint32_t refused() const noexcept { return list_.refused() + null_steps_; }
 
     std::optional<std::uint32_t> get_next_time() const noexcept {
         return list_.get_next_time();
@@ -48,4 +55,5 @@ public:
 
 private:
     WaitList list_;
+    std::uint32_t null_steps_ = 0;
 };

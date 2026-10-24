@@ -40,6 +40,7 @@ int cpp_elevator_step_next(void);
 int cpp_elevator_running(void);
 void cpp_elevator_stop(void);
 uint32_t cpp_elevator_time(void);
+uint32_t cpp_elevator_pool_refused(void);  /* refused pushes of the users' pool: 0 expected */
 
 /* Set from PendSV after every elevator step (kernel_port_after_step) */
 extern volatile uint32_t elevator_checksum;  /* sum * 31 + TIME: 2487227626 for 66 users */

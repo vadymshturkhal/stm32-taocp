@@ -59,6 +59,7 @@ typedef struct
   uint32_t start_cycles;    /* DWT cycles of the setup (malloc, init, users_start) */
   uint32_t elapsed_us;      /* TIM2 µs from the start to finished */
   uint32_t idle_us;         /* µs main slept in __WFI meanwhile */
+  uint32_t pool_refused;    /* pushes the users' pool refused: 0 expected */
 } ElevatorRun;
 
 enum { ELEVATOR_PHASE_CPP, ELEVATOR_PHASE_DONE };
@@ -114,6 +115,11 @@ static void __attribute__((noinline)) elevator_finish(void)
   volatile uint32_t elapsed_us = elevator_cpp.elapsed_us;
   volatile uint32_t idle_us = elevator_cpp.idle_us;
   volatile uint32_t idle_permille = elapsed_us ? (uint32_t)((uint64_t)idle_us * 1000u / elapsed_us) : 0;
+
+  /* Misuse a release build refuses silently: both must be 0 */
+  volatile uint32_t refused_ops = kernel_stats.refused_ops;           /* the kernel: a free node held or cancelled, a null step */
+  volatile uint32_t pool_refused = elevator_cpp.pool_refused;         /* the users' pool: a bad push */
+  (void)refused_ops; (void)pool_refused;
 
   /* The WAIT list (with KNUTH_KERNEL_STATS in the C++ symbols; otherwise 0) */
   volatile uint32_t sortins = kernel_stats.sortins;                   /* 568 expected */
@@ -217,6 +223,7 @@ int main(void)
     if (elevator_finishing())
     {
       elevator_cpp.elapsed_us = TIM2->CNT - elevator_start_us;
+      elevator_cpp.pool_refused = cpp_elevator_pool_refused();   /* before stop: the pool goes with it */
       cpp_elevator_stop();                    /* finished: none of its nodes is in the kernel */
       elevator_phase = ELEVATOR_PHASE_DONE;
       elevator_finish();

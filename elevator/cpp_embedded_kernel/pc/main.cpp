@@ -5,6 +5,7 @@
 //
 // Build (from elevator/cpp_embedded_kernel): see README.md; this file is the
 // PC entry point, the elevator itself (the *.cpp next to README.md) has no main.
+#include <cinttypes>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -42,6 +43,16 @@ int main(int argc, char** argv) {
     // The WAIT list empties after the last user leaves and the elevator is dormant at E1.
     while (const auto t = kernel.get_next_time()) {
         while (kernel.step(*t)) {}
+    }
+
+    // Misuse that a release build would refuse silently (a free node held or
+    // cancelled, a null step, a bad push): a correct run has none, so CI fails on it
+    const std::uint32_t refused_kernel = kernel.refused();
+    const std::uint32_t refused_pool = simulation.users.pool_refused();
+    if (refused_kernel != 0 || refused_pool != 0) {
+        std::fprintf(stderr, "refused operations: kernel %" PRIu32 ", pool %" PRIu32 "\n",
+                     refused_kernel, refused_pool);
+        return 1;
     }
 
     return 0;

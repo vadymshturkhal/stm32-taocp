@@ -100,7 +100,12 @@ How it works:
   would write into the next free node and cut AVAIL, so the pool later hands out
   one node again and again. The list recognises that state (`right` points to
   itself but `left` does not) and refuses `cancel`, `hold`, `holdc` and `immed`
-  on it: an `assert` in debug builds, no change at all with `NDEBUG`.
+  on it: an `assert` in debug builds, no change at all with `NDEBUG`. A refusal
+  is **counted**, so it does not go unseen: a refused `hold` means a node that
+  never runs. `Kernel::refused()` adds the list's refusals and due nodes whose
+  step was cleared while they waited (skipped); `StoragePool::refused()` counts
+  refused pushes. Both are 0 in a correct program: the elevator's PC run fails
+  if they are not, and the board shows them in `elevator_finish()`.
 - **Times are compared wrap-safe:** `static_cast<std::int32_t>(a - b) < 0`. The
   kernel counts in **ticks** and does not care how long a tick is: the port
   decides. The 32-bit tick counter wraps round every 2^32 ticks, and every
