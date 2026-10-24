@@ -11,6 +11,17 @@
 
 #include "elevator_simulation.hpp"
 
+// ElevatorSimulation::holdc with a literal 0 or nullptr as the step does not compile:
+// it would hold the node with no step, and the elevator would stop silently.
+// Checked here because CI builds this file. (Concepts on the class, so a call that
+// does not compile makes them false instead of stopping the build.)
+template <class S> concept holdc_0       = requires(S& s, WaitNode& n) { s.holdc(n, 20u, 0); };
+template <class S> concept holdc_nullptr = requires(S& s, WaitNode& n) { s.holdc(n, 20u, nullptr); };
+template <class S> concept holdc_step    = requires(S& s, WaitNode& n) { s.holdc(n, 20u, &Elevator::E3); };
+static_assert(!holdc_0<ElevatorSimulation> && !holdc_nullptr<ElevatorSimulation>,
+              "ElevatorSimulation::holdc(node, delay, 0) must not compile");
+static_assert(holdc_step<ElevatorSimulation>, "ElevatorSimulation::holdc with a real step must compile");
+
 static Kernel kernel;
 static ElevatorSimulation simulation{kernel};
 
