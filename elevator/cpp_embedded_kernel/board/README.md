@@ -12,3 +12,7 @@ they share the elevator sources, the kernel and its
 
 Each variant's README says which file goes where in the project, how to set it
 up and how to read the results.
+
+---
+
+*Code, design and measurements are mine; Claude helped draft the READMEs and the paper, and reviewed code.*

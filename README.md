@@ -134,3 +134,7 @@ is what came of taking that seriously.
   Sections: abstract, method, results, the confounder and the hypotheses it disproved, threats to validity;
   the full run history is in [RESULTS.md](elevator/measurements/RESULTS.md#history-c-vs-c-runs-in-order).
   To run it yourself: [the board harness](elevator/measurements/board) (`main.c` and how to set up the CubeIDE project).
+
+---
+
+*Code, design and measurements are mine; Claude helped draft the READMEs and the paper, and reviewed code.*

@@ -52,3 +52,7 @@ for n in 0 1 4 26 500; do ./elevator_sim $n | diff -q - ../measurements/trace_$n
 `-DTRACE` turns the trace on; without it `trace()` is an empty inline function.
 CI builds it with `-Werror`, diffs all five golden traces, and repeats them under
 AddressSanitizer and UndefinedBehaviorSanitizer.
+
+---
+
+*Code, design and measurements are mine; Claude helped draft the READMEs and the paper, and reviewed code.*

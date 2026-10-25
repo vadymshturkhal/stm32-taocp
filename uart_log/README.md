@@ -90,3 +90,7 @@ logic:
   the shared variable would let the DMA completion ISR read a
   partially-advanced `tail` mid-copy and dispatch a transfer including
   stale bytes from a previous message.
+
+---
+
+*Code, design and measurements are mine; Claude helped draft the READMEs and the paper, and reviewed code.*

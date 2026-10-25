@@ -133,3 +133,7 @@ sanitizers (with the asserts on), build with
 
 `main` runs the kernel event-driven, like Knuth's `CYCLE`: it jumps to
 `get_next_time()` and runs every due node, until the WAIT list is empty.
+
+---
+
+*Code, design and measurements are mine; Claude helped draft the READMEs and the paper, and reviewed code.*

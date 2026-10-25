@@ -76,3 +76,7 @@ cycles per run come from code placement and are not significant.
 While it runs, the totals can also be watched in **Live Expressions**
 (`elevator_c`, `elevator_cstyle`, `elevator_cpp`, `elevator_phase`): they are
 globals, so they survive `-O3`/LTO and need no breakpoint.
+
+---
+
+*Code, design and measurements are mine; Claude helped draft the READMEs and the paper, and reviewed code.*
