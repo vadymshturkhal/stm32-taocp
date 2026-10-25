@@ -108,7 +108,7 @@ public:
     // A literal 0 or nullptr as the step converts to a null NextInst: the node would
     // be held with no step, and the program would stop without a sound (it is also
     // the easy slip of writing holdc(node, now, 0) for "hold 0 with the same step").
-    // These make both a compile error.
+    // These make both a compile error
     void holdc(WaitNode&, std::uint32_t, int) = delete;
     void holdc(WaitNode&, std::uint32_t, std::nullptr_t) = delete;
     void holdc(WaitNode&, std::uint32_t, std::uint32_t, int) = delete;
@@ -156,7 +156,7 @@ public:
     }
 
     // Cancel. A node in no list (never held, already cancelled, or running now)
-    // stays as it is; a free node (on a pool's AVAIL) is refused.
+    // stays as it is; a free node (on a pool's AVAIL) is refused
     void delete_node(WaitNode& node) noexcept {
         assert(!node.is_on_avail() && "cancel: the node is free (on a pool's AVAIL)");
         if (node.is_on_avail()) { ++refused_; return; }   // release builds: refuse, and count it
@@ -209,7 +209,7 @@ private:
         // test. Knuth's fixed sentinel (a head time of 0) cannot work on a clock
         // that wraps: past 2^31 every time counts as "before" 0, and the walk would
         // go round the circle for ever. One store per hold instead of one compare
-        // and branch per node passed.
+        // and branch per node passed
         head.NEXTTIME = C.NEXTTIME;
 
         WaitNode* P = head.left;  // Last node

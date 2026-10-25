@@ -14,15 +14,39 @@ SysTick still runs for `HAL_GetTick()` (the link's timeouts), so the CPU also
 wakes 1000 times a second. A tickless variant (SysTick off) comes later in a
 folder beside this one.
 
-## Result (66 users, 1 Knuth unit = 1 ms, `-O2`)
+## Result (66 users, 1 Knuth unit = 1 ms)
 
-| | |
-|---|---|
-| Steps / checksum | 544 / 2487227626 (the same as the PC and the earlier board runs) |
-| Cycles per step | 210 (≈ 1.2 µs at 170 MHz) |
-| Longest step | 691 cycles (≈ 4 µs): the worst blocking for any other step |
-| Lateness after the deadline | **max 6 µs, average 301 ns** |
-| CPU idle | 99.8 % of the 10.36 s run |
+Every build does the same work: 544 steps, checksum 2487227626 (the same as the
+PC and the earlier board runs), no refused operations, CPU idle 99.8 % of the
+10.36 s run.
+
+| Build (whole project) | `-O2` | `-O3` | `-O3 -flto` |
+|---|---:|---:|---:|
+| Cycles per step | 233 (1.37 µs) | 226 (1.33 µs) | **219** (1.29 µs) |
+| Longest step | 718 (4.2 µs) | 698 (4.1 µs) | **652** (3.8 µs) |
+| Lateness after the deadline: max / average | 6 µs / 303 ns | 6 µs / 301 ns | **5 µs / 275 ns** |
+| Flash: the elevator's steps | **4 112 B** | 4 854 B | 5 022 B |
+| Flash: the kernel's handlers (PendSV, TIM2) | **264 B** | 264 B | 352 B |
+| Flash: the elevator and the kernel | **4 376 B** | 5 118 B | 5 374 B |
+
+- **Cycles** are DWT cycles inside `kernel.step()` (one node, its step and the
+  list work), at 170 MHz. The longest step is the worst blocking for any other
+  step.
+- **The elevator's steps** are the functions of `Elevator`, `Users`,
+  `ElevatorSimulation` and `ElevatorList` (`arm-none-eabi-nm -S`); the kernel is
+  header-only, so its list code is inlined into them. With LTO the helpers
+  (`decision`, `E6B`, `U2`, ...) are inlined into the steps too.
+- **The kernel's handlers** are `kernel_pendsv` (the drain loop with
+  `Kernel::step`, `aim()` and the stats), `PendSV_Handler` and
+  `TIM2_IRQHandler`; with LTO `kernel_pendsv` is inlined into
+  `PendSV_Handler`. `kernel_port_init` (84 B, run once) is left out: with LTO
+  it is inlined into `main`.
+- `-O3 -flto` buys 6 % (14 cycles per step) for 23 % more flash than `-O2`.
+
+**The kernel's misuse guards** (a free node held or cancelled, a due node with no
+step; see [the kernel README](../../../../knuth_kernel)) cost 24 cycles per step:
+the same `-O2` build with the kernel headers from before the guards runs at 209
+cycles per step (longest 688).
 
 The average lateness is the kernel's wake-up path (TIM2 interrupt, tail-chain
 into PendSV, the next deadline read): about 50 cycles. The maximum adds steps
@@ -30,26 +54,26 @@ due at the same tick, queued behind each other. Neither depends on
 `TICKS_PER_TIME_UNIT`. The run is deterministic: the same binary gives the same
 numbers down to the cycle.
 
-### The raw numbers (`elevator_finish()`, Variables view)
+### The raw numbers (`-O2`, `elevator_finish()`, Variables view)
 
 | Variable | Value | Meaning |
 |----------|------:|---------|
 | `steps` | 544 | nodes the kernel ran (`kernel_stats.steps`) |
 | `checksum` | 2487227626 | `sum = sum * 31 + TIME` after every step: the same work as the PC |
-| `start_cycles` | 8 447 | DWT cycles of the setup: `cpp_elevator_create()` (the users' pool) + `cpp_elevator_start()` |
-| `busy_cycles` | 114 648 | DWT cycles inside `kernel.step()`, all steps together |
-| `cycles_per_step` | 210 | `busy_cycles / steps` |
-| `max_cycles` | 691 | the longest step |
-| `late_sum_us` | 164 | µs after the deadline, all steps together (TIM2 ticks, so whole µs per step) |
-| `late_avg_ns` | 301 | `late_sum_us * 1000 / steps` |
+| `start_cycles` | 8 446 | DWT cycles of the setup: `cpp_elevator_create()` (the users' pool) + `cpp_elevator_start()` |
+| `busy_cycles` | 127 072 | DWT cycles inside `kernel.step()`, all steps together |
+| `cycles_per_step` | 233 | `busy_cycles / steps` |
+| `max_cycles` | 718 | the longest step |
+| `late_sum_us` | 165 | µs after the deadline, all steps together (TIM2 ticks, so whole µs per step) |
+| `late_avg_ns` | 303 | `late_sum_us * 1000 / steps` |
 | `max_late_us` | 6 | the worst lateness |
 | `elapsed_us` | 10 361 004 | TIM2 µs from the start to `finished()` |
-| `idle_us` | 10 348 837 | µs `main` slept in `__WFI()` |
+| `idle_us` | 10 348 777 | µs `main` slept in `__WFI()` |
 | `idle_permille` | 998 | `idle_us * 1000 / elapsed_us` |
 | `refused_ops` | 0 | misuse the kernel refused (a free node held or cancelled, a due node with no step): must be 0 |
 | `pool_refused` | 0 | pushes the users' pool refused (a free, held or foreign node): must be 0 |
 
-Awake: `elapsed_us - idle_us` = 12 167 µs, of which the steps are ~0.67 ms
+Awake: `elapsed_us - idle_us` = 12 227 µs, of which the steps are ~0.75 ms
 (`busy_cycles` / 170); the rest is mostly SysTick's 1 ms wake-ups (~1 µs each).
 
 ## How it runs
