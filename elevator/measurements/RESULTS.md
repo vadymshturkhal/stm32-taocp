@@ -1,4 +1,6 @@
-# Elevator simulation: measured results (Claude helped to generate this summary)
+# Elevator simulation: measured results
+
+*Claude helped draft this summary; the measurements are mine.*
 
 Three separate comparisons live here, because they measure different things:
 
