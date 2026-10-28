@@ -23,7 +23,6 @@ template <typename T, std::size_t N>
 class CircleOfBuffers {
 public:
     static_assert(N >= 1, "CircleOfBuffers size must be >= 1.");
-    static_assert((N & (N - 1)) == 0, "CircleOfBuffers size must be a power of 2.");
     static_assert(std::atomic<std::size_t>::is_always_lock_free, "Hidden lock in n.");
     static_assert(std::atomic<T*>::is_always_lock_free, "Hidden lock in DEVICE_BUFFER.");
 
@@ -48,7 +47,7 @@ public:
         n.fetch_add(1, std::memory_order_release);
 
         // [A3. Advance NEXTG]
-        NEXTG = (NEXTG + 1) & MASK;
+        NEXTG = next(NEXTG);
     }
 
     // Algorithm B [Buffer control]
@@ -77,7 +76,7 @@ public:
         assert(DEVICE_BUFFER.load(std::memory_order_relaxed) != nullptr);
     
         // [B5. Advance NEXTR]
-        NEXTR = (NEXTR + 1) & MASK;
+        NEXTR = next(NEXTR);
 
         // [B6. Decrease n]
         n.fetch_sub(1, std::memory_order_release);
@@ -91,7 +90,11 @@ public:
     }
 
 private:
-    static constexpr std::size_t MASK = N - 1;
+    // The buffer after i in the circle: N - 1 goes back to 0 (any N, not only powers of 2)
+    static constexpr std::size_t next(std::size_t i) noexcept {
+        return i + 1 == N ? 0 : i + 1;
+    }
+
     std::size_t NEXTR = 0;
     std::size_t NEXTG = 0;
     std::atomic<T*> DEVICE_BUFFER = nullptr;
