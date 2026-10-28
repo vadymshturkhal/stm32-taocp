@@ -15,14 +15,14 @@ jobs:
   cpp:
     runs-on: ubuntu-24.04            # has g++-14: needed for C++23 and <print>
     env:
-      CXXFLAGS: -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion -Werror -D_GLIBCXX_ASSERTIONS
+      CXXFLAGS: -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion -Werror -D_GLIBCXX_ASSERTIONS -pthread
     steps:
       - uses: actions/checkout@v5
 
       - name: Build and run every C++ test
         working-directory: knuth_kernel/tests
         run: |
-          for t in test_wait_list test_wait_list_stats test_kernel test_storage_pool; do
+          for t in test_wait_list test_wait_list_stats test_kernel test_storage_pool test_circle_of_buffers; do
             echo "::group::$t"
             g++-14 $CXXFLAGS $t.cpp -o $t
             timeout 300 ./$t
@@ -32,7 +32,7 @@ jobs:
       - name: Build and run every C++ test with NDEBUG (the board's build; misuse is refused, not asserted)
         working-directory: knuth_kernel/tests
         run: |
-          for t in test_wait_list test_wait_list_stats test_kernel test_storage_pool; do
+          for t in test_wait_list test_wait_list_stats test_kernel test_storage_pool test_circle_of_buffers; do
             echo "::group::$t (NDEBUG)"
             g++-14 $CXXFLAGS -DNDEBUG $t.cpp -o ${t}_ndebug
             timeout 300 ./${t}_ndebug
@@ -42,16 +42,31 @@ jobs:
   sanitizers:
     runs-on: ubuntu-24.04
     env:
-      CXXFLAGS: -std=c++23 -I.. -O1 -g -Wall -Wextra
+      CXXFLAGS: -std=c++23 -I.. -O1 -g -Wall -Wextra -pthread
     steps:
       - uses: actions/checkout@v5
+
+      # Newer kernels randomise memory more than the sanitizers expect; without this
+      # ThreadSanitizer can stop with "unexpected memory mapping".
+      - name: Lower address-space randomisation for the sanitizers
+        run: sudo sysctl vm.mmap_rnd_bits=28
 
       - name: AddressSanitizer + UndefinedBehaviorSanitizer (every C++ test)
         working-directory: knuth_kernel/tests
         run: |
-          for t in test_wait_list test_wait_list_stats test_kernel test_storage_pool; do
+          for t in test_wait_list test_wait_list_stats test_kernel test_storage_pool test_circle_of_buffers; do
             echo "::group::$t"
             g++-14 $CXXFLAGS -fsanitize=address,undefined -fno-sanitize-recover=all $t.cpp -o ${t}_asan
             timeout 300 ./${t}_asan
+            echo "::endgroup::"
+          done
+
+      - name: ThreadSanitizer (the tests with two threads)
+        working-directory: knuth_kernel/tests
+        run: |
+          for t in test_circle_of_buffers; do
+            echo "::group::$t"
+            g++-14 $CXXFLAGS -fsanitize=thread $t.cpp -o ${t}_tsan
+            TSAN_OPTIONS=halt_on_error=1 timeout 300 ./${t}_tsan
             echo "::endgroup::"
           done
