@@ -76,6 +76,44 @@ numbers down to the cycle.
 Awake: `elapsed_us - idle_us` = 12 227 µs, of which the steps are ~0.75 ms
 (`busy_cycles` / 170); the rest is mostly SysTick's 1 ms wake-ups (~1 µs each).
 
+## 4 users, with and without the trace
+
+The same elevator with `ELEVATOR_USERS 4` (in `main.c`): the users of
+[trace_4.txt](../../../measurements/trace_4.txt). Every run does the same
+work: 56 steps, checksum **4123600382**, no refused operations, a 1.458 s run.
+The trace changes only the timing, never the steps.
+
+**Build:** GCC 14.3 (STM32CubeIDE), `-O2 -DNDEBUG`, `TICKS_PER_TIME_UNIT`
+1000, SysTick on. The trace runs are the same build with `TRACE` added to the
+C++ defined symbols: `trace()` → `printf` → `__io_putchar` (the Nucleo BSP) →
+`HAL_UART_Transmit` polled, one byte at a time, on LPUART1 (COM1, the ST-LINK
+virtual COM port, which the link shares), **inside the step, in PendSV**. The
+baud rate is `BspCOMInit.BaudRate` in `main.c`.
+
+| N = 4 | No trace | Trace, 921 600 baud | Trace, 115 200 baud |
+|---|---:|---:|---:|
+| Busy (all steps) | **12 436 cycles (73 µs)** | 5 150 723 (30.3 ms) | 35 060 832 (206 ms) |
+| Cycles per step | **222** | 91 977 | 626 086 |
+| Longest step | **718** (4.2 µs) | 231 121 (1.36 ms) | 1 631 657 (9.6 ms) |
+| Lateness: max / average | **4 µs / 232 ns** | 604 µs / 15.2 µs | 6 903 µs / 460.8 µs |
+| Idle | 99.8 % | 97.8 % | 85.7 % |
+| `start_cycles` | 8 446 | 8 473 | 8 353 |
+
+- **The trace costs ~414 times the elevator's own work** at 921 600 baud: the
+  step waits for the wire. ~11.7 µs per byte against 10.85 µs on the wire, so
+  `printf` and one HAL call per byte add only ~0.8 µs; the rest is waiting.
+- **A faster baud rate only divides the cost** (×6.8 here, ×8 at best): while a
+  step waits for the UART, lateness stays in hundreds of µs. A node due during a
+  print waits for it to end.
+- **The target for the trace in BufferCircle** (the step writes a record,
+  `main` formats and sends it by DMA): the no-trace column, `max_late_us` ≈ 4
+  and the same checksum.
+- 222 cycles per step against 233 for 66 users: fewer users, shorter lists.
+
+To read the trace: `picocom -b 921600 --imap lfcrlf /dev/ttyACM0` (the lines
+end with `\n` only), opened before the reset: the run lasts 1.5 s. The link's
+frames are mixed in (the first line is its RST).
+
 ## How it runs
 
 ```
