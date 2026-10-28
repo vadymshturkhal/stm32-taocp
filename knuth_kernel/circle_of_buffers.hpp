@@ -10,6 +10,9 @@ N = total number of buffers.
 n = current number of red buffers.
 
 NOTE: after start_operation() only operation_is_completed() can free the buffer
+Two invariants: 
+  1. n == (NEXTG - NEXTR) mod N
+  2. DEVICE_BUFFER is null or NEXTR buffer
 
 Small changes:
 - A1 and B2 return nullptr
@@ -20,7 +23,9 @@ template <typename T, std::size_t N>
 class CircleOfBuffers {
 public:
     static_assert(N >= 1, "CircleOfBuffers size must be >= 1.");
-    static_assert((N & (N - 1)) == 0, "CircleOfBuffers size must be a power of 2");
+    static_assert((N & (N - 1)) == 0, "CircleOfBuffers size must be a power of 2.");
+    static_assert(std::atomic<std::size_t>::is_always_lock_free, "Hidden lock in n.");
+    static_assert(std::atomic<T*>::is_always_lock_free, "Hidden lock in DEVICE_BUFFER.");
 
     // Algorithm A [ASSIGN]
     [[nodiscard]] T* assign() noexcept {
@@ -79,6 +84,10 @@ public:
 
         // Clear the device
         DEVICE_BUFFER.store(nullptr, std::memory_order_release);
+    }
+
+    [[nodiscard]] std::size_t red_buffers_quantity() noexcept {
+        return n.load(std::memory_order_acquire);
     }
 
 private:
