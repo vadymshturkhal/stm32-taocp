@@ -19,6 +19,8 @@
 #include "kernel_port.hpp"
 #include "elevator_simulation.hpp"
 #include "start_cpp_elevator_simulation.h"
+#include "trace.hpp"
+#include "../uart_tx.h"
 
 static std::optional<ElevatorSimulation> simulation;
 
@@ -79,6 +81,41 @@ extern "C" int cpp_elevator_running(void) {
 // Pushes the users' pool refused (release builds): 0 in a correct run. Read it before stop.
 extern "C" std::uint32_t cpp_elevator_pool_refused(void) {
     return simulation ? simulation->users.pool_refused() : 0;
+}
+
+// main's side of the trace: PendSV's steps write records, main formats them here, where
+// PendSV can preempt it, and queues the lines. Never waits: if every TX buffer is busy,
+// the record stays the oldest and the next call tries again.
+extern "C" void cpp_elevator_trace_poll(void) {
+#ifdef TRACE
+    while (TraceRecord* r = trace_circle.start_operation()) {
+        char line[128];
+        const std::size_t length = format_trace(*r, line, sizeof line);
+        if (!UART_TX_Send(line, static_cast<int>(length))) {
+            trace_circle.cancel_operation();
+            return;
+        }
+        trace_circle.operation_is_completed();
+    }
+#endif
+}
+
+// 1 while trace records wait for cpp_elevator_trace_poll()
+extern "C" int cpp_elevator_trace_pending(void) {
+#ifdef TRACE
+    return trace_circle.red_buffers_quantity() != 0 ? 1 : 0;
+#else
+    return 0;
+#endif
+}
+
+// Records lost because the trace circle was full: 0 expected
+extern "C" std::uint32_t cpp_elevator_trace_dropped(void) {
+#ifdef TRACE
+    return trace_dropped;
+#else
+    return 0;
+#endif
 }
 
 extern "C" std::uint32_t cpp_elevator_time(void) {

@@ -42,6 +42,15 @@ void cpp_elevator_stop(void);
 uint32_t cpp_elevator_time(void);
 uint32_t cpp_elevator_pool_refused(void);  /* refused pushes of the users' pool: 0 expected */
 
+/* The trace (with TRACE in the C++ symbols; otherwise they do nothing):
+ *   cpp_elevator_trace_poll():    format the waiting records and queue the lines;
+ *                                 never waits. Call it from main, not from an interrupt
+ *   cpp_elevator_trace_pending(): 1 while records wait
+ *   cpp_elevator_trace_dropped(): records lost to a full trace circle: 0 expected */
+void cpp_elevator_trace_poll(void);
+int cpp_elevator_trace_pending(void);
+uint32_t cpp_elevator_trace_dropped(void);
+
 /* Set from PendSV after every elevator step (kernel_port_after_step) */
 extern volatile uint32_t elevator_checksum;  /* sum * 31 + TIME: 2487227626 for 66 users */
 extern volatile uint32_t elevator_done;      /* 1 once the elevator is finished */  /* TIME after the last step (for the checksum) */

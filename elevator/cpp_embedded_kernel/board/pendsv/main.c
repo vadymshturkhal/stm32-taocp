@@ -60,6 +60,7 @@ typedef struct
   uint32_t elapsed_us;      /* TIM2 µs from the start to finished */
   uint32_t idle_us;         /* µs main slept in __WFI meanwhile */
   uint32_t pool_refused;    /* pushes the users' pool refused: 0 expected */
+  uint32_t trace_dropped;   /* trace records lost to a full circle: 0 expected */
 } ElevatorRun;
 
 enum { ELEVATOR_PHASE_CPP, ELEVATOR_PHASE_DONE };
@@ -119,7 +120,9 @@ static void __attribute__((noinline)) elevator_finish(void)
   /* Misuse a release build refuses silently: both must be 0 */
   volatile uint32_t refused_ops = kernel_stats.refused_ops;           /* the kernel: a free node held or cancelled, a null step */
   volatile uint32_t pool_refused = elevator_cpp.pool_refused;         /* the users' pool: a bad push */
-  (void)refused_ops; (void)pool_refused;
+  volatile uint32_t trace_dropped = elevator_cpp.trace_dropped;       /* the trace: a full circle */
+  volatile uint32_t tx_dropped = UART_TX_Dropped();                   /* the UART: every TX buffer busy */
+  (void)refused_ops; (void)pool_refused; (void)trace_dropped; (void)tx_dropped;
 
   /* The WAIT list (with KNUTH_KERNEL_STATS in the C++ symbols; otherwise 0) */
   volatile uint32_t sortins = kernel_stats.sortins;                   /* 568 expected */
@@ -218,15 +221,28 @@ int main(void)
     /* USER CODE BEGIN 3 */
     Link_Poll(HAL_GetTick());
 
+    /* The records PendSV wrote since the last pass become lines here, where PendSV
+     * can preempt the formatting. If every TX buffer is busy the rest waits: the
+     * TX-complete interrupt wakes main for the next pass. */
+    cpp_elevator_trace_poll();
+
     /* PendSV runs the elevator; main only ends it. The end is the elevator's own
-     * state (users gone, dormant at E1), set by PendSV: elevator_done */
+     * state (users gone, dormant at E1), set by PendSV: elevator_done. The run's
+     * time stops there; the numbers are collected once the last record is queued. */
     if (elevator_finishing())
     {
-      elevator_cpp.elapsed_us = TIM2->CNT - elevator_start_us;
-      elevator_cpp.pool_refused = cpp_elevator_pool_refused();   /* before stop: the pool goes with it */
-      cpp_elevator_stop();                    /* finished: none of its nodes is in the kernel */
-      elevator_phase = ELEVATOR_PHASE_DONE;
-      elevator_finish();
+      if (elevator_cpp.elapsed_us == 0)
+      {
+        elevator_cpp.elapsed_us = TIM2->CNT - elevator_start_us;
+      }
+      if (!cpp_elevator_trace_pending())
+      {
+        elevator_cpp.pool_refused = cpp_elevator_pool_refused();   /* before stop: the pool goes with it */
+        elevator_cpp.trace_dropped = cpp_elevator_trace_dropped();
+        cpp_elevator_stop();                  /* finished: none of its nodes is in the kernel */
+        elevator_phase = ELEVATOR_PHASE_DONE;
+        elevator_finish();
+      }
     }
 
     /* Sleep until the next interrupt: the TIM2 compare (a deadline), SysTick, UART.
