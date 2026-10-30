@@ -89,12 +89,13 @@ extern "C" std::uint32_t cpp_elevator_pool_refused(void) {
 extern "C" void cpp_elevator_trace_poll(void) {
 #ifdef TRACE
     while (TraceRecord* r = trace_circle.start_operation()) {
-        char line[128];
-        const std::size_t length = format_trace(*r, line, sizeof line);
-        if (!UART_TX_Send(line, static_cast<int>(length))) {
+        char* line = UART_TX_Begin();
+        if (line == nullptr) {
             trace_circle.cancel_operation();
             return;
         }
+
+        UART_TX_Commit(format_trace(*r, line, UART_TX_LINE_SIZE));
         trace_circle.operation_is_completed();
     }
 #endif

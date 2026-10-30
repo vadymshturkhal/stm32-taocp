@@ -1,9 +1,11 @@
 /* uart_tx.cpp - lines sent on the link UART (LINK_HUART) using DMA
  *
- * Each line goes into one buffer of a circle of buffers (TAOCP 1.4.4):
- * UART_TX_Send() fills a buffer and releases it, DMA sends one whole buffer at
- * a time, and HAL_UART_TxCpltCallback() gives it back and starts the next one.
- * Nothing waits: a full circle refuses the line (counted in UART_TX_Dropped()).
+ * Each line goes into one buffer of a circle of buffers (TAOCP 1.4.4). The caller
+ * builds it in place (UART_TX_Begin(), UART_TX_Commit()) or copies a finished one
+ * (UART_TX_Send()). DMA sends one whole buffer at a time, and
+ * HAL_UART_TxCpltCallback() gives it back and starts the next one.
+ * Nothing waits: a full circle refuses the line (UART_TX_Send() counts it in
+ * UART_TX_Dropped()).
  *
  * LINK_OVER_STLINK (main.h) picks the UART:
  *   1: LPUART1. CubeMX knows nothing about its DMA, so UART_TX_Init() sets up
@@ -22,9 +24,9 @@
 namespace {
 struct TxLine {
     std::uint8_t  data[UART_TX_LINE_SIZE];
-    std::uint16_t len;
+    std::size_t   len;
 };
-static_assert(UART_TX_LINE_SIZE <= UINT16_MAX, "len is 16 bits");
+static_assert(UART_TX_LINE_SIZE <= UINT16_MAX, "HAL takes a 16-bit length");
 
 CircleOfBuffers<TxLine, 3> tx;
 std::uint32_t tx_dropped = 0;
@@ -36,7 +38,7 @@ DMA_HandleTypeDef hdma_link_tx;    // LPUART1 TX on DMA1 channel 2
 // main and the TX-complete interrupt both call it; DEVICE_BUFFER keeps them apart.
 void tx_start() {
     if (TxLine* buffer = tx.start_operation()) {
-        if (HAL_UART_Transmit_DMA(LINK_HUART, buffer->data, buffer->len) != HAL_OK) {
+        if (HAL_UART_Transmit_DMA(LINK_HUART, buffer->data, static_cast<std::uint16_t>(buffer->len)) != HAL_OK) {
             tx.cancel_operation();  // HAL_BUSY: stays first, retried next time
         }
     }
@@ -80,21 +82,35 @@ extern "C" void DMA1_Channel2_IRQHandler(void)
 
 std::uint32_t UART_TX_Dropped(void) { return tx_dropped; }
 
-int UART_TX_Send(const char* data, int len) {
-    if (len <= 0 || len > UART_TX_LINE_SIZE) return 0;  // a bug
+int UART_TX_Send(const char* data, std::size_t len) {
+    if (len == 0 || len > UART_TX_LINE_SIZE) return UART_TX_BAD_LENGTH;  // a bug
 
-    TxLine* buffer = tx.assign();
+    char* buffer = UART_TX_Begin();
     if (buffer == nullptr) {
         ++tx_dropped;
-        return 0;
+        return UART_TX_FULL;
     }
 
-    std::memcpy(buffer->data, data, static_cast<std::size_t>(len));
-    buffer->len = static_cast<std::uint16_t>(len);
+    std::memcpy(buffer, data, len);
+    return UART_TX_Commit(len);
+}
+
+char* UART_TX_Begin(void) {
+    TxLine* buffer = tx.assign();
+    return buffer == nullptr ? nullptr : reinterpret_cast<char*>(buffer->data);
+}
+
+int UART_TX_Commit(std::size_t len) {
+    TxLine* buffer = tx.assign();
+
+    if (buffer == nullptr) return UART_TX_FULL;
+    if (len == 0 || len > UART_TX_LINE_SIZE) return UART_TX_BAD_LENGTH;  // a bug
+
+    buffer->len = len;
     tx.release();
     tx_start();
 
-    return 1;
+    return UART_TX_OK;
 }
 
 void UART_TX_OnError(void) {
