@@ -11,6 +11,7 @@
 #include <cstdlib>
 
 #include "elevator_simulation.hpp"
+#include "trace.hpp"
 
 // ElevatorSimulation::holdc with a literal 0 or nullptr as the step does not compile:
 // it would hold the node with no step, and the elevator would stop silently.
@@ -42,7 +43,16 @@ int main(int argc, char** argv) {
     // Event-driven, like Knuth's CYCLE: jump to the next deadline, run every due node.
     // The WAIT list empties after the last user leaves and the elevator is dormant at E1.
     while (const auto t = kernel.get_next_time()) {
-        while (kernel.step(*t)) {}
+        while (kernel.step(*t)) {
+#ifdef TRACE
+            // The same path as the board: each step's records become lines afterwards
+            while (TraceRecord* r = trace_circle.start_operation()) {
+                char line[128];
+                std::fwrite(line, 1, format_trace(*r, line, sizeof line), stdout);
+                trace_circle.operation_is_completed();
+            }
+#endif
+        }
     }
 
     // Misuse that a release build would refuse silently (a free node held or
@@ -54,6 +64,12 @@ int main(int argc, char** argv) {
                      refused_kernel, refused_pool);
         return 1;
     }
+#ifdef TRACE
+    if (trace_dropped != 0) {
+        std::fprintf(stderr, "trace records dropped: %" PRIu32 "\n", trace_dropped);
+        return 1;
+    }
+#endif
 
     return 0;
 }

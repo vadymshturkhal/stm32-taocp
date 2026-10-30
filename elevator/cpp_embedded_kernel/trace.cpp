@@ -1,21 +1,20 @@
 #ifdef TRACE
 #include <cinttypes>
-#include <cstdarg>
 #include <cstdio>
 #include "trace.hpp"
-#include "elevator_simulation.hpp"
 
-void trace(const ElevatorSimulation& sim, const char* step, const char* fmt, ...) noexcept {
-    const Elevator& elev = sim.elevator;
-    const char* state = elev.STATE > 0 ? "U" : elev.STATE < 0 ? "D" : "N";
+/* Return the number of bytes to send. */
+std::size_t format_trace(const TraceRecord& record, char* out, std::size_t size) noexcept {
+    int n = std::snprintf(out, size, "%04" PRIu32 "   %-5s %-4u %-2u %-2u %-2u  %s ",
+            record.time, record.state, record.floor, record.d1, record.d2, record.d3, record.step);
 
-    std::printf("%04" PRIu32 "   %-5s %-4" PRIu32 " %-2" PRIu32 " %-2" PRIu32 " %-2" PRIu32 "  %s ",
-           sim.TIME, state, elev.FLOOR, elev.D1, elev.D2, elev.D3, step);
+    if (n < 0 || static_cast<std::size_t>(n) >= size) return 0;
+    
+    int m = std::snprintf(out + n, size - static_cast<std::size_t>(n), 
+            record.fmt, record.args[0], record.args[1], record.args[2], record.args[3]);
 
-    va_list args;
-    va_start(args, fmt);
-    std::vprintf(fmt, args);
-    va_end(args);
-    std::printf("\n");
+    if (m < 0 || static_cast<std::size_t>(n + m + 1) >= size) return 0;
+    out[n + m] = '\n';
+    return static_cast<std::size_t>(n + m + 1);
 }
 #endif
