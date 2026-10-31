@@ -267,6 +267,70 @@ public:
   of losing work: the elevator's U1 parks when the pool is empty, and the user
   who leaves wakes it (like the elevator parked at E1).
 
+## CircleOfBuffers (`circle_of_buffers.hpp`)
+
+Knuth's circle of buffers (TAOCP §1.4.4), between a program and a device that
+work at different speeds. The buffers stay in place, and only their ownership
+moves around the circle:
+
+```
+green (free) -> yellow (being filled) -> red (filled, then in the device) -> green
+```
+
+```cpp
+template <typename T, std::size_t N>
+class CircleOfBuffers {
+public:
+    // The producer
+    T* assign() noexcept;                    // A: the yellow buffer, or nullptr if all are red
+    void release() noexcept;                 // R: it is filled: red
+
+    // The consumer (the device)
+    T* start_operation() noexcept;           // B: the oldest red buffer, or nullptr: none, or the device is busy
+    void cancel_operation() noexcept;        // the device refused it: it stays the oldest
+    void operation_is_completed() noexcept;  // done: green
+
+    std::size_t red_buffers_quantity() noexcept;
+};
+```
+
+A buffer is filled and read **in place**: `T` is a whole line or a record, and it
+never wraps, so one line is one DMA transfer.
+
+```cpp
+if (TxLine* b = tx.assign()) {               // producer: main
+    b->len = format(*b);
+    tx.release();
+    if (TxLine* next = tx.start_operation()) // start the device if it is idle
+        start_dma(*next);
+}
+// the transfer-complete interrupt: tx.operation_is_completed(), then start the next one
+```
+
+- **One producer, one consumer.** `NEXTG` and `NEXTR` are plain: each side
+  writes only its own. `n`, the red buffers, is the one variable both change, so
+  it is an atomic read-modify-write; the producer's `release` orders the buffer's
+  contents before `n`.
+- **The circle knows the device.** `n` also counts the buffer being sent, so
+  `start_operation()` alone would give the same buffer twice. `DEVICE_BUFFER`
+  remembers it, and a second start gets `nullptr`. On the MCU the consumer runs
+  in two places, `main` and the transfer-complete interrupt, without a lock: while
+  no buffer is in the device no interrupt can come, and while one is, `main`
+  gets `nullptr`. `operation_is_completed()` clears `DEVICE_BUFFER` last.
+- **Nothing waits.** Knuth's "stall until n < N" becomes `nullptr`: the caller
+  decides to retry, count a loss, or stop. A device that refuses a buffer
+  calls for `cancel_operation()`, or nothing would ever complete it.
+- **Small changes from the book:** A3 (advance `NEXTG`) moved into `release()`,
+  so `assign()` keeps giving the same yellow buffer until then. Any `N` works:
+  `n` tells full from empty, so no power of 2 and no wasted buffer.
+
+On the board it carries the UART's DMA transmit
+(`CircleOfBuffers<TxLine, 3>`) and the elevator's trace
+(`CircleOfBuffers<TraceRecord, 16>`): a step writes a record, and `main` formats it
+straight into a TX buffer, where PendSV can preempt it. With 4 users at 921 600 baud,
+max lateness is 6 µs (`printf` inside the steps: 604 µs; no trace: 4 µs),
+and the trace matches the PC's byte for byte.
+
 ## Language and tools
 
 The same as [pi_mcu_protocol](../pi_mcu_protocol): C++23 with `g++-14` on the PC,
@@ -281,10 +345,12 @@ function is `noexcept`.
 | `wait_list.hpp`          | `WaitNode` and `WaitList`                          |
 | `kernel.hpp`             | `Kernel`: the API for programs, and `step(now)`    |
 | `storage_pool.hpp`       | `StoragePool<T>`: nodes created at run time        |
+| `circle_of_buffers.hpp`  | `CircleOfBuffers<T, N>`: Knuth's circle of buffers between a program and a device |
 | `port/stm32g4/kernel_port.{hpp,cpp}` | the STM32G4 port: TIM2 as the 1 µs clock (`now()`), the one shared `kernel`, `kernel_pendsv()` (run every due node, `KernelStats`), `aim()` (TIM2 compare at the next deadline, with the race re-check), `TIM2_IRQHandler`, the hook `kernel_port_after_step()` |
 | `tests/test_wait_list.cpp` | the tests of the WAIT list                       |
 | `tests/test_kernel.cpp`  | the tests of the kernel, with small programs       |
 | `tests/test_storage_pool.cpp` | the tests of the storage pool                 |
+| `tests/test_circle_of_buffers.cpp` | the tests of the circle of buffers, with two and three threads |
 | `tests/test_wait_list_stats.cpp` | the tests of the optional list counters (`KNUTH_KERNEL_STATS`) |
 
 ## Running the tests
@@ -295,11 +361,13 @@ g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_kernel.cpp -o test_kernel && ./test_kernel; echo $?
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_storage_pool.cpp -o test_storage_pool && ./test_storage_pool; echo $?
 g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion test_wait_list_stats.cpp -o test_wait_list_stats && ./test_wait_list_stats; echo $?
+g++-14 -std=c++23 -I.. -O2 -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion -pthread test_circle_of_buffers.cpp -o test_circle_of_buffers && ./test_circle_of_buffers; echo $?
 ```
 
 Each one exits with 0 when every test passes. CI runs it on every push that changes
 this folder, also with `NDEBUG` (the board's build, where misuse is refused
-instead of asserted) and under AddressSanitizer and UndefinedBehaviorSanitizer.
+instead of asserted) and under AddressSanitizer and UndefinedBehaviorSanitizer;
+`test_circle_of_buffers` also under ThreadSanitizer.
 
 | Test                 | What it checks                                                        |
 |----------------------|-----------------------------------------------------------------------|
@@ -307,6 +375,7 @@ instead of asserted) and under AddressSanitizer and UndefinedBehaviorSanitizer.
 | `test_kernel.cpp`    | at compile time: `Kernel::holdc` with a literal `0` or `nullptr` as the step does not compile; a new kernel; `start` runs at once; `step` runs one due node and says so; `get_next_time`; `cancel`; programs: a blinker, a periodic counter, two programs side by side, a message (one program starts another, ahead of overdue nodes), a supervisor that stops a program; across the clock wrap; "jump to `get_next_time`" (event-driven, like `CYCLE`) gives the same run as "every millisecond" (like SysTick) |
 | `test_wait_list_stats.cpp` | with `KNUTH_KERNEL_STATS`: the length after holds, `immed`, a re-hold (unchanged), delete, delete twice, `delete_first` to empty; `sortins` counts `hold` and `holdc`, not `immed`; the walk from the tail (0 for the latest time, all nodes for the earliest, equal times after the ones already there); the sums and maxima against hand-computed values |
 | `test_storage_pool.cpp` | a count of 0 or a size that overflows gives a pool that is not `valid()`; exactly `count` nodes, then `nullptr`; the nodes are one block, distinct, aligned, not overlapping; `owns`; LIFO reuse; a free node is not held, and `cancel` on a popped node changes nothing; every node constructed once by the constructor and destroyed once with the pool; a reused node keeps its previous user's fields; a popped node held and run by a `WaitList`, pushed back and reused; 100 000 random pops and pushes compared with a model; `is_free` for a popped, a held and a pushed node; pushing a free node again (the AVAIL head or one below it), a held node, or another pool's node aborts (child processes, asserts on); the valid paths (held, cancelled twice, pushed, popped; a running step giving its own node back, like U6); `cancel`, `hold`, `holdc`, `immed` and `Kernel::cancel` on a free node abort with the asserts on, and with `NDEBUG` every misuse is refused (the list stays empty, the pool gives each node once) |
+| `test_circle_of_buffers.cpp` | empty; `assign` gives the same yellow buffer until `release`; full: `N` distinct buffers, then `nullptr`; FIFO order; a second `start_operation` refused while the device has a buffer; `cancel_operation` keeps it the oldest; a reused buffer keeps its contents; 1000 times around for N = 1 to 5; 200 000 random operations compared with a model; `release`, `cancel_operation` and `operation_is_completed` out of turn abort (child processes, asserts on); two threads, a producer and a device: 500 000 buffers, each once, in order, never torn; three threads, with `main` and the interrupt taking turns as the consumer: only the circle's atomics order that hand-off, checked by ThreadSanitizer |
 
 ## Roadmap
 
@@ -318,7 +387,7 @@ instead of asserted) and under AddressSanitizer and UndefinedBehaviorSanitizer.
 3. **Run it on the MCU** (in progress): the kernel in PendSV, TIM2 as the
    1 µs clock and its compare as the wake-up, sleep (`WFI`) in between (done,
    with the elevator); next a second program (the board's LED); UART interrupts turned into events
-   through a lock-free ring buffer; a watchdog and a cycle budget per step
+   through a circle of buffers; a watchdog and a cycle budget per step
    (DWT). Nodes created at run time come from a `StoragePool<T>` per node type
    (done and tested on the PC); a boundary-tag allocator (TAOCP §2.5) for
    blocks of different sizes may come later.

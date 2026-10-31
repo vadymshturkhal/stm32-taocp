@@ -112,7 +112,7 @@ is what came of taking that seriously.
 - [Circular List](circular_list)
 - [XOR Circular List](xor_circular_list)
 - [Doubly Linked List](doubly_linked_list)
-- [Circle of Buffers](knuth_kernel/circle_of_buffers.hpp) (§1.4.4): Knuth's green, yellow and red buffers between a program and a device, with atomics.
+- [Circle of Buffers](knuth_kernel#circleofbuffers-circle_of_buffershpp) (§1.4.4): Knuth's green, yellow and red buffers between a program and a device, with atomics.
   On the board it carries the UART's DMA transmit and the [elevator's trace](elevator/cpp_embedded_kernel/board/pendsv): printing from the kernel's steps
   took the worst lateness to 604 µs, through the circle it stays at 6 µs, with the same output byte for byte.
   [Tested](knuth_kernel/tests/test_circle_of_buffers.cpp) in CI under AddressSanitizer, UBSan and ThreadSanitizer.
@@ -125,7 +125,7 @@ is what came of taking that seriously.
   max lateness 6 µs, average 301 ns.
 - [Pi ↔ MCU protocol](pi_mcu_protocol) *(in progress: steps 1–3 of 9)*: a Raspberry Pi ↔ STM32 serial link built from TAOCP ideas:
   a lock-free circular queue (§2.2.2) between the UART interrupt and the main loop, CRC-framed lines,
-  and a [circle of buffers](knuth_kernel/circle_of_buffers.hpp) (§1.4.4) for DMA transmit, one whole line per transfer.
+  and a [circle of buffers](knuth_kernel#circleofbuffers-circle_of_buffershpp) (§1.4.4) for DMA transmit, one whole line per transfer.
   C++23 on the MCU, Python on the Pi, tested in CI under AddressSanitizer, UBSan and ThreadSanitizer.
 
 # Papers:
