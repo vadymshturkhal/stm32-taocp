@@ -9,6 +9,8 @@ typedef struct {
     uint32_t late_sum_us;  // average lateness
     uint32_t max_late_us;  // the worst lateness
     uint32_t refused_ops;  // misuse refused by the kernel (a free node held or cancelled, a null step): 0 expected
+    uint32_t events_dropped;
+
 
     // The WAIT list, with KNUTH_KERNEL_STATS (C++ compiler flag) only; Knuth: ~10 nodes, SORTIN the main cost
     uint32_t sortins;      // insertions by time (hold, holdc)
@@ -39,4 +41,9 @@ constinit inline Kernel kernel;     // global Kernel for every program
 // TIM2->CNT is already volatile (CMSIS marks it __IO), so the compiler won't cache it
 inline uint32_t now() noexcept { return TIM2->CNT; }
 
+inline bool kernel_post(WaitNode& node) noexcept {
+    const bool posted = kernel.post(node);
+    pend_kernel();
+    return posted;
+}
 #endif

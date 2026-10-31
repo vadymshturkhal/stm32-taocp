@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <optional>
 #include "wait_list.hpp"
+#include "circle_of_buffers.hpp"
 
 class Kernel {
 public:
@@ -53,7 +54,31 @@ public:
     // Length and sortin walk counters: all zero unless KNUTH_KERNEL_STATS is defined
     [[nodiscard]] const WaitListStats& list_stats() const noexcept { return list_.stats(); }
 
+    // run this now
+    [[nodiscard]] bool post(WaitNode& node) noexcept {
+        WaitNode** node_address = events_.assign();
+
+        if (node_address == nullptr) {++events_dropped_; return false; }
+        *node_address = &node;
+        events_.release();
+        return true;
+    }
+
+    // One event at a time for keeping order: immed could change the order
+    void start_event(std::uint32_t now) noexcept {
+        if (WaitNode** e = events_.start_operation()) {
+            list_.immed(**e, now);
+            events_.operation_is_completed();
+        }
+    }
+
+    std::uint32_t events_dropped() const noexcept {
+        return events_dropped_;
+    }
+
 private:
     WaitList list_;
     std::uint32_t null_steps_ = 0;
+    CircleOfBuffers<WaitNode*, 8> events_;
+    std::uint32_t events_dropped_ = 0;
 };

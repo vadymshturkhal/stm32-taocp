@@ -50,8 +50,9 @@ extern "C" void TIM2_IRQHandler(void) {
 
 extern "C" void kernel_pendsv(void) {
     for(;;) {
-        const auto due = kernel.get_next_time(); // the head's deadline
         const uint32_t t = now();
+        kernel.start_event(t);
+        const auto due = kernel.get_next_time(); // the head's deadline
         const uint32_t c0 = DWT->CYCCNT;
         
         if (!kernel.step(t)) break;  // nothing due: done for now
@@ -70,6 +71,7 @@ extern "C" void kernel_pendsv(void) {
     }
 
     kernel_stats.refused_ops = kernel.refused();
+    kernel_stats.events_dropped = kernel.events_dropped();
 
     if constexpr (WAIT_LIST_STATS) {    // the WAIT list's own counters, copied for C
         const WaitListStats& w = kernel.list_stats();
