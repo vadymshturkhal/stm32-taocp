@@ -27,8 +27,6 @@ private:
     std::uint32_t user_id = 0;
     std::uint32_t active_users = 0;   // in the system now: add_user +1, U6_impl -1
 
-    // Users in the system at once (not in total); the most seen is 7-10, depending on VALUES
-    static constexpr std::size_t POOL_SIZE = 16;
     StoragePool<ElevatorNode> pool{POOL_SIZE};
     bool parked = false;    // U1 waits for a free node (park and wake)
 

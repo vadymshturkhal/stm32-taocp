@@ -1,4 +1,5 @@
 #pragma once
+#include <cstddef>
 #include <cstdint>
 
 inline constexpr std::uint32_t FLOORS = 5;
@@ -16,3 +17,6 @@ inline constexpr std::uint32_t ANY_CALL = CALLUP | CALLDOWN | CALLCAR;
 inline constexpr std::uint32_t TICKS_PER_TIME_UNIT = 1000;
 static_assert(TICKS_PER_TIME_UNIT > 0);
 inline constexpr std::uint32_t VALUES_SEED = 1;
+
+// Users in the system at once (not in total); the most seen is 7-10, depending on VALUES
+inline constexpr std::size_t POOL_SIZE = 16;

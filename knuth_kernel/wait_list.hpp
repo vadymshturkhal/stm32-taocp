@@ -215,11 +215,43 @@ private:
         WaitNode* P = head.left;  // Last node
         std::uint32_t walked = 0;
 
+#ifdef ASM_SORTIN   // Cortex-M4/M7: Thumb-2 and these field offsets
+        // ASM_SORTIN's unrolled, latency-hiding walk. cmp + bmi/bpl read only the
+        // sign of C - P, so it is wrap-safe like is_less (blt would not be).
+        static_assert(offsetof(WaitNode, left) == 0 && offsetof(WaitNode, NEXTTIME) == 8);
+        WaitNode* next;
+        std::uint32_t time;
+        __asm__(
+            "ldr  %[time], [%[P], #8]   \n"   // time = P->NEXTTIME
+            "cmp  %[C_time], %[time]    \n"   // Compare C->NEXTTIME and P->NEXTTIME
+            "bpl  3f                    \n"   // Branch if C->NEXTTIME is not less
+            "ldr  %[Q], [%[P], #0]      \n"   // Q = P->left, the next node to test
+            ".balign 4                  \n"   // SORTIN LOOP
+            "1:                         \n"
+            "ldr  %[time], [%[Q], #8]   \n"
+            "ldr  %[P], [%[Q], #0]      \n"   // P = Q->left, ready before the branch
+            "cmp  %[C_time], %[time]    \n"
+            "bpl  2f                    \n"
+            "ldr  %[Q], [%[P], #0]      \n"
+            "ldr  %[time], [%[P], #8]   \n"
+            "cmp  %[C_time], %[time]    \n"
+            "bmi  1b                    \n"
+            "b    3f                    \n"   // The cost is too small for removing
+            "2:                         \n"
+            "mov  %[P], %[Q]            \n"   // Copy Q to P
+            "3:                         \n"
+            : [P] "+r"(P), [Q] "=&r"(next), [time] "=&r"(time)
+            : [C_time] "r"(C.NEXTTIME)
+            : "cc", "memory");  
+            // "cc": the flags change, because of cmp
+            // "memory": the assembly reads memory the compiler can't see
+#else
         // Compare NEXTTIME fields right to left
         while (is_less(C.NEXTTIME, P->NEXTTIME)) {
             P = P->left;
             if constexpr (WAIT_LIST_STATS) ++walked;
         }
+#endif
 
         if constexpr (WAIT_LIST_STATS) {
             ++stats_.sortins;
