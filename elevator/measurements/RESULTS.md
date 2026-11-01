@@ -134,6 +134,17 @@ Every run as measured, including the ones that misled. **The C folder had `-flto
 
 **Lesson:** before comparing builds, read the flags every folder was really compiled with (`Debug/Core/Src/<folder>/subdir.mk`); the settings dialog is per folder and per configuration. Runs 4-11 were spent explaining a gap that was mostly a build flag.
 
+### The `sortin` walk: C++ vs assembly on a long WAIT list
+
+Kernel C++ in PendSV, no trace, same checksum (4280740907) and 1,519 steps in all three. `POOL_SIZE` 128, `GIVEUPTIME` 1000-4000, `INTERTIME` 20-60: the list averages 29.1 nodes and a walk passes 22.8.
+
+| 256 users, pool 128, `-O3 -flto` | Plain C++ | C++ (unrolled) | Assembly |
+|---|---|---|---|
+| `cycles_per_step` | 414 | 399 | **372** |
+| `busy_cycles` | 629,592 | 607,138 | **565,164** |
+| `max_cycles` | 1,226 | 1,111 | **965** |
+| flash (`text`) | 25,072 B | 25,368 B | **24,856 B** |
+
 ## Native: C vs Python (laptop, wall-clock, `TRACE=0` / notrace builds)
 
 Small-to-medium scale, C vs Python head to head (`compare_c_python_no_trace.sh`):
