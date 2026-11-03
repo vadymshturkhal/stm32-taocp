@@ -45,7 +45,7 @@ static std::vector<std::uint32_t> first_primes(std::uint32_t how_many) {
 static bool matches_reference(const KnuthPrimes& table) {
     const std::vector<std::uint32_t> reference = first_primes(PRIMES);
     for (std::uint32_t i = 0; i < PRIMES; ++i) {
-        if (table.prime(i) != reference[i]) return false;
+        if (table.get_prime(i) != reference[i]) return false;
     }
     return true;
 }
@@ -82,34 +82,34 @@ int main() {
     {
         KnuthPrimes table;
         check("new table: 2 and 3, not full",
-              table.found() == 2 && table.prime(0) == 2 && table.prime(1) == 3 && !table.is_full());
+              table.found() == 2 && table.get_prime(0) == 2 && table.get_prime(1) == 3 && !table.is_done());
     }
 
     // 2. Each call adds exactly one prime, and passes over a composite
     {
         KnuthPrimes table;
         table.next_prime();
-        check("next_prime: 5 is the third prime, stored once", table.found() == 3 && table.prime(2) == 5);
+        check("next_prime: 5 is the third prime, stored once", table.found() == 3 && table.get_prime(2) == 5);
         table.next_prime();
         table.next_prime();
-        check("next_prime: 9 is passed over, 7 then 11", table.found() == 5 && table.prime(3) == 7 && table.prime(4) == 11);
+        check("next_prime: 9 is passed over, 7 then 11", table.found() == 5 && table.get_prime(3) == 7 && table.get_prime(4) == 11);
     }
 
     // 3. The whole table
     {
         KnuthPrimes table;
         std::uint32_t calls = 0;
-        while (!table.is_full()) {
+        while (!table.is_done()) {
             table.next_prime();
             ++calls;
         }
         check("full table: 498 calls", calls == STEPS);
-        check("full table: 500 primes, the last is 3571", table.found() == PRIMES && table.prime(PRIMES - 1) == LAST_PRIME);
+        check("full table: 500 primes, the last is 3571", table.found() == PRIMES && table.get_prime(PRIMES - 1) == LAST_PRIME);
         check("full table: all 500 match trial division", matches_reference(table));
 
         // P3: without it this writes past the array (the sanitizer build sees it)
         table.next_prime();
-        check("a call on a full table changes nothing", table.found() == PRIMES && table.prime(PRIMES - 1) == LAST_PRIME);
+        check("a call on a full table changes nothing", table.found() == PRIMES && table.get_prime(PRIMES - 1) == LAST_PRIME);
     }
 
     // 4. The node: one prime per step, and out of the list at the end

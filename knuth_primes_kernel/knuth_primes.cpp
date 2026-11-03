@@ -26,7 +26,7 @@ bool KnuthPrimes::is_prime(std::uint32_t n) noexcept {
 
 void KnuthPrimes::next_prime() noexcept {
     // [P3]
-    if (is_full()) { return; }
+    if (is_done()) { return; }
 
     do {
         // [P4]
@@ -34,6 +34,6 @@ void KnuthPrimes::next_prime() noexcept {
     } while (!is_prime(candidate));
 
     // [P2]
-    primes[primes_found] = candidate;
+    primes[primes_found] = static_cast<std::uint16_t>(candidate);
     ++primes_found;
 }
