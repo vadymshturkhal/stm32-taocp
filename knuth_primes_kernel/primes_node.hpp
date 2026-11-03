@@ -14,7 +14,7 @@ private:
     static void step(WaitNode& node, std::uint32_t now) noexcept {
         auto& prime_node = static_cast<PrimesNode&>(node);
         prime_node.knuth_primes.next_prime();
-        if (!prime_node.knuth_primes.is_full()) { prime_node.kernel.hold(prime_node, now); }
+        if (!prime_node.knuth_primes.is_done()) { prime_node.kernel.hold(prime_node, now); }
         // Else: already canceled
     }
 };
