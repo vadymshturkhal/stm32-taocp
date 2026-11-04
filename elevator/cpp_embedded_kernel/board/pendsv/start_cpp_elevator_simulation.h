@@ -13,8 +13,6 @@
 extern "C" {
 #endif
 
-uint32_t start_cpp_elevator_simulation(uint32_t max_users);
-
 /* The same elevator in the main loop, on the real clock (1 Knuth unit = 1 ms,
  * TICKS_PER_TIME_UNIT). Do not mix with start_cpp_elevator_simulation() while
  * it runs: both use the same kernel.
@@ -22,24 +20,11 @@ uint32_t start_cpp_elevator_simulation(uint32_t max_users);
  *                           (the users' pool), so it can run before "now" is read
  *   cpp_elevator_start():   start it: max_users users from now_ms (creates it
  *                           first if cpp_elevator_create() was not called)
- *   cpp_elevator_step():    run at most one due node (the kernel's rule: one
- *                           node per pass, so the main loop gets a turn);
- *                           1 if a node ran, 0 if nothing was due
- *   cpp_elevator_step_next(): as fast as possible: run the first node at its
- *                           own time, without waiting for the clock; 1 if a
- *                           node ran, 0 if the WAIT list is empty
- *   cpp_elevator_running(): 1 until the elevator is finished: every user
- *                           gone and the elevator dormant at E1 (not "the
- *                           list is empty": the kernel is shared)
  *   cpp_elevator_stop():    destroy it (the users' pool gives its memory back);
  *                           only once cpp_elevator_running() is 0 */
 void cpp_elevator_create(void);
 void cpp_elevator_start(uint32_t max_users, uint32_t now_ms);
-int cpp_elevator_step(uint32_t now_ms);
-int cpp_elevator_step_next(void);
-int cpp_elevator_running(void);
 void cpp_elevator_stop(void);
-uint32_t cpp_elevator_time(void);
 uint32_t cpp_elevator_pool_refused(void);  /* refused pushes of the users' pool: 0 expected */
 
 /* The trace (with TRACE in the C++ symbols; otherwise they do nothing):

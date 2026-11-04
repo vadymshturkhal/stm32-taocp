@@ -24,24 +24,6 @@
 
 static std::optional<ElevatorSimulation> simulation;
 
-extern "C" std::uint32_t start_cpp_elevator_simulation(std::uint32_t max_users) {
-    simulation.emplace(kernel);
-
-    // Knuth's TIME 0 is kernel tick 0, as on the PC
-    simulation->start(max_users, 0);
-
-    // Event-driven, like Knuth's CYCLE: jump to the next deadline, run every due node
-    while (!simulation->finished()) {
-        const auto t = kernel.get_next_time();   // not finished: a node of the elevator is held
-        while (kernel.step(*t)) {}
-    }
-
-    simulation.reset();     // finished: no node of the elevator is left in the kernel
-    return 0;
-}
-
-// ---- The elevator in the main loop, on the real clock ----
-
 extern "C" {
     volatile uint32_t elevator_checksum;
     volatile uint32_t elevator_done = 0;
@@ -61,21 +43,6 @@ extern "C" void cpp_elevator_create(void) {
 extern "C" void cpp_elevator_start(std::uint32_t max_users, std::uint32_t now_ms) {
     if (!simulation) cpp_elevator_create();
     simulation->start(max_users, now_ms);   // Knuth's TIME 0 = now: USER1 is due at once
-}
-
-extern "C" int cpp_elevator_step(std::uint32_t now_ms) {
-    return kernel.step(now_ms) ? 1 : 0;
-}
-
-// As fast as possible: no waiting for the real clock. The first node runs at its
-// own time (Knuth's CYCLE: jump to the next deadline), one node per call.
-extern "C" int cpp_elevator_step_next(void) {
-    const auto t = kernel.get_next_time();
-    return (t && kernel.step(*t)) ? 1 : 0;
-}
-
-extern "C" int cpp_elevator_running(void) {
-    return (simulation && !simulation->finished()) ? 1 : 0;
 }
 
 // Pushes the users' pool refused (release builds): 0 in a correct run. Read it before stop.
@@ -117,10 +84,6 @@ extern "C" std::uint32_t cpp_elevator_trace_dropped(void) {
 #else
     return 0;
 #endif
-}
-
-extern "C" std::uint32_t cpp_elevator_time(void) {
-    return simulation ? simulation->TIME : 0;
 }
 
 extern "C" void cpp_elevator_stop(void) {
