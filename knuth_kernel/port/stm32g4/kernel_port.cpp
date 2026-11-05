@@ -21,7 +21,9 @@ extern "C" void kernel_port_init(void) {
 // When CNT reaches that value, TIM2 raises an interrupt, and the TIM2 handler pends PendSV.
 // PendSV runs the due node and calls aim() again.
 // Without aim(), the first PendSV runs whatever is due at start, and then nothing ever wakes the kernel again: the elevator would stop after its first steps. 
-static void aim() noexcept { 
+// The deadline already passed while arming CCR1 (the race)
+// Wakes the kernel exactly at the next deadline
+static void pend_next() noexcept {
     const auto t = kernel.get_next_time();
 
     // Nothing waits: no alarm
@@ -81,5 +83,5 @@ extern "C" void kernel_pendsv(void) {
         kernel_stats.walk_max = w.walk_max;
         kernel_stats.walk_sum = w.walk_sum;
     }
-    aim();
+    pend_next();
 }
