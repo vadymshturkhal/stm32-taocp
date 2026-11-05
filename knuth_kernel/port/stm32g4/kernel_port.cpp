@@ -50,17 +50,18 @@ extern "C" void TIM2_IRQHandler(void) {
     pend_kernel();
 }
 
-extern "C" void kernel_pendsv(void) {
+/* Called from PendSV_Handler */
+extern "C" void kernel_PendSV_Handler(void) {
     for(;;) {
         const uint32_t t = now();
         kernel.start_event(t);
-        const auto due = kernel.get_next_time(); // the head's deadline
+        const auto event_time = kernel.get_next_time();
         const uint32_t c0 = DWT->CYCCNT;
         
-        if (!kernel.step(t)) break;  // nothing due: done for now
+        if (!kernel.step(t)) break;
 
         const uint32_t cycles = DWT->CYCCNT - c0;
-        const uint32_t late = t - *due;  // µs after its deadline
+        const uint32_t late = t - *event_time;  // µs after its deadline
         
         // kernel stats
         ++kernel_stats.steps;

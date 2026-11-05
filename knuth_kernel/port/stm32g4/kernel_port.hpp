@@ -27,7 +27,7 @@ extern "C" {
 extern KernelStats kernel_stats;    // defined in kernel_port.cpp
 
 void kernel_port_init(void);        // callable from main.c
-void kernel_pendsv(void);           // called from PendSV_Handler
+void kernel_PendSV_Handler(void);           // called from PendSV_Handler
 void kernel_port_after_step(void);  // defined by the application, called every step
 static inline void pend_kernel(void) { SCB->ICSR = SCB_ICSR_PENDSVSET_Msk; }
 
