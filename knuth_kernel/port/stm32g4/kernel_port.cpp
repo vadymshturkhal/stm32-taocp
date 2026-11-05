@@ -39,21 +39,32 @@ static void pend_next() noexcept {
     if(!WaitList::is_less(now(), *t)) pend_kernel();
 }
 
-static volatile uint32_t tim2_high = 0;   // TIM2 overflows: the upper 32 bits of a 64-bit µs clock
-static bool tim2_tick = false;            // HAL_GetTick reads TIM2 (after kernel_port_tickless)
-static uint32_t tick_offset = 0;          // keeps HAL's ms clock continuous at the switch
+static bool tim2_tick = false;           // HAL_GetTick reads TIM2 (after HAL_Tick_From_TIM2)
+static uint32_t tick_offset = 0;         // keeps HAL's ms clock continuous at the switch
 
-// HAL's ms clock from TIM2: the 64-bit µs count / 1000, truncated to 32 bits, so it
-// wraps at 2^32 ms like uwTick. (TIM2->CNT / 1000 alone would jump back to 0 every
-// 71.6 min: a false timeout in every "now - start > timeout".)
+static volatile uint32_t base_ms = 0;    // ms in all the wraps so far
+static volatile uint32_t base_rem = 0;   // their leftover µs, < 1000
+
+static void add_wrap(uint32_t& ms, uint32_t& rem) noexcept {
+    ms += 4'294'967u;
+    rem += 296u;
+    if (rem >= 1000u) { rem -= 1000u; ++ms; }
+}
+
+// 36 cycles; the 64-bit division took 133 (measured)
 static uint32_t tim2_ms() noexcept {
     const uint32_t primask = __get_PRIMASK();
-    __disable_irq();                      // no overflow ISR between the two reads
-    uint32_t hi = tim2_high;
+    __disable_irq();                      // no overflow ISR between the reads
+
+    uint32_t ms = base_ms;
+    uint32_t rem = base_rem;
     const uint32_t lo = TIM2->CNT;
-    if ((TIM2->SR & TIM_SR_UIF) && lo < 0x80000000u) ++hi;   // overflowed, ISR not run yet
+    if ((TIM2->SR & TIM_SR_UIF) && lo < 0x80000000u) add_wrap(ms, rem);   // overflowed, ISR not run yet
+
     __set_PRIMASK(primask);
-    return static_cast<uint32_t>(((static_cast<uint64_t>(hi) << 32) | lo) / 1000u);
+    const uint32_t q = lo / 1000u;        // UMULL + LSR: the compiler's reciprocal
+    const uint32_t r = lo - q * 1000u;    // MLS
+    return ms + q + (r + rem >= 1000u);   // the two leftovers can make one more ms
 }
 
 // Overrides HAL's __weak HAL_GetTick: SysTick's uwTick until the switch, then TIM2
@@ -61,20 +72,30 @@ extern "C" uint32_t HAL_GetTick(void) {
     return tim2_tick ? tim2_ms() + tick_offset : uwTick;
 }
 
+// Call before the kernel starts: DIER is shared with pend_next()
 extern "C" void HAL_Tick_From_TIM2(void) {
+    __disable_irq();
     TIM2->SR = ~TIM_SR_UIF;                         // the UG at init set it
     TIM2->DIER = TIM2->DIER | TIM_DIER_UIE;         // count overflows (every 71.6 min)
     tick_offset = uwTick - tim2_ms();               // no jump in HAL's time
     tim2_tick = true;
     HAL_SuspendTick();                              // SysTick interrupt off: no 1 ms wake-ups
+    __enable_irq();
 }
 
 extern "C" void TIM2_IRQHandler(void) {
     const uint32_t sr = TIM2->SR;
-    if (sr & TIM_SR_UIF) {                          // overflow: the 64-bit clock's upper half
+    if (sr & TIM_SR_UIF) {         // overflow: one more wrap of 2^32 µs
+        __disable_irq();           // no reader between the clear and the update
         TIM2->SR = ~TIM_SR_UIF;
-        tim2_high = tim2_high + 1;
+        uint32_t ms = base_ms;     // 1. copy the volatile pair into locals
+        uint32_t rem = base_rem;
+        add_wrap(ms, rem);         // 2. + one wrap, with the carry when rem passes 1000
+        base_ms = ms;              // 3. write both back
+        base_rem = rem;
+        __enable_irq();            // PRIMASK was 0, or this ISR wouldn't be running
     }
+
     if ((sr & TIM_SR_CC1IF) && (TIM2->DIER & TIM_DIER_CC1IE)) {   // a deadline (alarm armed)
         TIM2->SR = ~TIM_SR_CC1IF;                   // clear the flag or the interrupt repeats forever
         pend_kernel();
@@ -86,13 +107,13 @@ extern "C" void kernel_PendSV_Handler(void) {
     for(;;) {
         const uint32_t t = now();
         kernel.start_event(t);
-        const auto event_time = kernel.get_next_time();
+        const auto head_deadline = kernel.get_next_time();
         const uint32_t c0 = DWT->CYCCNT;
         
         if (!kernel.step(t)) break;
 
         const uint32_t cycles = DWT->CYCCNT - c0;
-        const uint32_t late = t - *event_time;  // µs after its deadline
+        const uint32_t late = t - *head_deadline;
         
         // kernel stats
         ++kernel_stats.steps;
