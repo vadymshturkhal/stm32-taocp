@@ -16,13 +16,7 @@ extern "C" void kernel_port_init(void) {
     NVIC_EnableIRQ(TIM2_IRQn);
 }
 
-// aim() : the alarm clock. After the loop, nothing is due now, but the next node is due at some later time. Something has to run PendSV again at that moment, and aim() arranges it:
-// It writes the next deadline into TIM2->CCR1.
-// When CNT reaches that value, TIM2 raises an interrupt, and the TIM2 handler pends PendSV.
-// PendSV runs the due node and calls aim() again.
-// Without aim(), the first PendSV runs whatever is due at start, and then nothing ever wakes the kernel again: the elevator would stop after its first steps. 
-// The deadline already passed while arming CCR1 (the race)
-// Wakes the kernel exactly at the next deadline
+/* Wakes the kernel at the next deadline */
 static void pend_next() noexcept {
     const auto t = kernel.get_next_time();
 
@@ -45,9 +39,46 @@ static void pend_next() noexcept {
     if(!WaitList::is_less(now(), *t)) pend_kernel();
 }
 
+static volatile uint32_t tim2_high = 0;   // TIM2 overflows: the upper 32 bits of a 64-bit µs clock
+static bool tim2_tick = false;            // HAL_GetTick reads TIM2 (after kernel_port_tickless)
+static uint32_t tick_offset = 0;          // keeps HAL's ms clock continuous at the switch
+
+// HAL's ms clock from TIM2: the 64-bit µs count / 1000, truncated to 32 bits, so it
+// wraps at 2^32 ms like uwTick. (TIM2->CNT / 1000 alone would jump back to 0 every
+// 71.6 min: a false timeout in every "now - start > timeout".)
+static uint32_t tim2_ms() noexcept {
+    const uint32_t primask = __get_PRIMASK();
+    __disable_irq();                      // no overflow ISR between the two reads
+    uint32_t hi = tim2_high;
+    const uint32_t lo = TIM2->CNT;
+    if ((TIM2->SR & TIM_SR_UIF) && lo < 0x80000000u) ++hi;   // overflowed, ISR not run yet
+    __set_PRIMASK(primask);
+    return static_cast<uint32_t>(((static_cast<uint64_t>(hi) << 32) | lo) / 1000u);
+}
+
+// Overrides HAL's __weak HAL_GetTick: SysTick's uwTick until the switch, then TIM2
+extern "C" uint32_t HAL_GetTick(void) {
+    return tim2_tick ? tim2_ms() + tick_offset : uwTick;
+}
+
+extern "C" void HAL_Tick_From_TIM2(void) {
+    TIM2->SR = ~TIM_SR_UIF;                         // the UG at init set it
+    TIM2->DIER = TIM2->DIER | TIM_DIER_UIE;         // count overflows (every 71.6 min)
+    tick_offset = uwTick - tim2_ms();               // no jump in HAL's time
+    tim2_tick = true;
+    HAL_SuspendTick();                              // SysTick interrupt off: no 1 ms wake-ups
+}
+
 extern "C" void TIM2_IRQHandler(void) {
-    TIM2->SR = ~TIM_SR_CC1IF;      // Clear the flag or the interrup repeats forever
-    pend_kernel();
+    const uint32_t sr = TIM2->SR;
+    if (sr & TIM_SR_UIF) {                          // overflow: the 64-bit clock's upper half
+        TIM2->SR = ~TIM_SR_UIF;
+        tim2_high = tim2_high + 1;
+    }
+    if ((sr & TIM_SR_CC1IF) && (TIM2->DIER & TIM_DIER_CC1IE)) {   // a deadline (alarm armed)
+        TIM2->SR = ~TIM_SR_CC1IF;                   // clear the flag or the interrupt repeats forever
+        pend_kernel();
+    }
 }
 
 /* Called from PendSV_Handler */
