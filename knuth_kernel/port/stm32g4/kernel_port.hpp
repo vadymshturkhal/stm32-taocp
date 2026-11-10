@@ -29,7 +29,9 @@ extern KernelStats kernel_stats;    // defined in kernel_port.cpp
 void kernel_port_init(void);        // callable from main.c
 void kernel_PendSV_Handler(void);   // called from PendSV_Handler
 void kernel_port_after_step(void);  // defined by the application, called every step
-void HAL_Tick_From_TIM2(void);      // HAL_GetTick from TIM2, SysTick off
+#ifdef USE_HAL_DRIVER
+void HAL_Tick_From_TIM2(void);      // HAL_GetTick from TIM2, SysTick off (HAL builds only)
+#endif
 static inline void pend_kernel(void) { SCB->ICSR = SCB_ICSR_PENDSVSET_Msk; }
 
 #ifdef __cplusplus

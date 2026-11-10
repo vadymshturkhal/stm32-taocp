@@ -346,7 +346,7 @@ function is `noexcept`.
 | `kernel.hpp`             | `Kernel`: the API for programs, and `step(now)`    |
 | `storage_pool.hpp`       | `StoragePool<T>`: nodes created at run time        |
 | `circle_of_buffers.hpp`  | `CircleOfBuffers<T, N>`: Knuth's circle of buffers between a program and a device |
-| `port/stm32g4/kernel_port.{hpp,cpp}` | the STM32G4 port: TIM2 as the 1 µs clock (`now()`), the one shared `kernel`, `kernel_pendsv()` (run every due node, `KernelStats`), `aim()` (TIM2 compare at the next deadline, with the race re-check), `TIM2_IRQHandler`, the hook `kernel_port_after_step()` |
+| `port/stm32g4/kernel_port.{hpp,cpp}` | the STM32G4 port, CMSIS only: TIM2 as the 1 µs clock (`now()`), the one shared `kernel`, `kernel_PendSV_Handler()` (run every due node, `KernelStats`), `pend_next()` (TIM2 compare at the next deadline, with the race re-check), `TIM2_IRQHandler`, the hook `kernel_port_after_step()`. With the HAL (`USE_HAL_DRIVER`) also `HAL_Tick_From_TIM2()`: `HAL_GetTick` from TIM2, SysTick off |
 | `tests/test_wait_list.cpp` | the tests of the WAIT list                       |
 | `tests/test_kernel.cpp`  | the tests of the kernel, with small programs       |
 | `tests/test_storage_pool.cpp` | the tests of the storage pool                 |

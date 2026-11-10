@@ -19,4 +19,4 @@ static_assert(TICKS_PER_TIME_UNIT > 0);
 inline constexpr std::uint32_t VALUES_SEED = 1;
 
 // Users in the system at once (not in total); the most seen is 7-10, depending on VALUES
-inline constexpr std::size_t POOL_SIZE = 16;
+inline constexpr std::size_t POOL_SIZE = 32;

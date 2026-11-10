@@ -1,12 +1,17 @@
+// The port needs only CMSIS (stm32g4xx.h). The HAL tick (HAL_GetTick from TIM2)
+// is built only with the HAL: USE_HAL_DRIVER, which CubeMX projects define.
 #include "kernel_port.hpp"
-#include "stm32g4xx_hal.h"  // Only for the RCC macro
+#ifdef USE_HAL_DRIVER
+#include "stm32g4xx_hal.h"  // the HAL tick below: uwTick, HAL_SuspendTick
+#endif
 
 extern "C" __attribute__((weak)) void kernel_port_after_step(void) {}
 KernelStats kernel_stats __attribute__((used)) = {};
 
 extern "C" void kernel_port_init(void) {
-    __HAL_RCC_TIM2_CLK_ENABLE();  // macro enables the clock and then reads the register back
-    TIM2->PSC = 170 - 1;          // the prescaler: divides the input clock, so 170 MHz becomes 1 tick per µs
+    RCC->APB1ENR1 = RCC->APB1ENR1 | RCC_APB1ENR1_TIM2EN;   // TIM2's clock on
+    (void)RCC->APB1ENR1;          // read it back: a short delay before TIM2 is written (as HAL's macro does)
+    TIM2->PSC = 170 - 1;         // the prescaler: divides the input clock, so 170 MHz becomes 1 tick per µs
     TIM2->ARR = 0xFFFFFFFF;       // auto-reload: the value at which it wraps. 0xFFFFFFFF uses all 32 bits
     TIM2->EGR = TIM_EGR_UG;       // control: force an update
     TIM2->CR1 = TIM_CR1_CEN;      // control: start
@@ -20,7 +25,7 @@ extern "C" void kernel_port_init(void) {
 static void pend_next() noexcept {
     const auto t = kernel.get_next_time();
 
-    // Nothing waits: no alarm
+    // Nothing waits
     if (!t) {
         TIM2->DIER = TIM2->DIER & ~TIM_DIER_CC1IE;
         return;
@@ -39,6 +44,8 @@ static void pend_next() noexcept {
     if(!WaitList::is_less(now(), *t)) pend_kernel();
 }
 
+#ifdef USE_HAL_DRIVER
+// The HAL tick: a ms clock from TIM2 (µs) plus its overflow count, so SysTick can stop
 static bool tim2_tick = false;           // HAL_GetTick reads TIM2 (after HAL_Tick_From_TIM2)
 static uint32_t tick_offset = 0;         // keeps HAL's ms clock continuous at the switch
 
@@ -59,7 +66,10 @@ static uint32_t tim2_ms() noexcept {
     uint32_t ms = base_ms;
     uint32_t rem = base_rem;
     const uint32_t lo = TIM2->CNT;
-    if ((TIM2->SR & TIM_SR_UIF) && lo < 0x80000000u) add_wrap(ms, rem);   // overflowed, ISR not run yet
+    // UIF set: TIM2 wrapped, and the ISR (masked here) hasn't counted it yet.
+    // lo small: the wrap came before the CNT read, so lo needs it added.
+    // lo large: the wrap came between the CNT and SR reads; lo is from before it
+    if ((TIM2->SR & TIM_SR_UIF) && lo < 0x80000000u) add_wrap(ms, rem);
 
     __set_PRIMASK(primask);
     const uint32_t q = lo / 1000u;        // UMULL + LSR: the compiler's reciprocal
@@ -74,18 +84,22 @@ extern "C" uint32_t HAL_GetTick(void) {
 
 // Call before the kernel starts: DIER is shared with pend_next()
 extern "C" void HAL_Tick_From_TIM2(void) {
+    const uint32_t primask = __get_PRIMASK();
     __disable_irq();
     TIM2->SR = ~TIM_SR_UIF;                         // the UG at init set it
     TIM2->DIER = TIM2->DIER | TIM_DIER_UIE;         // count overflows (every 71.6 min)
     tick_offset = uwTick - tim2_ms();               // no jump in HAL's time
     tim2_tick = true;
     HAL_SuspendTick();                              // SysTick interrupt off: no 1 ms wake-ups
-    __enable_irq();
+    __set_PRIMASK(primask);                         // restore: a caller with interrupts masked keeps them masked
 }
+#endif  // USE_HAL_DRIVER
 
 extern "C" void TIM2_IRQHandler(void) {
     const uint32_t sr = TIM2->SR;
+#ifdef USE_HAL_DRIVER
     if (sr & TIM_SR_UIF) {         // overflow: one more wrap of 2^32 µs
+        const uint32_t primask = __get_PRIMASK();
         __disable_irq();           // no reader between the clear and the update
         TIM2->SR = ~TIM_SR_UIF;
         uint32_t ms = base_ms;     // 1. copy the volatile pair into locals
@@ -93,8 +107,9 @@ extern "C" void TIM2_IRQHandler(void) {
         add_wrap(ms, rem);         // 2. + one wrap, with the carry when rem passes 1000
         base_ms = ms;              // 3. write both back
         base_rem = rem;
-        __enable_irq();            // PRIMASK was 0, or this ISR wouldn't be running
+        __set_PRIMASK(primask);    // restore, as tim2_ms() does: no reasoning about entry needed
     }
+#endif
 
     if ((sr & TIM_SR_CC1IF) && (TIM2->DIER & TIM_DIER_CC1IE)) {   // a deadline (alarm armed)
         TIM2->SR = ~TIM_SR_CC1IF;                   // clear the flag or the interrupt repeats forever
