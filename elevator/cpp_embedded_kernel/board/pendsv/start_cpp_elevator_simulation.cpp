@@ -20,7 +20,10 @@
 #include "elevator_simulation.hpp"
 #include "start_cpp_elevator_simulation.h"
 #include "trace.hpp"
+
+#ifdef TRACE
 #include "../uart_tx.h"
+#endif
 
 static std::optional<ElevatorSimulation> simulation;
 
