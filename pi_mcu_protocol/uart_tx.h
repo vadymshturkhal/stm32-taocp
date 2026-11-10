@@ -15,7 +15,7 @@ extern "C" {
 void UART_TX_Init(void);
 
 /* What UART_TX_Send() and UART_TX_Commit() return */
-enum { UART_TX_OK = 0, UART_TX_BAD_LENGTH = 1, UART_TX_FULL = 2 };
+enum { UART_TX_OK = 0, UART_TX_BAD_LENGTH = 1, UART_TX_FULL = 2, UART_TX_NOT_BEGUN = 3 };
 
 /* Queue one line of len bytes (1...UART_TX_LINE_SIZE). Never waits. Returns UART_TX_OK,
  * UART_TX_BAD_LENGTH (a bug in the caller), or UART_TX_FULL (counted, see UART_TX_Dropped). */
@@ -30,6 +30,11 @@ void UART_TX_OnError(void);
 /* Create a line inside of DMA buffer. 
  * Gives the free buffer with UART_TX_LINE_SIZE or NULL. */
 char* UART_TX_Begin(void);
+
+/* Queue the line UART_TX_Begin() gave, len bytes (1...UART_TX_LINE_SIZE). Never waits.
+ * Returns UART_TX_OK, UART_TX_BAD_LENGTH (a bug in the caller), or UART_TX_NOT_BEGUN
+ * (a bug: no UART_TX_Begin() before it, or a second Commit; nothing is sent). 
+ */
 int UART_TX_Commit(size_t len);
 
 #ifdef __cplusplus

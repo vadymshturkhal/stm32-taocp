@@ -101,15 +101,12 @@ char* UART_TX_Begin(void) {
 }
 
 int UART_TX_Commit(std::size_t len) {
-    TxLine* buffer = tx.assign();
-
-    if (buffer == nullptr) return UART_TX_FULL;
+    TxLine* buffer = tx.yellow();
+    if (buffer == nullptr) return UART_TX_NOT_BEGUN;  // a bug: Commit twice, or without Begin
     if (len == 0 || len > UART_TX_LINE_SIZE) return UART_TX_BAD_LENGTH;  // a bug
-
     buffer->len = len;
     tx.release();
     tx_start();
-
     return UART_TX_OK;
 }
 

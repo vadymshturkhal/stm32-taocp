@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include <array>
 #include <atomic>
 #include <cstddef>
@@ -25,32 +26,54 @@ public:
     static_assert(N >= 1, "CircleOfBuffers size must be >= 1.");
     static_assert(std::atomic<std::size_t>::is_always_lock_free, "Hidden lock in n.");
     static_assert(std::atomic<T*>::is_always_lock_free, "Hidden lock in DEVICE_BUFFER.");
+    static_assert(std::atomic<std::uint32_t>::is_always_lock_free, "Hidden lock in refused_.");
 
-    // Algorithm A [ASSIGN]
+    /*
+     * Algorithm A [ASSIGN]
+     */
     [[nodiscard]] T* assign() noexcept {
         // [A1. Wait for n < N]
         // If n == N, stall the program  until n < N.
         // If n == N, no buffers are ready to be assigned.
         if (n.load(std::memory_order_acquire) == N) return nullptr;
 
-        // [A2. CURRENT <- NEXTG]
-        std::size_t CURRENT = NEXTG;
+        yellow_ = true;
 
-        return &CIRCLE_OF_BUFFERS[CURRENT];
+        // [A2. CURRENT <- NEXTG] NEXTG is yellow until release()
+        return &CIRCLE_OF_BUFFERS[NEXTG];
     }
 
-    // Algorithm R [RELEASE]
-    void release() noexcept {
-        assert(n.load(std::memory_order_relaxed) < N);  // Release without a successful Assign
-        
+    /*
+     * Returns the yellow buffer or nullptr
+     */
+    [[nodiscard]] T* yellow() noexcept { return yellow_ ? &CIRCLE_OF_BUFFERS[NEXTG] : nullptr; }
+
+    /*
+     * Algorithm R [RELEASE]
+     * Refuses release before assign or second release.
+     */
+    bool release() noexcept {
+        assert(yellow_ && "release: no assign() before it");
+
+        if (!yellow_) {
+            refused_.fetch_add(1, std::memory_order_relaxed);
+            return false;
+        }
+
+        yellow_ = false;
+
         // [R1. Increase n]
         n.fetch_add(1, std::memory_order_release);
 
         // [A3. Advance NEXTG]
         NEXTG = next(NEXTG);
+
+        return true;
     }
 
-    // Algorithm B [Buffer control]
+    /*
+     * Algorithm B [Buffer control]
+     */
     [[nodiscard]] T* start_operation() noexcept {
         // [B1 is a kernel routine]
         // [B2 return to kernel]
@@ -65,15 +88,34 @@ public:
         return buffer;
     }
 
-    // The device refused the buffer from start_operation
-    // start_operation() will return the same buffer after this
-    void cancel_operation() noexcept {
-        assert(DEVICE_BUFFER.load(std::memory_order_relaxed) != nullptr);
+    /*
+     * The device refused the buffer from start_operation.
+     * Start_operation() will return the same buffer after this.
+     * Refuses to cancel no busy device.
+     * Refuses to cancel the same buffer twice.
+     */
+    bool cancel_operation() noexcept {
+        assert(is_device_busy() && "cancel_operation: the device has no buffer");
+        
+        if (!is_device_busy()) {
+            refused_.fetch_add(1, std::memory_order_relaxed);
+            return false;
+        }
+
         DEVICE_BUFFER.store(nullptr, std::memory_order_release);
+        return true;
     }
 
-    void operation_is_completed() noexcept {
-        assert(DEVICE_BUFFER.load(std::memory_order_relaxed) != nullptr);
+    /*
+     * Without the !is_device_busy() NEXTR would skip a red buffer and n go below 0.
+     */
+    bool operation_is_completed() noexcept {
+        assert(is_device_busy() && "operation_is_completed: the device has no buffer");
+
+        if (!is_device_busy()) {
+            refused_.fetch_add(1, std::memory_order_relaxed);
+            return false;
+        }
     
         // [B5. Advance NEXTR]
         NEXTR = next(NEXTR);
@@ -83,21 +125,37 @@ public:
 
         // Clear the device
         DEVICE_BUFFER.store(nullptr, std::memory_order_release);
+
+        return true;
     }
 
     [[nodiscard]] std::size_t red_buffers_quantity() noexcept {
         return n.load(std::memory_order_acquire);
     }
 
+    /*
+     * Returns a quantity of refused operations.
+     */
+    [[nodiscard]] std::uint32_t refused_operations() const noexcept {
+        return refused_.load(std::memory_order_relaxed);
+    }
+
 private:
-    // The buffer after i in the circle: N - 1 goes back to 0 (any N, not only powers of 2)
+    // Circles NEXTR and NEXTG at [0, N)
     static constexpr std::size_t next(std::size_t i) noexcept {
         return i + 1 == N ? 0 : i + 1;
     }
+
+    bool is_device_busy() const noexcept { 
+        return DEVICE_BUFFER.load(std::memory_order_relaxed) != nullptr; 
+    }
+
+    bool yellow_ = false;  // Assigned and not released buffer
 
     std::size_t NEXTR = 0;
     std::size_t NEXTG = 0;
     std::atomic<T*> DEVICE_BUFFER = nullptr;
     std::atomic<std::size_t> n = 0;
     std::array<T, N> CIRCLE_OF_BUFFERS{};
+    std::atomic<std::uint32_t> refused_ = 0;  // Counts by main and ISR
 };

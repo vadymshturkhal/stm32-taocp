@@ -1,7 +1,8 @@
 // test_circle_of_buffers.cpp - tests of CircleOfBuffers<T, N> (circle_of_buffers.hpp), run on the PC
 //
 //   empty:       start_operation() gives nullptr, no red buffers
-//   assign:      gives the same (yellow) buffer until release(); release() makes it red
+//   assign:      gives the same (yellow) buffer until release(), and yellow() gives it;
+//                release() makes it red
 //   full:        N distinct buffers of the circle, then assign() gives nullptr
 //   FIFO:        start_operation() gives the red buffers in the order they were released
 //   device:      a second start_operation() is refused while the device has a buffer;
@@ -10,9 +11,11 @@
 //   reuse:       a buffer given again keeps its previous contents (the caller sets them)
 //   wrap:        N = 1, 2, 3, 4, 5 (not only powers of 2), many times around the circle
 //   random:      200 000 random operations compared with a model (a queue of values)
-//   misuse:      release() with every buffer red, cancel_operation() and
-//                operation_is_completed() with no buffer in the device abort with the
-//                asserts on (checked in a child process)
+//   misuse:      release() with no assign() before it (none, a second release, every
+//                buffer red), cancel_operation() and operation_is_completed() with no
+//                buffer in the device: with the asserts on they abort (checked in a child
+//                process); with NDEBUG (the board's build) they are refused, counted in
+//                refused_operations(), and change nothing. The valid paths refuse nothing.
 //   threads:     a producer thread and a device thread (the DMA and its interrupt),
 //                500 000 buffers: every one arrives once, in order, never torn. Run it
 //                with -fsanitize=thread too.
@@ -165,7 +168,7 @@ static bool random_against_model(std::uint32_t seed, std::size_t steps) {
         }
         if (c.red_buffers_quantity() != red.size()) return false;
     }
-    return true;
+    return c.refused_operations() == 0;     // only valid operations: nothing refused
 }
 
 // A buffer for the thread test: every field derives from seq, so a torn one shows
@@ -190,8 +193,8 @@ int main() {
     // 1. Empty
     {
         CircleOfBuffers<int, 4> c;
-        check("empty: start_operation() gives nullptr, no red buffers",
-              c.start_operation() == nullptr && c.red_buffers_quantity() == 0);
+        check("empty: start_operation() and yellow() give nullptr, no red buffers",
+              c.start_operation() == nullptr && c.yellow() == nullptr && c.red_buffers_quantity() == 0);
     }
 
     // 2. assign() gives the same yellow buffer until release()
@@ -201,8 +204,10 @@ int main() {
         int* b = c.assign();
         check("assign() twice before release(): the same buffer, still no red one",
               a != nullptr && a == b && c.red_buffers_quantity() == 0 && c.start_operation() == nullptr);
+        check("yellow() gives that assigned buffer", c.yellow() == a);
         *a = 7;
         c.release();
+        check("after release(): yellow() gives nullptr", c.yellow() == nullptr);
         int* d = c.assign();
         check("after release(): one red buffer, assign() gives the next one",
               c.red_buffers_quantity() == 1 && d != nullptr && d != a);
@@ -289,6 +294,15 @@ int main() {
 
 #ifndef NDEBUG
     // 9. Misuse stops at once with the asserts on
+    check("release() with no assign() before it aborts", aborts([] {
+        CircleOfBuffers<int, 2> c;
+        c.release();
+    }));
+    check("a second release() after one assign() aborts", aborts([] {
+        CircleOfBuffers<int, 2> c;
+        put(c, 1);
+        c.release();
+    }));
     check("release() with every buffer red (no successful assign) aborts", aborts([] {
         CircleOfBuffers<int, 2> c;
         put(c, 1);
@@ -305,6 +319,33 @@ int main() {
         put(c, 1);
         c.cancel_operation();
     }));
+#else
+    // 9. Release builds (NDEBUG, the board's) refuse misuse, count it, and change nothing
+    {
+        CircleOfBuffers<int, 2> c;
+        check("release() with no assign() before it is refused: no red buffer",
+              !c.release() && c.refused_operations() == 1 && c.red_buffers_quantity() == 0);
+        put(c, 1);
+        check("a second release() after one assign() is refused: still 1 red",
+              !c.release() && c.refused_operations() == 2 && c.red_buffers_quantity() == 1);
+        put(c, 2);
+        check("release() with every buffer red is refused: n stays N, assign() still nullptr",
+              !c.release() && c.refused_operations() == 3 && c.red_buffers_quantity() == 2
+              && c.assign() == nullptr);
+        check("operation_is_completed() with no buffer in the device is refused: still 2 red",
+              !c.operation_is_completed() && c.refused_operations() == 4 && c.red_buffers_quantity() == 2);
+        check("cancel_operation() with no buffer in the device is refused",
+              !c.cancel_operation() && c.refused_operations() == 5);
+        int* b = c.start_operation();
+        check("after the refusals the device gets the oldest red buffer, 1", b != nullptr && *b == 1);
+        check("a valid operation_is_completed() is not refused: 1 red",
+              c.operation_is_completed() && c.refused_operations() == 5 && c.red_buffers_quantity() == 1);
+        check("a second operation_is_completed() is refused: still 1 red",
+              !c.operation_is_completed() && c.refused_operations() == 6 && c.red_buffers_quantity() == 1);
+        int v = 0;
+        check("then the next one, 2, and the circle is empty",
+              take(c, v) && v == 2 && c.red_buffers_quantity() == 0);
+    }
 #endif
 
     // 10. Two threads: a producer and a device (the DMA with its interrupt)
@@ -340,8 +381,9 @@ int main() {
 
         check("500 000 buffers through two threads: each once, in order, never torn",
               in_order && expected == COUNT);
-        check("with cancelled starts among them, and the circle empty at the end",
-              cancels > 0 && c.red_buffers_quantity() == 0 && c.start_operation() == nullptr);
+        check("with cancelled starts among them, the circle empty at the end, nothing refused",
+              cancels > 0 && c.red_buffers_quantity() == 0 && c.start_operation() == nullptr
+              && c.refused_operations() == 0);
     }
 
     // 11. Two consumer contexts taking turns: main's kick and the TX-complete ISR
@@ -402,8 +444,9 @@ int main() {
 
         check("300 000 buffers started by main or by the ISR in turn: each once, in order, never torn",
               in_order.load() && sent.load() == COUNT);
-        check("both contexts started buffers, and the circle is empty at the end",
-              by_main.load() > 0 && by_isr.load() > 0 && c.red_buffers_quantity() == 0);
+        check("both contexts started buffers, the circle is empty at the end, nothing refused",
+              by_main.load() > 0 && by_isr.load() > 0 && c.red_buffers_quantity() == 0
+              && c.refused_operations() == 0);
     }
 
     std::println("\n{}", failures ? "SOME TESTS FAILED" : "all passed");
