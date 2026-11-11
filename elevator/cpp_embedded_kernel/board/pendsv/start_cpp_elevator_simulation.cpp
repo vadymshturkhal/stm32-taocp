@@ -27,16 +27,6 @@
 
 static std::optional<ElevatorSimulation> simulation;
 
-extern "C" {
-    volatile uint32_t elevator_checksum;
-    volatile uint32_t elevator_done = 0;
-}
-
-extern "C" void kernel_port_after_step(void) {
-	elevator_checksum = elevator_checksum * 31u + simulation->TIME;
-	if (simulation->finished()) elevator_done = 1;
-}
-
 // Construction (the users' pool: malloc and every node built) is most of the
 // setup, so it is split from start: read "now" after it, and USER1 is not late
 extern "C" void cpp_elevator_create(void) {
@@ -48,7 +38,18 @@ extern "C" void cpp_elevator_start(std::uint32_t max_users, std::uint32_t now_ms
     simulation->start(max_users, now_ms);   // Knuth's TIME 0 = now: USER1 is due at once
 }
 
-// Pushes the users' pool refused (release builds): 0 in a correct run. Read it before stop.
+// main polls it; PendSV sets it (check_done) at the step that ends the run. The
+// atomic is re-read on every call, and its acquire makes the checksum and the
+// counters written before it visible to main.
+extern "C" int cpp_elevator_finished(void) {
+    return simulation && simulation->done.load(std::memory_order_acquire) ? 1 : 0;
+}
+
+// Both for release builds, 0 in a correct run. Read them before stop.
+extern "C" std::uint32_t cpp_elevator_checksum(void) {
+    return simulation ? simulation->checksum : 0;
+}
+
 extern "C" std::uint32_t cpp_elevator_pool_refused(void) {
     return simulation ? simulation->users.pool_refused() : 0;
 }

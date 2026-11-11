@@ -94,8 +94,8 @@ results() {
     [ -f "$ELF" ] || die "no $ELF: run ./setup.sh first"
     "$(gdb_cmd)" -q -batch -nx "$ELF" \
         -ex "target extended-remote | openocd -c 'gdb_port pipe; log_output /dev/null' ${OPENOCD_ARGS[*]}" \
-        -ex "print elevator_done" \
-        -ex "print elevator_checksum" \
+        -ex "print elevator_phase" \
+        -ex "print elevator_cpp.checksum" \
         -ex "print kernel_stats" \
         -ex "print elevator_cpp" \
         -ex "monitor resume" \
@@ -106,7 +106,7 @@ check() {   # check the output of results
     local out steps checksum done
     out="$(results)"
     echo "$out"
-    done="$(sed -n 's/^\$1 = //p' <<<"$out")"
+    done="$(sed -n 's/^\$1 = //p' <<<"$out")"         # elevator_phase: 1 = ELEVATOR_PHASE_DONE
     checksum="$(sed -n 's/^\$2 = //p' <<<"$out")"
     steps="$(grep -o 'steps = [0-9]*' <<<"$out" | head -1 | grep -o '[0-9]*$')"
     if [ "$done" = 1 ] && [ "$steps" = "$EXPECT_STEPS" ] && [ "$checksum" = "$EXPECT_CHECKSUM" ]; then

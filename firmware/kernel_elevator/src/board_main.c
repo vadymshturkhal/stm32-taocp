@@ -19,6 +19,7 @@ typedef struct
   uint32_t start_cycles;    /* DWT cycles of the setup (malloc, init, users_start) */
   uint32_t elapsed_us;      /* TIM2 µs from the start to finished */
   uint32_t idle_us;         /* µs main slept in __WFI meanwhile */
+  uint32_t checksum;        /* checksum * 31 + TIME over the elevator's steps: 2487227626 expected */
   uint32_t pool_refused;    /* pushes the users' pool refused: 0 expected */
   uint32_t wakes;           /* how many times __WFI woke up */
 } ElevatorRun;
@@ -50,7 +51,7 @@ static void elevator_start_cpp(void)
 /* main's only elevator work: the end of the run */
 static inline int elevator_finishing(void)
 {
-  return elevator_phase == ELEVATOR_PHASE_CPP && elevator_done;
+  return elevator_phase == ELEVATOR_PHASE_CPP && cpp_elevator_finished();
 }
 
 /* The end of the run: every DWT count in one place. Breakpoint on the
@@ -59,7 +60,7 @@ static inline int elevator_finishing(void)
 static void __attribute__((noinline)) elevator_finish(void)
 {
   volatile uint32_t steps = kernel_stats.steps;                       /* 544 expected */
-  volatile uint32_t checksum = elevator_checksum;                     /* 2487227626 expected */
+  volatile uint32_t checksum = elevator_cpp.checksum;                 /* 2487227626 expected */
   volatile uint32_t start_cycles = elevator_cpp.start_cycles;
   volatile uint32_t busy_cycles = kernel_stats.busy_cycles;
   volatile uint32_t cycles_per_step = steps ? busy_cycles / steps : 0;
@@ -116,11 +117,12 @@ void board_main(void)
   for (;;)
   {
     /* PendSV runs the elevator; main only ends it. The end is the elevator's own
-     * state (users gone, dormant at E1), set by PendSV: elevator_done. */
+     * state (users gone, dormant at E1), a flag PendSV sets, read with cpp_elevator_finished(). */
     if (elevator_finishing())
     {
       elevator_cpp.elapsed_us = TIM2->CNT - elevator_start_us;
-      elevator_cpp.pool_refused = cpp_elevator_pool_refused();   /* before stop: the pool goes with it */
+      elevator_cpp.checksum = cpp_elevator_checksum();           /* before stop: the simulation goes with it */
+      elevator_cpp.pool_refused = cpp_elevator_pool_refused();
       cpp_elevator_stop();                  /* finished: none of its nodes is in the kernel */
       elevator_phase = ELEVATOR_PHASE_DONE;
       elevator_finish();

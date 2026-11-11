@@ -80,7 +80,7 @@ refused operations, no dropped trace records.
 | `./setup.sh fetch` | CMSIS into `third_party/cmsis` (pinned commits, SHA-256 checked) |
 | `./setup.sh build` | CMake configure and build: `build/elevator.elf`, `build/elevator.map` |
 | `./setup.sh flash` | program the board over the ST-LINK (OpenOCD) |
-| `./setup.sh results` | read `elevator_done`, `elevator_checksum`, `kernel_stats`, `elevator_cpp` from the board (GDB through OpenOCD) |
+| `./setup.sh results` | read `elevator_phase`, `elevator_cpp.checksum`, `kernel_stats`, `elevator_cpp` from the board (GDB through OpenOCD) |
 | `./setup.sh test` | `flash`, wait 12 s (the run takes 10.4 s), `results`, then PASS or FAIL |
 | `./setup.sh clean` | remove `build/` |
 
