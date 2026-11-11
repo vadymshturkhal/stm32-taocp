@@ -5,7 +5,6 @@
 #include "stm32g4xx_hal.h"  // the HAL tick below: uwTick, HAL_SuspendTick
 #endif
 
-extern "C" __attribute__((weak)) void kernel_port_after_step(void) {}
 KernelStats kernel_stats __attribute__((used)) = {};
 
 extern "C" void kernel_port_init(void) {
@@ -141,8 +140,6 @@ extern "C" void kernel_PendSV_Handler(void) {
         if (cycles > kernel_stats.max_cycles) kernel_stats.max_cycles = cycles;
         kernel_stats.late_sum_us += late;
         if (late > kernel_stats.max_late_us) kernel_stats.max_late_us = late;
-
-        kernel_port_after_step();
     }
 
     kernel_stats.refused_ops = kernel.refused();
