@@ -32,6 +32,7 @@ void kernel_PendSV_Handler(void);   // called from PendSV_Handler
 void HAL_Tick_From_TIM2(void);      // HAL_GetTick from TIM2, SysTick off (HAL builds only)
 #endif
 static inline void pend_kernel(void) { SCB->ICSR = SCB_ICSR_PENDSVSET_Msk; }
+uint32_t kernel_port_sleep(void);   // __WFI from SRAM; call with interrupts masked; returns the µs slept
 
 #ifdef __cplusplus
 }

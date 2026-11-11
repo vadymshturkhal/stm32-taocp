@@ -155,3 +155,22 @@ extern "C" void kernel_PendSV_Handler(void) {
     }
     pend_next();
 }
+
+/*
+ * Runs from SRAM: .data_ramfunc is matched by *(.data*), so startup copies it with
+ * .data. With DBG_SLEEP set, the G431 can run a wrong instruction from the I-cache
+ * after the wake (ES0431 2.2.7, seen even with its ISB and FLASHSMEN workarounds).
+ * Call with interrupts masked; returns the µs slept.
+ * 
+ * Explanations:
+ * .data_ramfunc, not .data.x: the .data. prefix makes gas warn "setting incorrect section attributes".
+ * noinline: this keeps the sequence in SRAM. Inlined into main, it would run from flash again.
+ */
+extern "C" [[gnu::section(".data_ramfunc"), gnu::noinline]]
+uint32_t kernel_port_sleep(void) {
+    const uint32_t t0 = now();
+    __DSB();    // finish every memory access before sleeping
+    __WFI();    // wakes on a pending interrupt even when masked
+    __ISB();    // the code after WFI runs only after the wake
+    return now() - t0;
+}

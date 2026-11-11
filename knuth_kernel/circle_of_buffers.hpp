@@ -140,6 +140,13 @@ public:
         return refused_.load(std::memory_order_relaxed);
     }
 
+    /*
+     * The buffer the device has or nullptr
+     */
+    [[nodiscard]] T* device_buffer() const noexcept {
+        return DEVICE_BUFFER.load(std::memory_order_acquire);
+    }
+
 private:
     // Circles NEXTR and NEXTG at [0, N)
     static constexpr std::size_t next(std::size_t i) noexcept {

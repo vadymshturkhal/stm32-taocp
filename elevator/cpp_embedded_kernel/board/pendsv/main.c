@@ -64,6 +64,7 @@ typedef struct
   uint32_t checksum;        /* checksum * 31 + TIME over the elevator's steps: 2487227626 expected */
   uint32_t pool_refused;    /* pushes the users' pool refused: 0 expected */
   uint32_t trace_dropped;   /* trace records lost to a full circle: 0 expected */
+  uint32_t wakes;
 } ElevatorRun;
 
 enum { ELEVATOR_PHASE_CPP, ELEVATOR_PHASE_DONE };
@@ -74,7 +75,7 @@ static uint32_t elevator_start_us;
 static uint32_t elevator_dwt_overhead;          /* the cost of reading CYCCNT twice */
 /* USER CODE END PV */
 
-/* Private function prototypes -----------------------------------------------*/
+/* Private function unprototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
@@ -256,21 +257,17 @@ int main(void)
       }
     }
 
-    /* Sleep until the next interrupt: the TIM2 compare (a deadline), SysTick, UART.
-     * Interrupts masked around it: the check and __WFI cannot be split by an
-     * interrupt (no lost wake-up), and the time counts only the sleep, because
-     * the woken handler (and PendSV after it) runs at __enable_irq() */
-    __disable_irq();
+    __disable_irq();  // pend interrupts
     if (!elevator_finishing())
     {
-      uint32_t t0 = TIM2->CNT;
-      __WFI();                                /* wakes on a pending interrupt even when masked */
+      const uint32_t slept = kernel_port_sleep();
       if (elevator_phase == ELEVATOR_PHASE_CPP)
       {
-        elevator_cpp.idle_us += TIM2->CNT - t0;
+        elevator_cpp.idle_us += slept;
+        elevator_cpp.wakes++;
       }
     }
-    __enable_irq();
+    __enable_irq();  // cpsie (Change Processor State, Interrupt Enable)
   }
   /* USER CODE END 3 */
 }

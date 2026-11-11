@@ -128,23 +128,16 @@ void board_main(void)
       elevator_finish();
     }
 
-    /* Sleep until the next interrupt (the TIM2 compare: a deadline).
-     * Interrupts masked around it: the check and __WFI cannot be split by an
-     * interrupt (no lost wake-up), and the time counts only the sleep, because
-     * the woken handler (and PendSV after it) runs at __enable_irq() */
     __disable_irq();
     if (!elevator_finishing())
     {
-      uint32_t t0 = TIM2->CNT;
-      __DSB();   /* finish every memory access before sleeping */
-      __WFI();  /* wakes on a pending interrupt even when masked */
-      __ISB();   /* flush the pipeline: the code after WFI runs only after the wake */
+      const uint32_t slept = kernel_port_sleep();
       if (elevator_phase == ELEVATOR_PHASE_CPP)
       {
-        elevator_cpp.idle_us += TIM2->CNT - t0;
+        elevator_cpp.idle_us += slept;
         elevator_cpp.wakes++;
       }
     }
-    __enable_irq();
+  __enable_irq();
   }
 }
