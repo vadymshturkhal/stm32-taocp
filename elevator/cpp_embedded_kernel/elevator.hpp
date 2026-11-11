@@ -33,6 +33,7 @@ private:
     bool first_search = false;  // Look at E3-E4
 
     static void E2(WaitNode& node, std::uint32_t now) noexcept;
+
     static void E4(WaitNode& node, std::uint32_t now) noexcept;
     static void E7(WaitNode& node, std::uint32_t now) noexcept;
     static void E7_continue(WaitNode& node, std::uint32_t now) noexcept;
@@ -40,6 +41,9 @@ private:
     static void E8_continue(WaitNode& node, std::uint32_t now) noexcept;
 
     void E2A(std::uint32_t delay) noexcept;  // Run E2 after delay
+    void E3_impl() noexcept;
     void E4A(std::uint32_t delay) noexcept;
     void E6B() noexcept;
+    void E7_impl() noexcept;
+    void E8_impl() noexcept;
 };

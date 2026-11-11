@@ -15,7 +15,7 @@ void Elevator::E5A(std::uint32_t delay) noexcept { simulation.holdc(ELEV2, delay
 void Elevator::E1(WaitNode& /*node*/, std::uint32_t /*now*/) noexcept {}
 
 // [Change of state?]
-void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
+void Elevator::E2(WaitNode& node, std::uint32_t /*now*/) noexcept {
     ElevatorSimulation& sim = begin_step(node);
     Elevator& elevator = sim.elevator;
 
@@ -27,7 +27,7 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
     if (elevator.STATE > 0) {
         // Are there calls for higher floors?
         if (sim.is_any_call(elevator.FLOOR + 1, FLOORS, ANY_CALL)) {
-            E3(node, now);
+            elevator.E3_impl();
             return;
         }
 
@@ -37,7 +37,6 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
             elevator.STATE = -elevator.STATE;
         } else {
             elevator.STATE = 0;
-
         }
     }
 
@@ -46,7 +45,7 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
         // Are there calls for lower floors?
         if (sim.is_any_call(0, elevator.FLOOR, ANY_CALL)) {
             // If yes, go to E3
-            E3(node, now);
+            elevator.E3_impl();
             return;
         }
 
@@ -67,15 +66,14 @@ void Elevator::E2(WaitNode& node, std::uint32_t now) noexcept {
     sim.CALLS[elevator.FLOOR] = 0;
 
     // Jump to E3
-    E3(node, now);
+    elevator.E3_impl();
 }
 
 // [Open door]
-void Elevator::E3(WaitNode& node, std::uint32_t /*now*/) noexcept {
-    ElevatorSimulation& sim = begin_step(node);
-    Elevator& elevator = sim.elevator;
+void Elevator::E3(WaitNode& node, std::uint32_t /*now*/) noexcept { begin_step(node).elevator.E3_impl(); }
 
-    trace(sim, "E3", "Elevator doors start to open");
+void Elevator::E3_impl() noexcept {
+    trace(simulation, "E3", "Elevator doors start to open");
 
     // If activity already scheduled: remove it from WAIT list
     // Note that it can be removed as WaitList::hold unlinks the node before sorting
@@ -83,22 +81,23 @@ void Elevator::E3(WaitNode& node, std::uint32_t /*now*/) noexcept {
 
     // Schedule activity E9 after 300 units
     std::uint32_t delay = 300;
-    sim.hold(elevator.ELEV3, delay);
+    simulation.hold(ELEV3, delay);
 
     // Schedule activity E5 after 76 units
     delay = 76;
-    sim.hold(elevator.ELEV2, delay);
+    simulation.hold(ELEV2, delay);
 
     // Set D2 to nonzero
-    elevator.D2 = 1;
+    D2 = 1;
 
     // Set D1 to nonzero
-    elevator.D1 = 1;
+    D1 = 1;
 
-    elevator.first_search = true;
+    // For printing
+    first_search = true;
 
     delay = 20;
-    elevator.E4A(delay);
+    E4A(delay);
 }
 
 // [Let people out, in]
@@ -230,6 +229,7 @@ void Elevator::E6B() noexcept {
     // If STATE == NEUTRAL: go to E1 and wait
     if (STATE == 0) {
         E1A();  // NOTE: can skip this line
+        simulation.check_done();
         return;
     }
 
@@ -246,21 +246,20 @@ void Elevator::E6B() noexcept {
 }
 
 // [Go up a floor]
-void Elevator::E7(WaitNode& node, std::uint32_t /*now*/) noexcept {
-    ElevatorSimulation& sim = begin_step(node);
-    Elevator& elevator = sim.elevator;
+void Elevator::E7(WaitNode& node, std::uint32_t /*now*/) noexcept { begin_step(node).elevator.E7_impl(); }
 
-    trace(sim, "E7", "Elevator moving up");
+void Elevator::E7_impl() noexcept {
+    trace(simulation, "E7", "Elevator moving up");
 
-    elevator.FLOOR += 1;
+    FLOOR += 1;
 
     // Wait 51 units
     std::uint32_t delay = 51;
-    sim.holdc(elevator.ELEV1, delay, &E7_continue);
+    simulation.holdc(ELEV1, delay, &E7_continue);
 }
 
 // [Move up]
-void Elevator::E7_continue(WaitNode& node, std::uint32_t now) noexcept {
+void Elevator::E7_continue(WaitNode& node, std::uint32_t /*now*/) noexcept {
     ElevatorSimulation& sim = begin_step(node);
     Elevator& elevator = sim.elevator;
 
@@ -281,12 +280,12 @@ void Elevator::E7_continue(WaitNode& node, std::uint32_t now) noexcept {
         // Are there calls for higher floors?
         if (sim.is_any_call(elevator.FLOOR + 1, FLOORS, ANY_CALL)) {
             // If yes: repeat E7
-            E7(node, now);
+            elevator.E7_impl();
             return;
         }
     } else {
         // repeat E7
-        E7(node, now);
+        elevator.E7_impl();
         return;
     }
 
@@ -296,22 +295,21 @@ void Elevator::E7_continue(WaitNode& node, std::uint32_t now) noexcept {
 }
 
 // [Go down a floor]
-void Elevator::E8(WaitNode& node, std::uint32_t /*now*/) noexcept {
-    ElevatorSimulation& sim = begin_step(node);
-    Elevator& elevator = sim.elevator;
+void Elevator::E8(WaitNode& node, std::uint32_t /*now*/) noexcept { begin_step(node).elevator.E8_impl(); }
 
-    trace(sim, "E8", "Elevator moving down");
+void Elevator::E8_impl() noexcept {
+    trace(simulation, "E8", "Elevator moving down");
 
     // DEC4 1
-    elevator.FLOOR -= 1;
+    FLOOR -= 1;
 
     // Wait 61 units
     std::uint32_t delay = 61;
-    sim.holdc(elevator.ELEV1, delay, &E8_continue);
+    simulation.holdc(ELEV1, delay, &E8_continue);
 }
 
 // [Move down]
-void Elevator::E8_continue(WaitNode& node, std::uint32_t now) noexcept {
+void Elevator::E8_continue(WaitNode& node, std::uint32_t /*now*/) noexcept {
     ElevatorSimulation& sim = begin_step(node);
     Elevator& elevator = sim.elevator;
 
@@ -332,12 +330,12 @@ void Elevator::E8_continue(WaitNode& node, std::uint32_t now) noexcept {
         // Are there calls for lower floors?
         if (sim.is_any_call(0, elevator.FLOOR, ANY_CALL)) {
             // If yes: repeat E8
-            E8(node, now);
+            elevator.E8_impl();
             return;
         }
     } else {
         // repeat E8
-        E8(node, now);
+        elevator.E8_impl();
         return;
     }
 
@@ -361,4 +359,5 @@ void Elevator::E9(WaitNode& node, std::uint32_t /*now*/) noexcept {
 
     // Call the decision
     sim.decision(&E9);
+    sim.check_done();
 }

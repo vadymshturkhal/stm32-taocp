@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cassert>
+#include <atomic>
 
 #include "kernel.hpp"
 #include "elevator_list.hpp"
@@ -15,13 +16,15 @@ public:
     explicit ElevatorSimulation(Kernel& k) noexcept : kernel(k) {}
 
     Kernel& kernel;
-    std::uint32_t t0 = 0;  // kernel tick at which the elevator started
+    std::uint32_t t0 = 0;            // kernel tick at which the elevator started
     std::uint32_t TIME = 0;
+    std::uint32_t checksum = 0;      // checksum * 31 + TIME at every step: 2487227626 for 66 users
     std::uint32_t CALLS[FLOORS]{};
     ElevatorList ELEVATOR_LIST;
     ElevatorList QUEUE[FLOORS];
     Elevator elevator{*this};
     Users users{*this};
+    std::atomic<bool> done {false};  // set in PendSV, read by main
 
     void start(std::uint32_t users_quantity, std::uint32_t now_ticks) noexcept;
 
@@ -56,8 +59,18 @@ public:
     }
 
     [[nodiscard]] bool finished() const noexcept;
+
+    /*
+     * Called by PendSV
+     */
+    void check_done() noexcept {
+        if (finished()) done.store(true, std::memory_order_release);
+    }
 };
 
+/*
+ * Every simulation step uses it
+ */
 inline ElevatorSimulation& begin_step(WaitNode& n) noexcept {
     auto& node = static_cast<ElevatorNode&>(n);
     
@@ -65,5 +78,7 @@ inline ElevatorSimulation& begin_step(WaitNode& n) noexcept {
 
     ElevatorSimulation& simulation = *node.simulation;
     simulation.TIME = (node.get_next_time() - simulation.t0) / TICKS_PER_TIME_UNIT;
+    
+    simulation.checksum = simulation.checksum * 31u + simulation.TIME;
     return simulation;
 }

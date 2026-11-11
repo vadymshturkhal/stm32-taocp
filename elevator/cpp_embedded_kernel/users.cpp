@@ -206,4 +206,6 @@ void Users::U6_impl(ElevatorNode& user, bool is_print) noexcept {
         parked = false;
         simulation.immed(USER1);
     }
+
+    simulation.check_done();
 }
