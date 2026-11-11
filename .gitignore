@@ -14,6 +14,7 @@ elevator/c_native/elevator_sim
 elevator/c_native/elevator_sim_notrace
 elevator/c_native/*.o
 .ipynb*
+.vscode
 
 # pi_mcu_protocol: test programs built on the PC (keep only the sources)
 pi_mcu_protocol/tests/*

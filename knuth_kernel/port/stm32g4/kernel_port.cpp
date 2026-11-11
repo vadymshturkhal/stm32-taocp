@@ -52,13 +52,18 @@ static uint32_t tick_offset = 0;         // keeps HAL's ms clock continuous at t
 static volatile uint32_t base_ms = 0;    // ms in all the wraps so far
 static volatile uint32_t base_rem = 0;   // their leftover µs, < 1000
 
+/*
+ * Based on TAOCP Vol 2.(4.3.1) Algorithm A (Addition of nonnegative integers).
+ */
 static void add_wrap(uint32_t& ms, uint32_t& rem) noexcept {
     ms += 4'294'967u;
     rem += 296u;
     if (rem >= 1000u) { rem -= 1000u; ++ms; }
 }
 
-// 36 cycles; the 64-bit division took 133 (measured)
+/*
+ * 36 cycles; the 64-bit division took 133 (measured)
+ */ 
 static uint32_t tim2_ms() noexcept {
     const uint32_t primask = __get_PRIMASK();
     __disable_irq();                      // no overflow ISR between the reads
