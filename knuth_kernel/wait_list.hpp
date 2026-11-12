@@ -53,11 +53,10 @@ private:
     friend class WaitList;
     template <std::derived_from<WaitNode> T> friend class StoragePool;   // uses left for the AVAIL list
 
-    // On a pool's AVAIL list: in no list (right points to itself), but left links
-    // the next free node. A node in use points to itself both ways when it is in
-    // no list, so only a free node looks like this. No list operation may touch it:
-    // unlinking it would write into the next free node and cut AVAIL.
-    [[nodiscard]] bool is_on_avail() const noexcept { return right == this && left != this; }
+    /*
+     * AVAIL list lenks on LEFT only: <-node<-node<-node
+     */
+    [[nodiscard]] bool is_on_avail() const noexcept { return left != this && right == this; }
 
     WaitNode* left = this;
     WaitNode* right = this;
