@@ -68,22 +68,36 @@ uint32_t stack_guard_size(void)
 }
 
 
-/* The C part: runs on the fresh stack, old_msp = the stacked frame */
+/* The C part: runs on the fresh stack, old_msp = the stacked frame,
+ * exc_return = the LR the core set on the HardFault's entry */
 __attribute__((used, noreturn))
-void stack_guard_record(const uint32_t* old_msp)
+void stack_guard_record(const uint32_t* old_msp, uint32_t exc_return)
 {
     const uint32_t cfsr = SCB->CFSR;
     stack_guard_fault.cfsr  = cfsr;
     stack_guard_fault.hfsr  = SCB->HFSR;
-    stack_guard_fault.mmfar = SCB->MMFAR;
-    stack_guard_fault.bfar  = SCB->BFAR;
+    /* The address registers hold an address only while their VALID bit is set */
+    stack_guard_fault.mmfar = (cfsr & SCB_CFSR_MMARVALID_Msk) ? SCB->MMFAR : 0u;
+    stack_guard_fault.bfar  = (cfsr & SCB_CFSR_BFARVALID_Msk) ? SCB->BFAR : 0u;
     stack_guard_fault.sp    = (uint32_t)old_msp;
+    stack_guard_fault.exc_return = exc_return;
 
-    /*The frame was stacked */
+    /* The frame was stacked: every word is there */
     if ((cfsr & (SCB_CFSR_MSTKERR_Msk | SCB_CFSR_STKERR_Msk)) == 0u)
     {
         stack_guard_fault.lr = old_msp[5];
         stack_guard_fault.pc = old_msp[6];
+    }
+    else
+    {
+        /* The stacking failed: the overflow put the frame (partly) in the guard.
+         * The Cortex-M4 stacks PC and xPSR first, then R0-R3, R12, LR. R0, the
+         * lowest word, is in the guard: that write faults and the rest is
+         * abandoned. So PC is kept when it lies above the guard; LR is never
+         * written (measured: a marker there stays) and stays 0. */
+        const uintptr_t guard_top = (uintptr_t)stack_bottom() + guard_bytes();
+        const uintptr_t pc_at = (uintptr_t)&old_msp[6];
+        if (pc_at >= guard_top && pc_at < (uintptr_t)_estack) stack_guard_fault.pc = old_msp[6];
     }
 
     ++stack_guard_fault.count;
@@ -99,10 +113,11 @@ void stack_guard_hard_fault(void)
 {
     __asm volatile(
         "mrs r0, msp            \n"   /* 1. the old SP: where the core stacked the frame */
-        "ldr r1, =_estack       \n"   /* 2. the top of RAM */
-        "msr msp, r1            \n"   /* 3. a fresh, empty stack */
-        "b   stack_guard_record \n"   /* 4. into C, with the old SP as the argument (r0) */
-        ".ltorg                 \n"); /* 5. the literal pool for "=_estack" */
+        "mov r1, lr             \n"   /* 2. EXC_RETURN: the frame's type, the mode, the stack */
+        "ldr r2, =_estack       \n"   /* 3. the top of RAM */
+        "msr msp, r2            \n"   /* 4. a fresh, empty stack */
+        "b   stack_guard_record \n"   /* 5. into C: (old SP in r0, EXC_RETURN in r1) */
+        ".ltorg                 \n"); /* 6. the literal pool for "=_estack" */
 }
 
 #ifndef USE_HAL_DRIVER

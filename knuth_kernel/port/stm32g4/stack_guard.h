@@ -26,13 +26,13 @@ typedef struct
 
     /* 
      * MemManage Fault Address Register
-     * SCB->MMFAR: the address the MPU refused (if CFSR.MMARVALID)
+     * SCB->MMFAR: the address the MPU refused; 0 unless CFSR.MMARVALID
      */
     uint32_t mmfar;
     
     /* 
      * BusFault Address Register 
-     * SCB->BFAR: the bus error's address (if CFSR.BFARVALID)
+     * SCB->BFAR: the bus error's address; 0 unless CFSR.BFARVALID
      */ 
     uint32_t bfar;
 
@@ -47,9 +47,18 @@ typedef struct
      * word 7  xPSR  the status flags and the exception number
      * (with FPU context: S0–S15, FPSCR and one more word follow)
      */
+    /* From the frame. After a stacking fault (CFSR.MSTKERR/STKERR: an overflow)
+     * lr is 0 (never stacked) and pc is kept only when it lay above the guard */
     uint32_t lr;
     uint32_t pc;
     uint32_t sp;        /* MSP when the HardFault was entered */
+
+    /* EXC_RETURN: the LR the core set on the HardFault's entry (not the code's LR)
+     * bit 4 = 0  the frame has the FPU context (104 bytes, not 32)
+     * bit 3 = 1  the fault came from thread mode, 0 from a handler
+     * bit 2 = 1  the frame is on PSP, 0 on MSP (sp above is MSP)
+     * 0xFFFFFFF9 thread, MSP, no FPU; 0xFFFFFFE9 the same with the FPU context; 0xFFFFFFF1 a handler */
+    uint32_t exc_return;
     uint32_t count;     /* HardFaults since reset */
 } StackGuardFault;
 
