@@ -13,6 +13,16 @@ MEMORY
 _estack = ORIGIN(RAM) + LENGTH(RAM);   /* the stack grows down from the top */
 _Min_Heap_Size = 0x200;                /* checked at link time; the heap may grow past it */
 _Min_Stack_Size = 0x400;
+/* The MPU no-access region at the stack's bottom (stack_guard.c). At least one
+ * exception frame with the FPU context: 26 words = 104 bytes (+4 alignment padding),
+ * so a frame stacked just above the guard cannot land below it. A power of 2 >= 32,
+ * and the stack's bottom must be aligned to it (an MPU region rule). */
+_Stack_Guard_Size = 128;
+ASSERT((_Stack_Guard_Size & (_Stack_Guard_Size - 1)) == 0 && _Stack_Guard_Size >= 32,
+       "_Stack_Guard_Size: a power of 2, at least 32")
+ASSERT(((_estack - _Min_Stack_Size) & (_Stack_Guard_Size - 1)) == 0,
+       "the stack's bottom is not aligned to _Stack_Guard_Size")
+ASSERT(_Stack_Guard_Size < _Min_Stack_Size, "_Stack_Guard_Size: the guard eats the stack")
 
 SECTIONS
 {

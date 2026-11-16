@@ -64,7 +64,7 @@ uint32_t stack_guard_depth(void)
 
 uint32_t stack_guard_size(void)
 {
-    return (uint32_t)(uintptr_t)&_Min_Stack_Size - guard_bytes();   /* 1024 - 32 = 992 */
+    return (uint32_t)(uintptr_t)&_Min_Stack_Size - guard_bytes();   /* 1024 - 128 = 896 */
 }
 
 

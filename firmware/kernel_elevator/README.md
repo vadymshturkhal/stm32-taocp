@@ -24,6 +24,18 @@ sums; then CMake configures and builds `build/elevator.elf` and
 `build/elevator.map` from the kernel and the elevator in this checkout
 (`../..`). Later runs rebuild only what changed.
 
+**The compiler** on Linux (Debian, Ubuntu), from the distribution's packages:
+
+```
+sudo apt install gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+```
+
+The C++ headers (`<optional>`, `<atomic>`, `<concepts>`) come from
+`libstdc++-arm-none-eabi-newlib`, the C library from `libnewlib-arm-none-eabi`.
+The compiler needs GCC >= 10 for C++20 (Ubuntu 22.04: 10.3). It has no GDB:
+see "On the board" below. With the compiler on PATH, `./setup.sh` needs no
+`TOOLCHAIN_DIR`.
+
 **Another compiler**, for example CubeIDE's GCC 14.3:
 
 ```
@@ -44,6 +56,29 @@ Without Ninja, leave out `-G Ninja` (Make).
 `build/elevator.elf`, waits for the run and prints PASS or FAIL. `./setup.sh
 results` reads the numbers again; the board must still hold that `.elf`, since
 GDB takes the variables' addresses from it.
+
+These need OpenOCD and a GDB for ARM. On Linux (Debian, Ubuntu), together
+with the compiler, everything in one line:
+
+```
+sudo apt install openocd gdb-multiarch gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+```
+
+Instead of `gdb-multiarch`, the `arm-none-eabi-gdb` next to the compiler works
+too: `TOOLCHAIN_DIR=<folder with arm-none-eabi-gdb> ./setup.sh test` (CubeIDE
+ships one in `plugins/*gnu-tools-for-stm32*/tools/bin`).
+
+**CubeIDE's OpenOCD** instead of a system one (paths under `~/st/STM32CubeIDE_*/plugins`):
+
+```
+OPENOCD=.../com.st.stm32cube.ide.mcu.externaltools.openocd.linux64_*/tools/bin/openocd \
+OPENOCD_SCRIPTS=.../com.st.stm32cube.ide.mcu.debug.openocd_*/resources/openocd/st_scripts \
+STLINK_CFG=stlink-dap.cfg ./setup.sh test
+```
+
+`setup.sh` passes `set ENABLE_LOW_POWER 1`: without it, ST's `stm32g4x.cfg`
+clears `DBG_SLEEP` in `DBGMCU_CR` on attach, and attaching to the core asleep
+in `__WFI` fails with "Examination failed".
 
 ## Reference: the same elevator in the CubeIDE project (HAL)
 

@@ -22,6 +22,7 @@ add_executable(elevator
     ${CMSIS}/device/system_stm32g4xx.c         # SystemInit: the FPU on
     ${CMSIS}/device/startup_stm32g431xx.s      # the vector table, Reset_Handler
     ${KERNEL}/port/stm32g4/kernel_port.cpp
+    ${KERNEL}/port/stm32g4/stack_guard.c       # the MPU stack guard, HardFault_Handler
     ${ELEVATOR}/elevator.cpp
     ${ELEVATOR}/elevator_list.cpp
     ${ELEVATOR}/elevator_simulation.cpp

@@ -13,6 +13,11 @@
 # Settings (environment):
 #   TOOLCHAIN_DIR=<path>  the folder with arm-none-eabi-gcc (default: from PATH)
 #   STATS=1               build with KNUTH_KERNEL_STATS (the WAIT list's counters)
+#   OPENOCD=<path>        the openocd binary (default: from PATH), e.g. CubeIDE's
+#   OPENOCD_SCRIPTS=<dir> its scripts folder (openocd reads this variable itself);
+#                         CubeIDE's: .../com.st.stm32cube.ide.mcu.debug.openocd_*/resources/openocd/st_scripts
+#   STLINK_CFG=<file>     the probe's interface script (default: stlink.cfg);
+#                         stlink-dap.cfg for CubeIDE's OpenOCD (its stlink.cfg loops)
 #
 # Needs: curl, sha256sum, cmake >= 3.20, arm-none-eabi-gcc >= 10 (C++20);
 # for flash/results/test also openocd and gdb (arm-none-eabi-gdb or gdb-multiarch).
@@ -31,7 +36,11 @@ G4_URL="https://raw.githubusercontent.com/STMicroelectronics/cmsis-device-g4/$CM
 
 EXPECT_STEPS=544
 EXPECT_CHECKSUM=2487227626
-OPENOCD_ARGS=(-f interface/stlink.cfg -f target/stm32g4x.cfg)
+OPENOCD="${OPENOCD:-openocd}"
+# ENABLE_LOW_POWER=1: ST's stm32g4x.cfg otherwise CLEARS DBGMCU_CR's DBG_SLEEP/STOP/STANDBY
+# on attach, and an attach to the core sleeping in __WFI (most of the run, all of it
+# after) loses the bus: "Examination failed". Upstream's script sets them anyway.
+OPENOCD_ARGS=(-c "set ENABLE_LOW_POWER 1" -f "interface/${STLINK_CFG:-stlink.cfg}" -f target/stm32g4x.cfg)
 
 say() { printf '\n== %s\n' "$*"; }
 die() { printf 'setup.sh: %s\n' "$*" >&2; exit 1; }
@@ -77,10 +86,10 @@ build() {
 }
 
 flash() {
-    need openocd
+    need "$OPENOCD"
     [ -f "$ELF" ] || die "no $ELF: run ./setup.sh first"
     say "flash"
-    openocd "${OPENOCD_ARGS[@]}" -c "program $ELF verify reset exit"
+    "$OPENOCD" "${OPENOCD_ARGS[@]}" -c "program $ELF verify reset exit"
 }
 
 gdb_cmd() {
@@ -90,10 +99,12 @@ gdb_cmd() {
 }
 
 results() {
-    need openocd
+    need "$OPENOCD"
     [ -f "$ELF" ] || die "no $ELF: run ./setup.sh first"
+    local ocd   # GDB runs the pipe through a shell: quote each word
+    ocd="$(printf '%q ' "$OPENOCD" -c 'gdb_port pipe; log_output /dev/null' "${OPENOCD_ARGS[@]}")"
     "$(gdb_cmd)" -q -batch -nx "$ELF" \
-        -ex "target extended-remote | openocd -c 'gdb_port pipe; log_output /dev/null' ${OPENOCD_ARGS[*]}" \
+        -ex "target extended-remote | $ocd" \
         -ex "print elevator_phase" \
         -ex "print elevator_cpp.checksum" \
         -ex "print kernel_stats" \
