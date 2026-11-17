@@ -121,9 +121,8 @@ TIM2 CNT == CCR1 ─► TIM2_IRQHandler: clear the flag, pend PendSV
                          │
        (no other interrupt active) ─► PendSV_Handler ─► kernel_pendsv():
                                         run every due node (the drain loop)
-                                        kernel_port_after_step() after each one
                                         aim(): CCR1 = the next deadline
-main:  Link_Poll ─► elevator_done? ─► __WFI() ─► (woken) ─► ...
+main:  Link_Poll ─► cpp_elevator_finished()? ─► kernel_port_sleep() ─► (woken) ─► ...
 ```
 
 - **Only PendSV touches the kernel** after the first `pend_kernel()`: `main`
@@ -133,14 +132,19 @@ main:  Link_Poll ─► elevator_done? ─► __WFI() ─► (woken) ─► ...
 - **`aim()` re-checks the deadline** after arming the compare: if it already
   passed, it pends PendSV itself (otherwise the next match is 71.6 min away).
 - **The end is the elevator's own state** (`finished()`: every user gone, the
-  elevator dormant at E1), not an empty list: the kernel is shared.
+  elevator dormant at E1), not an empty list: the kernel is shared. The elevator
+  checks it at the steps that can end a run and sets an atomic flag; `main`
+  polls it with `cpp_elevator_finished()`.
+- **The sleep runs from SRAM** (`kernel_port_sleep()` in the port): with
+  `DBG_SLEEP` set, the G431 can skip the first instruction fetched from flash
+  after `__WFI` (ES0431 §2.2.7, seen even with its workarounds).
 
 ## Files
 
 | File | Goes to (CubeIDE project) | What it is |
 |------|---------------------------|------------|
-| `main.c` | `Core/Src/main.c` | starts the link and the elevator, waits for `elevator_done`, sleeps in `__WFI()`; collects every number in `elevator_finish()` |
-| `start_cpp_elevator_simulation.{h,cpp}` | `Core/Src/elevator_cpp/` | the elevator callable from C: `cpp_elevator_create()` / `cpp_elevator_start()` / `cpp_elevator_stop()`, and the kernel hook `kernel_port_after_step()` (checksum, `elevator_done`) |
+| `main.c` | `Core/Src/main.c` | starts the link and the elevator, waits for `cpp_elevator_finished()`, sleeps in `kernel_port_sleep()`; collects every number in `elevator_finish()` |
+| `start_cpp_elevator_simulation.{h,cpp}` | `Core/Src/elevator_cpp/` | the elevator callable from C: `cpp_elevator_create()` / `cpp_elevator_start()` / `cpp_elevator_stop()`, `cpp_elevator_finished()` and `cpp_elevator_checksum()` (the elevator keeps both itself) |
 
 From elsewhere in the repository:
 

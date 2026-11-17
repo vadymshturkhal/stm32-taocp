@@ -5,9 +5,11 @@
 #   ./setup.sh fetch      only fetch CMSIS (pinned, checked); the kernel and the elevator
 #                         are in this checkout (../..)
 #   ./setup.sh build      only configure and build
-#   ./setup.sh flash      program the board over the ST-LINK (OpenOCD)
+#   ./setup.sh flash      build (only what changed), program the board over the ST-LINK (OpenOCD)
 #   ./setup.sh results    read the numbers from the running board (GDB + OpenOCD)
-#   ./setup.sh test       flash, wait for the run (~10.4 s), read, check 544 / 2487227626
+#   ./setup.sh test       build, flash, wait for the run (~10.4 s), read, check 544 steps,
+#                         checksum 2487227626, 473 wakes, idle within the run,
+#                         the stack guard on and no HardFault
 #   ./setup.sh clean      remove build/ (third_party/ stays)
 #
 # Settings (environment):
@@ -36,6 +38,8 @@ G4_URL="https://raw.githubusercontent.com/STMicroelectronics/cmsis-device-g4/$CM
 
 EXPECT_STEPS=544
 EXPECT_CHECKSUM=2487227626
+EXPECT_WAKES=473             # main's sleeps: a wrong count means the sleep accounting broke
+                             # (e.g. the DBG_SLEEP misfetch after __WFI, ES0431 2.2.7)
 OPENOCD="${OPENOCD:-openocd}"
 # ENABLE_LOW_POWER=1: ST's stm32g4x.cfg otherwise CLEARS DBGMCU_CR's DBG_SLEEP/STOP/STANDBY
 # on attach, and an attach to the core sleeping in __WFI (most of the run, all of it
@@ -109,21 +113,32 @@ results() {
         -ex "print elevator_cpp.checksum" \
         -ex "print kernel_stats" \
         -ex "print elevator_cpp" \
+        -ex "print is_stack_guard_on" \
+        -ex "print stack_guard_fault" \
         -ex "monitor resume" \
         -ex "detach" 2>/dev/null | grep '^\$'   # resume: detach through the pipe leaves the core halted
 }
 
 check() {   # check the output of results
-    local out steps checksum done
+    local out steps checksum done wakes idle elapsed guard faults
     out="$(results)"
     echo "$out"
     done="$(sed -n 's/^\$1 = //p' <<<"$out")"         # elevator_phase: 1 = ELEVATOR_PHASE_DONE
     checksum="$(sed -n 's/^\$2 = //p' <<<"$out")"
     steps="$(grep -o 'steps = [0-9]*' <<<"$out" | head -1 | grep -o '[0-9]*$')"
-    if [ "$done" = 1 ] && [ "$steps" = "$EXPECT_STEPS" ] && [ "$checksum" = "$EXPECT_CHECKSUM" ]; then
-        echo "PASS: $steps steps, checksum $checksum"
+    wakes="$(grep -o 'wakes = [0-9]*' <<<"$out" | grep -o '[0-9]*$')"
+    idle="$(grep -o 'idle_us = [0-9]*' <<<"$out" | grep -o '[0-9]*$')"
+    elapsed="$(grep -o 'elapsed_us = [0-9]*' <<<"$out" | grep -o '[0-9]*$')"
+    guard="$(sed -n 's/^\$5 = //p' <<<"$out")"                              # is_stack_guard_on
+    faults="$(sed -n 's/^\$6 = .*count = \([0-9]*\).*/\1/p' <<<"$out")"     # stack_guard_fault.count
+    if [ "$done" = 1 ] && [ "$steps" = "$EXPECT_STEPS" ] && [ "$checksum" = "$EXPECT_CHECKSUM" ] \
+       && [ "$wakes" = "$EXPECT_WAKES" ] && [ -n "$idle" ] && [ -n "$elapsed" ] && [ "$idle" -le "$elapsed" ] \
+       && [ "$guard" = 1 ] && [ "$faults" = 0 ]; then
+        echo "PASS: $steps steps, checksum $checksum, $wakes wakes, idle $idle of $elapsed us, stack guard on, 0 faults"
     else
-        echo "FAIL: done $done, steps $steps (want $EXPECT_STEPS), checksum $checksum (want $EXPECT_CHECKSUM)"
+        echo "FAIL: done $done, steps $steps (want $EXPECT_STEPS), checksum $checksum (want $EXPECT_CHECKSUM)," \
+             "wakes $wakes (want $EXPECT_WAKES), idle $idle us (want <= elapsed $elapsed)," \
+             "stack guard $guard (want 1), faults $faults (want 0)"
         return 1
     fi
 }
@@ -132,9 +147,9 @@ case "${1:-all}" in
     all)     fetch; build ;;
     fetch)   fetch ;;
     build)   build ;;
-    flash)   flash ;;
+    flash)   build; flash ;;
     results) results ;;
-    test)    flash; say "the run (12 s)"; sleep 12; say "results"; check ;;
+    test)    build; flash; say "the run (12 s)"; sleep 12; say "results"; check ;;
     clean)   rm -rf "$BUILD" ;;
     *)       sed -n '2,20p' "$0"; exit 1 ;;
 esac

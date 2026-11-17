@@ -10,6 +10,7 @@
  * -> PendSV, untick "Generate IRQ handler", or the link finds two of them. */
 #include "board_main.h"
 #include "kernel_port.hpp"
+#include "stack_guard.h"
 #include "start_cpp_elevator_simulation.h"
 
 #define ELEVATOR_USERS 66
@@ -22,6 +23,7 @@ typedef struct
   uint32_t checksum;        /* checksum * 31 + TIME over the elevator's steps: 2487227626 expected */
   uint32_t pool_refused;    /* pushes the users' pool refused: 0 expected */
   uint32_t wakes;           /* how many times __WFI woke up */
+  uint32_t stack_used;      /* the deepest the stack went (painted), bytes of stack_guard_size() */
 } ElevatorRun;
 
 enum { ELEVATOR_PHASE_CPP, ELEVATOR_PHASE_DONE };
@@ -72,6 +74,7 @@ static void __attribute__((noinline)) elevator_finish(void)
   volatile uint32_t idle_us = elevator_cpp.idle_us;
   volatile uint32_t idle_permille = elapsed_us ? (uint32_t)((uint64_t)idle_us * 1000u / elapsed_us) : 0;
   volatile uint32_t wakes = elevator_cpp.wakes;
+  volatile uint32_t stack_used = elevator_cpp.stack_used;            /* 228 of 896 bytes with one kernel level */
   volatile uint32_t awake_us = elapsed_us - idle_us;
 
   /* Misuse a release build refuses silently: both must be 0 */
@@ -87,7 +90,7 @@ static void __attribute__((noinline)) elevator_finish(void)
 
   (void)steps; (void)checksum; (void)start_cycles; (void)busy_cycles;
   (void)cycles_per_step; (void)max_cycles; (void)late_sum_us; (void)late_avg_ns; (void)max_late_us;
-  (void)elapsed_us; (void)idle_us; (void)idle_permille; (void)wakes; (void)awake_us;
+  (void)elapsed_us; (void)idle_us; (void)idle_permille; (void)wakes; (void)awake_us; (void)stack_used;
   (void)refused_ops; (void)pool_refused;
   (void)sortins; (void)list_max; (void)list_avg_x100; (void)walk_max; (void)walk_avg_x100;
 
@@ -122,6 +125,7 @@ void board_main(void)
     {
       elevator_cpp.elapsed_us = TIM2->CNT - elevator_start_us;
       elevator_cpp.checksum = cpp_elevator_checksum();           /* before stop: the simulation goes with it */
+      elevator_cpp.stack_used = stack_guard_depth();
       elevator_cpp.pool_refused = cpp_elevator_pool_refused();
       cpp_elevator_stop();                  /* finished: none of its nodes is in the kernel */
       elevator_phase = ELEVATOR_PHASE_DONE;
