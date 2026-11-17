@@ -129,6 +129,32 @@ Needs: `curl`, `sha256sum`, `cmake` >= 3.20, `arm-none-eabi-gcc` >= 10
 (C++20); for `flash`, `results` and `test` also `openocd` and `gdb`
 (`arm-none-eabi-gdb` or `gdb-multiarch`). Ninja is used when it is installed.
 
+## The stack guard
+
+`main` calls `stack_guard_init()` first
+([stack_guard.c](../../knuth_kernel/port/stm32g4/stack_guard.c)). It paints the
+stack with `0xDEADBEEF` and makes the bottom 128 bytes of the 1 KB stack
+(`0x20007C00`–`0x20007C7F`, MPU region 0) inaccessible. An overflow becomes a
+HardFault, which records the fault in `stack_guard_fault`, instead of silently
+overwriting the heap. `stack_used` in `elevator_cpp` is the deepest the stack
+went (painted): 228 of 896 bytes in a normal run. How it works:
+[SCHEME.md](../../knuth_kernel/port/stm32g4/SCHEME.md#the-stack-guard-stack_guardc).
+
+**Why 128 bytes and not 32.** The first FPU instruction in thread mode sets
+`CONTROL.FPCA`. From then on every exception taken from `main` reserves the
+extended frame, 104 bytes (`EXC_RETURN` = `0xFFFFFFE9`). No `float` is needed
+for that: the compiler uses FPU registers to move memory. Which code does it
+first depends on the build:
+
+| Build | Compiler | What sets `FPCA` first |
+|---|---|---|
+| Bare build | GCC 10.3 | `stack_guard_init()`: the paint loop compiles to `vldr` + `vstmia` (FPU registers). There's no BSP in this build. |
+| Elevator-Primes | GCC 14.3 (CubeIDE) | `BSP_LED_Init` and `BSP_PB_Init` (`vldr`/`vstr d7`). Here the same paint loop compiles to `strd r2, r2, [r3]`, plain integer registers. |
+
+So assume the extended frame in every build: a 104-byte frame that starts
+above a 128-byte guard can't end below it. The size is `_Stack_Guard_Size` in
+[stm32g431rb.ld](stm32g431rb.ld), with `ASSERT`s for its alignment.
+
 ## What replaces the CubeMX project
 
 | File | Replaces |
