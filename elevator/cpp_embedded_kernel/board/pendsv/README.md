@@ -36,9 +36,9 @@ PC and the earlier board runs), no refused operations, CPU idle 99.8 % of the
   `ElevatorSimulation` and `ElevatorList` (`arm-none-eabi-nm -S`); the kernel is
   header-only, so its list code is inlined into them. With LTO the helpers
   (`decision`, `E6B`, `U2`, ...) are inlined into the steps too.
-- **The kernel's handlers** are `kernel_pendsv` (the drain loop with
-  `Kernel::step`, `aim()` and the stats), `PendSV_Handler` and
-  `TIM2_IRQHandler`; with LTO `kernel_pendsv` is inlined into
+- **The kernel's handlers** are `kernel_PendSV_Handler` (the drain loop with
+  `Kernel::step`, `pend_next()` and the stats), `PendSV_Handler` and
+  `TIM2_IRQHandler`; with LTO `kernel_PendSV_Handler` is inlined into
   `PendSV_Handler`. `kernel_port_init` (84 B, run once) is left out: with LTO
   it is inlined into `main`.
 - `-O3 -flto` buys 6 % (14 cycles per step) for 23 % more flash than `-O2`.
@@ -119,9 +119,9 @@ frames are mixed in (the first line is its RST).
 ```
 TIM2 CNT == CCR1 ─► TIM2_IRQHandler: clear the flag, pend PendSV
                          │
-       (no other interrupt active) ─► PendSV_Handler ─► kernel_pendsv():
+       (no other interrupt active) ─► PendSV_Handler ─► kernel_PendSV_Handler():
                                         run every due node (the drain loop)
-                                        aim(): CCR1 = the next deadline
+                                        pend_next(): CCR1 = the next deadline
 main:  Link_Poll ─► cpp_elevator_finished()? ─► kernel_port_sleep() ─► (woken) ─► ...
 ```
 
@@ -129,7 +129,7 @@ main:  Link_Poll ─► cpp_elevator_finished()? ─► kernel_port_sleep() ─�
   and the ISRs never call `hold` or `cancel`, so the list needs no locks.
 - **PendSV has the lowest priority** (15), TIM2 a higher one (2): the kernel
   never delays an interrupt.
-- **`aim()` re-checks the deadline** after arming the compare: if it already
+- **`pend_next()` re-checks the deadline** after arming the compare: if it already
   passed, it pends PendSV itself (otherwise the next match is 71.6 min away).
 - **The end is the elevator's own state** (`finished()`: every user gone, the
   elevator dormant at E1), not an empty list: the kernel is shared. The elevator
@@ -173,7 +173,7 @@ From elsewhere in the repository:
    void PendSV_Handler(void)
    {
      /* USER CODE BEGIN PendSV_IRQn 0 */
-     kernel_pendsv();
+     kernel_PendSV_Handler();
    ```
    `TIM2_IRQHandler` is defined in `kernel_port.cpp` (TIM2 is not configured in
    the `.ioc`, so CubeMX does not generate one).

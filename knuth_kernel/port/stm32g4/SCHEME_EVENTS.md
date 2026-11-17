@@ -31,7 +31,7 @@ calls `kernel_post()` yet. Its first users will be the button and the I2C DMA.
                          ▼       ├───────────────────┘
    events_: 8 slots of WaitNode* │ PENDSVSET (the doorbell)
                          │ red   │
-  PendSV (prio 15)       │       ▼ kernel_pendsv()
+  PendSV (prio 15)       │       ▼ kernel_PendSV_Handler()
   ┌──────────────────────│───────────────────────────────────┐
   │ for (;;) {           │                                   │
   │   t = now()          ▼                                   │
@@ -45,24 +45,24 @@ calls `kernel_post()` yet. Its first users will be the button and the I2C DMA.
   │ }                                                        │
   │                                                          │
   │ refused_ops, events_dropped copied to kernel_stats       │
-  │ aim(): the next alarm                                    │
+  │ pend_next(): the next alarm                              │
   └──────────────────────────────────────────────────────────┘
 ```
 
 One event on a timeline:
 
 ```
-time ─────────────────────────────────────────────────────────────────────────►
+time ───────────────────────────────────────────────────────────────────────────────►
 
-main    ███ WFI (asleep) ···█ woken ██ __enable_irq                 ██ loop, WFI ···
-                            ▲          │                             ▲
-button edge ────────────────┘          ▼                             │
-ISR     (pending until __enable_irq)   █ post, pend_kernel           │
-                                        ╲ tail-chain                 │ return
-PendSV                                   ██ start_event ██ step ██ aim
+main    ███ WFI (asleep) ···█ woken ██ __enable_irq                       ██ loop, WFI ···
+                            ▲          │                                   ▲
+button edge ────────────────┘          ▼                                   │
+ISR     (pending until __enable_irq)   █ post, pend_kernel                 │
+                                        ╲ tail-chain                       │ return
+PendSV                                   ██ start_event ██ step ██ pend_next
 ```
 
-The cycle: **post → doorbell → PendSV: `start_event`, `step`, per event → `aim`**.
+The cycle: **post → doorbell → PendSV: `start_event`, `step`, per event → `pend_next`**.
 
 ## Rules
 
@@ -97,7 +97,7 @@ the step must find out which of the two happened.
 pending. The running pass doesn't see it unless it hasn't reached `start_event`
 yet; otherwise a later pass or the next PendSV takes it. No event is lost.
 
-**An ISR fires after the loop's last pass, before `aim()`.** The doorbell makes
+**An ISR fires after the loop's last pass, before `pend_next()`.** The doorbell makes
 PendSV run again at once.
 
 **The circle is full.** `post` returns `false` and counts it in `events_dropped`.
@@ -117,6 +117,11 @@ its own timestamp, taken in the ISR.
 
 The button's level is `BSP_BUTTON_USER_IT_PRIORITY` in `stm32g4xx_nucleo_conf.h`,
 applied by `BSP_PB_Init()`. Its default is 15. Check it after CubeMX regenerates.
+
+All levels share the one MSP. In the worst case `main`, PendSV, an ISR at 3 and
+TIM2 are all on it at once, with a frame for each interrupt (32 bytes, 104 with
+the FPU context). The [stack guard](SCHEME.md#the-stack-guard-stack_guardc)
+turns an overflow into a recorded HardFault.
 
 ## New names
 
