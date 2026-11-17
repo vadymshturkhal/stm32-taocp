@@ -9,6 +9,7 @@
 
 - This repository contains Python, C, C++ and hand-tuned ARM Assembly implementations of [Algorithms](#algorithms) and [Data Structures](#data-structures) from The Art of Computer Programming, Vol.1, and a [Raspberry Pi ↔ STM32 protocol](#systems) built from its ideas.
 - [Knuth kernel](#systems): Knuth's 1968 CYCLE running as a real-time kernel on the Cortex-M4, in PendSV woken by a hardware timer: every event within 6 µs of its deadline, the CPU asleep 99.8% of the time, the same result as the simulation to the last bit.
+- [Firmware](#firmware): the elevator on the Knuth kernel from one script: it builds, flashes the board and checks the run, with an MPU guard against stack overflow.
 - [Paper](#papers): *Is C++ Slower than C on a Cortex-M4?* A controlled measurement on the board: the same design costs the same in both languages.
 
 ## Why this repository exists
@@ -130,7 +131,7 @@ is what came of taking that seriously.
 
 # Firmware:
 - [Knuth elevator](firmware/kernel_elevator): the C++ elevator on the [Knuth kernel](knuth_kernel) for the NUCLEO-G431RB,
-  bare: One script (`./setup.sh test`) fetches CMSIS, builds with CMake,
+  One script (`./setup.sh test`) fetches CMSIS, builds with CMake,
   flashes the board and checks the run: 544 steps, the same checksum as the simulation, the CPU asleep 99.99% of the time,
   and an MPU guard at the bottom of the stack that turns an overflow into a recorded HardFault.
 
