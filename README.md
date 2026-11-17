@@ -128,6 +128,12 @@ is what came of taking that seriously.
   and a [circle of buffers](knuth_kernel#circleofbuffers-circle_of_buffershpp) (§1.4.4) for DMA transmit, one whole line per transfer.
   C++23 on the MCU, Python on the Pi, tested in CI under AddressSanitizer, UBSan and ThreadSanitizer.
 
+# Firmware:
+- [Knuth elevator](firmware/kernel_elevator): the C++ elevator on the [Knuth kernel](knuth_kernel) for the NUCLEO-G431RB,
+  bare: One script (`./setup.sh test`) fetches CMSIS, builds with CMake,
+  flashes the board and checks the run: 544 steps, the same checksum as the simulation, the CPU asleep 99.99% of the time,
+  and an MPU guard at the bottom of the stack that turns an overflow into a recorded HardFault.
+
 # Papers:
 - [Is C++ Slower than C on a Cortex-M4? A Controlled Measurement with Knuth's Elevator](elevator/measurements/PAPER.md):
   the elevator implemented three ways (C, the C design written in C++, and C++ on the [Knuth kernel](knuth_kernel)),
