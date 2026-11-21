@@ -24,7 +24,8 @@ typedef struct {
 extern "C" {
 #endif
 
-extern KernelStats kernel_stats;    // defined in kernel_port.cpp
+extern KernelStats kernel_stats_level_14;  // defined in kernel_port.cpp; level_14's (the elevator's)
+extern KernelStats kernel_stats_level_15;  // level_15's (PendSV)
 
 void kernel_port_init(void);        // callable from main.c
 void kernel_PendSV_Handler(void);   // called from PendSV_Handler
@@ -40,8 +41,23 @@ uint32_t kernel_port_sleep(void);   // __WFI from SRAM; call with interrupts mas
 
 constinit inline Kernel kernel;     // global Kernel for every program
 
+// Two kernel levels (stage 2), not used yet: the elevator moves to level_14,
+// the trace drain and tx_watchdog go to level_15. Then the global kernel goes.
+inline void pend_level_14() noexcept { NVIC->STIR = CORDIC_IRQn; }   // pends CORDIC_IRQHandler
+inline void pend_level_15() noexcept { pend_kernel(); }              // pends PendSV
+
+struct KernelLevel {
+    Kernel kernel;               // this level's WAIT list: only this level's handler touches it (rule 1)
+    KernelStats& stats;          // a C global, so main.c, GDB and setup.sh can read it
+    uint8_t channel;             // 0 = CCR1/CC1IF, 1 = CCR2/CC2IF
+    void (*doorbell)() noexcept; // how to run this level from anywhere
+};
+
+constinit inline KernelLevel level_14{ .kernel = {}, .stats = kernel_stats_level_14, .channel = 0, .doorbell = pend_level_14 };
+constinit inline KernelLevel level_15{ .kernel = {}, .stats = kernel_stats_level_15, .channel = 1, .doorbell = pend_level_15 };
+
 // The kernel's clock: TIM2, 32-bit, 1 tick = 1 µs, wraps every ~71.6 min
-// TIM2->CNT is already volatile (CMSIS marks it __IO), so the compiler won't cache it
+// TIM2->CNT is already volatile (CMSIS marks it __IO)
 inline uint32_t now() noexcept { return TIM2->CNT; }
 
 inline bool kernel_post(WaitNode& node) noexcept {

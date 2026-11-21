@@ -58,7 +58,7 @@ numbers down to the cycle.
 
 | Variable | Value | Meaning |
 |----------|------:|---------|
-| `steps` | 544 | nodes the kernel ran (`kernel_stats.steps`) |
+| `steps` | 544 | nodes the kernel ran (`kernel_stats_level_14.steps`) |
 | `checksum` | 2487227626 | `sum = sum * 31 + TIME` after every step: the same work as the PC |
 | `start_cycles` | 8 446 | DWT cycles of the setup: `cpp_elevator_create()` (the users' pool) + `cpp_elevator_start()` |
 | `busy_cycles` | 127 072 | DWT cycles inside `kernel.step()`, all steps together |

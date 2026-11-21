@@ -111,7 +111,7 @@ results() {
         -ex "target extended-remote | $ocd" \
         -ex "print elevator_phase" \
         -ex "print elevator_cpp.checksum" \
-        -ex "print kernel_stats" \
+        -ex "print kernel_stats_level_14" \
         -ex "print elevator_cpp" \
         -ex "print is_stack_guard_on" \
         -ex "print stack_guard_fault" \

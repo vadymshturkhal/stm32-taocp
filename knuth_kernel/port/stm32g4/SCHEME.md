@@ -41,7 +41,7 @@ ISR posts yet: the button and the I2C DMA will be the first.
   │   stats: cycles, lateness                   │      │     │   │
   │ }  ─────────────────────────────────────────│──────┘     │   │
   │                                             ▼            │   │
-  │   refused_ops, events_dropped → kernel_stats             │   │
+  │   refused_ops, events_dropped → kernel_stats_level_14    │   │
   │   pend_next():                                           │   │
   │     list empty?  → CC1IE off, return (no alarm)          │   │
   │     CCR1 = first node's NEXTTIME ────────────────────────│───┘

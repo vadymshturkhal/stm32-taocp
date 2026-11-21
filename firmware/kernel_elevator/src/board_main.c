@@ -2,7 +2,7 @@
  *
  * The kernel runs in PendSV, woken by the TIM2 compare at each deadline; main
  * only ends the run and sleeps. The per-step numbers (steps, cycles, lateness)
- * are the port's kernel_stats. Globals, so they survive -O2/LTO and Live
+ * are the port's kernel_stats_level_14. Globals, so they survive -O2/LTO and Live
  * Expressions can read them while it runs.
  *
  * CMSIS only, apart from the HAL tick switch (USE_HAL_DRIVER: CubeMX builds).
@@ -61,15 +61,15 @@ static inline int elevator_finishing(void)
  * function even at -O3/LTO, so the breakpoint binds; volatile: the locals are kept. */
 static void __attribute__((noinline)) elevator_finish(void)
 {
-  volatile uint32_t steps = kernel_stats.steps;                       /* 544 expected */
+  volatile uint32_t steps = kernel_stats_level_14.steps;                       /* 544 expected */
   volatile uint32_t checksum = elevator_cpp.checksum;                 /* 2487227626 expected */
   volatile uint32_t start_cycles = elevator_cpp.start_cycles;
-  volatile uint32_t busy_cycles = kernel_stats.busy_cycles;
+  volatile uint32_t busy_cycles = kernel_stats_level_14.busy_cycles;
   volatile uint32_t cycles_per_step = steps ? busy_cycles / steps : 0;
-  volatile uint32_t max_cycles = kernel_stats.max_cycles;             /* the longest step */
-  volatile uint32_t late_sum_us = kernel_stats.late_sum_us;
+  volatile uint32_t max_cycles = kernel_stats_level_14.max_cycles;             /* the longest step */
+  volatile uint32_t late_sum_us = kernel_stats_level_14.late_sum_us;
   volatile uint32_t late_avg_ns = steps ? (uint32_t)((uint64_t)late_sum_us * 1000u / steps) : 0;   /* < 1 µs: in ns */
-  volatile uint32_t max_late_us = kernel_stats.max_late_us;           /* the worst lateness */
+  volatile uint32_t max_late_us = kernel_stats_level_14.max_late_us;           /* the worst lateness */
   volatile uint32_t elapsed_us = elevator_cpp.elapsed_us;
   volatile uint32_t idle_us = elevator_cpp.idle_us;
   volatile uint32_t idle_permille = elapsed_us ? (uint32_t)((uint64_t)idle_us * 1000u / elapsed_us) : 0;
@@ -78,15 +78,15 @@ static void __attribute__((noinline)) elevator_finish(void)
   volatile uint32_t awake_us = elapsed_us - idle_us;
 
   /* Misuse a release build refuses silently: both must be 0 */
-  volatile uint32_t refused_ops = kernel_stats.refused_ops;           /* the kernel: a free node held or cancelled, a null step */
+  volatile uint32_t refused_ops = kernel_stats_level_14.refused_ops;           /* the kernel: a free node held or cancelled, a null step */
   volatile uint32_t pool_refused = elevator_cpp.pool_refused;         /* the users' pool: a bad push */
 
   /* The WAIT list (with KNUTH_KERNEL_STATS in the C++ symbols; otherwise 0) */
-  volatile uint32_t sortins = kernel_stats.sortins;                   /* 568 expected */
-  volatile uint32_t list_max = kernel_stats.list_max;                 /* 7 */
-  volatile uint32_t list_avg_x100 = sortins ? kernel_stats.list_sum * 100u / sortins : 0;   /* 310 = 3.10 nodes */
-  volatile uint32_t walk_max = kernel_stats.walk_max;                 /* 6 */
-  volatile uint32_t walk_avg_x100 = sortins ? kernel_stats.walk_sum * 100u / sortins : 0;   /* 194 = 1.94 nodes */
+  volatile uint32_t sortins = kernel_stats_level_14.sortins;                   /* 568 expected */
+  volatile uint32_t list_max = kernel_stats_level_14.list_max;                 /* 7 */
+  volatile uint32_t list_avg_x100 = sortins ? kernel_stats_level_14.list_sum * 100u / sortins : 0;   /* 310 = 3.10 nodes */
+  volatile uint32_t walk_max = kernel_stats_level_14.walk_max;                 /* 6 */
+  volatile uint32_t walk_avg_x100 = sortins ? kernel_stats_level_14.walk_sum * 100u / sortins : 0;   /* 194 = 1.94 nodes */
 
   (void)steps; (void)checksum; (void)start_cycles; (void)busy_cycles;
   (void)cycles_per_step; (void)max_cycles; (void)late_sum_us; (void)late_avg_ns; (void)max_late_us;

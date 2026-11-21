@@ -44,7 +44,7 @@ calls `kernel_post()` yet. Its first users will be the button and the I2C DMA.
   │   stats: cycles, lateness                                │
   │ }                                                        │
   │                                                          │
-  │ refused_ops, events_dropped copied to kernel_stats       │
+  │ refused_ops, events_dropped → kernel_stats_level_14      │
   │ pend_next(): the next alarm                              │
   └──────────────────────────────────────────────────────────┘
 ```
@@ -131,7 +131,7 @@ turns an overflow into a recorded HardFault.
 | `kernel.post(node)` | [kernel.hpp](../../kernel.hpp) | writes the node's address into the circle: `assign`, store, `release`. Touches no list |
 | `kernel.start_event(t)` | [kernel.hpp](../../kernel.hpp) | takes one event: `start_operation`, `immed`, `operation_is_completed` |
 | `events_` | [kernel.hpp](../../kernel.hpp) | `CircleOfBuffers<WaitNode*, 8>`: pointers to nodes, the nodes are never copied. 8 is a margin, not a calculation; `events_dropped` checks it |
-| `kernel.events_dropped()` | [kernel.hpp](../../kernel.hpp) | events refused because the circle was full; copied to `kernel_stats` at the end of every PendSV |
+| `kernel.events_dropped()` | [kernel.hpp](../../kernel.hpp) | events refused because the circle was full; copied to `kernel_stats_level_14` at the end of every PendSV |
 
 ## Cost
 

@@ -116,7 +116,7 @@ refused operations, no dropped trace records.
 | `./setup.sh fetch` | CMSIS into `third_party/cmsis` (pinned commits, SHA-256 checked) |
 | `./setup.sh build` | CMake configure and build: `build/elevator.elf`, `build/elevator.map` |
 | `./setup.sh flash` | build (only what changed), then program the board over the ST-LINK (OpenOCD) |
-| `./setup.sh results` | read `elevator_phase`, `elevator_cpp.checksum`, `kernel_stats`, `elevator_cpp` (with `stack_used`), `is_stack_guard_on`, `stack_guard_fault` from the board (GDB through OpenOCD) |
+| `./setup.sh results` | read `elevator_phase`, `elevator_cpp.checksum`, `kernel_stats_level_14`, `elevator_cpp` (with `stack_used`), `is_stack_guard_on`, `stack_guard_fault` from the board (GDB through OpenOCD) |
 | `./setup.sh test` | `build`, `flash`, wait 12 s (the run takes 10.4 s), `results`, then PASS or FAIL: steps, checksum, 473 wakes, `idle_us` ≤ `elapsed_us`, the stack guard on and `stack_guard_fault.count` = 0. Wakes and idle catch broken sleep accounting, which steps and checksum don't (the `DBG_SLEEP` misfetch after `__WFI`) |
 | `./setup.sh clean` | remove `build/` |
 
