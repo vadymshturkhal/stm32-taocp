@@ -105,8 +105,9 @@ refused operations, no dropped trace records.
   about 220 cycles (1.3 µs) per wake-up.
 - **Trace on** (`TRACE`, lines over LPUART1 DMA at 921 600 baud): +299 cycles
   per step for writing the records in PendSV; about 29 ms in main, mostly
-  `snprintf` in `format_trace` (an estimate: ~580 lines, ~8 000 cycles each,
-  not yet measured with DWT); +1167 wake-ups, one transfer-complete per line.
+  `snprintf` in `format_trace`: 392 lines at about 10 400 cycles each (measured
+  later with DWT, below); +1167 wake-ups, three interrupts per line (HAL's DMA
+  half-transfer and transfer-complete, then the UART's transfer-complete).
 - **Old project:** the extra ~1.4 ms awake is main's other work (`Link_Poll`,
   the OLED, the trace poll). Its cycles per step were not recorded in that run.
 
@@ -123,6 +124,32 @@ time (the first version) cost lateness and awake time:
 | This build, one level | 5 µs / 0.28 µs | 1.33 ms |
 | This build, two levels, table at run time | 5 µs / 0.77 µs | 1.61 ms |
 | This build, two levels, templates | 5 µs / 0.28 µs | 1.32 ms |
+
+### The trace's formatter
+
+`format_trace` measured with DWT, line by line, in Elevator-Primes with the trace
+on (66 users, two kernel levels, `-O3 -flto`). Every version sends the same 392
+lines, byte for byte, as the PC build and its golden traces:
+
+| `format_trace` | Cycles a line, average / longest | CPU awake | Flash (`text`) |
+|---|---:|---:|---:|
+| `snprintf` (newlib) | 10 389 / 13 758 | 29.8 ms | 25 808 B |
+| `std::to_chars`, the action's `%u` read at run time | 4 331 / 9 861 | 16.0 ms | 24 208 B |
+| `std::to_chars`, the action's `{}` checked at compile time (now) | **3 733 / 6 529** | **14.5 ms** | 24 404 B |
+
+- **`snprintf` parses its format on every call**, and newlib is precompiled, so our
+  flags don't reach it: 10 582 cycles at `-O2`, 10 389 at `-O3 -flto`. It also
+  links newlib's `printf` engine.
+- **`std::to_chars`** (C++17) writes a number with no format string and no locale,
+  and is compiled with our code: at `-O3 -flto` it and the small helpers around it
+  inline into one function. At `-O2` without LTO it takes 7 775 cycles.
+- **The compile-time check** (`TraceFormat` in `trace.hpp`): an action is text with a
+  `{}` per number, as `std::format` writes it. Its constructor is `consteval`, so a
+  wrong count stops the build (`trace_format_does_not_match_its_arguments`), and the
+  numbers must be unsigned and at most 32 bits, at most 4 (`TraceNumbers`). It runs
+  with or without `TRACE`. At run time `format_trace` only replaces each `{}`.
+- The longest line includes whatever preempted it (a level-14 step, TIM2, the UART);
+  the average is the formatting itself.
 
 ## Commands
 
