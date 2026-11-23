@@ -4,8 +4,8 @@
 // (a new simulation with its users' pool, VALUES from seed 1) and runs until the
 // elevator is finished, so a cold and a warm run do the same work.
 //
-// The kernel is the port's shared one (kernel_port.hpp): it outlives the
-// elevator, so the elevator must leave no nodes in it when it is destroyed.
+// The kernel is the port's level 14 (kernel_port_priorities.hpp): it outlives
+// the elevator, so the elevator must leave no nodes in it when it is destroyed.
 // finished() says when: every user gone and the elevator dormant at E1, so
 // none of its nodes is in the list.
 // The simulation lives in static storage, not on the stack: it is a few hundred
@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <optional>
 
-#include "kernel_port.hpp"
+#include "kernel_port_priorities.hpp"
 #include "elevator_simulation.hpp"
 #include "start_cpp_elevator_simulation.h"
 #include "trace.hpp"
@@ -30,7 +30,7 @@ static std::optional<ElevatorSimulation> simulation;
 // Construction (the users' pool: malloc and every node built) is most of the
 // setup, so it is split from start: read "now" after it, and USER1 is not late
 extern "C" void cpp_elevator_create(void) {
-    simulation.emplace(kernel);
+    simulation.emplace(level_14.kernel);
 }
 
 extern "C" void cpp_elevator_start(std::uint32_t max_users, std::uint32_t now_ms) {
@@ -91,7 +91,7 @@ extern "C" std::uint32_t cpp_elevator_trace_dropped(void) {
 }
 
 extern "C" void cpp_elevator_stop(void) {
-    // Safe once finished(): none of the elevator's nodes is in the shared kernel.
+    // Safe once finished(): none of the elevator's nodes is in level 14's kernel.
     // TODO: stopping in the middle of a run needs the elevator to cancel its own nodes.
     assert(!simulation || simulation->finished());
     simulation.reset();

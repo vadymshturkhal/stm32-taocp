@@ -1,57 +1,72 @@
 # How the kernel runs on the STM32G4
 
-`main` sleeps, the TIM2 compare is the alarm, PendSV runs the kernel.
+`main` sleeps, TIM2's two compare channels are the alarms, and two NVIC priority
+levels run the kernel, each with its own `Kernel` (WAIT list, events circle, stats):
 
-An ISR can ring the doorbell too: it posts a node with `kernel_post()`, and each
-pass of the loop first takes one posted event (`start_event`).
+- **level 14**, run by `CORDIC_IRQHandler` (CORDIC's spare vector): the elevator;
+- **level 15**, run by PendSV: the background work, the trace drain and
+  `tx_watchdog` (phase 3). It is empty for now.
+
+The levels are a table in [kernel_port_priorities.hpp](kernel_port_priorities.hpp).
+Only a level's handler touches that level's kernel (rule 1), so the levels need no
+locks; the NVIC does the preemption.
+
+An ISR can ring a level too: it posts a node with `kernel_post(level, node)`, and
+each pass of that level's loop first takes one posted event (`start_event`).
 [SCHEME_EVENTS.md](SCHEME_EVENTS.md) has that part, its rules and its edge cases. No
 ISR posts yet: the button and the I2C DMA will be the first.
+
+**Measured** (the bare build, 66 users): the same 544 steps, checksum 2487227626
+and 473 wakes as with the one PendSV kernel, and the same maximum lateness, 5 µs.
+The **average lateness rose from 0.28 µs to 0.77 µs** (`late_sum_us` 151 → 420),
+and the CPU is awake 1.61 ms of the 10.36 s instead of 1.33 ms. The cost is in the
+alarm path: `TIM2_IRQHandler`, `arm()` and `ring()` read each level's channel and
+IRQ from `levels` at run time (51 instructions in the handler, about 8 before). A
+version with the level as a template parameter, so the table folds into constants,
+measured 0.28 µs again; it is the next step.
 
 ```
                   ┌──────────────────────────────────────────┐
   main (no prio)  │ start: stack_guard_init (the MPU guard)  │
                   │        kernel_port_init, create, start   │
-                  │        pend_kernel() ────────────┐       │
-                  │ loop:  Link_Poll                 │       │
-                  │        cpp_elevator_trace_poll   │       │
-                  │        done? → stop, finish      │       │
-                  │        __disable_irq             │       │
-                  │        kernel_port_sleep ◄─ here │       │
-                  │        __enable_irq              │       │
-                  └──────────────────────────────────│───────┘
-                                                     │ PENDSVSET (the doorbell)
-  TIM2 (prio 2)                                      │
-  ┌──────────────────────────┐                       │
-  │ TIM2_IRQHandler:         │  CNT == CCR1          │
-  │   clear CC1IF            │◄──── (the alarm) ─────│───────────┐
-  │   pend_kernel() ─────────│───────────────────────┤           │
-  └──────────────────────────┘                       │           │
-                       tail-chain, no return to main │           │
-                                                     ▼           │
-  PendSV (prio 15)   PendSV_Handler → kernel_PendSV_Handler()    │
-  ┌──────────────────────────────────────────────────────────┐   │
-  │ for (;;) {                                               │   │
-  │   t = now()                         ◄──────────────┐     │   │
-  │   kernel.start_event(t): one event → immed         │     │   │
-  │   kernel.step(t) ── nothing due? ── break ──┐      │     │   │
-  │     │ due: unlink first, run its step       │      │     │   │
-  │     │      (E1..E9, U1..U6: hold, holdc,    │      │     │   │
-  │     │       immed → the WAIT list changes)  │      │     │   │
-  │     ▼                                       │      │     │   │
-  │   stats: cycles, lateness                   │      │     │   │
-  │ }  ─────────────────────────────────────────│──────┘     │   │
-  │                                             ▼            │   │
-  │   refused_ops, events_dropped → kernel_stats_level_14    │   │
-  │   pend_next():                                           │   │
-  │     list empty?  → CC1IE off, return (no alarm)          │   │
-  │     CCR1 = first node's NEXTTIME ────────────────────────│───┘
-  │     clear CC1IF, CC1IE on                                │
-  │     now ≥ NEXTTIME already? → pend_kernel() ──┐          │
-  └───────────────────────────────────────────────│──────────┘
-                                                  │ PendSV again at once
-   return → main goes on after __enable_irq       │ (a deadline missed by pend_next)
-                                                  ▼
-                                         back to kernel_PendSV_Handler
+                  │        kernel_port_start(): ring every   │
+                  │          level once (rule 1 from here)   │
+                  │ loop:  Link_Poll                         │
+                  │        cpp_elevator_trace_poll           │
+                  │        done? → stop, finish              │
+                  │        __disable_irq                     │
+                  │        kernel_port_sleep ◄─ here         │
+                  │        __enable_irq                      │
+                  └──────────────────────────────────────────┘
+
+  TIM2 (prio 2), the alarms: CNT == CCR1 → level 14, CNT == CCR2 → level 15
+  ┌──────────────────────────────────────────────────────────┐
+  │ TIM2_IRQHandler:                                         │
+  │   CC1IF? (is it set?) → clear it, ring(level_14): NVIC->STIR = 100    │
+  │   CC2IF? (is it set?) → clear it, ring(level_15): ICSR.PENDSVSET      │
+  └────────────────────────────┬─────────────────────────────┘
+                               │ tail-chain, no return to main
+                               ▼
+  level 14 (prio 14)  CORDIC_IRQHandler → run_level(level_14): the elevator
+  level 15 (prio 15)  PendSV_Handler → kernel_PendSV_Handler → run_level(level_15)
+                      (empty until phase 3); level 14 preempts it
+
+  run_level(level), the same loop for every level:
+  ┌──────────────────────────────────────────────────────────┐
+  │ for (;;) {                                               │
+  │   t = now()                                              │
+  │   kernel.start_event(t): one event → immed               │
+  │   kernel.step(t) ── nothing due? ── break                │
+  │     due: unlink first, run its step                      │
+  │     (E1..E9, U1..U6: hold, holdc, immed → its WAIT list) │
+  │   stats: cycles, lateness → level.stats                  │
+  │ }                                                        │
+  │ refused_ops, events_dropped → level.stats                │
+  │ arm(level):                                              │
+  │   list empty?  → return (no register is touched)         │
+  │   its CCRx = first node's NEXTTIME, clear only its CCxIF │
+  │   now ≥ NEXTTIME already? → ring(level): it runs again   │
+  └──────────────────────────────────────────────────────────┘
 
   The application (the elevator), inside its own steps:
   ┌──────────────────────────────────────────────────────────┐
@@ -71,48 +86,62 @@ time ─────────────────────────
 main    ███ WFI (asleep) ···█ woken ██ __enable_irq                         ██ loop, WFI ···
                             ▲          │                                     ▲
            CNT == CCR1 ─────┘          ▼                                     │
-TIM2    (pending until __enable_irq)   █ clear flag, pend_kernel             │
+TIM2    (pending until __enable_irq)   █ clear CC1IF, ring level 14          │
                                         ╲ tail-chain                         │ return
-PendSV                                   ██ step ██ step ██ pend_next ───────┘
+level 14                                 ██ step ██ step ██ arm ─────────────┘
                                          (two nodes due: drained in one run)
 ```
 
-The cycle: **pend_next → sleep → alarm → TIM2 pends PendSV → drain loop (event?,
-step, event?, step, ...) → pend_next**. An ISR's `kernel_post()` enters the same
-cycle at "pends PendSV".
+The cycle: **arm → sleep → alarm → TIM2 rings the level → drain loop (event?,
+step, event?, step, ...) → arm**. An ISR's `kernel_post(level, node)` enters the
+same cycle at "rings the level".
 
-Priorities: TIM2 2 (higher), the ISRs that post 3, PendSV 15 (the lowest), so the
-kernel never delays an interrupt (`main` masks them only around `__WFI`), and only
-PendSV touches the WAIT list: no locks. ISRs reach it only through the event
-circle.
+Priorities: TIM2 2 (the highest of these), the ISRs that post 3, then the kernel
+levels, 14 and 15. `level_config`'s `static_assert`s keep every level at 4..15,
+below the real interrupts, so the kernel never delays one (`main` masks them only
+around `__WFI`). ISRs reach a level only through its events circle; a higher level
+would reach a lower one the same way.
 
 ## Edge cases
 
-**A node comes due while another node runs.** No interrupt: during the drain
-loop `CCR1` still holds the old alarm (already passed); `pend_next()` sets the new one
-only after the loop. The loop catches it instead: it reads `now()` again after
-every step, so the node runs right after the current one, in the same PendSV.
-Its lateness is the rest of the current step (what `max_late_us` measures).
-Steps run to completion: the next node never interrupts the current one.
+**A node comes due while another node of the same level runs.** No interrupt:
+during the drain loop the level's `CCRx` still holds the old alarm (already
+passed); `arm()` sets the new one only after the loop. The loop catches it instead:
+it reads `now()` again after every step, so the node runs right after the current
+one, in the same run. Its lateness is the rest of the current step (what
+`max_late_us` measures). Steps of one level run to completion: the next node never
+interrupts the current one.
 
 ```
 time    ──────────────|B due|──────────────────────►
-PendSV   ██ A ███████████████ ██ B ██ pend_next
+level   ██ A ████████████████ ██ B ██ arm
                       └─ late ─┘ = the rest of A
 ```
 
-**A node comes due after the loop's last check, before `pend_next()` arms the
-alarm.** The compare matches only on equality, so arming a time already passed
-would wait 71.6 min for the wrap. `pend_next()`'s race check (`now ≥ NEXTTIME` after
-arming) sees it and calls `pend_kernel()`: PendSV runs again at once.
+**A node comes due after the loop's last check, before `arm()` arms the alarm.**
+The compare matches only on equality, so arming a time already passed would wait
+71.6 min for the wrap. `arm()`'s race check (`now ≥ NEXTTIME` after arming) sees it
+and rings the level: it runs again at once.
 
-**TIM2 matches during a drain.** It happens whenever PendSV starts for another
-reason while `CCR1` holds a deadline still ahead: an ISR's `kernel_post()`, `main`'s
-first `pend_kernel()`, or `pend_next()`'s race check. If the drain is still running when
-`CNT` reaches `CCR1`, TIM2 (priority 2) preempts PendSV for a moment and sets PendSV
-pending again. After this run ends, PendSV runs once more, finds nothing due and
-aims again. One wasted pass, harmless. Once the button and I2C post, it is no
-longer rare.
+**TIM2 matches during a drain.** It happens whenever a level runs for another
+reason while its `CCRx` holds a deadline still ahead: an ISR's `kernel_post()`,
+`main`'s `kernel_port_start()`, or `arm()`'s race check. If the drain is still
+running when `CNT` reaches `CCRx`, TIM2 (priority 2) preempts it for a moment and
+rings the level again. After this run ends, the level runs once more, finds nothing
+due and arms again. One wasted pass, harmless. Once the button and I2C post, it is
+no longer rare.
+
+**Level 14 comes due while level 15 runs.** TIM2 rings level 14, which preempts
+level 15 at once, between or inside a step; level 15 goes on where it was after
+level 14 returns. The levels share nothing but TIM2, and they split it: each has its
+own `CCRx`, clears only its own `CCxIF` (one write, rc_w0), and neither writes
+`DIER`. Level 15's step cycles then include level 14's run.
+
+**A level's list becomes empty.** `arm()` returns without touching a register, so
+the level's `CCRx` keeps its old time. Its next match, after the 71.6 min wrap,
+rings the level once: it finds nothing and arms nothing. One wasted pass. Turning
+the alarm off would need a `DIER` write, a read-modify-write that the other level
+could preempt and undo; so both enables are set once, in `kernel_port_init()`.
 
 ## Every name in the scheme
 
@@ -121,42 +150,53 @@ longer rare.
 | Name | What it does |
 |------|--------------|
 | `stack_guard_init()` | ([stack_guard.c](stack_guard.c)) first, before the clock: paints the stack and puts the MPU guard under it. In the bare build (`firmware/kernel_elevator/src/main.c`) and Elevator-Primes; not yet in this `main.c`. See [The stack guard](#the-stack-guard-stack_guardc) |
-| `kernel_port_init()` | starts TIM2 as the 1 µs clock (PSC = 169, 32-bit, free-running) and sets the priorities: TIM2 2, PendSV 15 |
-| `cpp_elevator_create()` | builds the elevator and its users' pool (the `malloc` and every node constructed once); before reading "now", so the setup is not counted as lateness |
-| `cpp_elevator_start()` | Knuth's TIME 0 = now: `immed`s USER1, the sole entry in the WAIT list (as in Knuth); the elevator's nodes are started later by the users' steps |
+| `kernel_port_init()` | starts TIM2 as the 1 µs clock (PSC = 169, 32-bit, free-running); clears `CC1IF` and `CC2IF` and sets `DIER` = `CC1IE` \| `CC2IE`, once; sets each level's priority from `level_config` and enables its IRQ (CORDIC; PendSV is always enabled); TIM2 at 2 |
+| `cpp_elevator_create()` | builds the elevator on `level_14.kernel` and its users' pool (the `malloc` and every node constructed once); before reading "now", so the setup is not counted as lateness |
+| `cpp_elevator_start()` | Knuth's TIME 0 = now: `immed`s USER1, the sole entry in level 14's WAIT list (as in Knuth); the elevator's nodes are started later by the users' steps |
+| `kernel_port_start()` | the kick, after the setup: rings every level once. Until here `main` owns the kernels; from here on only each level's handler touches its own (rule 1). An empty level runs once and arms nothing |
 | `Link_Poll()` | the Pi link's work: reads the bytes the UART interrupt stored, collects a line, at `'\n'` checks its CRC and replies; checks the link's timeouts |
-| `cpp_elevator_trace_poll()` | `TRACE` builds: turns the records PendSV's steps wrote into lines and queues them for the UART's DMA. Here, not in PendSV, because formatting is slow; PendSV can preempt it |
+| `cpp_elevator_trace_poll()` | `TRACE` builds: turns the records level 14's steps wrote into lines and queues them for the UART's DMA. Here, not in a level, because formatting is slow; the levels can preempt it |
 | `__disable_irq()` | PRIMASK = 1: interrupts still happen, but their handlers wait (pending) |
 | `kernel_port_sleep()` | ([kernel_port.cpp](kernel_port.cpp)) `__DSB(); __WFI(); __ISB()` and returns the µs slept. Wait For Interrupt: the CPU sleeps until an interrupt is pending; it wakes even while they are masked. The function runs from SRAM (section `.data_ramfunc`, copied with `.data`): with `DBG_SLEEP` set, the G431 can skip the first instruction fetched from flash after the wake (ES0431 §2.2.7, seen here even with its workarounds) |
-| `__enable_irq()` | PRIMASK = 0: the pending handlers (TIM2, then PendSV) run at this line. Masked check + sleep + enable = no lost wake-up |
-| `done? → stop, finish` | `main` checks `cpp_elevator_finished()`, the atomic flag the elevator sets when it is finished; then it reads `cpp_elevator_checksum()`, stops the elevator (`cpp_elevator_stop()`: frees the users' pool; none of its nodes is in the kernel) and calls `elevator_finish()` (collects the numbers) |
+| `__enable_irq()` | PRIMASK = 0: the pending handlers (TIM2, then level 14, then level 15) run at this line. Masked check + sleep + enable = no lost wake-up |
+| `done? → stop, finish` | `main` checks `cpp_elevator_finished()`, the atomic flag the elevator sets when it is finished; then it reads `cpp_elevator_checksum()`, stops the elevator (`cpp_elevator_stop()`: frees the users' pool; none of its nodes is in level 14's kernel) and calls `elevator_finish()` (collects the numbers) |
 
-### The doorbell ([kernel_port.hpp](kernel_port.hpp))
+### The levels ([kernel_port_priorities.hpp](kernel_port_priorities.hpp))
 
 | Name | What it does |
 |------|--------------|
-| `pend_kernel()` | `SCB->ICSR = SCB_ICSR_PENDSVSET_Msk`: makes PendSV pending, as if hardware had raised it. The only way into the kernel; called by `main` at the start, `TIM2_IRQHandler` on the alarm, and `pend_next()` for a deadline already past. Several calls before PendSV runs = one run |
-| `SCB->ICSR` | the core's Interrupt Control and State Register; writing 0 to its other bits does nothing, so a plain `=` is safe |
-| `PENDSVSET` | the ICSR bit that sets PendSV pending |
+| `level_config` | the `constexpr` table, one row per level: `priority`, `irq` (its handler), `channel` (its alarm): {14, `CORDIC_IRQn`, 0} and {15, `PendSV_IRQn`, 1}. The only place these numbers are written |
+| the `static_assert`s | every priority 4..15 (`first_kernel_priority`: below TIM2 and the posting ISRs); every channel 0 or 1; no priority, IRQ or channel used twice. A wrong table fails the build |
+| `level_index(p)` | `consteval`: the table's row for priority `p`; a priority with no level is a compile error |
+| `KernelLevel` | a level's changing part: its `Kernel`, a reference to its stats (a C global) and one to its row of `level_config` |
+| `levels` | `constinit std::array` of the two levels: built at compile time, no constructor runs before `main`. Each entry finds its config by priority |
+| `level_14`, `level_15` | the names programs use: `levels[0]`, the elevator; `levels[1]`, the trace drain and `tx_watchdog` (phase 3) |
+| `kernel_stats_level_14`, `_15` | each level's `KernelStats`; `main.c`, GDB and `setup.sh` read them |
+| `ring(level)` | the doorbell: makes the level's handler pending. CORDIC: `NVIC->STIR = CORDIC_IRQn`; PendSV: `pend_kernel()`, i.e. `SCB->ICSR = PENDSVSET` (a system exception: `STIR` can't pend it). Called by `kernel_port_start()`, `TIM2_IRQHandler`, `arm()`'s race check and `kernel_post()`. Several rings before it runs = one run |
+| `NVIC->STIR`, `SCB->ICSR` | single writes, never a read-modify-write, so any context can ring safely; writing 0 to `ICSR`'s other bits does nothing |
+| `kernel_post(level, node)` | what an ISR calls: the node into the level's events circle, then `ring(level)`. See [SCHEME_EVENTS.md](SCHEME_EVENTS.md) |
 
-### TIM2, the clock and the alarm
+### TIM2, the clock and the alarms
 
 | Name | What it does |
 |------|--------------|
 | `TIM2->CNT` | the counter: µs since start, 32 bits, wraps after 71.6 min. `now()` reads it |
-| `TIM2->CCR1` | Capture/Compare Register 1: the alarm time. When `CNT == CCR1`, the compare matches |
-| `CC1IF` | Capture/Compare 1 Interrupt Flag (in `TIM2->SR`): set by the match; must be cleared, or the interrupt repeats for ever |
-| `CC1IE` | Capture/Compare 1 Interrupt Enable (in `TIM2->DIER`): the alarm on or off |
-| `TIM2_IRQHandler` | ([kernel_port.cpp](kernel_port.cpp)) the alarm's interrupt: if `CC1IF` is set and `CC1IE` is on (an alarm armed), clears `CC1IF` and calls `pend_kernel()`. In HAL builds it also counts TIM2's wraps (`UIF`) for `HAL_GetTick` |
-| `HAL_Tick_From_TIM2()` | HAL builds only (`USE_HAL_DRIVER`): `HAL_GetTick` in ms from TIM2's µs and its wraps, and SysTick off, so there are no 1 ms wake-ups. Called once, before the kernel starts |
-| tail-chain | the Cortex-M goes from one handler straight into the next pending one (TIM2 → PendSV) without returning to `main` in between |
+| `TIM2->CCR1`, `CCR2` | the alarm times of level 14 (channel 0) and level 15 (channel 1). When `CNT == CCRx`, the compare matches |
+| `CC1IF`, `CC2IF` | the compare flags in `TIM2->SR`, set by the match; each must be cleared, or the interrupt repeats for ever. They are rc_w0: writing 0 clears, writing 1 changes nothing, so `SR = ~flag` clears one level's flag in one write without touching the other's (or `UIF`) |
+| `CC1IE`, `CC2IE` | the compare interrupt enables in `TIM2->DIER`: both set once in `kernel_port_init()` and never written again |
+| `TIM2_IRQHandler` | ([kernel_port.cpp](kernel_port.cpp)) the alarms' interrupt: for each level whose flag is set, clears it and rings the level. In HAL builds it also counts TIM2's wraps (`UIF`) for `HAL_GetTick` |
+| `HAL_Tick_From_TIM2()` | HAL builds only (`USE_HAL_DRIVER`): `HAL_GetTick` in ms from TIM2's µs and its wraps, and SysTick off, so there are no 1 ms wake-ups. Called once, before the kernel starts: its read-modify-write of `DIER` (adding `UIE`) is safe then, with interrupts masked |
+| tail-chain | the Cortex-M goes from one handler straight into the next pending one (TIM2 → level 14 → level 15) without returning to `main` in between |
 
-### PendSV, the kernel ([kernel_port.cpp](kernel_port.cpp))
+### The levels' handlers and the drain loop ([kernel_port.cpp](kernel_port.cpp))
 
 | Name | What it does |
 |------|--------------|
-| `PendSV_Handler` | the PendSV exception's handler (in `stm32g4xx_it.c` in the CubeIDE projects, in `board_main.c` in the bare build); only calls `kernel_PendSV_Handler()` |
-| `kernel_PendSV_Handler()` | the kernel's body: the drain loop, then `pend_next()`. `extern "C"`, so the C handler can call this C++ function |
+| `CORDIC_IRQHandler` | level 14: `run_level(level_14)`. CORDIC's vector used as a spare software interrupt; the CORDIC itself stays off. Defined in the port, it replaces the startup file's weak alias, so CubeMX needs no change |
+| `PendSV_Handler` | level 15's exception handler (in `stm32g4xx_it.c` in the CubeIDE projects, in `board_main.c` in the bare build); only calls `kernel_PendSV_Handler()` |
+| `kernel_PendSV_Handler()` | `run_level(level_15)`. `extern "C"`, so the C handler can call this C++ function |
+| the handlers' `static_assert`s | the table must name `CORDIC_IRQn` for level 14 and `PendSV_IRQn` for level 15: the vector table fixes which handler runs which level |
+| `run_level(level)` | one run of a level: the drain loop on `level.kernel`, the stats into `level.stats`, then `arm(level)`. A higher level can preempt it between or inside steps |
 | `now()` | `TIM2->CNT`: the current time in µs, read again on every pass of the loop |
 | `kernel.start_event(t)` | takes one posted event, if there is one, and `immed`s its node: it runs ahead of the nodes already due. See [SCHEME_EVENTS.md](SCHEME_EVENTS.md) |
 | `kernel.step(t)` | if the WAIT list's first node is due (its time ≤ `t`): unlinks it, runs its step, returns `true`; otherwise `false`, and the loop ends. Knuth's CYCLE on the real clock. "≤" is wrap-safe, `!is_less(t, NEXTTIME)` (the sign of the difference): it holds while deadlines are less than 2^31 µs (35.8 min) apart |
@@ -164,14 +204,14 @@ longer rare.
 | `hold(node, now, delay)` | puts the node back in the WAIT list, due `delay` from now (sorted in by time) |
 | `holdc(node, now, delay, step)` | the same, with a new step to run next |
 | `immed(node, now)` | puts the node first in the list: it runs in this same drain loop |
-| stats: cycles, lateness | DWT cycles of the step (`busy_cycles`, `max_cycles`); `now - deadline` in µs (`late_sum_us`, `max_late_us`) |
+| stats: cycles, lateness | DWT cycles of the step (`busy_cycles`, `max_cycles`); `now - deadline` in µs (`late_sum_us`, `max_late_us`). A step's cycles include any higher level that ran inside it. With the two levels the elevator's average lateness is 0.77 µs (0.28 µs with the one PendSV kernel), the maximum 5 µs as before |
 | `kernel.refused()` | misuse the kernel refused in release builds (a free node held or cancelled, a due node with no step); 0 in a correct run |
-| `pend_next()` | sets the next alarm: `CC1IE` off if the list is empty; else `CCR1` = the first node's `NEXTTIME` (the earliest deadline: the list is sorted by time; `kernel.get_next_time()`, i.e. `head.right`, not the sentinel `head` itself), clear `CC1IF`, `CC1IE` on, then the race check: if `now()` is already at or past the deadline, `pend_kernel()` (a missed match comes back only after the 71.6 min wrap) |
+| `arm(level)` | the level's next alarm: list empty → return, no register touched; else the level's `CCRx` = the first node's `NEXTTIME` (the earliest deadline: the list is sorted by time; `kernel.get_next_time()`, i.e. `head.right`, not the sentinel `head` itself), clear only its `CCxIF`, then the race check: if `now()` is already at or past the deadline, `ring(level)` (a missed match comes back only after the 71.6 min wrap) |
 | `NEXTTIME` | a node's deadline in µs (Knuth's field name) |
 
 ### The stack guard ([stack_guard.c](stack_guard.c))
 
-`main`, TIM2, the ISRs and PendSV all run on the one MSP, and each interrupt
+`main`, TIM2, the ISRs and both kernel levels all run on the one MSP, and each interrupt
 that nests stacks its frame on top of the one it preempted. The Cortex-M4 has
 no stack-limit register, so the guard is an MPU region at the stack's bottom.
 
@@ -186,7 +226,7 @@ _estack  0x20008000  ┬ the stack: 896 of the 1 KB reserve, grows down; MSP sta
 |------|--------------|
 | `stack_guard_init()` | returns with the guard off if the stack's bottom is not aligned to the guard's size. Paints the stack from above the guard up to 16 words below the current SP (its own frame) with `STACK_PAINT` (`0xDEADBEEF`). Then it sets MPU region 0 over the guard: no access (`AP` = 0), execute never (`XN`), size `_Stack_Guard_Size` from the linker script; `PRIVDEFENA` keeps the default map for the rest. Sets `is_stack_guard_on` |
 | `_Stack_Guard_Size` | 128, set in the `.ld`, with `ASSERT`s: a power of 2 ≥ 32, the stack's bottom aligned to it, smaller than the stack. 128, not 32: a frame with the FPU context is 104 bytes, so a frame that starts above the guard ends inside it, never below it in the heap |
-| `stack_guard_depth()` | the deepest the stack has gone since `stack_guard_init()`: scans up from the guard to the first word that is not the paint. `ElevatorRun.stack_used` in the bare build (228 of 896 bytes) |
+| `stack_guard_depth()` | the deepest the stack has gone since `stack_guard_init()`: scans up from the guard to the first word that is not the paint. `ElevatorRun.stack_used` in the bare build: 220 of 896 bytes with the two levels (228 with the one PendSV kernel) |
 | `HardFault_Handler` | an alias of `stack_guard_hard_fault` (naked; in the CubeIDE projects `stm32g4xx_it.c` branches to it). A push into the guard is a MemManage fault; MemManage is not enabled, so it escalates to HardFault. The entry moves MSP back to `_estack` (the old SP points into the guard) and passes the old SP and `EXC_RETURN` to `stack_guard_record()` |
 | `stack_guard_record()` | fills `stack_guard_fault`: CFSR, HFSR, MMFAR/BFAR (only when valid), LR and PC from the frame (when it was stacked), the old SP, `EXC_RETURN`, `count`. Then `BKPT` if a debugger is attached, else it loops for ever |
 | `stack_guard_fault` | the record, read by the debugger or `./setup.sh results`; `./setup.sh test` passes only with `is_stack_guard_on` = 1 and `count` = 0 |

@@ -8,10 +8,14 @@ simulation the WAIT list runs simulated time; here it runs real time.
 
 **Status:** the WAIT list (`wait_list.hpp`), the `Kernel` class (`kernel.hpp`)
 and the storage pool are done and tested on the PC. On the STM32G431 the kernel
-runs in **PendSV**, woken by the **TIM2 compare** at each deadline
-([`port/stm32g4`](port/stm32g4)); the elevator runs on it in real time, every
-step within 6 µs of its deadline
-([elevator/cpp_embedded_kernel/board](../elevator/cpp_embedded_kernel/board)).
+runs at **two NVIC priority levels**, each with its own `Kernel`: level 14 in
+CORDIC's spare vector runs the elevator, level 15 in **PendSV** is for background
+work. TIM2's two **compare channels** wake them at each deadline
+([`port/stm32g4`](port/stm32g4)). The elevator runs in real time, every step within
+5 µs of its deadline
+([elevator/cpp_embedded_kernel/board](../elevator/cpp_embedded_kernel/board)); the
+average lateness rose from 0.28 µs to **0.77 µs** with the two levels, because the
+alarm path reads the level table at run time (a compile-time version is next).
 Next: a second program beside it, and UART interrupts as events (see
 [Roadmap](#roadmap)).
 
@@ -327,7 +331,7 @@ if (TxLine* b = tx.assign()) {               // producer: main
 On the board it carries the UART's DMA transmit
 (`CircleOfBuffers<TxLine, 3>`) and the elevator's trace
 (`CircleOfBuffers<TraceRecord, 16>`): a step writes a record, and `main` formats it
-straight into a TX buffer, where PendSV can preempt it. With 4 users at 921 600 baud,
+straight into a TX buffer, where the kernel levels can preempt it. With 4 users at 921 600 baud,
 max lateness is 6 µs (`printf` inside the steps: 604 µs; no trace: 4 µs),
 and the trace matches the PC's byte for byte.
 
@@ -346,7 +350,8 @@ function is `noexcept`.
 | `kernel.hpp`             | `Kernel`: the API for programs, and `step(now)`    |
 | `storage_pool.hpp`       | `StoragePool<T>`: nodes created at run time        |
 | `circle_of_buffers.hpp`  | `CircleOfBuffers<T, N>`: Knuth's circle of buffers between a program and a device |
-| `port/stm32g4/kernel_port.{hpp,cpp}` | the STM32G4 port, CMSIS only: TIM2 as the 1 µs clock (`now()`), the one shared `kernel`, `kernel_PendSV_Handler()` (run every due node, `KernelStats`), `pend_next()` (TIM2 compare at the next deadline, with the race re-check), `TIM2_IRQHandler`, `kernel_port_sleep()` (the masked `__WFI` run from SRAM, returns the µs slept: with `DBG_SLEEP` set the G431 can skip the first instruction fetched from flash after the wake, ES0431 §2.2.7). With the HAL (`USE_HAL_DRIVER`) also `HAL_Tick_From_TIM2()`: `HAL_GetTick` from TIM2, SysTick off |
+| `port/stm32g4/kernel_port_priorities.hpp` | the kernel levels: `level_config` (priority, IRQ and TIM2 channel per level, checked by `static_assert`), `levels` (a `Kernel` and `KernelStats` per level), `level_14` (the elevator, CORDIC's vector) and `level_15` (PendSV), `ring(level)`, `kernel_post(level, node)` |
+| `port/stm32g4/kernel_port.{hpp,cpp}` | the STM32G4 port, CMSIS only: TIM2 as the 1 µs clock (`now()`), `run_level()` (run every due node of a level, its `KernelStats`), `arm()` (the level's TIM2 compare at its next deadline, with the race re-check), `CORDIC_IRQHandler` and `kernel_PendSV_Handler()` (levels 14 and 15), `TIM2_IRQHandler` (rings the level whose compare matched), `kernel_port_start()` (`main`'s kick), `kernel_port_sleep()` (the masked `__WFI` run from SRAM, returns the µs slept: with `DBG_SLEEP` set the G431 can skip the first instruction fetched from flash after the wake, ES0431 §2.2.7). With the HAL (`USE_HAL_DRIVER`) also `HAL_Tick_From_TIM2()`: `HAL_GetTick` from TIM2, SysTick off |
 | `tests/test_wait_list.cpp` | the tests of the WAIT list                       |
 | `tests/test_kernel.cpp`  | the tests of the kernel, with small programs       |
 | `tests/test_storage_pool.cpp` | the tests of the storage pool                 |
@@ -384,8 +389,9 @@ instead of asserted) and under AddressSanitizer and UndefinedBehaviorSanitizer;
 2. **Test it** (done): with a fake clock on the PC: a blinker, a counter, a
    message between two programs (one program `start`s another's node), a
    supervisor, the clock wrap.
-3. **Run it on the MCU** (in progress): the kernel in PendSV, TIM2 as the
-   1 µs clock and its compare as the wake-up, sleep (`WFI`) in between (done,
+3. **Run it on the MCU** (in progress): the kernel at two NVIC levels (14 in
+   CORDIC's vector, 15 in PendSV), TIM2 as the 1 µs clock and its compares as the
+   wake-ups, sleep (`WFI`) in between (done,
    with the elevator); next a second program (the board's LED); UART interrupts turned into events
    through a circle of buffers; a watchdog and a cycle budget per step
    (DWT). Nodes created at run time come from a `StoragePool<T>` per node type
@@ -397,8 +403,9 @@ instead of asserted) and under AddressSanitizer and UndefinedBehaviorSanitizer;
    and on the board).
 
 Then: the [Pi ↔ MCU protocol](../pi_mcu_protocol) as a program (its timers
-already use this WAIT list), and the DWT benchmarks. Preemption (a stack per
-task, a context switch in `PendSV`) may come much later.
+already use this WAIT list), and the DWT benchmarks. Preemption between levels is
+done, by the NVIC on one stack; a stack per task with a context switch may come
+much later.
 
 ---
 

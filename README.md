@@ -8,7 +8,7 @@
 [![Pi-MCU protocol](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/pi-mcu-protocol.yml/badge.svg)](https://github.com/vadymshturkhal/stm32-taocp/actions/workflows/pi-mcu-protocol.yml)
 
 - This repository contains Python, C, C++ and hand-tuned ARM Assembly implementations of [Algorithms](#algorithms) and [Data Structures](#data-structures) from The Art of Computer Programming, Vol.1, and a [Raspberry Pi ↔ STM32 protocol](#systems) built from its ideas.
-- [Knuth kernel](#systems): Knuth's 1968 CYCLE running as a real-time kernel on the Cortex-M4, in PendSV woken by a hardware timer: every event within 6 µs of its deadline, the CPU asleep 99.8% of the time, the same result as the simulation to the last bit.
+- [Knuth kernel](#systems): Knuth's 1968 CYCLE running as a real-time kernel on the Cortex-M4, at two interrupt priority levels woken by a hardware timer: every event within 6 µs of its deadline, the CPU asleep 99.8% of the time, the same result as the simulation to the last bit.
 - [Firmware](#firmware): the elevator on the Knuth kernel from one script: it builds, flashes the board and checks the run, with an MPU guard against stack overflow.
 - [Paper](#papers): *Is C++ Slower than C on a Cortex-M4?* A controlled measurement on the board: the same design costs the same in both languages.
 
@@ -121,9 +121,10 @@ is what came of taking that seriously.
 # Systems:
 - [Knuth kernel](knuth_kernel): a run-to-completion event kernel built from the elevator's WAIT list (§2.2.5):
   programs are nodes, `HOLD`/`IMMED`/`CYCLE` are the scheduler, nodes created at run time come from an AVAIL-list
-  storage pool (§2.2.3). No preemption, one stack, no heap after startup; tested in CI under AddressSanitizer and UBSan.
-  On the STM32G431 it runs in PendSV, woken by the TIM2 compare at each deadline ([board app](elevator/cpp_embedded_kernel/board)):
-  max lateness 6 µs, average 301 ns.
+  storage pool (§2.2.3). Run to completion within a level (a higher level preempts a lower one), one stack, no heap after startup; tested in CI under AddressSanitizer and UBSan.
+  On the STM32G431 it runs at two NVIC priority levels, each with its own WAIT list (14 in a spare interrupt vector, 15 in PendSV),
+  woken by TIM2's compares at each deadline ([board app](elevator/cpp_embedded_kernel/board)): max lateness 5 µs, average 0.77 µs
+  (0.28 µs with the earlier single PendSV level; the alarm path now reads the level table at run time).
 - [Pi ↔ MCU protocol](pi_mcu_protocol) *(in progress: steps 1–3 of 9)*: a Raspberry Pi ↔ STM32 serial link built from TAOCP ideas:
   a lock-free circular queue (§2.2.2) between the UART interrupt and the main loop, CRC-framed lines,
   and a [circle of buffers](knuth_kernel#circleofbuffers-circle_of_buffershpp) (§1.4.4) for DMA transmit, one whole line per transfer.

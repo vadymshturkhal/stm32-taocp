@@ -96,7 +96,7 @@ static void elevator_start_cpp(void)
   uint32_t end = DWT->CYCCNT;
   elevator_cpp.start_cycles = end - start - elevator_dwt_overhead;
 
-  pend_kernel();                    /* from here on, only PendSV touches the kernel (rule 1) */
+  kernel_port_start();              /* from here on, only a level's handler touches its kernel (rule 1) */
 }
 
 /* main's only elevator work: the end of the run */

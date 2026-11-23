@@ -1,6 +1,7 @@
 // The port needs only CMSIS (stm32g4xx.h). The HAL tick (HAL_GetTick from TIM2)
 // is built only with the HAL: USE_HAL_DRIVER, which CubeMX projects define.
 #include "kernel_port.hpp"
+#include "kernel_port_priorities.hpp"
 #ifdef USE_HAL_DRIVER
 #include "stm32g4xx_hal.h"  // the HAL tick below: uwTick, HAL_SuspendTick
 #endif
@@ -11,40 +12,65 @@ KernelStats kernel_stats_level_15 __attribute__((used)) = {};
 /* Clock on and set priority level */
 extern "C" void kernel_port_init(void)
 {
-    RCC->APB1ENR1 |= RCC_APB1ENR1_TIM2EN;   // TIM2's clock on
-    (void)RCC->APB1ENR1;          // read back: short delay before the first TIM2 access (the clock needs a couple of cycles to reach the peripheral)
-    TIM2->PSC = 170 - 1;          // the prescaler: 170 MHz / 170 = 1 MHz tick
-    TIM2->ARR = 0xFFFFFFFF;       // auto-reload: the value at which it wraps. 0xFFFFFFFF uses all 32 bits
-    TIM2->EGR = TIM_EGR_UG;       // reloads PSC/ARR without setting UIF (update interrupt flag)
-    TIM2->CR1 |= TIM_CR1_CEN;     // start counting
+    RCC->APB1ENR1 = RCC->APB1ENR1 | RCC_APB1ENR1_TIM2EN;   // TIM2's clock on
+    (void)RCC->APB1ENR1;       // read back: short delay before the first TIM2 access (the clock needs a couple of cycles to reach the peripheral)
+    TIM2->PSC = 170 - 1;       // the prescaler: 170 MHz / 170 = 1 MHz tick
+    TIM2->ARR = 0xFFFFFFFF;    // auto-reload: the value at which it wraps. 0xFFFFFFFF uses all 32 bits
+    TIM2->EGR = TIM_EGR_UG;    // reinitialize the counter and generates an update of the registers
+    TIM2->CR1 = TIM2->CR1 | TIM_CR1_CEN;  // start counting
 
-    NVIC_SetPriority(PendSV_IRQn, (1u << __NVIC_PRIO_BITS) - 1);  // lowest: 15
-    NVIC_SetPriority(TIM2_IRQn, 2);
+    // The alarms: both compare interrupts on, once. arm() never writes DIER: a
+    // read-modify-write there could be preempted by the other level and undo its bit
+    TIM2->SR = ~(TIM_SR_CC1IF | TIM_SR_CC2IF);      // no stale match: each level arms its own
+    TIM2->DIER = TIM_DIER_CC1IE | TIM_DIER_CC2IE;
+
+    // The levels' handlers, at the priorities in level_config (PendSV is always enabled)
+    for (const KernelLevel& level : levels)
+    {
+        NVIC_SetPriority(level.config.irq, level.config.priority);
+        if (level.config.irq >= 0) NVIC_EnableIRQ(level.config.irq);
+    }
+
+    NVIC_SetPriority(TIM2_IRQn, 2);     // above every level: a running step never delays an alarm
     NVIC_EnableIRQ(TIM2_IRQn);
 }
 
-/* Wakes the kernel at the next deadline */
-static void pend_next() noexcept
+/* main's kick, once its programs are set up: from here on, only a level's handler
+ * touches that level's kernel (rule 1). An empty level runs once and arms nothing */
+extern "C" void kernel_port_start(void)
 {
-    const auto t = kernel.get_next_time();
+    for (const KernelLevel& level : levels) ring(level);
+}
 
-    // Nothing waits
+/* Wakes the kernel at the next deadline */
+static void arm(KernelLevel& level) noexcept
+{
+    // 1. Take the next time
+    const auto t = level.kernel.get_next_time();
+
+    // 2. If the list is empty: return
     if (!t) {
-        TIM2->DIER &= ~TIM_DIER_CC1IE;
         return;
     }
 
-    // 1. Write CCR1 (the alarm: CNT == CCR1 ->interrupt)
-    TIM2->CCR1 = *t;
+    // 3. Otherwise write the level's compare register, chosen by its alarm channel,
+    // 4. then clear only its flag with a single write to SR (rc_w0: the 1s change nothing)
+    switch (level.config.channel)
+    {
+    case 0:
+        TIM2->CCR1 = *t;
+        TIM2->SR = ~TIM_SR_CC1IF;
+        break;
+    case 1:
+        TIM2->CCR2 = *t;
+        TIM2->SR = ~TIM_SR_CC2IF;
+        break;
+    default:
+        return;     // no such channel (level_channels_exist() rules it out): arm nothing
+    }
 
-    // 2. Clear the flag (drop a stale match from earlier alarm)
-    TIM2->SR = ~TIM_SR_CC1IF;
-
-    // 3. Update interrupt enable
-    TIM2->DIER |= TIM_DIER_CC1IE;
-
-    // 4. Go to PendSV
-    if(!WaitList::is_less(now(), *t)) pend_kernel();
+    // 5. The race check: the deadline is already here (now >= t), so ring the level
+    if (!WaitList::is_less(now(), *t)) ring(level);
 }
 
 #ifdef USE_HAL_DRIVER
@@ -67,7 +93,7 @@ static void add_wrap(uint32_t& ms, uint32_t& rem) noexcept
 
 /*
  * 36 cycles; the 64-bit division took 133 (measured)
- */ 
+ */
 static uint32_t tim2_ms() noexcept
 {
     const uint32_t primask = __get_PRIMASK();
@@ -87,13 +113,12 @@ static uint32_t tim2_ms() noexcept
     return ms + q + (r + rem >= 1000u);   // the two leftovers can make one more ms
 }
 
-// Overrides HAL's __weak HAL_GetTick: SysTick's uwTick until the switch, then TIM2
+/* Overrides HAL's __weak HAL_GetTick: SysTick's uwTick until the switch, then TIM2 */
 extern "C" uint32_t HAL_GetTick(void)
 {
     return tim2_tick ? tim2_ms() + tick_offset : uwTick;
 }
 
-// Call before the kernel starts: DIER is shared with pend_next()
 extern "C" void HAL_Tick_From_TIM2(void)
 {
     const uint32_t primask = __get_PRIMASK();
@@ -126,50 +151,78 @@ extern "C" void TIM2_IRQHandler(void)
     }
 #endif
 
-    if ((sr & TIM_SR_CC1IF) && (TIM2->DIER & TIM_DIER_CC1IE))
-    {   // a deadline (alarm armed)
-        TIM2->SR = ~TIM_SR_CC1IF;                   // clear the flag or the interrupt repeats forever
-        pend_kernel();
+    // A level's deadline: clear its flag (or the interrupt repeats forever), ring the level
+    for (KernelLevel& level : levels)
+    {
+        const uint32_t flag = level.config.channel == 0 ? TIM_SR_CC1IF : TIM_SR_CC2IF;
+        if (sr & flag)
+        {
+            TIM2->SR = ~flag;
+            ring(level);
+        }
     }
 }
 
-/* Called from PendSV_Handler */
-extern "C" void kernel_PendSV_Handler(void)
+/*
+ * One run of a level: every due node and every posted event, then its next alarm.
+ * Only that level's handler calls it (rule 1). A higher level can preempt it between
+ * or inside steps: the levels share nothing but TIM2, whose registers they split.
+ * cycles include any higher level that ran inside the step.
+ */
+static void run_level(KernelLevel& level) noexcept
 {
-    for(;;)
+    Kernel& kernel = level.kernel;
+    KernelStats& stats = level.stats;
+
+    for (;;)
     {
         const uint32_t t = now();
         kernel.start_event(t);
         const auto head_deadline = kernel.get_next_time();
         const uint32_t c0 = DWT->CYCCNT;
-        
+
         if (!kernel.step(t)) break;
 
         const uint32_t cycles = DWT->CYCCNT - c0;
         const uint32_t late = t - *head_deadline;
-        
-        // kernel stats
-        ++kernel_stats_level_14.steps;
-        kernel_stats_level_14.busy_cycles += cycles;
-        if (cycles > kernel_stats_level_14.max_cycles) kernel_stats_level_14.max_cycles = cycles;
-        kernel_stats_level_14.late_sum_us += late;
-        if (late > kernel_stats_level_14.max_late_us) kernel_stats_level_14.max_late_us = late;
+
+        ++stats.steps;
+        stats.busy_cycles += cycles;
+        if (cycles > stats.max_cycles) stats.max_cycles = cycles;
+        stats.late_sum_us += late;
+        if (late > stats.max_late_us) stats.max_late_us = late;
     }
 
-    kernel_stats_level_14.refused_ops = kernel.refused();
-    kernel_stats_level_14.events_dropped = kernel.events_dropped();
+    stats.refused_ops = kernel.refused();
+    stats.events_dropped = kernel.events_dropped();
 
     // the WAIT list's own counters, copied for C
     if constexpr (WAIT_LIST_STATS)
     {
         const WaitListStats& w = kernel.list_stats();
-        kernel_stats_level_14.sortins = w.sortins;
-        kernel_stats_level_14.list_max = w.length_max;
-        kernel_stats_level_14.list_sum = w.length_sum;
-        kernel_stats_level_14.walk_max = w.walk_max;
-        kernel_stats_level_14.walk_sum = w.walk_sum;
+        stats.sortins = w.sortins;
+        stats.list_max = w.length_max;
+        stats.list_sum = w.length_sum;
+        stats.walk_max = w.walk_max;
+        stats.walk_sum = w.walk_sum;
     }
-    pend_next();
+    arm(level);
+}
+
+// The handlers are fixed by the vector table: check the table agrees
+static_assert(level_config[level_index(14)].irq == CORDIC_IRQn, "level 14 runs in CORDIC_IRQHandler");
+static_assert(level_config[level_index(15)].irq == PendSV_IRQn, "level 15 runs in PendSV_Handler");
+
+/* Level 14 (the elevator): CORDIC's vector, pended by ring(). The CORDIC itself stays off */
+extern "C" void CORDIC_IRQHandler(void)
+{
+    run_level(level_14);
+}
+
+/* Level 15, called from PendSV_Handler */
+extern "C" void kernel_PendSV_Handler(void)
+{
+    run_level(level_15);
 }
 
 /*

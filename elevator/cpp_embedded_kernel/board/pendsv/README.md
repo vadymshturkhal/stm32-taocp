@@ -9,6 +9,15 @@ time. Here the same elevator runs on a NUCLEO-G431RB in **real time**: the
 The elevator does the same work as on the PC, to the last bit: the same 544
 steps, the same checksum of TIME.
 
+**Since stage 2 (November 2026)** the port runs the kernel at two NVIC levels, each
+with its own `Kernel`: the elevator on level 14 (`CORDIC_IRQHandler`, CORDIC's spare
+vector, alarm on `CCR1`), and level 15 in PendSV (alarm on `CCR2`), empty until the
+trace drain moves there. See [SCHEME.md](../../../../knuth_kernel/port/stm32g4/SCHEME.md).
+The measurements below are from the one-PendSV-kernel version. With the two levels
+the steps, checksum and wakes are the same and the maximum lateness stays 5 µs, but
+the average lateness rose from 0.28 µs to **0.77 µs** (bare build, `late_sum_us`
+151 → 420): the alarm path now reads the level table at run time.
+
 The kernel itself is tickless (it wakes only at deadlines), but HAL's 1 ms
 SysTick still runs for `HAL_GetTick()` (the link's timeouts), so the CPU also
 wakes 1000 times a second. A tickless variant (SysTick off) comes later in a
@@ -117,22 +126,23 @@ frames are mixed in (the first line is its RST).
 ## How it runs
 
 ```
-TIM2 CNT == CCR1 ─► TIM2_IRQHandler: clear the flag, pend PendSV
+TIM2 CNT == CCR1 ─► TIM2_IRQHandler: clear CC1IF, ring level 14 (NVIC->STIR = CORDIC_IRQn)
                          │
-       (no other interrupt active) ─► PendSV_Handler ─► kernel_PendSV_Handler():
+       (no higher interrupt active) ─► CORDIC_IRQHandler ─► run_level(level_14):
                                         run every due node (the drain loop)
-                                        pend_next(): CCR1 = the next deadline
+                                        arm(): CCR1 = the next deadline
 main:  Link_Poll ─► cpp_elevator_finished()? ─► kernel_port_sleep() ─► (woken) ─► ...
 ```
 
-- **Only PendSV touches the kernel** after the first `pend_kernel()`: `main`
-  and the ISRs never call `hold` or `cancel`, so the list needs no locks.
-- **PendSV has the lowest priority** (15), TIM2 a higher one (2): the kernel
-  never delays an interrupt.
-- **`pend_next()` re-checks the deadline** after arming the compare: if it already
-  passed, it pends PendSV itself (otherwise the next match is 71.6 min away).
+- **Only level 14's handler touches the elevator's kernel** after
+  `kernel_port_start()`: `main` and the ISRs never call `hold` or `cancel`, so the
+  list needs no locks. Level 15 (PendSV) has its own kernel, which it alone touches.
+- **The kernel levels have the lowest priorities** (14 and 15), TIM2 a higher one
+  (2): the kernel never delays an interrupt, and level 14 preempts level 15.
+- **`arm()` re-checks the deadline** after arming the compare: if it already
+  passed, it rings the level itself (otherwise the next match is 71.6 min away).
 - **The end is the elevator's own state** (`finished()`: every user gone, the
-  elevator dormant at E1), not an empty list: the kernel is shared. The elevator
+  elevator dormant at E1), not an empty list: other programs can share level 14. The elevator
   checks it at the steps that can end a run and sets an atomic flag; `main`
   polls it with `cpp_elevator_finished()`.
 - **The sleep runs from SRAM** (`kernel_port_sleep()` in the port): with
@@ -175,8 +185,10 @@ From elsewhere in the repository:
      /* USER CODE BEGIN PendSV_IRQn 0 */
      kernel_PendSV_Handler();
    ```
-   `TIM2_IRQHandler` is defined in `kernel_port.cpp` (TIM2 is not configured in
-   the `.ioc`, so CubeMX does not generate one).
+   PendSV runs level 15. `TIM2_IRQHandler` and `CORDIC_IRQHandler` (level 14) are
+   defined in `kernel_port.cpp`: TIM2 and the CORDIC are not configured in the
+   `.ioc`, so CubeMX generates neither, and the port's ones replace the startup
+   file's weak aliases.
 5. `TICKS_PER_TIME_UNIT` in `elevator_constants.hpp`: 1000 (1 Knuth unit =
    1 ms, a 10.4 s run). Any value gives the same steps and checksum.
 

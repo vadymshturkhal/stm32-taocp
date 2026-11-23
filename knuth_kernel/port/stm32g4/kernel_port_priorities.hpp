@@ -1,0 +1,140 @@
+/*
+ * kernel_port_priorities.hpp - the kernel's levels (stage 2): one Kernel per NVIC priority.
+ *
+ * A level is an exception handler at a chosen priority, with its own WAIT list: the
+ * NVIC does the preemption, and only that level's handler touches its list (rule 1).
+ * Elevator context: Elevator program moves to level_14, the trace drain and tx_watchdog to level_15. 
+*/
+
+#pragma once
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include "kernel_port.hpp"
+
+/* 
+ * The kernel levels sit below every real interrupt: TIM2 (2, the alarm) 
+ * and the ISRs that post events (3) must be able to preempt any step.
+*/
+inline constexpr std::uint8_t first_kernel_priority = 4;
+
+/* constexpr, fixed part of a level. */
+struct LevelConfig
+{
+    std::uint8_t priority;  // NVIC priority, 0 = the highest
+    IRQn_Type irq;          // the handler that runs it: PendSV, or a spare IRQ pended with NVIC->STIR
+    std::uint8_t channel;   // its alarm in TIM2: 0 = CCR1/CC1IF, 1 = CCR2/CC2IF
+};
+
+inline constexpr std::array<LevelConfig, 2> level_config
+{
+    {
+        { .priority = 14, .irq = CORDIC_IRQn, .channel = 0 },  // the elevator
+        { .priority = 15, .irq = PendSV_IRQn, .channel = 1 },  // the trace drain, tx_watchdog
+    }
+};
+
+consteval bool level_priorities_in_range() 
+{
+    for (const LevelConfig& c : level_config)
+    {
+        if (c.priority < first_kernel_priority || c.priority >= (1u << __NVIC_PRIO_BITS))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+consteval bool level_channels_exist() 
+{
+    for (const LevelConfig& c : level_config)
+    {
+        if (c.channel > 1) return false;
+    }
+
+    return true;
+}
+
+consteval bool level_nothing_shared()
+{
+    for (std::size_t i = 0; i < level_config.size(); ++i)
+    {
+        for (std::size_t j = i + 1; j < level_config.size(); ++j) 
+        {
+            const LevelConfig& a = level_config[i];
+            const LevelConfig& b = level_config[j];
+            if (a.priority == b.priority || a.irq == b.irq || a.channel == b.channel) return false;
+        }
+    }
+
+    return true;
+
+}
+static_assert(level_priorities_in_range(), "level_config: a kernel level's priority must be 4..15, below the real interrupts");
+static_assert(level_channels_exist(), "level_config: arm() knows channels 0 (CCR1) and 1 (CCR2) only");
+static_assert(level_nothing_shared(), "level_config: two levels share a priority, an IRQ or an alarm channel");
+
+/* A name for a missing level, like level_13, is a compile error. */
+void no_kernel_level_at_this_priority();
+
+consteval std::size_t level_index(std::uint8_t priority) 
+{
+    for (std::size_t i = 0; i < level_config.size(); ++i)
+    {
+        if (level_config[i].priority == priority) return i;
+    }
+    
+    no_kernel_level_at_this_priority();
+    
+    return 0;
+}
+
+/* constinit, built at compile time, written at run time. */
+struct KernelLevel 
+{
+    Kernel kernel;              // this level's WAIT list: only this level's handler touches it (rule 1)
+    KernelStats& stats;         // a C global
+    const LevelConfig& config;  // its priority, IRQ and alarm channel
+};
+
+constinit inline std::array<KernelLevel, level_config.size()> levels
+{
+    {
+        { .kernel = {}, .stats = kernel_stats_level_14, .config = level_config[level_index(14)] },
+        { .kernel = {}, .stats = kernel_stats_level_15, .config = level_config[level_index(15)] },
+    }
+};
+
+/* The names the programs use. Each entry above finds its config by priority,
+ * so reordering level_config can't pair a name with another level's stats */
+inline constexpr KernelLevel& level_14 = levels[0];  // the elevator
+inline constexpr KernelLevel& level_15 = levels[1];  // the trace drain, tx_watchdog
+
+/*
+ * The doorbell: makes the level's handler pending. 
+ * It runs as soon as its priority allows; several rings before it runs are one run. 
+ */
+inline void ring(const KernelLevel& level) noexcept 
+{
+    if (level.config.irq == PendSV_IRQn)
+    {
+        pend_kernel();  // a system exception: ICSR (STIR can't pend it)
+    }
+    else
+    {
+        NVIC->STIR = static_cast<std::uint32_t>(level.config.irq);
+    }
+}
+
+/*
+ * What an ISR calls to wake a node on this level: the node goes into the level's events
+ * circle, and the level's handler does the immed. One posting priority per level's circle
+ * (a single producer). false = the circle was full: the event is counted as dropped.
+ */
+inline bool kernel_post(KernelLevel& level, WaitNode& node) noexcept
+{
+    const bool posted = level.kernel.post(node);
+    ring(level);    // anyway: the level's run is what makes room
+    return posted;
+}

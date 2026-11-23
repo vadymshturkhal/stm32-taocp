@@ -115,7 +115,7 @@ void board_main(void)
   HAL_Tick_From_TIM2();             /* HAL's ms from TIM2, SysTick off: no 1 ms wake-ups */
 #endif
   elevator_start_cpp();
-  pend_kernel();                    /* from here on, only PendSV touches the kernel (rule 1) */
+  kernel_port_start();              /* from here on, only a level's handler touches its kernel (rule 1) */
 
   for (;;)
   {
