@@ -50,9 +50,10 @@ I2C_HandleTypeDef hi2c1;
 DMA_HandleTypeDef hdma_i2c1_tx;
 
 /* USER CODE BEGIN PV */
-/* The C++ elevator on the Knuth kernel, in real time: the kernel runs in PendSV,
- * woken by the TIM2 compare at each deadline; main runs the link and sleeps.
- * The per-step numbers (steps, cycles, lateness) are the port's kernel_stats_level_14.
+/* The C++ elevator on the Knuth kernel, in real time: the elevator runs on kernel
+ * level 14 (CORDIC_IRQHandler), woken by TIM2's CCR1 at each deadline; level 15
+ * (PendSV) is empty for now; main runs the link and sleeps.
+ * The per-step numbers (steps, cycles, lateness) are level 14's, kernel_stats_level_14.
  * Globals, so they survive -O3/LTO and Live Expressions can read them while it runs. */
 #define ELEVATOR_USERS 66
 
@@ -212,7 +213,7 @@ int main(void)
   UART_RX_Init();                   /* interrupt receiving */
   Link_Init();                      /* sends RST, starts the protocol */
 
-  /* The C++ elevator beside the link, in real time: the kernel runs in PendSV at
+  /* The C++ elevator beside the link, in real time: kernel level 14 runs it at
    * each deadline (TIM2 compare), main sleeps in between. */
   DBGMCU->CR |= DBGMCU_CR_DBG_SLEEP;                  /* keep the debugger connected in __WFI */
   CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;     /* the DWT cycle counter on */
@@ -232,13 +233,13 @@ int main(void)
     /* USER CODE BEGIN 3 */
     Link_Poll(HAL_GetTick());
 
-    /* The records PendSV wrote since the last pass become lines here, where PendSV
-     * can preempt the formatting. If every TX buffer is busy the rest waits: the
+    /* The records level 14's steps wrote since the last pass become lines here, where
+     * the kernel levels can preempt the formatting. If every TX buffer is busy the rest waits: the
      * TX-complete interrupt wakes main for the next pass. */
     cpp_elevator_trace_poll();
 
-    /* PendSV runs the elevator; main only ends it. The end is the elevator's own
-     * state (users gone, dormant at E1), a flag PendSV sets, read with cpp_elevator_finished(). The run's
+    /* Level 14 runs the elevator; main only ends it. The end is the elevator's own
+     * state (users gone, dormant at E1), a flag level 14 sets, read with cpp_elevator_finished(). The run's
      * time stops there; the numbers are collected once the last record is queued. */
     if (elevator_finishing())
     {

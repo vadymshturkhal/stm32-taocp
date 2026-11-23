@@ -3,7 +3,9 @@
 The C++ elevator on the Knuth kernel for a NUCLEO-G431RB, built from this
 repository's sources (`knuth_kernel`, `elevator/cpp_embedded_kernel`) with
 **CMSIS only**: no HAL, no CubeMX, no CubeIDE. One script fetches CMSIS,
-builds, flashes and checks the run.
+builds, flashes and checks the run. The kernel runs at two NVIC priority levels:
+the elevator on level 14 (CORDIC's spare vector), level 15 in PendSV, empty for
+now ([SCHEME.md](../../knuth_kernel/port/stm32g4/SCHEME.md)).
 
 ```
 ./setup.sh           # fetch + build -> build/elevator.elf
@@ -108,6 +110,17 @@ refused operations, no dropped trace records.
 - **Old project:** the extra ~1.4 ms awake is main's other work (`Link_Poll`,
   the OLED, the trace poll). Its cycles per step were not recorded in that run.
 
+These were measured with one kernel level, in PendSV. With the two levels (trace
+off) the steps, checksum and wakes are the same, but the alarm path reads the
+level table at run time, which costs lateness and awake time:
+
+| | Lateness max / average | CPU awake |
+|---|---:|---:|
+| Elevator-Primes, one level (above) | 6 µs / 286 ns | 1.31 ms |
+| Elevator-Primes, two levels | 6 µs / 1.17 µs | 1.78 ms |
+| This build, one level | 5 µs / 0.28 µs | 1.33 ms |
+| This build, two levels | 5 µs / 0.77 µs | 1.61 ms |
+
 ## Commands
 
 | Command | What it does |
@@ -161,7 +174,7 @@ above a 128-byte guard can't end below it. The size is `_Stack_Guard_Size` in
 |---|---|
 | `src/clock.c` | `SystemClock_Config`: 170 MHz from the HSI in registers, the same steps HAL runs (range 1 boost, 4 flash wait states, PLL /4 x85 /2, the AHB /2 step above 80 MHz) |
 | `src/main.c` | the generated `main.c`: `clock_170mhz()`, the priority grouping `HAL_Init` sets, `board_main()` |
-| `src/board_main.c` | the same file as in the CubeIDE project: the elevator's start, end, statistics, the sleep loop, `PendSV_Handler` |
+| `src/board_main.c` | the same file as in the CubeIDE project: the elevator's start, end, statistics, the sleep loop, `PendSV_Handler` (kernel level 15) |
 | `src/sbrk.c` | `sysmem.c`: the heap for `malloc` (the users' pool) |
 | `src/init_fini.c` | `_init`/`_fini`: linked with `-nostartfiles`, so newlib's `crt0` (and the stdio it pulls in) is left out |
 | `stm32g431rb.ld` | the generated linker script |

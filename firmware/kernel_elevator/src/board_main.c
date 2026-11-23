@@ -1,13 +1,15 @@
 /* board_main.c - the C++ elevator on the Knuth kernel, in real time
  *
- * The kernel runs in PendSV, woken by the TIM2 compare at each deadline; main
- * only ends the run and sleeps. The per-step numbers (steps, cycles, lateness)
- * are the port's kernel_stats_level_14. Globals, so they survive -O2/LTO and Live
- * Expressions can read them while it runs.
+ * The kernel runs at two NVIC levels (kernel_port_priorities.hpp): the elevator
+ * on level 14, in CORDIC_IRQHandler, woken by TIM2's CCR1 at each deadline; level
+ * 15 in PendSV, empty for now. main only ends the run and sleeps. The per-step
+ * numbers (steps, cycles, lateness) are level 14's, kernel_stats_level_14.
+ * Globals, so they survive -O2/LTO and Live Expressions can read them while it runs.
  *
  * CMSIS only, apart from the HAL tick switch (USE_HAL_DRIVER: CubeMX builds).
- * PendSV_Handler is defined here: in a CubeMX project, NVIC -> Code generation
- * -> PendSV, untick "Generate IRQ handler", or the link finds two of them. */
+ * PendSV_Handler (level 15) is defined here: in a CubeMX project, NVIC -> Code
+ * generation -> PendSV, untick "Generate IRQ handler", or the link finds two of
+ * them. CORDIC_IRQHandler (level 14) and TIM2_IRQHandler are in the port. */
 #include "board_main.h"
 #include "kernel_port.hpp"
 #include "stack_guard.h"
@@ -33,7 +35,7 @@ volatile uint32_t elevator_phase __attribute__((used)) = ELEVATOR_PHASE_CPP;
 static uint32_t elevator_start_us;
 static uint32_t elevator_dwt_overhead;          /* the cost of reading CYCCNT twice */
 
-/* PendSV runs the kernel */
+/* PendSV runs kernel level 15 */
 void PendSV_Handler(void)
 {
   kernel_PendSV_Handler();
@@ -74,7 +76,7 @@ static void __attribute__((noinline)) elevator_finish(void)
   volatile uint32_t idle_us = elevator_cpp.idle_us;
   volatile uint32_t idle_permille = elapsed_us ? (uint32_t)((uint64_t)idle_us * 1000u / elapsed_us) : 0;
   volatile uint32_t wakes = elevator_cpp.wakes;
-  volatile uint32_t stack_used = elevator_cpp.stack_used;            /* 228 of 896 bytes with one kernel level */
+  volatile uint32_t stack_used = elevator_cpp.stack_used;            /* 220 of 896 bytes with the two levels (228 with one) */
   volatile uint32_t awake_us = elapsed_us - idle_us;
 
   /* Misuse a release build refuses silently: both must be 0 */
@@ -99,7 +101,7 @@ static void __attribute__((noinline)) elevator_finish(void)
 
 void board_main(void)
 {
-  kernel_port_init();               /* TIM2 as the 1 µs clock, PendSV and TIM2 priorities */
+  kernel_port_init();               /* TIM2 as the clock and the alarms; the levels' and TIM2's priorities */
 
   DBGMCU->CR |= DBGMCU_CR_DBG_SLEEP;                  /* keep the debugger connected in __WFI */
   DBGMCU->APB1FZR1 |= DBGMCU_APB1FZR1_DBG_TIM2_STOP;  /* TIM2 stops while the debugger halts the CPU */
@@ -119,8 +121,8 @@ void board_main(void)
 
   for (;;)
   {
-    /* PendSV runs the elevator; main only ends it. The end is the elevator's own
-     * state (users gone, dormant at E1), a flag PendSV sets, read with cpp_elevator_finished(). */
+    /* Level 14 runs the elevator; main only ends it. The end is the elevator's own
+     * state (users gone, dormant at E1), a flag level 14 sets, read with cpp_elevator_finished(). */
     if (elevator_finishing())
     {
       elevator_cpp.elapsed_us = TIM2->CNT - elevator_start_us;
