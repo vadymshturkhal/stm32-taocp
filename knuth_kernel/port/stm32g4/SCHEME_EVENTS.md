@@ -32,7 +32,7 @@ calls `kernel_post()` yet. Its first users will be the button and the I2C DMA.
                          ▼       ├───────────────────┘
    events_: 8 slots of WaitNode* │ STIR or PENDSVSET (the level's doorbell)
                          │ red   │
-  the level (14, 15)     │       ▼ run_level(level)
+  the level (14, 15)     │       ▼ run_level<P>()
   ┌──────────────────────│───────────────────────────────────┐
   │ for (;;) {           │                                   │
   │   t = now()          ▼                                   │
@@ -46,7 +46,7 @@ calls `kernel_post()` yet. Its first users will be the button and the I2C DMA.
   │ }                                                        │
   │                                                          │
   │ refused_ops, events_dropped → level.stats                │
-  │ arm(level): the next alarm                               │
+  │ arm<P>(): the next alarm                                 │
   └──────────────────────────────────────────────────────────┘
 ```
 

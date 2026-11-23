@@ -111,15 +111,18 @@ refused operations, no dropped trace records.
   the OLED, the trace poll). Its cycles per step were not recorded in that run.
 
 These were measured with one kernel level, in PendSV. With the two levels (trace
-off) the steps, checksum and wakes are the same, but the alarm path reads the
-level table at run time, which costs lateness and awake time:
+off) the steps, checksum and wakes are the same. The lateness is too, once the
+alarm path takes its level as a template argument; reading the level table at run
+time (the first version) cost lateness and awake time:
 
 | | Lateness max / average | CPU awake |
 |---|---:|---:|
 | Elevator-Primes, one level (above) | 6 µs / 286 ns | 1.31 ms |
-| Elevator-Primes, two levels | 6 µs / 1.17 µs | 1.78 ms |
+| Elevator-Primes, two levels, table at run time | 6 µs / 1.17 µs | 1.78 ms |
+| Elevator-Primes, two levels, templates | 5 µs / 0.28 µs | 1.37 ms |
 | This build, one level | 5 µs / 0.28 µs | 1.33 ms |
-| This build, two levels | 5 µs / 0.77 µs | 1.61 ms |
+| This build, two levels, table at run time | 5 µs / 0.77 µs | 1.61 ms |
+| This build, two levels, templates | 5 µs / 0.28 µs | 1.32 ms |
 
 ## Commands
 

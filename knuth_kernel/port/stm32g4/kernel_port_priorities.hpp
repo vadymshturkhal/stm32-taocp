@@ -128,6 +128,34 @@ inline void ring(const KernelLevel& level) noexcept
 }
 
 /*
+ * The compile-time versions, for code that knows its level's priority P: the level's
+ * row of level_config is then a constant, so its channel and IRQ fold into the code.
+ * The port's hot paths (the alarm, the drain loop) use these: read through levels at
+ * run time, the same values cost 0.5 µs of average lateness.
+ */
+template <std::uint8_t P>
+constexpr KernelLevel& level_at() noexcept
+{
+    static_assert(P == 14 || P == 15, "level_at: no kernel level at this priority");
+    if constexpr (P == 14) return level_14;
+    else return level_15;
+}
+
+template <std::uint8_t P>
+inline void ring_at() noexcept
+{
+    constexpr const LevelConfig& config = level_config[level_index(P)];
+    if constexpr (config.irq == PendSV_IRQn)
+    {
+        pend_kernel();  // a system exception: ICSR (STIR can't pend it)
+    }
+    else
+    {
+        NVIC->STIR = static_cast<std::uint32_t>(config.irq);
+    }
+}
+
+/*
  * What an ISR calls to wake a node on this level: the node goes into the level's events
  * circle, and the level's handler does the immed. One posting priority per level's circle
  * (a single producer). false = the circle was full: the event is counted as dropped.

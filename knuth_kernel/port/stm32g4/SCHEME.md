@@ -17,13 +17,15 @@ each pass of that level's loop first takes one posted event (`start_event`).
 ISR posts yet: the button and the I2C DMA will be the first.
 
 **Measured** (the bare build, 66 users): the same 544 steps, checksum 2487227626
-and 473 wakes as with the one PendSV kernel, and the same maximum lateness, 5 µs.
-The **average lateness rose from 0.28 µs to 0.77 µs** (`late_sum_us` 151 → 420),
-and the CPU is awake 1.61 ms of the 10.36 s instead of 1.33 ms. The cost is in the
-alarm path: `TIM2_IRQHandler`, `arm()` and `ring()` read each level's channel and
-IRQ from `levels` at run time (51 instructions in the handler, about 8 before). A
-version with the level as a template parameter, so the table folds into constants,
-measured 0.28 µs again; it is the next step.
+and 473 wakes as with the one PendSV kernel, the same maximum lateness, 5 µs, and
+the same **average lateness, 0.28 µs** (`late_sum_us` 151), awake 1.32 ms of the
+10.36 s. That needs the hot paths (`TIM2_IRQHandler`, `arm`, the race check's
+ring) to know their level at compile time: they are templates on the level's
+priority, so its row of `level_config` folds into constants (`TIM2_IRQHandler`:
+23 instructions). The first version read each level's channel and IRQ from
+`levels` at run time (51 instructions in the handler): average lateness 0.77 µs,
+awake 1.61 ms. The price of the templates: one copy of the drain loop per level,
++288 bytes of flash.
 
 ```
                   ┌──────────────────────────────────────────┐
@@ -40,18 +42,18 @@ measured 0.28 µs again; it is the next step.
                   └──────────────────────────────────────────┘
 
   TIM2 (prio 2), the alarms: CNT == CCR1 → level 14, CNT == CCR2 → level 15
-  ┌──────────────────────────────────────────────────────────┐
-  │ TIM2_IRQHandler:                                         │
-  │   CC1IF? (is it set?) → clear it, ring(level_14): NVIC->STIR = 100    │
-  │   CC2IF? (is it set?) → clear it, ring(level_15): ICSR.PENDSVSET      │
-  └────────────────────────────┬─────────────────────────────┘
+  ┌───────────────────────────────────────────────────────────────────────┐
+  │ TIM2_IRQHandler:                                                      │
+  │   CC1IF? (is it set?) → clear it, ring_at<14>(): NVIC->STIR = 100     │
+  │   CC2IF? (is it set?) → clear it, ring_at<15>(): ICSR.PENDSVSET       │
+  └────────────────────────────┬──────────────────────────────────────────┘
                                │ tail-chain, no return to main
                                ▼
-  level 14 (prio 14)  CORDIC_IRQHandler → run_level(level_14): the elevator
-  level 15 (prio 15)  PendSV_Handler → kernel_PendSV_Handler → run_level(level_15)
+  level 14 (prio 14)  CORDIC_IRQHandler → run_level<14>(): the elevator
+  level 15 (prio 15)  PendSV_Handler → kernel_PendSV_Handler → run_level<15>()
                       (empty until phase 3); level 14 preempts it
 
-  run_level(level), the same loop for every level:
+  run_level<P>(), the same loop for every level P (level_at<P>()):
   ┌──────────────────────────────────────────────────────────┐
   │ for (;;) {                                               │
   │   t = now()                                              │
@@ -62,10 +64,10 @@ measured 0.28 µs again; it is the next step.
   │   stats: cycles, lateness → level.stats                  │
   │ }                                                        │
   │ refused_ops, events_dropped → level.stats                │
-  │ arm(level):                                              │
+  │ arm<P>():                                                │
   │   list empty?  → return (no register is touched)         │
   │   its CCRx = first node's NEXTTIME, clear only its CCxIF │
-  │   now ≥ NEXTTIME already? → ring(level): it runs again   │
+  │   now ≥ NEXTTIME already? → ring_at<P>(): it runs again  │
   └──────────────────────────────────────────────────────────┘
 
   The application (the elevator), inside its own steps:
@@ -172,7 +174,8 @@ could preempt and undo; so both enables are set once, in `kernel_port_init()`.
 | `levels` | `constinit std::array` of the two levels: built at compile time, no constructor runs before `main`. Each entry finds its config by priority |
 | `level_14`, `level_15` | the names programs use: `levels[0]`, the elevator; `levels[1]`, the trace drain and `tx_watchdog` (phase 3) |
 | `kernel_stats_level_14`, `_15` | each level's `KernelStats`; `main.c`, GDB and `setup.sh` read them |
-| `ring(level)` | the doorbell: makes the level's handler pending. CORDIC: `NVIC->STIR = CORDIC_IRQn`; PendSV: `pend_kernel()`, i.e. `SCB->ICSR = PENDSVSET` (a system exception: `STIR` can't pend it). Called by `kernel_port_start()`, `TIM2_IRQHandler`, `arm()`'s race check and `kernel_post()`. Several rings before it runs = one run |
+| `ring(level)` | the doorbell: makes the level's handler pending. CORDIC: `NVIC->STIR = CORDIC_IRQn`; PendSV: `pend_kernel()`, i.e. `SCB->ICSR = PENDSVSET` (a system exception: `STIR` can't pend it). Called by `kernel_port_start()` and `kernel_post()`. Several rings before it runs = one run |
+| `level_at<P>()`, `ring_at<P>()` | the compile-time versions, for code that knows its level's priority `P`: the level's row of `level_config` is then a constant, so its channel and IRQ fold into the code. The hot paths use them: `TIM2_IRQHandler`, `run_level<P>`, `arm<P>`. A priority with no level is a compile error |
 | `NVIC->STIR`, `SCB->ICSR` | single writes, never a read-modify-write, so any context can ring safely; writing 0 to `ICSR`'s other bits does nothing |
 | `kernel_post(level, node)` | what an ISR calls: the node into the level's events circle, then `ring(level)`. See [SCHEME_EVENTS.md](SCHEME_EVENTS.md) |
 
@@ -184,7 +187,7 @@ could preempt and undo; so both enables are set once, in `kernel_port_init()`.
 | `TIM2->CCR1`, `CCR2` | the alarm times of level 14 (channel 0) and level 15 (channel 1). When `CNT == CCRx`, the compare matches |
 | `CC1IF`, `CC2IF` | the compare flags in `TIM2->SR`, set by the match; each must be cleared, or the interrupt repeats for ever. They are rc_w0: writing 0 clears, writing 1 changes nothing, so `SR = ~flag` clears one level's flag in one write without touching the other's (or `UIF`) |
 | `CC1IE`, `CC2IE` | the compare interrupt enables in `TIM2->DIER`: both set once in `kernel_port_init()` and never written again |
-| `TIM2_IRQHandler` | ([kernel_port.cpp](kernel_port.cpp)) the alarms' interrupt: for each level whose flag is set, clears it and rings the level. In HAL builds it also counts TIM2's wraps (`UIF`) for `HAL_GetTick` |
+| `TIM2_IRQHandler` | ([kernel_port.cpp](kernel_port.cpp)) the alarms' interrupt: one `check_alarm<P>()` per level, expanded at compile time from `level_config`: if the level's flag is set, clear it and `ring_at<P>()`. In HAL builds it also counts TIM2's wraps (`UIF`) for `HAL_GetTick` |
 | `HAL_Tick_From_TIM2()` | HAL builds only (`USE_HAL_DRIVER`): `HAL_GetTick` in ms from TIM2's µs and its wraps, and SysTick off, so there are no 1 ms wake-ups. Called once, before the kernel starts: its read-modify-write of `DIER` (adding `UIE`) is safe then, with interrupts masked |
 | tail-chain | the Cortex-M goes from one handler straight into the next pending one (TIM2 → level 14 → level 15) without returning to `main` in between |
 
@@ -192,11 +195,11 @@ could preempt and undo; so both enables are set once, in `kernel_port_init()`.
 
 | Name | What it does |
 |------|--------------|
-| `CORDIC_IRQHandler` | level 14: `run_level(level_14)`. CORDIC's vector used as a spare software interrupt; the CORDIC itself stays off. Defined in the port, it replaces the startup file's weak alias, so CubeMX needs no change |
+| `CORDIC_IRQHandler` | level 14: `run_level<14>()`. CORDIC's vector used as a spare software interrupt; the CORDIC itself stays off. Defined in the port, it replaces the startup file's weak alias, so CubeMX needs no change |
 | `PendSV_Handler` | level 15's exception handler (in `stm32g4xx_it.c` in the CubeIDE projects, in `board_main.c` in the bare build); only calls `kernel_PendSV_Handler()` |
-| `kernel_PendSV_Handler()` | `run_level(level_15)`. `extern "C"`, so the C handler can call this C++ function |
+| `kernel_PendSV_Handler()` | `run_level<15>()`. `extern "C"`, so the C handler can call this C++ function |
 | the handlers' `static_assert`s | the table must name `CORDIC_IRQn` for level 14 and `PendSV_IRQn` for level 15: the vector table fixes which handler runs which level |
-| `run_level(level)` | one run of a level: the drain loop on `level.kernel`, the stats into `level.stats`, then `arm(level)`. A higher level can preempt it between or inside steps |
+| `run_level<P>()` | one run of level P (`level_at<P>()`): the drain loop on `level.kernel`, the stats into `level.stats`, then `arm<P>()`. A template on the priority, so the level is known at compile time; each level gets its own copy, inlined into its handler. A higher level can preempt it between or inside steps |
 | `now()` | `TIM2->CNT`: the current time in µs, read again on every pass of the loop |
 | `kernel.start_event(t)` | takes one posted event, if there is one, and `immed`s its node: it runs ahead of the nodes already due. See [SCHEME_EVENTS.md](SCHEME_EVENTS.md) |
 | `kernel.step(t)` | if the WAIT list's first node is due (its time ≤ `t`): unlinks it, runs its step, returns `true`; otherwise `false`, and the loop ends. Knuth's CYCLE on the real clock. "≤" is wrap-safe, `!is_less(t, NEXTTIME)` (the sign of the difference): it holds while deadlines are less than 2^31 µs (35.8 min) apart |
@@ -204,9 +207,9 @@ could preempt and undo; so both enables are set once, in `kernel_port_init()`.
 | `hold(node, now, delay)` | puts the node back in the WAIT list, due `delay` from now (sorted in by time) |
 | `holdc(node, now, delay, step)` | the same, with a new step to run next |
 | `immed(node, now)` | puts the node first in the list: it runs in this same drain loop |
-| stats: cycles, lateness | DWT cycles of the step (`busy_cycles`, `max_cycles`); `now - deadline` in µs (`late_sum_us`, `max_late_us`). A step's cycles include any higher level that ran inside it. With the two levels the elevator's average lateness is 0.77 µs (0.28 µs with the one PendSV kernel), the maximum 5 µs as before |
+| stats: cycles, lateness | DWT cycles of the step (`busy_cycles`, `max_cycles`); `now - deadline` in µs (`late_sum_us`, `max_late_us`). A step's cycles include any higher level that ran inside it. The elevator's average lateness is 0.28 µs and the maximum 5 µs, as with the one PendSV kernel (0.77 µs while the alarm path read the level table at run time) |
 | `kernel.refused()` | misuse the kernel refused in release builds (a free node held or cancelled, a due node with no step); 0 in a correct run |
-| `arm(level)` | the level's next alarm: list empty → return, no register touched; else the level's `CCRx` = the first node's `NEXTTIME` (the earliest deadline: the list is sorted by time; `kernel.get_next_time()`, i.e. `head.right`, not the sentinel `head` itself), clear only its `CCxIF`, then the race check: if `now()` is already at or past the deadline, `ring(level)` (a missed match comes back only after the 71.6 min wrap) |
+| `arm<P>()` | level P's next alarm (a template like `run_level<P>`, so the channel and IRQ are constants): list empty → return, no register touched; else the level's `CCRx` = the first node's `NEXTTIME` (the earliest deadline: the list is sorted by time; `kernel.get_next_time()`, i.e. `head.right`, not the sentinel `head` itself), clear only its `CCxIF`, then the race check: if `now()` is already at or past the deadline, `ring_at<P>()` (a missed match comes back only after the 71.6 min wrap) |
 | `NEXTTIME` | a node's deadline in µs (Knuth's field name) |
 
 ### The stack guard ([stack_guard.c](stack_guard.c))

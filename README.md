@@ -123,8 +123,8 @@ is what came of taking that seriously.
   programs are nodes, `HOLD`/`IMMED`/`CYCLE` are the scheduler, nodes created at run time come from an AVAIL-list
   storage pool (§2.2.3). Run to completion within a level (a higher level preempts a lower one), one stack, no heap after startup; tested in CI under AddressSanitizer and UBSan.
   On the STM32G431 it runs at two NVIC priority levels, each with its own WAIT list (14 in a spare interrupt vector, 15 in PendSV),
-  woken by TIM2's compares at each deadline ([board app](elevator/cpp_embedded_kernel/board)): max lateness 5 µs, average 0.77 µs
-  (0.28 µs with the earlier single PendSV level; the alarm path now reads the level table at run time).
+  woken by TIM2's compares at each deadline ([board app](elevator/cpp_embedded_kernel/board)): max lateness 5 µs, average 0.28 µs,
+  as with the earlier single PendSV level (the alarm path takes its level as a template argument).
 - [Pi ↔ MCU protocol](pi_mcu_protocol) *(in progress: steps 1–3 of 9)*: a Raspberry Pi ↔ STM32 serial link built from TAOCP ideas:
   a lock-free circular queue (§2.2.2) between the UART interrupt and the main loop, CRC-framed lines,
   and a [circle of buffers](knuth_kernel#circleofbuffers-circle_of_buffershpp) (§1.4.4) for DMA transmit, one whole line per transfer.

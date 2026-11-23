@@ -13,9 +13,9 @@ CORDIC's spare vector runs the elevator, level 15 in **PendSV** is for backgroun
 work. TIM2's two **compare channels** wake them at each deadline
 ([`port/stm32g4`](port/stm32g4)). The elevator runs in real time, every step within
 5 µs of its deadline
-([elevator/cpp_embedded_kernel/board](../elevator/cpp_embedded_kernel/board)); the
-average lateness rose from 0.28 µs to **0.77 µs** with the two levels, because the
-alarm path reads the level table at run time (a compile-time version is next).
+([elevator/cpp_embedded_kernel/board](../elevator/cpp_embedded_kernel/board)), on
+average 0.28 µs, as with one level: the alarm path takes the level as a template
+argument, so the level table folds into constants (read at run time it cost 0.77 µs).
 Next: a second program beside it, and UART interrupts as events (see
 [Roadmap](#roadmap)).
 
@@ -335,6 +335,28 @@ straight into a TX buffer, where the kernel levels can preempt it. With 4 users 
 max lateness is 6 µs (`printf` inside the steps: 604 µs; no trace: 4 µs),
 and the trace matches the PC's byte for byte.
 
+## On the board: two kernel levels
+
+The STM32G4 port ([`port/stm32g4`](port/stm32g4), [SCHEME.md](port/stm32g4/SCHEME.md))
+runs the kernel at two NVIC priority levels, each with its own `Kernel`: the
+elevator on level 14 (CORDIC's spare vector), level 15 in PendSV. The hot paths
+(the alarm interrupt, the drain loop, `arm`) are templates on the level's
+priority, so each level's row of `level_config` folds into constants.
+
+On the board (the [bare build](../firmware/kernel_elevator), 66 users), with 544
+steps, the checksum and 473 wakes in every run:
+
+| | Max / average lateness | Awake (of 10.36 s) | `TIM2_IRQHandler` |
+|---|---:|---:|---:|
+| One level (before) | 5 µs / 0.28 µs | 1.33 ms | ~8 instructions |
+| Two levels, table at run time | 5 µs / 0.77 µs | 1.61 ms | 51 |
+| Two levels, templates | 5 µs / 0.28 µs | 1.32 ms | 23 |
+
+- **The price:** +288 bytes of flash in the bare build, +232 in Elevator-Primes,
+  because each level now has its own copy of the drain loop, inlined into its
+  handler.
+- **The stack is unchanged:** 392 of 896 bytes in the static estimate.
+
 ## Language and tools
 
 The same as [pi_mcu_protocol](../pi_mcu_protocol): C++23 with `g++-14` on the PC,
@@ -350,8 +372,8 @@ function is `noexcept`.
 | `kernel.hpp`             | `Kernel`: the API for programs, and `step(now)`    |
 | `storage_pool.hpp`       | `StoragePool<T>`: nodes created at run time        |
 | `circle_of_buffers.hpp`  | `CircleOfBuffers<T, N>`: Knuth's circle of buffers between a program and a device |
-| `port/stm32g4/kernel_port_priorities.hpp` | the kernel levels: `level_config` (priority, IRQ and TIM2 channel per level, checked by `static_assert`), `levels` (a `Kernel` and `KernelStats` per level), `level_14` (the elevator, CORDIC's vector) and `level_15` (PendSV), `ring(level)`, `kernel_post(level, node)` |
-| `port/stm32g4/kernel_port.{hpp,cpp}` | the STM32G4 port, CMSIS only: TIM2 as the 1 µs clock (`now()`), `run_level()` (run every due node of a level, its `KernelStats`), `arm()` (the level's TIM2 compare at its next deadline, with the race re-check), `CORDIC_IRQHandler` and `kernel_PendSV_Handler()` (levels 14 and 15), `TIM2_IRQHandler` (rings the level whose compare matched), `kernel_port_start()` (`main`'s kick), `kernel_port_sleep()` (the masked `__WFI` run from SRAM, returns the µs slept: with `DBG_SLEEP` set the G431 can skip the first instruction fetched from flash after the wake, ES0431 §2.2.7). With the HAL (`USE_HAL_DRIVER`) also `HAL_Tick_From_TIM2()`: `HAL_GetTick` from TIM2, SysTick off |
+| `port/stm32g4/kernel_port_priorities.hpp` | the kernel levels: `level_config` (priority, IRQ and TIM2 channel per level, checked by `static_assert`), `levels` (a `Kernel` and `KernelStats` per level), `level_14` (the elevator, CORDIC's vector) and `level_15` (PendSV), `ring(level)` and the compile-time `level_at<P>()`, `ring_at<P>()`, `kernel_post(level, node)` |
+| `port/stm32g4/kernel_port.{hpp,cpp}` | the STM32G4 port, CMSIS only: TIM2 as the 1 µs clock (`now()`), `run_level<P>()` (run every due node of level `P`, its `KernelStats`), `arm<P>()` (the level's TIM2 compare at its next deadline, with the race re-check): templates on the level's priority, so the table folds into constants, `CORDIC_IRQHandler` and `kernel_PendSV_Handler()` (levels 14 and 15), `TIM2_IRQHandler` (rings the level whose compare matched), `kernel_port_start()` (`main`'s kick), `kernel_port_sleep()` (the masked `__WFI` run from SRAM, returns the µs slept: with `DBG_SLEEP` set the G431 can skip the first instruction fetched from flash after the wake, ES0431 §2.2.7). With the HAL (`USE_HAL_DRIVER`) also `HAL_Tick_From_TIM2()`: `HAL_GetTick` from TIM2, SysTick off |
 | `tests/test_wait_list.cpp` | the tests of the WAIT list                       |
 | `tests/test_kernel.cpp`  | the tests of the kernel, with small programs       |
 | `tests/test_storage_pool.cpp` | the tests of the storage pool                 |

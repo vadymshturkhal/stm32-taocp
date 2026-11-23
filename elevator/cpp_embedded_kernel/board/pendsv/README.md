@@ -14,9 +14,9 @@ with its own `Kernel`: the elevator on level 14 (`CORDIC_IRQHandler`, CORDIC's s
 vector, alarm on `CCR1`), and level 15 in PendSV (alarm on `CCR2`), empty until the
 trace drain moves there. See [SCHEME.md](../../../../knuth_kernel/port/stm32g4/SCHEME.md).
 The measurements below are from the one-PendSV-kernel version. With the two levels
-the steps, checksum and wakes are the same and the maximum lateness stays 5 µs, but
-the average lateness rose from 0.28 µs to **0.77 µs** (bare build, `late_sum_us`
-151 → 420): the alarm path now reads the level table at run time.
+the steps, checksum, wakes and lateness are the same (bare build: 5 µs maximum,
+0.28 µs average). That needs the alarm path to take its level as a template
+argument: reading the level table at run time had cost 0.77 µs on average.
 
 The kernel itself is tickless (it wakes only at deadlines), but HAL's 1 ms
 SysTick still runs for `HAL_GetTick()` (the link's timeouts), so the CPU also
@@ -128,7 +128,7 @@ frames are mixed in (the first line is its RST).
 ```
 TIM2 CNT == CCR1 ─► TIM2_IRQHandler: clear CC1IF, ring level 14 (NVIC->STIR = CORDIC_IRQn)
                          │
-       (no higher interrupt active) ─► CORDIC_IRQHandler ─► run_level(level_14):
+       (no higher interrupt active) ─► CORDIC_IRQHandler ─► run_level<14>():
                                         run every due node (the drain loop)
                                         arm(): CCR1 = the next deadline
 main:  Link_Poll ─► cpp_elevator_finished()? ─► kernel_port_sleep() ─► (woken) ─► ...

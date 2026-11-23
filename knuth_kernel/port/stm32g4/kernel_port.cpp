@@ -2,6 +2,7 @@
 // is built only with the HAL: USE_HAL_DRIVER, which CubeMX projects define.
 #include "kernel_port.hpp"
 #include "kernel_port_priorities.hpp"
+#include <utility>   // std::index_sequence: one alarm check per level
 #ifdef USE_HAL_DRIVER
 #include "stm32g4xx_hal.h"  // the HAL tick below: uwTick, HAL_SuspendTick
 #endif
@@ -42,9 +43,20 @@ extern "C" void kernel_port_start(void)
     for (const KernelLevel& level : levels) ring(level);
 }
 
-/* Wakes the kernel at the next deadline */
-static void arm(KernelLevel& level) noexcept
+/*
+ * The hot paths take the level's priority P as a template argument (level_at<P>,
+ * ring_at<P> in kernel_port_priorities.hpp): its row of level_config is then known at
+ * compile time, and the channel, flag and IRQ are constants in the code. Read from
+ * levels at run time they cost 0.5 µs of average lateness (0.77 instead of 0.28 µs).
+ */
+
+/* Wakes level P at its next deadline */
+template <std::uint8_t P>
+static void arm() noexcept
 {
+    KernelLevel& level = level_at<P>();
+    constexpr const LevelConfig& config = level_config[level_index(P)];
+
     // 1. Take the next time
     const auto t = level.kernel.get_next_time();
 
@@ -55,22 +67,31 @@ static void arm(KernelLevel& level) noexcept
 
     // 3. Otherwise write the level's compare register, chosen by its alarm channel,
     // 4. then clear only its flag with a single write to SR (rc_w0: the 1s change nothing)
-    switch (level.config.channel)
+    if constexpr (config.channel == 0)
     {
-    case 0:
         TIM2->CCR1 = *t;
         TIM2->SR = ~TIM_SR_CC1IF;
-        break;
-    case 1:
+    }
+    else    // channel 1: level_channels_exist() rules out the others
+    {
         TIM2->CCR2 = *t;
         TIM2->SR = ~TIM_SR_CC2IF;
-        break;
-    default:
-        return;     // no such channel (level_channels_exist() rules it out): arm nothing
     }
 
     // 5. The race check: the deadline is already here (now >= t), so ring the level
-    if (!WaitList::is_less(now(), *t)) ring(level);
+    if (!WaitList::is_less(now(), *t)) ring_at<P>();
+}
+
+/* Level P's alarm in TIM2_IRQHandler: its flag set? Clear it (or the interrupt repeats forever), ring the level */
+template <std::uint8_t P>
+static void check_alarm(uint32_t sr) noexcept
+{
+    constexpr uint32_t flag = level_config[level_index(P)].channel == 0 ? TIM_SR_CC1IF : TIM_SR_CC2IF;
+    if (sr & flag)
+    {
+        TIM2->SR = ~flag;
+        ring_at<P>();
+    }
 }
 
 #ifdef USE_HAL_DRIVER
@@ -151,16 +172,11 @@ extern "C" void TIM2_IRQHandler(void)
     }
 #endif
 
-    // A level's deadline: clear its flag (or the interrupt repeats forever), ring the level
-    for (KernelLevel& level : levels)
+    // One check per level, expanded at compile time from level_config
+    [sr]<std::size_t... I>(std::index_sequence<I...>)
     {
-        const uint32_t flag = level.config.channel == 0 ? TIM_SR_CC1IF : TIM_SR_CC2IF;
-        if (sr & flag)
-        {
-            TIM2->SR = ~flag;
-            ring(level);
-        }
-    }
+        (check_alarm<level_config[I].priority>(sr), ...);
+    }(std::make_index_sequence<level_config.size()>{});
 }
 
 /*
@@ -169,8 +185,10 @@ extern "C" void TIM2_IRQHandler(void)
  * or inside steps: the levels share nothing but TIM2, whose registers they split.
  * cycles include any higher level that ran inside the step.
  */
-static void run_level(KernelLevel& level) noexcept
+template <std::uint8_t P>
+static void run_level() noexcept
 {
+    KernelLevel& level = level_at<P>();
     Kernel& kernel = level.kernel;
     KernelStats& stats = level.stats;
 
@@ -206,23 +224,23 @@ static void run_level(KernelLevel& level) noexcept
         stats.walk_max = w.walk_max;
         stats.walk_sum = w.walk_sum;
     }
-    arm(level);
+    arm<P>();
 }
 
 // The handlers are fixed by the vector table: check the table agrees
 static_assert(level_config[level_index(14)].irq == CORDIC_IRQn, "level 14 runs in CORDIC_IRQHandler");
 static_assert(level_config[level_index(15)].irq == PendSV_IRQn, "level 15 runs in PendSV_Handler");
 
-/* Level 14 (the elevator): CORDIC's vector, pended by ring(). The CORDIC itself stays off */
+/* Level 14 (the elevator): CORDIC's vector, pended by ring_at<14>(). The CORDIC itself stays off */
 extern "C" void CORDIC_IRQHandler(void)
 {
-    run_level(level_14);
+    run_level<14>();
 }
 
 /* Level 15, called from PendSV_Handler */
 extern "C" void kernel_PendSV_Handler(void)
 {
-    run_level(level_15);
+    run_level<15>();
 }
 
 /*
