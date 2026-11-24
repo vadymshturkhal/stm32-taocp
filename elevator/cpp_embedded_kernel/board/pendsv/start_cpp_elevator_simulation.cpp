@@ -20,12 +20,14 @@
 #include "elevator_simulation.hpp"
 #include "start_cpp_elevator_simulation.h"
 #include "trace.hpp"
+#include "elevator_constants.hpp"   // USERS
 
 #ifdef TRACE
 #include "../uart_tx.h"
 #endif
 
 static std::optional<ElevatorSimulation> simulation;
+extern "C" const uint32_t elevator_users = USERS;
 
 // Construction (the users' pool: malloc and every node built) is most of the
 // setup, so it is split from start: read "now" after it, and USER1 is not late
@@ -54,9 +56,18 @@ extern "C" std::uint32_t cpp_elevator_pool_refused(void) {
     return simulation ? simulation->users.pool_refused() : 0;
 }
 
-// main's side of the trace: PendSV's steps write records, main formats them here, where
-// PendSV can preempt it, and queues the lines. Never waits: if every TX buffer is busy,
-// the record stays the oldest and the next call tries again.
+// format_trace() measured with DWT, one line at a time (0 without TRACE). The cycles
+// include any interrupt or kernel level that preempted it: the average is the cost,
+// the maximum an upper bound
+extern "C" {
+std::uint32_t format_count = 0;        // lines formatted
+std::uint32_t format_cycles_sum = 0;   // format_count = the average
+std::uint32_t format_cycles_max = 0;   // the longest one
+}
+
+// main's side of the trace: level 14's steps write records, main formats them here, where
+// the kernel levels can preempt it, and queues the lines. Never waits: if every TX buffer
+// is busy, the record stays the oldest and the next call tries again.
 extern "C" void cpp_elevator_trace_poll(void) {
 #ifdef TRACE
     while (TraceRecord* r = trace_circle.start_operation()) {
@@ -66,7 +77,14 @@ extern "C" void cpp_elevator_trace_poll(void) {
             return;
         }
 
-        UART_TX_Commit(format_trace(*r, line, UART_TX_LINE_SIZE));
+        const std::uint32_t c0 = DWT->CYCCNT;
+        const std::size_t len = format_trace(*r, line, UART_TX_LINE_SIZE);
+        const std::uint32_t cycles = DWT->CYCCNT - c0;
+        ++format_count;
+        format_cycles_sum += cycles;
+        if (cycles > format_cycles_max) format_cycles_max = cycles;
+
+        UART_TX_Commit(len);
         trace_circle.operation_is_completed();
     }
 #endif

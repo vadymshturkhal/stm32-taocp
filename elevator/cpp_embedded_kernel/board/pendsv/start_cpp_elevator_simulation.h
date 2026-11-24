@@ -36,12 +36,20 @@ void cpp_elevator_trace_poll(void);
 int cpp_elevator_trace_pending(void);
 uint32_t cpp_elevator_trace_dropped(void);
 
+/* format_trace() measured with DWT in cpp_elevator_trace_poll() (0 without TRACE):
+ * lines, their cycles (sum / count = the average), the longest; preemption included */
+extern uint32_t format_count;
+extern uint32_t format_cycles_sum;
+extern uint32_t format_cycles_max;
+
 /* The run, read from main between PendSV passes:
  *   cpp_elevator_finished(): 1 once every user is gone and the elevator is dormant at E1
  *   cpp_elevator_checksum(): checksum * 31 + TIME over the elevator's own steps:
  *                            2487227626 for 66 users. Read it before stop */
 int cpp_elevator_finished(void);
 uint32_t cpp_elevator_checksum(void);
+
+extern const uint32_t elevator_users;        /* USERS from elevator_constants.hpp */
 
 #ifdef __cplusplus
 }
