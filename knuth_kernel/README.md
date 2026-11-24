@@ -431,4 +431,10 @@ much later.
 
 ---
 
-*Code, design and measurements are mine; Claude helped draft the READMEs and the paper, and reviewed code.*
+*Claude (Opus 5.5) assistance:*
+- *Drafted all READMEs, SCHEME files and tests;*
+- *Ran the board tests and measurements (DWT, GDB, `setup.sh`) and reviewed the code.*
+- *Suggested, wrote and then proved that to_chars is faster than snprintf;*
+- *Suggested to use template for kernel levels, for splitting compile/runtime code, then proved that templates provided some hints to compiler for optimizing kernel levels API usage: average lateness 0.77µs → 0.28 µs, at the cost of +288 bytes of flash.*
+- *Investigated why the G431 skipped an instruction after the masked `__WFI` with `DBG_SLEEP` (ES0431 §2.2.7, seen even with ST's workarounds), and moved `kernel_port_sleep()` to SRAM; checked in 20 code layouts.*
+- *Tested the stack guard on the board, with a deliberate overflow and the fault record, and wrote the static stack estimate, which matches the measured 228 bytes.*

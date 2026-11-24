@@ -211,7 +211,3 @@ that layout.
 `DBGMCU_CR_DBG_SLEEP` keeps the debugger connected while the CPU sleeps.
 Measuring by single-stepping does not work here: the debugger masks interrupts
 while stepping, so PendSV seems to run later than it does.
-
----
-
-*Code, design and measurements are mine; Claude helped draft the READMEs and the paper, and reviewed code.*

@@ -325,7 +325,3 @@ only, never on the MCU:
 7. Heartbeat (a periodic WaitList node)
 8. Timeout (a WaitList node restarted by every received line)
 9. Flow control
-
----
-
-*Code, design and measurements are mine; Claude helped draft the READMEs and the paper, and reviewed code.*
