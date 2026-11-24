@@ -114,13 +114,17 @@ refused operations, no dropped trace records.
 These were measured with one kernel level, in PendSV. With the two levels (trace
 off) the steps, checksum and wakes are the same. The lateness is too, once the
 alarm path takes its level as a template argument; reading the level table at run
-time (the first version) cost lateness and awake time:
+time (the first version) cost lateness and awake time. The Elevator-Primes rows
+were measured with `-flto` on the C++ only, except the last one, with `-flto` on the
+C as well (CubeIDE's Debug configuration now, and its CMake build). The earlier
+versions no longer build against today's `main.c`, so they weren't re-measured:
 
 | | Lateness max / average | CPU awake |
 |---|---:|---:|
 | Elevator-Primes, one level (above) | 6 µs / 286 ns | 1.31 ms |
 | Elevator-Primes, two levels, table at run time | 6 µs / 1.17 µs | 1.78 ms |
 | Elevator-Primes, two levels, templates | 5 µs / 0.28 µs | 1.37 ms |
+| Elevator-Primes, two levels, templates, `-flto` on the C too (now) | **5 µs / 0.27 µs** | **1.28 ms** |
 | This build, one level | 5 µs / 0.28 µs | 1.33 ms |
 | This build, two levels, table at run time | 5 µs / 0.77 µs | 1.61 ms |
 | This build, two levels, templates | 5 µs / 0.28 µs | 1.32 ms |
@@ -128,14 +132,26 @@ time (the first version) cost lateness and awake time:
 ### The trace's formatter
 
 `format_trace` measured with DWT, line by line, in Elevator-Primes with the trace
-on (66 users, two kernel levels, `-O3 -flto`). Every version sends the same 392
-lines, byte for byte, as the PC build and its golden traces:
+on (66 users, two kernel levels, `-O3`). Every version sends the same 392 lines,
+byte for byte, as the PC build and its golden traces.
+
+With `-flto` on the C++ only:
 
 | `format_trace` | Cycles a line, average / longest | CPU awake | Flash (`text`) |
 |---|---:|---:|---:|
 | `snprintf` (newlib) | 10 389 / 13 758 | 29.8 ms | 25 808 B |
 | `std::to_chars`, the action's `%u` read at run time | 4 331 / 9 861 | 16.0 ms | 24 208 B |
-| `std::to_chars`, the action's `{}` checked at compile time (now) | **3 733 / 6 529** | **14.5 ms** | 24 404 B |
+| `std::to_chars`, the action's `{}` checked at compile time | 3 733 / 6 529 | 14.5 ms | 24 404 B |
+| Digits written by hand, the action's `{}` checked at compile time | 1 354 / 1 828 | 9.2 ms | 23 824 B |
+
+With `-flto` on the C and the C++ (CubeIDE's Debug configuration now, and the CMake
+build, which gives the same `.text` byte for byte). The HAL, `main.c` and `uart_tx`
+then inline with the C++, and the trace's poll inlines into `main`:
+
+| `format_trace` | Cycles a line, average / longest | CPU awake | Flash (`text`) |
+|---|---:|---:|---:|
+| `std::to_chars`, the action's `{}` checked at compile time | 3 740 / 6 545 | 13.8 ms | 22 356 B |
+| Digits written by hand, the action's `{}` checked at compile time (now) | **1 430 / 1 952** | **8.6 ms** | **21 732 B** |
 
 - **`snprintf` parses its format on every call**, and newlib is precompiled, so our
   flags don't reach it: 10 582 cycles at `-O2`, 10 389 at `-O3 -flto`. It also
@@ -143,6 +159,26 @@ lines, byte for byte, as the PC build and its golden traces:
 - **`std::to_chars`** (C++17) writes a number with no format string and no locale,
   and is compiled with our code: at `-O3 -flto` it and the small helpers around it
   inline into one function. At `-O2` without LTO it takes 7 775 cycles.
+- **But libstdc++'s `to_chars` copies its digit table first.** In GCC 14.3's
+  `bits/charconv.h`, `__to_chars_10_impl` holds the table `"000102…99"` as a
+  non-`static` `constexpr char __digits[201]` (a `constexpr` function can't have a
+  `static` local before C++23), and GCC doesn't move it to flash. So every number of
+  10 or more starts with a 201-byte `memcpy` onto the stack, newlib-nano's, which is
+  built for size; the disassembly shows it as `movs r2, #201; bl memcpy`. No flag or
+  `-std` changes it.
+- **The digits written by hand** (`digit_count`, then `put` from the last digit back):
+  `/ 10` and `% 10` by a constant compile to a `umull` and a shift, and most numbers
+  here are one or two digits. Against the `to_chars` version, rebuilt and run side by
+  side on the same day: 2.6 times fewer cycles with LTO on everything, 2.7 with LTO
+  on the C++ only (`to_chars` then: 3 720 / 6 522, 14.6 ms, 24 452 B); about −625 B
+  of flash; the same 392 lines. With LTO on the C++ only, where the trace's poll is
+  still a function of its own, its stack frame goes from 280 to 56 bytes, which
+  matters once the formatting moves onto kernel level 15. The cost is the standard
+  function: the reason is in the comment at the top of `trace.cpp`, so it isn't put
+  back.
+- **LTO on the C as well** makes everything else faster (`busy_cycles` 279 268 →
+  269 818, 2.1 KB less flash) but the formatting 5.6 % slower (1 354 → 1 430): the
+  code is inlined and placed differently. Not explained further.
 - **The compile-time check** (`TraceFormat` in `trace.hpp`): an action is text with a
   `{}` per number, as `std::format` writes it. Its constructor is `consteval`, so a
   wrong count stops the build (`trace_format_does_not_match_its_arguments`), and the

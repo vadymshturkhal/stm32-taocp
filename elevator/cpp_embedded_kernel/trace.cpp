@@ -1,49 +1,68 @@
 #ifdef TRACE
-#include <charconv>
-#include <cstring>
 #include "trace.hpp"
 
 /*
- * The line, formatted with std::to_chars: no format string parsed for its types at run
- * time, no locale, no printf engine linked. On the G431 at -O3 -flto: ~3 700 cycles a
- * line, against ~10 400 with the snprintf version it replaced (same output, byte for byte).
+ * The line, formatted by hand: no format string parsed for its types at run time, no
+ * locale, no printf engine linked. The digits are written here, not with std::to_chars:
+ * libstdc++'s to_chars (GCC 14.3) copies its 201-byte digit table onto the stack for
+ * every number >= 10, because the table is a non-static constexpr local. On the G431 at
+ * -O3, -flto on the C and the C++: ~1 430 cycles a line, against ~3 740 with to_chars
+ * and ~10 400 with snprintf (same output, byte for byte).
  */
 
 namespace {
 
-// Each one writes at p and returns the new end, or nullptr if it doesn't fit before end
+/* Each one writes at p and returns the new end, or nullptr if it doesn't fit before end */
 
-char* put(char* p, char* end, const char* s) noexcept {
-    for (; *s; ++s) {
+char* put(char* p, char* end, const char* s) noexcept
+{
+    for (; *s; ++s)
+    {
         if (p == end) return nullptr;
         *p++ = *s;
     }
     return p;
 }
 
-char* put(char* p, char* end, std::uint32_t v) noexcept {
-    const auto r = std::to_chars(p, end, v);
-    return r.ec == std::errc{} ? r.ptr : nullptr;
+/* The number of v's decimal digits */
+std::size_t digit_count(std::uint32_t v) noexcept
+{
+    std::size_t n = 1;
+    for (; v >= 10; v /= 10) ++n;
+    return n;
 }
 
-// v with '0's in front up to width: printf's %04u
-char* put_zero_padded(char* p, char* end, std::uint32_t v, std::size_t width) noexcept {
-    char digits[10];                                   // 4294967295: 10 digits
-    const auto r = std::to_chars(digits, digits + sizeof digits, v);
-    const auto n = static_cast<std::size_t>(r.ptr - digits);
-    for (std::size_t i = n; i < width; ++i) {
-        if (p == end) return nullptr;
-        *p++ = '0';
-    }
+/* v's decimal digits */
+char* put(char* p, char* end, std::uint32_t v) noexcept
+{
+    const std::size_t n = digit_count(v);
     if (static_cast<std::size_t>(end - p) < n) return nullptr;
-    std::memcpy(p, digits, n);
+    char* q = p + n;
+    do                                                    // last digit first
+    {
+        *--q = static_cast<char>('0' + v % 10);
+        v /= 10;
+    } while (v != 0);
     return p + n;
 }
 
-// spaces after the field that began at start, up to width: printf's %-Nu, %-Ns
-char* pad(char* p, char* end, const char* start, std::size_t width) noexcept {
+/* v with '0's in front up to width: printf's %04u */
+char* put_zero_padded(char* p, char* end, std::uint32_t v, std::size_t width) noexcept
+{
+    for (std::size_t i = digit_count(v); i < width; ++i)
+    {
+        if (p == end) return nullptr;
+        *p++ = '0';
+    }
+    return put(p, end, v);
+}
+
+/* Spaces after the field that began at start, up to width: printf's %-Nu, %-Ns */
+char* pad(char* p, char* end, const char* start, std::size_t width) noexcept
+{
     if (p == nullptr) return nullptr;
-    while (static_cast<std::size_t>(p - start) < width) {
+    while (static_cast<std::size_t>(p - start) < width)
+    {
         if (p == end) return nullptr;
         *p++ = ' ';
     }
@@ -58,7 +77,8 @@ char* pad(char* p, char* end, const char* start, std::size_t width) noexcept {
  * "{}" replaced by the next number; TraceFormat checked at compile time that their counts
  * match. Returns the bytes to send, or 0 if the line doesn't fit (nothing to send).
  */
-std::size_t format_trace(const TraceRecord& r, char* out, std::size_t size) noexcept {
+std::size_t format_trace(const TraceRecord& r, char* out, std::size_t size) noexcept
+{
     if (size == 0) return 0;
     char* const end = out + size - 1;   // the line, '\n' included, fits in size - 1, as with snprintf's NUL
     char* p = out;
@@ -80,8 +100,10 @@ std::size_t format_trace(const TraceRecord& r, char* out, std::size_t size) noex
     if (!(p = put(p, end, " "))) return 0;
 
     std::size_t arg = 0;
-    for (const char* f = r.fmt; *f; ++f) {
-        if (f[0] == '{' && f[1] == '}') {            // a number's place
+    for (const char* f = r.fmt; *f; ++f)
+    {
+        if (f[0] == '{' && f[1] == '}')
+        {            // a number's place
             if (arg == 4 || !(p = put(p, end, r.args[arg++]))) return 0;
             ++f;
             continue;
