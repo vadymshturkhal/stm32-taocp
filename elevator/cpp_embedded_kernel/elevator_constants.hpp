@@ -1,6 +1,6 @@
 #pragma once
-#include <cstddef>
 #include <cstdint>
+#include <cstddef>
 
 inline constexpr std::uint32_t FLOORS = 5;
 inline constexpr std::uint32_t HOME_FLOOR = 2;
@@ -20,3 +20,6 @@ inline constexpr std::uint32_t VALUES_SEED = 1;
 
 // Users in the system at once (not in total); the most seen is 7-10, depending on VALUES
 inline constexpr std::size_t POOL_SIZE = 32;
+
+// Users in the whole run; checksum 2487227626 and 544 steps are for 66
+inline constexpr std::uint32_t USERS = 66;
