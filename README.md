@@ -14,17 +14,20 @@
 
 ## Why this repository exists
 
-I planned to go through TAOCP in Python, until I saw that Knuth writes his programs in MIX language and uses cycles counting methodology. I had two choices: to give up or to go further. Unexpectedly, I went further and bought a NUCLEO-G431RB board to test TAOCP's concepts on a real hardware. This repository holds my results and my answer to the question: *can the concepts of The Art of Computer Programming be used on real hardware?*
+I planned to go through TAOCP in Python, until I saw that Knuth writes his programs in the MIX language and uses cycle counting methodology. I had two choices: to give up or to go further. Unexpectedly, I went further and bought a NUCLEO-G431RB board to test TAOCP's concepts on real hardware. This repository holds my results and my answer to the question: *can the concepts from The Art of Computer Programming be used on real hardware?*
 
 ## Hardware and tools
 
 | What | Used |
 |------|------|
-| Board | NUCLEO-G431RB: STM32G431RB, Arm Cortex-M4 with FPU, 170 MHz, 128 KB flash, 32 KB RAM |
-| MCU toolchain | STM32CubeIDE, `arm-none-eabi-gcc` / `g++` 14.3 (GNU Tools for STM32) |
+| Board | NUCLEO-G431RB: STM32G431RB, Arm Cortex-M4 with FPU, 170 MHz, 128 KB flash, 32 KB RAM; the on-board ST-LINK for flashing, debugging and a USB serial port |
+| MCU toolchain, CubeIDE | STM32CubeIDE: `arm-none-eabi-gcc` / `g++` 14.3 (GNU Tools for STM32), the HAL; the kernel and the elevator [linked from this checkout](elevator/cpp_embedded_kernel/board/CUBEIDE.md) |
+| MCU toolchain, without CubeIDE | [firmware/kernel_elevator](firmware/kernel_elevator): CMake ≥ 3.20, `arm-none-eabi-gcc` ≥ 10 (Ubuntu 22.04: 10.3), no HAL |
+| Flash and debug | OpenOCD and GDB (`arm-none-eabi-gdb` or `gdb-multiarch`), or CubeIDE's debugger |
+| Measuring on the board | the DWT cycle counter; the trace over LPUART1 DMA, read at 921600 baud on the ST-LINK serial port |
 | PC builds and tests | `gcc`, `g++-14` (C++23), Python 3.10+ |
 | Host for the protocol | Raspberry Pi 4 (a Linux PC over the ST-LINK USB serial port during development) |
-| CI | GitHub Actions: the badges above; each workflow builds and tests one project on every push |
+| CI | GitHub Actions on Ubuntu 24.04: the badges above; each workflow builds and tests one project on every push; the C++ ones with `-Werror` and ASan + UBSan, the kernel and the protocol also TSan |
 
 # Algorithms:
 - [Algorithm P (Print table of 500 primes)](knuth_primes)
