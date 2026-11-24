@@ -23,7 +23,7 @@
 #include "elevator_constants.hpp"   // USERS
 
 #ifdef TRACE
-#include "../uart_tx.h"
+#include "uart_tx.h"
 #endif
 
 static std::optional<ElevatorSimulation> simulation;

@@ -151,6 +151,10 @@ main:  Link_Poll ─► cpp_elevator_finished()? ─► kernel_port_sleep() ─�
 
 ## Files
 
+**To build from this checkout instead of copying files,** link the repository's folders
+into the CubeIDE project: [CUBEIDE.md](../CUBEIDE.md). The tables below are the older
+way, copying.
+
 | File | Goes to (CubeIDE project) | What it is |
 |------|---------------------------|------------|
 | `main.c` | `Core/Src/main.c` | starts the link and the elevator, waits for `cpp_elevator_finished()`, sleeps in `kernel_port_sleep()`; collects every number in `elevator_finish()` |
@@ -166,6 +170,10 @@ From elsewhere in the repository:
 | [`pi_mcu_protocol`](../../../../pi_mcu_protocol) MCU side (`link`, `uart_rx`, `uart_tx`, `crc16`, `app`) | `Core/Src/` |
 
 ## Setting up the project
+
+With the repository's folders linked instead of copied, follow
+[CUBEIDE.md](../CUBEIDE.md): it covers the include paths, flags and hooks below for
+that layout.
 
 1. A CubeMX project for the NUCLEO-G431RB (170 MHz from the PLL, APB1 not
    divided, so TIM2 counts 1 µs with `PSC = 169`), **converted to C++**.
