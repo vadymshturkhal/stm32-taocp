@@ -14,14 +14,7 @@
 
 ## Why this repository exists
 
-I planned to work through TAOCP in Python. Then I met MIX, Knuth's assembly
-language for an imaginary computer, and almost stopped. I kept going instead, and
-MIX turned out to be the bridge: it led to hand-written ARM assembly on a real
-microcontroller (now faster and smaller than GCC's best), then to C and C++
-versions checked against the same output, and finally to Knuth's 1968 elevator
-scheduler running as a real-time kernel on the board. Knuth keeps MIX in the
-books so that readers understand what the machine really does; this repository
-is what came of taking that seriously.
+I planned to go through TAOCP in Python, until I saw that Knuth writes his programs in MIX language and uses cycles counting methodology. I had two choices: to give up or to go further. Unexpectedly, I went further and bought a NUCLEO-G431RB board to test TAOCP's concepts on a real hardware. This repository holds my results and my answer to the question: *can the concepts of The Art of Computer Programming be used on real hardware?*
 
 ## Hardware and tools
 
