@@ -142,3 +142,15 @@ I planned to go through TAOCP in Python, until I saw that Knuth writes his progr
   Sections: abstract, method, results, the confounder and the hypotheses it disproved, threats to validity;
   the full run history is in [RESULTS.md](elevator/measurements/RESULTS.md#history-c-vs-c-runs-in-order).
   To run it yourself: [the board harness](elevator/measurements/board) (`main.c` and how to set up the CubeIDE project).
+
+
+---
+
+*Claude (Opus 5.5) assistance:*
+- *Drafted all READMEs, SCHEME files and tests;*
+- *Ran the board tests and measurements (DWT, GDB, `setup.sh`) and reviewed the code.*
+- *Suggested, wrote and then proved that to_chars is faster than snprintf in trace;*
+- *Found, in the `format_trace` assembly I asked for, that libstdc++'s `to_chars` copies its 201-byte digit table onto the stack with `memcpy` for every number of 10 or more; with the digits written by hand the trace formats 2.6 times faster (3 740 → 1 430 cycles a line), with no table on the stack (the frame 280 → 56 bytes) and 624 bytes less flash;*
+- *Suggested to use template for kernel levels, for splitting compile/runtime code, then proved that templates provided some hints to compiler for optimizing kernel levels API usage: average lateness 0.77µs → 0.28 µs, at the cost of +288 bytes of flash.*
+- *Investigated why the G431 skipped an instruction after the masked `__WFI` with `DBG_SLEEP` (ES0431 §2.2.7, seen even with ST's workarounds), and moved `kernel_port_sleep()` to SRAM; checked in 20 code layouts.*
+- *Tested the stack guard on the board, with a deliberate overflow and the fault record, and wrote the static stack estimate, which matches the measured 228 bytes.*

@@ -67,9 +67,9 @@ uint32_t stack_guard_size(void)
     return (uint32_t)(uintptr_t)&_Min_Stack_Size - guard_bytes();   /* 1024 - 128 = 896 */
 }
 
-
 /* The C part: runs on the fresh stack, old_msp = the stacked frame,
- * exc_return = the LR the core set on the HardFault's entry */
+ * exc_return = the LR the core set on the HardFault's entry 
+ */
 __attribute__((used, noreturn))
 void stack_guard_record(const uint32_t* old_msp, uint32_t exc_return)
 {
@@ -94,7 +94,8 @@ void stack_guard_record(const uint32_t* old_msp, uint32_t exc_return)
          * The Cortex-M4 stacks PC and xPSR first, then R0-R3, R12, LR. R0, the
          * lowest word, is in the guard: that write faults and the rest is
          * abandoned. So PC is kept when it lies above the guard; LR is never
-         * written (measured: a marker there stays) and stays 0. */
+         * written (measured: a marker there stays) and stays 0. 
+         */
         const uintptr_t guard_top = (uintptr_t)stack_bottom() + guard_bytes();
         const uintptr_t pc_at = (uintptr_t)&old_msp[6];
         if (pc_at >= guard_top && pc_at < (uintptr_t)_estack) stack_guard_fault.pc = old_msp[6];
