@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include "kernel_port.hpp"
+#include "kernel_levels.hpp"
 
 /* 
  * The kernel levels sit below every real interrupt: TIM2 (2, the alarm) 
@@ -29,8 +30,8 @@ struct LevelConfig
 inline constexpr std::array<LevelConfig, 2> level_config
 {
     {
-        { .priority = 14, .irq = CORDIC_IRQn, .channel = 0 },  // the elevator
-        { .priority = 15, .irq = PendSV_IRQn, .channel = 1 },  // the trace drain, tx_watchdog
+        { .priority = kernel_priorities[0], .irq = CORDIC_IRQn, .channel = 0 },  // the elevator
+        { .priority = kernel_priorities[1], .irq = PendSV_IRQn, .channel = 1 },  // trace, tx_watchdog
     }
 };
 
@@ -74,6 +75,7 @@ consteval bool level_nothing_shared()
 static_assert(level_priorities_in_range(), "level_config: a kernel level's priority must be 4..15, below the real interrupts");
 static_assert(level_channels_exist(), "level_config: arm() knows channels 0 (CCR1) and 1 (CCR2) only");
 static_assert(level_nothing_shared(), "level_config: two levels share a priority, an IRQ or an alarm channel");
+static_assert(level_config.size() == kernel_priorities.size(), "level_config: a row for each of kernel_priorities");
 
 /* A name for a missing level, like level_13, is a compile error. */
 void no_kernel_level_at_this_priority();
@@ -139,9 +141,7 @@ inline void ring(const KernelLevel& level) noexcept
 template <std::uint8_t P>
 constexpr KernelLevel& level_at() noexcept
 {
-    static_assert(P == 14 || P == 15, "level_at: no kernel level at this priority");
-    if constexpr (P == 14) return level_14;
-    else return level_15;
+    return levels[level_index(P)];   // level_index is consteval: a priority with no level stops the build
 }
 
 template <std::uint8_t P>

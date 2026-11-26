@@ -175,7 +175,8 @@ could preempt and undo; so both enables are set once, in `kernel_port_init()`.
 
 | Name | What it does |
 |------|--------------|
-| `level_config` | the `constexpr` table, one row per level: `priority`, `irq` (its handler), `channel` (its alarm): {14, `CORDIC_IRQn`, 0} and {15, `PendSV_IRQn`, 1}. The only place these numbers are written |
+| `level_config` | the `constexpr` table, one row per level: `priority`, `irq` (its handler), `channel` (its alarm): {14, `CORDIC_IRQn`, 0} and {15, `PendSV_IRQn`, 1}. The priorities come from `kernel_priorities` |
+| `kernel_priorities` | ([kernel_levels.hpp](kernel_levels.hpp)) the levels' priorities, {14, 15}: the only place they are written. `kernel.hpp` takes them from here (a WAIT list for each; the PC builds, which don't have this file on their include path, use the same two values), and `level_config`'s rows refer to them. A new level: a priority here, a row in `level_config`, its stats global and its handler |
 | the `static_assert`s | every priority 4..15 (`first_kernel_priority`: below TIM2 and the posting ISRs); every channel 0 or 1; no priority, IRQ or channel used twice. A wrong table fails the build |
 | `level_index(p)` | `consteval`: the table's row for priority `p`; a priority with no level is a compile error |
 | `kernel` | `constinit inline Kernel kernel`: the one kernel, a WAIT list per level (`std::array<WaitList, 2>`), built at compile time |
@@ -185,7 +186,7 @@ could preempt and undo; so both enables are set once, in `kernel_port_init()`.
 | `level_14`, `level_15` | the names programs use: `levels[0]`, the elevator; `levels[1]`, the trace drain and `tx_watchdog` (phase 3) |
 | `kernel_stats_level_14`, `_15` | each level's `KernelStats`; `main.c`, GDB and `setup.sh` read them |
 | `ring(level)` | the doorbell: makes the level's handler pending. CORDIC: `NVIC->STIR = CORDIC_IRQn`; PendSV: `pend_kernel()`, i.e. `SCB->ICSR = PENDSVSET` (a system exception: `STIR` can't pend it). Called by `kernel_port_start()`. Several rings before it runs = one run |
-| `level_at<P>()`, `ring_at<P>()` | the compile-time versions, for code that knows its level's priority `P`: the level's row of `level_config` is then a constant, so its channel and IRQ fold into the code. The hot paths use them: `TIM2_IRQHandler`, `run_level<P>`, `arm<P>`. A priority with no level is a compile error |
+| `level_at<P>()`, `ring_at<P>()` | the compile-time versions, for code that knows its level's priority `P`: the level's row of `level_config` is then a constant, so its channel and IRQ fold into the code. The hot paths use them: `TIM2_IRQHandler`, `run_level<P>`, `arm<P>`. `level_at<P>()` is `levels[level_index(P)]`, so a priority with no level is a compile error |
 | `NVIC->STIR`, `SCB->ICSR` | single writes, never a read-modify-write, so any context can ring safely; writing 0 to `ICSR`'s other bits does nothing |
 
 ### TIM2, the clock and the alarms

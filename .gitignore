@@ -30,3 +30,4 @@ knuth_kernel/tests/*
 !knuth_kernel/tests/*.hpp
 knuth_kernel/**/*.o
 knuth_kernel/**/a.out
+knuth_primes_kernel/

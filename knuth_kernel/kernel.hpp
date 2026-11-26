@@ -6,6 +6,18 @@
 #include <cassert>
 #include "wait_list.hpp"
 
+/*
+ * The levels' priorities: the port's kernel_levels.hpp when the build has it on its
+ * include path (the board builds), else 14 and 15 (the PC builds: the tests and the
+ * PC elevator). <>, not "": it must not find a file next to this one. A file that
+ * sees both would define kernel_priorities twice, and the build stops.
+ */
+#if __has_include(<kernel_levels.hpp>)
+#include <kernel_levels.hpp>
+#else
+inline constexpr std::array<std::uint32_t, 2> kernel_priorities{14, 15};
+#endif
+
 class Kernel {
 public:
     constexpr Kernel() noexcept = default;
@@ -123,7 +135,7 @@ public:
     }
 
 private:
-    static constexpr std::array<std::uint32_t, 2> priorities{14, 15};
+    static constexpr auto priorities = kernel_priorities;
 
     /* Array with all available wait lists */
     std::array<WaitList, priorities.size()> wait_lists{};
