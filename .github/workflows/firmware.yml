@@ -1,0 +1,64 @@
+name: Firmware
+
+# The bare firmware (firmware/kernel_elevator, CMSIS only) cross-compiled for the
+# NUCLEO-G431RB: the only place CI builds the STM32G4 port (knuth_kernel/port/stm32g4)
+# and the board's elevator code (elevator/cpp_embedded_kernel/board). The PC tests
+# can't: the port needs CMSIS and the Cortex-M4. It checks that they compile and link,
+# not how they run: timing and lateness need the board.
+
+on:
+  push:
+    paths:
+      - 'knuth_kernel/**'
+      - 'elevator/cpp_embedded_kernel/**'
+      - 'firmware/**'
+      - '.github/workflows/firmware.yml'
+  pull_request:
+    paths:
+      - 'knuth_kernel/**'
+      - 'elevator/cpp_embedded_kernel/**'
+      - 'firmware/**'
+      - '.github/workflows/firmware.yml'
+  workflow_dispatch:
+
+jobs:
+  kernel_elevator:
+    runs-on: ubuntu-24.04            # its gcc-arm-none-eabi is 13.2 (setup.sh needs >= 10)
+    env:
+      CFLAGS: -Werror                # CMake adds these to the toolchain's CPU flags at the
+      CXXFLAGS: -Werror              # first configure: every compile and the LTO link
+    defaults:
+      run:
+        working-directory: firmware/kernel_elevator
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install the Arm toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib ninja-build
+          arm-none-eabi-gcc --version | head -1
+
+      - name: Fetch CMSIS (pinned commits, SHA-256 checked)
+        run: ./setup.sh fetch
+
+      - name: Build (-Werror)
+        run: ./setup.sh build
+
+      - name: Build with STATS=1, the WAIT list's counters (-Werror)
+        run: |
+          arm-none-eabi-size build/elevator.elf > size.txt
+          STATS=1 ./setup.sh build
+          arm-none-eabi-size build/elevator.elf | tail -1 >> size.txt
+
+      - name: Flash and RAM used
+        run: |
+          {
+            echo '### elevator.elf (GCC '"$(arm-none-eabi-gcc -dumpversion)"')'
+            echo '```'
+            echo '   text    data     bss     dec     hex filename'
+            sed -n '2p' size.txt | sed 's|$|  (default)|'
+            sed -n '3p' size.txt | sed 's|$|  (STATS=1)|'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
