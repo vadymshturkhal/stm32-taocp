@@ -155,7 +155,8 @@ I planned to go through TAOCP in Python, until I saw that Knuth writes his progr
 - *Investigated why the G431 skipped an instruction after the masked `__WFI` with `DBG_SLEEP` (ES0431 §2.2.7, seen even with ST's workarounds), and moved `kernel_port_sleep()` to SRAM; checked in 20 code layouts, since the skip appeared only in layouts with `wfi` at an address ≡ 4 mod 8 (not in all of them).*
 - *That became possible after I insisted on a CMake build. In one of the later runs Claude flashed the CMake build to the MCU with the Debug settings and noticed that `idle_us` showed a garbage value, while the steps and the checksum were right; since then `./setup.sh test` also checks the wakes and `idle_us`. I asked Claude to investigate the cause and to give me links to the related documentation. I checked the documentation and told Claude to fix the bug accordingly.*
 - *Tested the stack guard on the board, with a deliberate overflow and the fault record, and wrote the static stack estimate, which matches the measured 228 bytes.*
-- *Suggested to use one Kernel per priority level, and I decided to keep one Kernel per MCU instead.*
-- *In adding priority levels to Kernel, suggested to create between levels event lists, which is a bad design. I adjusted priority level to WaitNode itself.*
+- *Suggested one Kernel per priority level for the kernel levels (stage 2); I later replaced it with one Kernel per MCU, holding a WAIT list for each level*
+- *When a level had to wake a node on another level, suggested an events circle per poster, which is a bad design: a circle for every pair. I made each node know its level instead, so every operation goes to the node's own list.*
 - *Pointed that set_priority on a waiting node breaks rule 1: The node sits in list 14. If its priority then becomes 15, the next hold unlinks it from list 14 using list 15's code, run from level 15.*
 - *Suggested to use templates and constexprs in Kernel.*
+- *Wrote the CI job that cross-compiles the STM32G4 port and the bare firmware with -Werror, the only place CI builds the port, and checked that a wrong level table fails it.*
