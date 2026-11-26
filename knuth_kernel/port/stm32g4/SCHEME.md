@@ -177,9 +177,9 @@ could preempt and undo; so both enables are set once, in `kernel_port_init()`.
 |------|--------------|
 | `level_config` | the `constexpr` table, one row per level: `priority`, `irq` (its handler), `channel` (its alarm): {14, `CORDIC_IRQn`, 0} and {15, `PendSV_IRQn`, 1}. The priorities come from `kernel_priorities` |
 | `kernel_priorities` | ([kernel_levels.hpp](kernel_levels.hpp)) the levels' priorities, {14, 15}: the only place they are written. `kernel.hpp` takes them from here (a WAIT list for each; the PC builds, which don't have this file on their include path, use the same two values), and `level_config`'s rows refer to them. A new level: a priority here, a row in `level_config`, its stats global and its handler |
-| the `static_assert`s | every priority 4..15 (`first_kernel_priority`: below TIM2 and the posting ISRs); every channel 0 or 1; no priority, IRQ or channel used twice. A wrong table fails the build |
+| the `static_assert`s | every priority 4..15 (`first_kernel_priority`: below TIM2 and the ISRs that will wake nodes); every channel 0 or 1; no priority, IRQ or channel used twice. A wrong table fails the build |
 | `level_index(p)` | `consteval`: the table's row for priority `p`; a priority with no level is a compile error |
-| `kernel` | `constinit inline Kernel kernel`: the one kernel, a WAIT list per level (`std::array<WaitList, 2>`), built at compile time |
+| `kernel` | `constinit inline Kernel kernel`: the one kernel, a WAIT list for each of `kernel_priorities` (`std::array<WaitList, kernel_priorities.size()>`), built at compile time |
 | `kernel.attach<P>(node)` | puts the node on level P: sets its `list_` to level P's WAIT list (only while the node waits in no list). Every `hold`, `holdc`, `immed` and `cancel` then goes to that list, with one load. A node that was never attached fails an assert in debug builds |
 | `KernelLevel` | a level's changing part: a reference to its stats (a C global) and one to its row of `level_config` |
 | `levels` | `constinit std::array` of the two levels: built at compile time, no constructor runs before `main`. Each entry finds its config by priority |

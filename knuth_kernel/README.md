@@ -8,7 +8,7 @@ simulation the WAIT list runs simulated time; here it runs real time.
 
 **Status:** the WAIT list (`wait_list.hpp`), the `Kernel` class (`kernel.hpp`)
 and the storage pool are done and tested on the PC. On the STM32G431 the kernel
-runs at **two NVIC priority levels**, each with its own `Kernel`: level 14 in
+runs at **two NVIC priority levels**, one `Kernel` with a WAIT list for each: level 14 in
 CORDIC's spare vector runs the elevator, level 15 in **PendSV** is for background
 work. TIM2's two **compare channels** wake them at each deadline
 ([`port/stm32g4`](port/stm32g4)). The elevator runs in real time, every step within
