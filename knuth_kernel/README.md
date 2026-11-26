@@ -174,34 +174,45 @@ fields, with no vtable.
 
 ## Kernel (`kernel.hpp`)
 
-Programs use the kernel, not the list:
+Programs use the kernel, not the list. The kernel holds a WAIT list per level
+(the levels are NVIC priorities on the board: 14 and 15), and each node knows its
+list:
 
 ```cpp
 class Kernel {
 public:
+    template <std::uint32_t P> void attach(WaitNode& node) noexcept;   // the node goes on level P
+
+    // these go to the node's own list (node.list_): one load, no lookup
     void start(WaitNode& node, std::uint32_t now) noexcept;      // run as soon as possible (immed)
     void hold(WaitNode& node, std::uint32_t now) noexcept;       // run after the node's DELAY
     void hold(WaitNode& node, std::uint32_t now, std::uint32_t delay) noexcept;
     void holdc(WaitNode& node, std::uint32_t now, std::uint32_t delay, WaitNode::NextInst next) noexcept;
     void cancel(WaitNode& node) noexcept;
 
-    bool step(std::uint32_t now) noexcept;                       // run at most one due node
-    std::optional<std::uint32_t> get_next_time() const noexcept;     // the first node's time, if any
+    // these have no node, so the level is a template parameter: a fixed offset, no lookup
+    template <std::uint32_t P> bool step(std::uint32_t now) noexcept;              // run at most one due node
+    template <std::uint32_t P> std::optional<std::uint32_t> get_next_time() const noexcept;  // the first node's time, if any
+    template <std::uint32_t P> std::uint32_t refused() const noexcept;             // level P's refused operations
 };
 ```
 
-`step` is one step of Knuth's `CYCLE`: if the first node is due, take it out of
-the list and run it. The main loop calls it again and again:
+A level that isn't one of the kernel's (`step<3>`) is a compile error. A node used
+before `attach` fails an assert in debug builds.
+
+`step<P>` is one step of Knuth's `CYCLE` on level P: if the first node is due, take
+it out of the list and run it. The main loop calls it again and again:
 
 ```cpp
+k.attach<14>(blinker);
 k.start(blinker, now());
-while (true) k.step(now());
+while (true) k.step<14>(now());
 ```
 
 `step` runs one node per call, so the main loop gets a turn between steps. With
-`get_next_time()` the same kernel can also run event-driven, jumping from deadline
+`get_next_time<P>()` the same kernel can also run event-driven, jumping from deadline
 to deadline like the simulation does; the tests check that both give the same
-run. On the MCU, `get_next_time()` tells how long it may sleep.
+run. On the MCU, `get_next_time<P>()` tells level P's next alarm.
 
 ## The elevator as a reference program
 
@@ -369,10 +380,10 @@ function is `noexcept`.
 | File                     | What it is                                         |
 |--------------------------|----------------------------------------------------|
 | `wait_list.hpp`          | `WaitNode` and `WaitList`                          |
-| `kernel.hpp`             | `Kernel`: the API for programs, and `step(now)`    |
+| `kernel.hpp`             | `Kernel`: a WAIT list per level, the API for programs (`attach<P>`, `hold`, ...), and `step<P>(now)` |
 | `storage_pool.hpp`       | `StoragePool<T>`: nodes created at run time        |
 | `circle_of_buffers.hpp`  | `CircleOfBuffers<T, N>`: Knuth's circle of buffers between a program and a device |
-| `port/stm32g4/kernel_port_priorities.hpp` | the kernel levels: `level_config` (priority, IRQ and TIM2 channel per level, checked by `static_assert`), `levels` (a `Kernel` and `KernelStats` per level), `level_14` (the elevator, CORDIC's vector) and `level_15` (PendSV), `ring(level)` and the compile-time `level_at<P>()`, `ring_at<P>()`, `kernel_post(level, node)` |
+| `port/stm32g4/kernel_port_priorities.hpp` | the kernel levels: `level_config` (priority, IRQ and TIM2 channel per level, checked by `static_assert`), `kernel` (the one `Kernel`), `levels` (`KernelStats` and config per level), `level_14` (the elevator, CORDIC's vector) and `level_15` (PendSV), `ring(level)` and the compile-time `level_at<P>()`, `ring_at<P>()` |
 | `port/stm32g4/kernel_port.{hpp,cpp}` | the STM32G4 port, CMSIS only: TIM2 as the 1 µs clock (`now()`), `run_level<P>()` (run every due node of level `P`, its `KernelStats`), `arm<P>()` (the level's TIM2 compare at its next deadline, with the race re-check): templates on the level's priority, so the table folds into constants, `CORDIC_IRQHandler` and `kernel_PendSV_Handler()` (levels 14 and 15), `TIM2_IRQHandler` (rings the level whose compare matched), `kernel_port_start()` (`main`'s kick), `kernel_port_sleep()` (the masked `__WFI` run from SRAM, returns the µs slept: with `DBG_SLEEP` set the G431 can skip the first instruction fetched from flash after the wake, ES0431 §2.2.7). With the HAL (`USE_HAL_DRIVER`) also `HAL_Tick_From_TIM2()`: `HAL_GetTick` from TIM2, SysTick off |
 | `tests/test_wait_list.cpp` | the tests of the WAIT list                       |
 | `tests/test_kernel.cpp`  | the tests of the kernel, with small programs       |

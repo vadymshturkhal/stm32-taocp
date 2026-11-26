@@ -1,5 +1,11 @@
 // start_cpp_elevator_simulation.cpp - one complete run of the C++ elevator, called from C
 //
+// Updated for the kernel with a WAIT list per level (step<P>, get_next_time<P>):
+// the elevator's nodes are on ELEVATOR_LEVEL, attached by ElevatorSimulation::start.
+// Nothing in the repo builds this file: it is the harness behind the C vs C++
+// measurement (README.md here, ../RESULTS.md), whose numbers were taken with the
+// previous kernel (a Kernel with one WAIT list). Not run on the board since.
+//
 // Like the C start_elevator_simulation(): every call starts from a fresh state
 // (a new kernel, a new simulation with its users' pool, VALUES from seed 1) and
 // runs until the WAIT list is empty, so a cold and a warm run do the same work.
@@ -26,8 +32,8 @@ extern "C" std::uint32_t start_cpp_elevator_simulation(std::uint32_t max_users) 
     simulation->start(max_users, 0);
 
     // Event-driven, like Knuth's CYCLE: jump to the next deadline, run every due node
-    while (const auto t = kernel->get_next_time()) {
-        while (kernel->step(*t)) {}
+    while (const auto t = kernel->get_next_time<ELEVATOR_LEVEL>()) {
+        while (kernel->step<ELEVATOR_LEVEL>(*t)) {}
     }
 
     simulation.reset();     // before the kernel: the simulation holds a reference to it
@@ -44,19 +50,19 @@ extern "C" void cpp_elevator_start(std::uint32_t max_users, std::uint32_t now_ms
 }
 
 extern "C" int cpp_elevator_step(std::uint32_t now_ms) {
-    return (kernel && kernel->step(now_ms)) ? 1 : 0;
+    return (kernel && kernel->step<ELEVATOR_LEVEL>(now_ms)) ? 1 : 0;
 }
 
 // As fast as possible: no waiting for the real clock. The first node runs at its
 // own time (Knuth's CYCLE: jump to the next deadline), one node per call.
 extern "C" int cpp_elevator_step_next(void) {
     if (!kernel) return 0;
-    const auto t = kernel->get_next_time();
-    return (t && kernel->step(*t)) ? 1 : 0;
+    const auto t = kernel->get_next_time<ELEVATOR_LEVEL>();
+    return (t && kernel->step<ELEVATOR_LEVEL>(*t)) ? 1 : 0;
 }
 
 extern "C" int cpp_elevator_running(void) {
-    return (kernel && kernel->get_next_time()) ? 1 : 0;
+    return (kernel && kernel->get_next_time<ELEVATOR_LEVEL>()) ? 1 : 0;
 }
 
 extern "C" std::uint32_t cpp_elevator_time(void) {
