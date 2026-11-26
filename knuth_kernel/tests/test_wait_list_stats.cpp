@@ -55,7 +55,7 @@ static void test_length() {
 
 static void test_sortins_and_walk() {
     WaitList list;
-    WaitNode n[4] = {{noop, 0}, {noop, 0}, {noop, 0}, {noop, 0}};
+    WaitNode n[4] = {WaitNode{noop, 0}, WaitNode{noop, 0}, WaitNode{noop, 0}, WaitNode{noop, 0}};
 
     list.hold(n[0], 0, 10);                    // empty list: length 0, walk 0
     list.hold(n[1], 0, 20);                    // the latest: length 1, walk 0

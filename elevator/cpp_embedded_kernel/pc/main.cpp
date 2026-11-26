@@ -42,8 +42,8 @@ int main(int argc, char** argv) {
 
     // Event-driven, like Knuth's CYCLE: jump to the next deadline, run every due node.
     // The WAIT list empties after the last user leaves and the elevator is dormant at E1.
-    while (const auto t = kernel.get_next_time()) {
-        while (kernel.step(*t)) {
+    while (const auto t = kernel.get_next_time<ELEVATOR_LEVEL>()) {
+        while (kernel.step<ELEVATOR_LEVEL>(*t)) {
 #ifdef TRACE
             // The same path as the board: each step's records become lines afterwards
             while (TraceRecord* r = trace_circle.start_operation()) {

@@ -9,7 +9,6 @@ typedef struct {
     uint32_t late_sum_us;  // average lateness
     uint32_t max_late_us;  // the worst lateness
     uint32_t refused_ops;  // misuse refused by the kernel (a free node held or cancelled, a null step): 0 expected
-    uint32_t events_dropped;
 
 
     // The WAIT list, with KNUTH_KERNEL_STATS (C++ compiler flag) only; Knuth: ~10 nodes, SORTIN the main cost
@@ -40,7 +39,7 @@ uint32_t kernel_port_sleep(void);   // __WFI from SRAM; call with interrupts mas
 }
 #include "kernel.hpp"
 
-// The kernels, one per level, and kernel_post(): kernel_port_priorities.hpp
+// The kernel and its levels: kernel_port_priorities.hpp
 
 // The kernel's clock: TIM2, 32-bit, 1 tick = 1 µs, wraps every ~71.6 min
 // TIM2->CNT is already volatile (CMSIS marks it __IO)

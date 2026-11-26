@@ -154,3 +154,6 @@ I planned to go through TAOCP in Python, until I saw that Knuth writes his progr
 - *Suggested to use template for kernel levels, for splitting compile/runtime code, then proved that templates provided some hints to compiler for optimizing kernel levels API usage: average lateness 0.77µs → 0.28 µs, at the cost of +288 bytes of flash.*
 - *Investigated why the G431 skipped an instruction after the masked `__WFI` with `DBG_SLEEP` (ES0431 §2.2.7, seen even with ST's workarounds), and moved `kernel_port_sleep()` to SRAM; checked in 20 code layouts.*
 - *Tested the stack guard on the board, with a deliberate overflow and the fault record, and wrote the static stack estimate, which matches the measured 228 bytes.*
+- *In adding priority levels to Kernel, suggested to create between levels event lists, which is a bad design. I adjusted priority level to WaitNode itself.*
+- *Pointed that set_priority on a waiting node breaks rule 1: The node sits in list 14. If its priority then becomes 15, the next hold unlinks it from list 14 using list 15's code, run from level 15.*
+- *Suggested to use templates and constexprs in Kernel*

@@ -11,6 +11,9 @@ inline constexpr std::uint32_t CALLDOWN = 0b010;
 inline constexpr std::uint32_t CALLCAR = 0b001;
 inline constexpr std::uint32_t ANY_CALL = CALLUP | CALLDOWN | CALLCAR;
 
+// The kernel level (NVIC priority) the elevator's nodes run on: kernel.attach<ELEVATOR_LEVEL>
+inline constexpr std::uint32_t ELEVATOR_LEVEL = 14;
+
 // Kernel ticks per Knuth time unit. 
 // Originally it is set to tenths of seconds, for that set it to 100
 // 1 is the fastest speed

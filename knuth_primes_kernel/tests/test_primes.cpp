@@ -53,8 +53,8 @@ static bool matches_reference(const KnuthPrimes& table) {
 // Event-driven, like the elevator's CYCLE: jump to each deadline until the list is empty
 static std::uint32_t run_to_end(Kernel& k) {
     std::uint32_t steps = 0;
-    while (const auto due = k.get_next_time()) {
-        k.step(*due);
+    while (const auto due = k.get_next_time<14>()) {
+        k.step<14>(*due);
         ++steps;
     }
     return steps;
@@ -63,7 +63,7 @@ static std::uint32_t run_to_end(Kernel& k) {
 // Another program: runs a fixed number of times and adds up the times it ran at
 struct Ticker : WaitNode {
     Ticker(Kernel& k, std::uint32_t delay, std::uint32_t runs_wanted) noexcept
-        : WaitNode(tick, delay), kernel(&k), runs(runs_wanted) {}
+        : WaitNode(tick, delay), kernel(&k), runs(runs_wanted) { k.attach<14>(*this); }
 
     static void tick(WaitNode& node, std::uint32_t now) noexcept {
         auto& t = static_cast<Ticker&>(node);
@@ -116,15 +116,16 @@ int main() {
     {
         Kernel k;
         PrimesNode node(k, 10);
+        k.attach<14>(node);
         k.start(node, 0);
-        k.step(0);
+        k.step<14>(0);
         check("node: one step adds one prime", node.knuth_primes.found() == 3);
-        check("node: it holds itself", node.is_held() && k.get_next_time() == 10u);
+        check("node: it holds itself", node.is_held() && k.get_next_time<14>() == 10u);
 
         const std::uint32_t steps = 1 + run_to_end(k);
         check("node: 498 steps", steps == STEPS);
         check("node: all 500 primes match trial division", matches_reference(node.knuth_primes));
-        check("node: out of the list when full", !node.is_held() && !k.get_next_time());
+        check("node: out of the list when full", !node.is_held() && !k.get_next_time<14>());
         check("node: nothing refused", k.refused() == 0);
     }
 
@@ -133,10 +134,11 @@ int main() {
     {
         Kernel k;
         PrimesNode node(k, 1000);
+        k.attach<14>(node);
         const std::uint32_t start = 1'000'000;
         k.start(node, start);
-        k.step(start);
-        check("late start: next due is now + delay", k.get_next_time() == start + 1000);
+        k.step<14>(start);
+        check("late start: next due is now + delay", k.get_next_time<14>() == start + 1000);
         const std::uint32_t steps = 1 + run_to_end(k);
         check("late start: 498 steps", steps == STEPS);
     }
@@ -145,19 +147,20 @@ int main() {
     {
         Kernel k;
         PrimesNode node(k, 1000);
+        k.attach<14>(node);
         const std::uint32_t start = 0u - 250'000u;   // 250 steps before the wrap
         k.start(node, start);
 
         std::uint32_t steps = 0;
         std::uint32_t last = start;
-        while (const auto due = k.get_next_time()) {
+        while (const auto due = k.get_next_time<14>()) {
             last = *due;
-            k.step(last);
+            k.step<14>(last);
             ++steps;
         }
         check("wrap: 498 steps, all primes match", steps == STEPS && matches_reference(node.knuth_primes));
         check("wrap: the last step is on time", last == start + (STEPS - 1) * 1000);
-        check("wrap: out of the list when full", !node.is_held() && !k.get_next_time());
+        check("wrap: out of the list when full", !node.is_held() && !k.get_next_time<14>());
     }
 
     // 7. Beside another program: the other one runs at the times it runs alone
@@ -166,6 +169,7 @@ int main() {
             Kernel k;
             Ticker ticker(k, 7, 1000);
             PrimesNode node(k, 3);
+            k.attach<14>(node);
             k.start(ticker, 0);
             if (with_primes) k.start(node, 0);
             run_to_end(k);

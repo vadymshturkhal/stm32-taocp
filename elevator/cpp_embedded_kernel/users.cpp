@@ -8,6 +8,7 @@
 void Users::start(std::uint32_t quantity) noexcept {
     // USER1 node represents action U1 and it is initially the sole entry in the WAIT list
     users_quantity = quantity; 
+    simulation.kernel.attach<ELEVATOR_LEVEL>(USER1);
     simulation.immed(USER1);
 }
 
@@ -26,6 +27,7 @@ void Users::U1(WaitNode& node, std::uint32_t /*now*/) noexcept {
         users.parked = true;
         return;
     }
+    sim.kernel.attach<ELEVATOR_LEVEL>(*user);   // a pool node: its level is set when it's taken
 
     // 2 JMP VALUES: parked U1 consumes no random numbers
     const UserValues user_values = users.values.next();

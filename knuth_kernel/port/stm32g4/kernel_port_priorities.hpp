@@ -1,5 +1,5 @@
 /*
- * kernel_port_priorities.hpp - the kernel's levels (stage 2): one Kernel per NVIC priority.
+ * kernel_port_priorities.hpp - the kernel's levels (stage 2): one Kernel, a WAIT list per NVIC priority.
  *
  * A level is an exception handler at a chosen priority, with its own WAIT list: the
  * NVIC does the preemption, and only that level's handler touches its list (rule 1).
@@ -90,10 +90,13 @@ consteval std::size_t level_index(std::uint8_t priority)
     return 0;
 }
 
+/* The kernel: every level's WAIT list. A node goes to its level's list (kernel.attach<P>);
+ * only that level's handler touches the list (rule 1) */
+constinit inline Kernel kernel;
+
 /* constinit, built at compile time, written at run time. */
 struct KernelLevel 
 {
-    Kernel kernel;              // this level's WAIT list: only this level's handler touches it (rule 1)
     KernelStats& stats;         // a C global
     const LevelConfig& config;  // its priority, IRQ and alarm channel
 };
@@ -101,8 +104,8 @@ struct KernelLevel
 constinit inline std::array<KernelLevel, level_config.size()> levels
 {
     {
-        { .kernel = {}, .stats = kernel_stats_level_14, .config = level_config[level_index(14)] },
-        { .kernel = {}, .stats = kernel_stats_level_15, .config = level_config[level_index(15)] },
+        { .stats = kernel_stats_level_14, .config = level_config[level_index(14)] },
+        { .stats = kernel_stats_level_15, .config = level_config[level_index(15)] },
     }
 };
 
@@ -155,14 +158,3 @@ inline void ring_at() noexcept
     }
 }
 
-/*
- * What an ISR calls to wake a node on this level: the node goes into the level's events
- * circle, and the level's handler does the immed. One posting priority per level's circle
- * (a single producer). false = the circle was full: the event is counted as dropped.
- */
-inline bool kernel_post(KernelLevel& level, WaitNode& node) noexcept
-{
-    const bool posted = level.kernel.post(node);
-    ring(level);    // anyway: the level's run is what makes room
-    return posted;
-}

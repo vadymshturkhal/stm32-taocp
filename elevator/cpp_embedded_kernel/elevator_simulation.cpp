@@ -4,6 +4,9 @@
 void ElevatorSimulation::start(std::uint32_t users_quantity, std::uint32_t now_ticks) noexcept {
     t0 = now_ticks;
     TIME = 0;
+    kernel.attach<ELEVATOR_LEVEL>(elevator.ELEV1);
+    kernel.attach<ELEVATOR_LEVEL>(elevator.ELEV2);
+    kernel.attach<ELEVATOR_LEVEL>(elevator.ELEV3);
     users.start(users_quantity);
 }
 

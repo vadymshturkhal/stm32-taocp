@@ -30,39 +30,38 @@ class WaitNode {
 public:
     using NextInst = void (*)(WaitNode&, std::uint32_t now) noexcept;
 
+    WaitNode() = default;
+    constexpr explicit WaitNode(NextInst next_inst, std::uint32_t delay) noexcept 
+        : NEXTINST(next_inst), DELAY(delay) {}
+
+    WaitNode(const WaitNode&) = delete;
+    WaitNode& operator=(const WaitNode&) = delete;
+
     void run(std::uint32_t now) noexcept {
-        // hold, holdc and immed assert a step; the test stays so that a release
-        // build never jumps to address 0 if a step is cleared while a node waits
         assert(NEXTINST != nullptr && "run: a node with no step");
         if(NEXTINST) NEXTINST(*this, now);
     }
-
-    WaitNode() = default;
-    constexpr WaitNode(NextInst next_inst, std::uint32_t delay) noexcept 
-        : NEXTINST(next_inst), DELAY(delay) {}
 
     [[nodiscard]] bool is_held() const noexcept { return right != this; }
     [[nodiscard]] std::uint32_t get_next_time() const noexcept { return NEXTTIME; }
     [[nodiscard]] NextInst get_next_inst() const noexcept { return NEXTINST; }
     void set_next_inst(NextInst next_inst) noexcept { NEXTINST = next_inst; }
 
-    WaitNode(const WaitNode&) = delete;
-    WaitNode& operator=(const WaitNode&) = delete;
-
 private:
     friend class WaitList;
+    friend class Kernel;   // attach() sets list_
     template <std::derived_from<WaitNode> T> friend class StoragePool;   // uses left for the AVAIL list
 
-    /*
-     * AVAIL list lenks on LEFT only: <-node<-node<-node
-     */
+    /* AVAIL list lenks on LEFT only: <-node<-node<-node */
     [[nodiscard]] bool is_on_avail() const noexcept { return left != this && right == this; }
+    [[nodiscard]] WaitList* get_list() const noexcept { return list_; }
 
     WaitNode* left = this;
     WaitNode* right = this;
     std::uint32_t NEXTTIME = 0;
     NextInst NEXTINST = nullptr;
     std::uint32_t DELAY = 0;
+    WaitList* list_ = nullptr;
 };
 
 class WaitList {

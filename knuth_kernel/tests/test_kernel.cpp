@@ -32,7 +32,7 @@ static void check(const char* name, bool ok) {
 
 struct Program : WaitNode {
     Program(Kernel& k, std::string& l, const char* n, NextInst first, std::uint32_t delay = 0) noexcept
-        : WaitNode(first, delay), kernel(&k), log(&l), name(n) {}
+        : WaitNode(first, delay), kernel(&k), log(&l), name(n) { k.attach<14>(*this); }
 
     Kernel* kernel;
     std::string* log;
@@ -87,16 +87,16 @@ static void stop_other(WaitNode& n, std::uint32_t now) noexcept {
 // Run the kernel with a real clock: every millisecond from `from` to `to`, all due steps.
 static void every_ms(Kernel& k, std::uint32_t from, std::uint32_t to) noexcept {
     for (std::uint32_t now = from; ; ++now) {
-        while (k.step(now)) {}
+        while (k.step<14>(now)) {}
         if (now == to) break;
     }
 }
 
 // Run the kernel event-driven: jump straight to the next deadline, until `to`.
 static void jump(Kernel& k, std::uint32_t to) noexcept {
-    while (const auto t = k.get_next_time()) {
+    while (const auto t = k.get_next_time<14>()) {
         if (WaitList::is_less(to, *t)) break;
-        while (k.step(*t)) {}
+        while (k.step<14>(*t)) {}
     }
 }
 
@@ -112,7 +112,7 @@ int main() {
     // 1. A new kernel
     {
         Kernel k;
-        check("new kernel: step runs nothing, get_next_time is empty", !k.step(0) && !k.get_next_time());
+        check("new kernel: step runs nothing, get_next_time is empty", !k.step<14>(0) && !k.get_next_time<14>());
     }
 
     // 2. start runs a program at once, and step reports it
@@ -120,9 +120,9 @@ int main() {
         Kernel k; std::string log;
         Program r{k, log, "r", &receive};
         k.start(r, 50);
-        const bool early = k.step(49);
-        const bool ran = k.step(50);
-        const bool again = k.step(50);
+        const bool early = k.step<14>(49);
+        const bool ran = k.step<14>(50);
+        const bool again = k.step<14>(50);
         check("start at 50: not at 49, runs at 50, step says true once",
               !early && ran && !again && log == "50:r got, ");
     }
@@ -142,14 +142,14 @@ int main() {
         Kernel k; std::string log;
         Program b{k, log, "b", &blink_on};
         k.start(b, 0);
-        const auto t0 = k.get_next_time();
-        k.step(0);
-        const auto t1 = k.get_next_time();
-        k.step(100);
-        const auto t2 = k.get_next_time();
+        const auto t0 = k.get_next_time<14>();
+        k.step<14>(0);
+        const auto t1 = k.get_next_time<14>();
+        k.step<14>(100);
+        const auto t2 = k.get_next_time<14>();
         k.cancel(b);
         check("get_next_time: 0 after start, 100 after on, 1000 after off, empty after cancel",
-              t0 == 0u && t1 == 100u && t2 == 1000u && !k.get_next_time());
+              t0 == 0u && t1 == 100u && t2 == 1000u && !k.get_next_time<14>());
     }
 
     // 5. cancel stops a program for good
@@ -169,10 +169,10 @@ int main() {
         Program x{k, log, "x", &receive}, y{k, log, "y", &receive};
         k.hold(x, 0, 10);
         k.hold(y, 0, 10);
-        const bool one = k.step(10);
+        const bool one = k.step<14>(10);
         const std::string after_one = log;
-        const bool two = k.step(10);
-        const bool three = k.step(10);
+        const bool two = k.step<14>(10);
+        const bool three = k.step<14>(10);
         check("two nodes due: two steps run one each, the third runs none",
               one && after_one == "10:x got, " && two && !three);
     }
@@ -206,7 +206,7 @@ int main() {
         s.other = &r;
         k.hold(s, 0, 50);                    // the sender is due first
         k.hold(late, 0, 100);                // another node, also overdue by 200
-        while (k.step(200)) {}               // the loop was busy until 200
+        while (k.step<14>(200)) {}               // the loop was busy until 200
         check("a message jumps ahead of an overdue node (start = immed): s r late",
               log == "200:s send, 200:r got, 200:late got, ");
     }
@@ -220,7 +220,7 @@ int main() {
         k.hold(sup, 0, 1050);
         every_ms(k, 0, 5000);
         check("supervisor stops the blinker at 1050",
-              log == "0:b on, 100:b off, 1000:b on, 1050:sup stop, " && !k.get_next_time());
+              log == "0:b on, 100:b off, 1000:b on, 1050:sup stop, " && !k.get_next_time<14>());
     }
 
     // 10. start on a program that is already waiting moves it to now

@@ -37,7 +37,7 @@ extern "C" void kernel_port_init(void)
 }
 
 /* main's kick, once its programs are set up: from here on, only a level's handler
- * touches that level's kernel (rule 1). An empty level runs once and arms nothing */
+ * touches that level's WAIT list (rule 1). An empty level runs once and arms nothing */
 extern "C" void kernel_port_start(void)
 {
     for (const KernelLevel& level : levels) ring(level);
@@ -54,11 +54,10 @@ extern "C" void kernel_port_start(void)
 template <std::uint8_t P>
 static void arm() noexcept
 {
-    KernelLevel& level = level_at<P>();
     constexpr const LevelConfig& config = level_config[level_index(P)];
 
     // 1. Take the next time
-    const auto t = level.kernel.get_next_time();
+    const auto t = kernel.get_next_time<P>();
 
     // 2. If the list is empty: return
     if (!t) {
@@ -188,18 +187,15 @@ extern "C" void TIM2_IRQHandler(void)
 template <std::uint8_t P>
 static void run_level() noexcept
 {
-    KernelLevel& level = level_at<P>();
-    Kernel& kernel = level.kernel;
-    KernelStats& stats = level.stats;
+    KernelStats& stats = level_at<P>().stats;
 
     for (;;)
     {
         const uint32_t t = now();
-        kernel.start_event(t);
-        const auto head_deadline = kernel.get_next_time();
+        const auto head_deadline = kernel.get_next_time<P>();
         const uint32_t c0 = DWT->CYCCNT;
 
-        if (!kernel.step(t)) break;
+        if (!kernel.step<P>(t)) break;
 
         const uint32_t cycles = DWT->CYCCNT - c0;
         const uint32_t late = t - *head_deadline;
@@ -211,13 +207,12 @@ static void run_level() noexcept
         if (late > stats.max_late_us) stats.max_late_us = late;
     }
 
-    stats.refused_ops = kernel.refused();
-    stats.events_dropped = kernel.events_dropped();
+    stats.refused_ops = kernel.refused<P>();
 
     // the WAIT list's own counters, copied for C
     if constexpr (WAIT_LIST_STATS)
     {
-        const WaitListStats& w = kernel.list_stats();
+        const WaitListStats& w = kernel.list_stats<P>();
         stats.sortins = w.sortins;
         stats.list_max = w.length_max;
         stats.list_sum = w.length_sum;

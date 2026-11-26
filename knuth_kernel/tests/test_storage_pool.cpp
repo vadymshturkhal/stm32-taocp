@@ -370,6 +370,7 @@ int main() {
         Kernel k;
         UserNode* a = pool.pop();
         pool.push(*a);
+        k.attach<14>(*a);                           // attached, so the abort is the free node's
         k.cancel(*a);
     }));
 #else
@@ -389,6 +390,7 @@ int main() {
         list.holdc(*b, 0, 10, &count_run);
         list.immed(*b, 0);
         Kernel k;
+        k.attach<14>(*b);
         k.cancel(*b);
         pool.push(*b);                              // a second push
         check("NDEBUG: cancel, hold, holdc, immed, Kernel::cancel and a second push of a free node are refused",
@@ -416,11 +418,12 @@ int main() {
         UserNode a;
         a.set_next_inst(&count_run);
         a.runs = 0;
+        k.attach<14>(a);
         k.hold(a, 0, 10);
         a.set_next_inst(nullptr);                   // cleared while it waits
-        const bool stepped = k.step(10);
+        const bool stepped = k.step<14>(10);
         check("NDEBUG: a due node with no step is skipped, and counted",
-              stepped && a.runs == 0 && k.refused() == 1 && !k.get_next_time());
+              stepped && a.runs == 0 && k.refused() == 1 && !k.get_next_time<14>());
     }
 #endif
 

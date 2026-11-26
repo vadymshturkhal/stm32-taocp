@@ -50,7 +50,8 @@ concept TraceNumbers = sizeof...(Args) <= 4
 
 // Table 1 style trace line: "TIME STATE FLOOR D1 D2 D3 step action"
 // Matches Python's row format
-struct TraceRecord {
+struct TraceRecord
+{
     std::uint32_t time;
     const char* step;
     const char* fmt;            // the action: text and a "{}" per number in args, checked by TraceFormat
@@ -66,13 +67,17 @@ inline CircleOfBuffers<TraceRecord, 16> trace_circle;
 std::size_t format_trace(const TraceRecord& record, char* out, std::size_t size) noexcept;
 inline std::uint32_t trace_dropped = 0;
 
-// type_identity_t: Args come from the numbers alone; then the literal converts to the
-// TraceFormat of that many "{}", which is where the consteval check runs
+/* type_identity_t: Args come from the numbers alone;
+ * then the literal converts to the TraceFormat of that many "{}",
+ * which is where the consteval check runs
+ */
 template <typename... Args>
     requires TraceNumbers<Args...>
 void trace(const ElevatorSimulation& sim, const char* step,
-           std::type_identity_t<TraceFormat<sizeof...(Args)>> fmt, Args... args) noexcept {
-    if (TraceRecord* r = trace_circle.assign()) {
+           std::type_identity_t<TraceFormat<sizeof...(Args)>> fmt, Args... args) noexcept
+{
+    if (TraceRecord* r = trace_circle.assign())
+    {
         const Elevator& e = sim.elevator;
         *r = {sim.TIME, step, fmt.text,
             {static_cast<std::uint32_t>(args)...},
@@ -82,7 +87,9 @@ void trace(const ElevatorSimulation& sim, const char* step,
             static_cast<std::uint8_t>(e.D2),
             static_cast<std::uint8_t>(e.D3)};
         trace_circle.release();
-    } else {
+    }
+    else
+    {
         ++trace_dropped;
     }
 }
