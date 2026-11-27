@@ -22,13 +22,14 @@
 
 // private to the file instead of a static on every line
 namespace {
-struct TxLine {
+struct TxLine
+{
     std::uint8_t  data[UART_TX_LINE_SIZE];
     std::size_t   len;
 };
 static_assert(UART_TX_LINE_SIZE <= UINT16_MAX, "HAL takes a 16-bit length");
 
-CircleOfBuffers<TxLine, 3> tx;
+CircleOfBuffers<TxLine, 3> tx_circle;
 std::uint32_t tx_dropped = 0;
 #if LINK_OVER_STLINK
 DMA_HandleTypeDef hdma_link_tx;    // LPUART1 TX on DMA1 channel 2
@@ -36,10 +37,17 @@ DMA_HandleTypeDef hdma_link_tx;    // LPUART1 TX on DMA1 channel 2
 
 // Start DMA on the oldest red line if the device is idle.
 // main and the TX-complete interrupt both call it; DEVICE_BUFFER keeps them apart.
-void tx_start() {
-    if (TxLine* buffer = tx.start_operation()) {
-        if (HAL_UART_Transmit_DMA(LINK_HUART, buffer->data, static_cast<std::uint16_t>(buffer->len)) != HAL_OK) {
-            tx.cancel_operation();  // HAL_BUSY: stays first, retried next time
+void tx_start()
+{
+    if (TxLine* buffer = tx_circle.start_operation())
+    {
+        if (HAL_UART_Transmit_DMA(LINK_HUART, buffer->data, static_cast<std::uint16_t>(buffer->len)) != HAL_OK)
+        {
+        	tx_circle.cancel_operation();  // HAL_BUSY: stays first, retried next time
+        }
+        else
+        {
+            __HAL_DMA_DISABLE_IT(LINK_HUART->hdmatx, DMA_IT_HT);   // the UART driver turns it on; nothing uses it
         }
     }
 }
@@ -82,11 +90,13 @@ extern "C" void DMA1_Channel2_IRQHandler(void)
 
 std::uint32_t UART_TX_Dropped(void) { return tx_dropped; }
 
-int UART_TX_Send(const char* data, std::size_t len) {
+int UART_TX_Send(const char* data, std::size_t len)
+{
     if (len == 0 || len > UART_TX_LINE_SIZE) return UART_TX_BAD_LENGTH;  // a bug
 
     char* buffer = UART_TX_Begin();
-    if (buffer == nullptr) {
+    if (buffer == nullptr)
+    {
         ++tx_dropped;
         return UART_TX_FULL;
     }
@@ -95,29 +105,33 @@ int UART_TX_Send(const char* data, std::size_t len) {
     return UART_TX_Commit(len);
 }
 
-char* UART_TX_Begin(void) {
-    TxLine* buffer = tx.assign();
+char* UART_TX_Begin(void)
+{
+    TxLine* buffer = tx_circle.assign();
     return buffer == nullptr ? nullptr : reinterpret_cast<char*>(buffer->data);
 }
 
-int UART_TX_Commit(std::size_t len) {
-    TxLine* buffer = tx.yellow();
+int UART_TX_Commit(std::size_t len)
+{
+    TxLine* buffer = tx_circle.yellow();
     if (buffer == nullptr) return UART_TX_NOT_BEGUN;  // a bug: Commit twice, or without Begin
     if (len == 0 || len > UART_TX_LINE_SIZE) return UART_TX_BAD_LENGTH;  // a bug
     buffer->len = len;
-    tx.release();
+    tx_circle.release();
     tx_start();
     return UART_TX_OK;
 }
 
-void UART_TX_OnError(void) {
-    tx.operation_is_completed();   // the DMA stopped: the line is lost
+void UART_TX_OnError(void)
+{
+	tx_circle.operation_is_completed();   // the DMA stopped: the line is lost
     tx_start();
 }
 
-extern "C" void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart) {
+extern "C" void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
+{
     if (huart != LINK_HUART) return;
 
-    tx.operation_is_completed();
+    tx_circle.operation_is_completed();
     tx_start();
 }
